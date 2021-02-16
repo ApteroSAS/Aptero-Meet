@@ -861,7 +861,6 @@ AFRAME.registerComponent("media-video", {
             hls.attachMedia(videoEl);
 
             hls.on(HLS.Events.ERROR, function(event, data) {
-              //console.error("hls error:", data);
               if (data.fatal) {
                 switch (data.type) {
                   case HLS.ErrorTypes.NETWORK_ERROR:

@@ -109,6 +109,7 @@ import "./components/replay";
 import "./components/visibility-by-path";
 import "./components/tags";
 import "./components/hubs-text";
+import "./components/billboard";
 import "./components/periodic-full-syncs";
 import "./components/inspect-button";
 import "./components/inspect-pivot-child-selector";
@@ -164,34 +165,6 @@ import "./gltf-component-mappings";
 import { App } from "./App";
 import MediaDevicesManager from "./utils/media-devices-manager";
 import { platformUnsupported } from "./support";
-
-/*let PEER_CONNECTION_CONFIG = {
-  iceServers: [
-    {"urls":"stun:stun.l.google.com:19302"},
-    {"urls":"stun:stun1.l.google.com:19302"},
-    {"urls":"stun:stun2.l.google.com:19302"},
-    {"urls":"stun:stun3.l.google.com:19302"},
-    {
-      "urls":"turn:167.71.58.80:3478",
-      "username":"coturn",
-      "credential":"coturnaptero"
-    },
-    {
-      "urls":"turn:167.71.58.80:3478?transport=tcp",
-      "username":"coturn",
-      "credential":"coturnaptero"
-    },
-    // {
-    //   "url":"turn:[ADDRESS]:[PORT][?transport=tcp]",
-    //   "username":"[USERNAME]",
-    //   "credential":"[CREDENTIAL]"
-    // }
-  ]
-};
-
-import * as JanusAdapter from "naf-janus-adapter";
-JanusAdapter.setGlobalPeerConnectionConfig(PEER_CONNECTION_CONFIG);*/
-
 
 window.APP = new App();
 window.APP.RENDER_ORDER = {
@@ -578,7 +551,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
     }
   });
 
-  // Wait for scene objects to load before connecting, so there is no race condition on network state.
+  // TODO Remove this once transition completed.
   // Wait for scene objects to load before connecting, so there is no race condition on network state.
   const connectToScene = async () => {
     let adapter = "janus";
@@ -745,7 +718,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-
   await store.initProfile();
 
   const canvas = document.querySelector(".a-canvas");
@@ -757,8 +729,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const detectedOS = detectOS(navigator.userAgent);
   const browser = detect();
-  // Some apps like Twitter, Discord and Facebook on Android and iOS open links in
-  // their own embedded preview browsers.
+  // HACK - it seems if we don't initialize the mic track up-front, voices can drop out on iOS
+  // safari when initializing it later.
   if (["iOS", "Mac OS"].includes(detectedOS) && ["safari", "ios"].includes(browser.name)) {
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -1401,7 +1373,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       scene.addEventListener("adapter-ready", async ({ detail: adapter }) => {
         // HUGE HACK Safari does not like it if the first peer seen does not immediately
         // send audio over its media stream. Otherwise, the stream doesn't work and stays
-        // silent. (Though subsequent peers work fine.)
+        // silent. (Though subsequent peers work fine.) This only affects naf janus adapter
+        // not mediasoup.
         //
         // This hooks up a simple audio pipeline to push a short tone over the WebRTC
         // media stream as its created to mitigate this Safari bug.
@@ -1413,7 +1386,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         // This only covers the case where a Safari user is in the room and the first
         // other user joins. If a user is in the room and Safari user joins,
         // then Safari can fail to receive audio from a single peer (it does not seem
-        // to be related to silence, but may be a factor.)
         // to be related to silence, but may be a factor.)
         let track, oscillator, stream;
 

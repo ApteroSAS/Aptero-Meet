@@ -428,7 +428,7 @@ AFRAME.registerComponent("media-loader", {
 
         contentType = (result.meta && result.meta.expected_content_type) || contentType;
         thumbnail = result.meta && result.meta.thumbnail && proxiedUrlFor(result.meta.thumbnail);
-        //TOD still necessary?
+        //TODO still necessary?
         if(!thumbnail){
           thumbnail = window.APP_CONFIG.GLOBAL_ASSETS_PATH+"app-thumbnail.png";
         }
@@ -436,7 +436,7 @@ AFRAME.registerComponent("media-loader", {
 
       // todo: we don't need to proxy for many things if the canonical URL has permissive CORS headers
       accessibleUrl = proxiedUrlFor(canonicalUrl);
-      //Aptero microsoft integration feature
+      //Aptero microsoft integration feature TODO service
       if(accessibleUrl.endsWith(MICROSOFT_AUTH_ERROR)){
         if (this.el.components["position-at-border__freeze"]) {
           this.el.setAttribute("position-at-border__freeze", { isFlat: true });
@@ -632,9 +632,7 @@ AFRAME.registerComponent("media-loader", {
         this.el.addEventListener(
           "image-loaded",
           async () => {
-            //aptero change scene permission //TODO still necessary?
-            //const mayChangeScene = this.el.sceneEl.systems.permissions.can("update_hub");
-            const mayChangeScene = true;
+            const mayChangeScene = this.el.sceneEl.systems.permissions.can("update_hub");
 
             if (await isLocalHubsAvatarUrl(src)) {
               this.el.setAttribute("hover-menu__hubs-item", {

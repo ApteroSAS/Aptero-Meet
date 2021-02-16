@@ -2,7 +2,6 @@ import "./animation";
 import "./ambient-light";
 import "./animation-mixer";
 import "./audio-feedback";
-import "./billboard";
 import "./css-class";
 import "./directional-light";
 import "./gltf-model-plus";
