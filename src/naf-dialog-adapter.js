@@ -21,10 +21,16 @@ import { debug as newDebug } from "debug";
 
 // Based upon mediasoup-demo RoomClient
 
-const debug = newDebug("naf-dialog-adapter:debug");
-//const warn = newDebug("naf-dialog-adapter:warn");
-const error = newDebug("naf-dialog-adapter:error");
-const info = newDebug("naf-dialog-adapter:info");
+if(newDebug){
+	const debug = newDebug("naf-dialog-adapter:debug");
+	//const warn = newDebug("naf-dialog-adapter:warn");
+	const error = newDebug("naf-dialog-adapter:error");
+	const info = newDebug("naf-dialog-adapter:info");
+}else{
+	const debug = console.log;
+	const error = console.error;
+	const info = console.log;
+}
 
 const PC_PROPRIETARY_CONSTRAINTS = {
   optional: [{ googDscp: true }]
