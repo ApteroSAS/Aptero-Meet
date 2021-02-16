@@ -611,6 +611,12 @@ module.exports = async (env, argv) => {
     ]),
     new CopyWebpackPlugin([
       {
+        from: "src/assets/static/",
+        to: "assets/static/"
+      }
+    ]),
+    new CopyWebpackPlugin([
+      {
         from: "src/workers/pdfjs-dist@2.1.266/build/pdf.worker.js",
         to: "workers/pdfjs-dist@2.1.266/build/pdf.worker.js"
       }

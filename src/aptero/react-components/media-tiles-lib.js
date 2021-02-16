@@ -10,6 +10,47 @@ import PropTypes from "prop-types";
 
 export const WEB_BROWSER_URL_MODE = "web-browser";
 
+function BaseTile({ as: TileComponent, className, name, description, tall, wide, children, ...rest }) {
+  let additionalProps;
+
+  if (TileComponent === "div") {
+    additionalProps = {
+      tabIndex: "0",
+      role: "button"
+    };
+  }
+
+  return (
+    <TileComponent
+      className={classNames(styles.mediaTile, { [styles.tall]: tall, [styles.wide]: wide }, className)}
+      {...additionalProps}
+      {...rest}
+    >
+      <div className={styles.thumbnailContainer}>{children}</div>
+      {(name || description) && (
+        <div className={styles.info}>
+          <b>{name}</b>
+          {description && <small className={styles.description}>{description}</small>}
+        </div>
+      )}
+    </TileComponent>
+  );
+}
+
+BaseTile.propTypes = {
+  as: PropTypes.elementType,
+  className: PropTypes.string,
+  name: PropTypes.string,
+  description: PropTypes.node,
+  children: PropTypes.node,
+  tall: PropTypes.bool,
+  wide: PropTypes.bool
+};
+
+BaseTile.defaultProps = {
+  as: "div"
+};
+
 export class MediaTilesLib {
   sessionCache = {};
   displayWebBrowserTile = false;
@@ -18,6 +59,7 @@ export class MediaTilesLib {
     this.parent = parent;
     this.props = props;
     this.state = state;
+    this.handleEntryClicked = this.parent.handleEntryClicked;
   }
 
   getTileDimensions(isImage, isAvatar, imageAspect) {
@@ -41,18 +83,24 @@ export class MediaTilesLib {
 
   createStreamTile() {
     const clickAction = (e) => {
-      this.props.handleEntryClicked && this.props.handleEntryClicked(e, { createLiveEntry: true });
+      this.handleEntryClicked && this.handleEntryClicked(e, { createLiveEntry: true });
     };
-    const [imageWidth, imageHeight] = this.getTileDimensions(false, false, 16 / 9);
-    return (<div style={{ width: `${imageWidth}px` }} className={styles.tile} key={`create-live`}>
+    let img = "../../assets/static/app-thumbnail.png";
+    let title = "Create à new live stream" || "\u00A0";
+    return this.createStandardTile(clickAction,img,title);
+  }
+
+  createStandardTile(clickAction,imgSrc,title){
+    /*const [imageWidth, imageHeight] = this.getTileDimensions(false, false, 16 / 9);
+    return (<div style={{ width: `${imageWidth}px` }} className={styles.tile} key={title}>
       <a rel="noreferrer noopener"
-         onClick={clickAction}
-         className={styles.tileLink}
-         style={{ width: `${imageWidth}px`, height: `${imageHeight}px` }}
+        onClick={clickAction}
+        className={styles.tileLink}
+        style={{ width: `${imageWidth}px`, height: `${imageHeight}px` }}
       ><img
         className={classNames(styles.tileContent, styles.avatarTile)}
         style={{ width: `${imageWidth}px`, height: `${imageHeight}px` }}
-        src={"../../assets/static/app-thumbnail.png"}
+        src={imgSrc}
       />
       </a>
       <div className={styles.info}>
@@ -62,131 +110,51 @@ export class MediaTilesLib {
           style={{ textAlign: "center" }}
           onClick={clickAction}
         >
-          {"Create à new live stream" || "\u00A0"}
+          {title}
         </a>
       </div>
-    </div>);
+    </div>);*/
+    
+    return <BaseTile onClick={clickAction} className={styles.createTile} wide={true} tall={false} key={title} name={title}>
+      <div className={styles.createTileContent}>
+        <img
+          src={imgSrc}
+        />
+        <p>{title}</p>
+      </div>
+    </BaseTile>
   }
+
+  
 
   createShareScreenTile() {
     const clickAction = (e) => {
-      this.props.handleEntryClicked && this.props.handleEntryClicked(e, { shareScreen: {} });
+      this.handleEntryClicked && this.handleEntryClicked(e, { shareScreen: {} });
     };
-    const [imageWidth, imageHeight] = this.getTileDimensions(false, false, 16 / 9);
-    return <BaseTile className={styles.createTile} wide={true} tall={false}>
-      <div style={{ width: `${imageWidth}px` }} className={styles.tile} key={`share-screen`}>
-        <a rel="noreferrer noopener"
-           onClick={clickAction}
-           className={styles.tileLink}
-           style={{ width: `${imageWidth}px`, height: `${imageHeight}px` }}
-        ><img
-          className={classNames(styles.tileContent, styles.avatarTile)}
-          style={{ width: `${imageWidth}px`, height: `${imageHeight}px` }}
-          src={"../../assets/static/share-screen.png"}
-        />
-        </a>
-        <div className={styles.info}>
-          <a
-            rel="noreferrer noopener"
-            className={styles.name}
-            style={{ textAlign: "center" }}
-            onClick={clickAction}
-          >
-            {"Share your screen" || "\u00A0"}
-          </a>
-        </div>
-      </div>
-      </BaseTile>;
-  }
-
-  createShareScreenTileV1() {
-    const clickAction = (e) => {
-      this.props.handleEntryClicked && this.props.handleEntryClicked(e, { shareScreen: {} });
-    };
-    const [imageWidth, imageHeight] = this.getTileDimensions(false, false, 16 / 9);
-    return (<div style={{ width: `${imageWidth}px` }} className={styles.tile} key={`share-screen`}>
-      <a rel="noreferrer noopener"
-         onClick={clickAction}
-         className={styles.tileLink}
-         style={{ width: `${imageWidth}px`, height: `${imageHeight}px` }}
-      ><img
-        className={classNames(styles.tileContent, styles.avatarTile)}
-        style={{ width: `${imageWidth}px`, height: `${imageHeight}px` }}
-        src={"../../assets/static/share-screen.png"}
-      />
-      </a>
-      <div className={styles.info}>
-        <a
-          rel="noreferrer noopener"
-          className={styles.name}
-          style={{ textAlign: "center" }}
-          onClick={clickAction}
-        >
-          {"Share your screen" || "\u00A0"}
-        </a>
-      </div>
-    </div>);
+    let img = "../../assets/static/share-screen.png";
+    let title = "Share your screen" || "\u00A0";
+    return this.createStandardTile(clickAction,img,title);
   }
 
   createWebcamTile(device) {
     const clickAction = (e) => {
-      this.props.handleEntryClicked && this.props.handleEntryClicked(e, { camera: device });
+      this.handleEntryClicked && this.handleEntryClicked(e, { camera: device });
     };
-    const [imageWidth, imageHeight] = this.getTileDimensions(false, false, 16 / 9);
-    return (<div style={{ width: `${imageWidth}px` }} className={styles.tile} key={`camera-live` + device.deviceId}>
-      <a rel="noreferrer noopener"
-         onClick={clickAction}
-         className={styles.tileLink}
-         style={{ width: `${imageWidth}px`, height: `${imageHeight}px` }}
-      ><img
-        className={classNames(styles.tileContent, styles.avatarTile)}
-        style={{ width: `${imageWidth}px`, height: `${imageHeight}px` }}
-        src={"../../assets/static/camera-thumbnail.png"}
-      />
-      </a>
-      <div className={styles.info}>
-        <a
-          rel="noreferrer noopener"
-          className={styles.name}
-          style={{ textAlign: "center" }}
-          onClick={clickAction}
-        >
-          {device.label || "\u00A0"}
-        </a>
-      </div>
-    </div>);
+    let img = "../../assets/static/camera-thumbnail.png";
+    let title = device.label || "\u00A0";
+    return this.createStandardTile(clickAction,img,title);
   }
 
   createWebBrowserTile() {
     const clickAction = (e) => {
-      this.props.handleEntryClicked && this.props.handleEntryClicked(e, {
+      this.handleEntryClicked && this.handleEntryClicked(e, {
         url: WEB_BROWSER_URL_MODE,
         webBrowser: { sessionID: remoteControlService.getNewRemoteSessionID() }
       });
     };
-    const [imageWidth, imageHeight] = this.getTileDimensions(false, false, 16 / 9);
-    return (<div style={{ width: `${imageWidth}px` }} className={styles.tile} key={`web-browser`}>
-      <a rel="noreferrer noopener"
-         onClick={clickAction}
-         className={styles.tileLink}
-         style={{ width: `${imageWidth}px`, height: `${imageHeight}px` }}
-      ><img
-        className={classNames(styles.tileContent, styles.avatarTile)}
-        style={{ width: `${imageWidth}px`, height: `${imageHeight}px` }}
-        src={"../../assets/static/camera-thumbnail.png"}
-      />
-      </a>
-      <div className={styles.info}>
-        <a
-          rel="noreferrer noopener"
-          className={styles.name}
-          style={{ textAlign: "center" }}
-          onClick={clickAction}
-        >
-          Web Browser
-        </a>
-      </div>
-    </div>);
+    let img = "../../assets/static/camera-thumbnail.png";
+    let title = "Web Browser";
+    return this.createStandardTile(clickAction,img,title);
   }
 
   createWebcamTiles() {
@@ -301,40 +269,3 @@ export function createAvatarCustomTileV2(onclick) {
     console.log(url);
   }} />;
 }
-
-function BaseTile({ as: TileComponent, className, name, description, tall, wide, children, ...rest }) {
-  let additionalProps;
-
-  if (TileComponent === "div") {
-    additionalProps = {
-      tabIndex: "0",
-      role: "button"
-    };
-  }
-
-  return (
-    <TileComponent
-      className={classNames(styles.mediaTile, { [styles.tall]: tall, [styles.wide]: wide }, className)}
-      {...additionalProps}
-      {...rest}
-    >
-      <div className={styles.thumbnailContainer}>{children}</div>
-      {(name || description) && (
-        <div className={styles.info}>
-          <b>{name}</b>
-          {description && <small className={styles.description}>{description}</small>}
-        </div>
-      )}
-    </TileComponent>
-  );
-}
-
-BaseTile.propTypes = {
-  as: PropTypes.elementType,
-  className: PropTypes.string,
-  name: PropTypes.string,
-  description: PropTypes.node,
-  children: PropTypes.node,
-  tall: PropTypes.bool,
-  wide: PropTypes.bool
-};
