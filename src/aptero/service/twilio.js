@@ -17,8 +17,18 @@ export async function fetchICEservers() {
   return servers;
 }
 
+export function addIceServers(iceServer) {
+  window.iceServers.forEach(server => {
+    iceServer.unshift(server);
+  })
+  console.info("iceServer",iceServer);
+  return iceServer;
+}
+
 export function configureTurn(forceTurn,forceTcp,adapter) {
   let peerConnectionConfig = adapter.peerConnectionConfig || {};
   peerConnectionConfig.iceServers = window.iceServers || peerConnectionConfig.iceServers; //APTERO
-  adapter.setPeerConnectionConfig(peerConnectionConfig);
+  if(adapter.setPeerConnectionConfig) {
+    adapter.setPeerConnectionConfig(peerConnectionConfig);
+  }
 }

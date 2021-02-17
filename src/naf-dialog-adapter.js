@@ -1,6 +1,7 @@
 import * as mediasoupClient from "mediasoup-client";
 import protooClient from "protoo-client";
 import { debug as newDebug } from "debug";
+import { addIceServers } from "./aptero/service/twilio";
 
 // NOTE this adapter does not properly fire the onOccupantsReceived events since those are only needed for
 // data channels, which are not yet supported. To fire that event, this class would need to keep a list of
@@ -21,15 +22,14 @@ import { debug as newDebug } from "debug";
 
 // Based upon mediasoup-demo RoomClient
 
+let debug = console.log;
+let error = console.error;
+let info = console.log;
 if(newDebug){
-	const debug = newDebug("naf-dialog-adapter:debug");
+	debug = newDebug("naf-dialog-adapter:debug");
 	//const warn = newDebug("naf-dialog-adapter:warn");
-	const error = newDebug("naf-dialog-adapter:error");
-	const info = newDebug("naf-dialog-adapter:info");
-}else{
-	const debug = console.log;
-	const error = console.error;
-	const info = console.log;
+	error = newDebug("naf-dialog-adapter:error");
+	info = newDebug("naf-dialog-adapter:info");
 }
 
 const PC_PROPRIETARY_CONSTRAINTS = {
@@ -123,7 +123,7 @@ export default class DialogAdapter {
     } else {
       iceServers.push({ urls: "stun:stun1.l.google.com:19302" }, { urls: "stun:stun2.l.google.com:19302" });
     }
-
+    addIceServers(iceServers);
     return iceServers;
   }
 
