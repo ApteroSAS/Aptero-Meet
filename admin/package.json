@@ -9,9 +9,7 @@
     "url": "https://github.com/mozilla/hubs.git"
   },
   "scripts": {
-    "start": "webpack-dev-server --mode=development --env.hubsCloudDev",
     "dev": "webpack-dev-server --mode=development --env.dev",
-    "local": "webpack-dev-server --mode=development --env.local",
     "build": "rimraf ./dist && webpack --mode=production",
     "prettier": "prettier --write '*.js' 'src/**/*.js'",
     "lint:js": "eslint '*.js' 'src/**/*.js'",
@@ -34,11 +32,11 @@
     "@babel/core": "^7.3.3",
     "@babel/plugin-proposal-class-properties": "^7.3.3",
     "@babel/plugin-proposal-object-rest-spread": "^7.3.2",
+    "@babel/plugin-proposal-optional-chaining": "7.12.1",
     "@babel/polyfill": "^7.4.4",
     "@babel/preset-env": "^7.3.1",
     "@babel/preset-react": "^7.0.0",
     "@babel/register": "^7.0.0",
-    "@babel/plugin-proposal-optional-chaining": "7.12.1",
     "babel-eslint": "^10.0.1",
     "babel-loader": "^8.0.5",
     "babel-plugin-react-intl": "^3.0.1",

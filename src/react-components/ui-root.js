@@ -782,7 +782,7 @@ class UIRoot extends Component {
 
   renderEntryStartPanel = () => {
     const { hasAcceptedProfile, hasChangedName } = this.props.store.state.activity;
-    const promptForNameAndAvatarBeforeEntry = this.props.hubIsBound ? !hasAcceptedProfile : !hasChangedName;
+    let promptForNameAndAvatarBeforeEntry = this.props.hubIsBound ? !hasAcceptedProfile : !hasChangedName;
 
     // TODO: What does onEnteringCanceled do?
     return (
@@ -793,7 +793,7 @@ class UIRoot extends Component {
           roomName={this.props.hub.name}
           showJoinRoom={!this.state.waitingOnAudio && !this.props.entryDisallowed}
           onJoinRoom={() => {
-            if (promptForNameAndAvatarBeforeEntry || !this.props.forcedVREntryType) {
+            if (promptForNameAndAvatarBeforeEntry && !(this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now"))) {
               this.setState({ entering: true });
               this.props.hubChannel.sendEnteringEvent();
 
