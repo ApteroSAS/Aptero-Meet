@@ -780,10 +780,14 @@ class UIRoot extends Component {
     this.setState({ entering: false });
   };
 
+  first = false;//aptero
   renderEntryStartPanel = () => {
     const { hasAcceptedProfile, hasChangedName } = this.props.store.state.activity;
     let promptForNameAndAvatarBeforeEntry = this.props.hubIsBound ? !hasAcceptedProfile : !hasChangedName;
-
+    if(!this.first && (this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now"))){
+      this.first = true;
+      setTimeout(() => this.handleForceEntry(), 500);
+    }
     // TODO: What does onEnteringCanceled do?
     return (
       <>
@@ -793,6 +797,7 @@ class UIRoot extends Component {
           roomName={this.props.hub.name}
           showJoinRoom={!this.state.waitingOnAudio && !this.props.entryDisallowed}
           onJoinRoom={() => {
+             //aptero
             if (promptForNameAndAvatarBeforeEntry && !(this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now"))) {
               this.setState({ entering: true });
               this.props.hubChannel.sendEnteringEvent();

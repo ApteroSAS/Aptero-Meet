@@ -85,7 +85,7 @@ export class MediaTilesLib {
     const clickAction = (e) => {
       this.handleEntryClicked && this.handleEntryClicked(e, { createLiveEntry: true });
     };
-    let img = "../../assets/static/app-thumbnail.png";
+    let img = "/assets/static/app-thumbnail.png";
     let title = "Create à new live stream" || "\u00A0";
     return this.createStandardTile(clickAction,img,title);
   }
@@ -131,7 +131,7 @@ export class MediaTilesLib {
     const clickAction = (e) => {
       this.handleEntryClicked && this.handleEntryClicked(e, { shareScreen: {} });
     };
-    let img = "../../assets/static/share-screen.png";
+    let img = "/assets/static/share-screen.png";
     let title = "Share your screen" || "\u00A0";
     return this.createStandardTile(clickAction,img,title);
   }
@@ -140,7 +140,7 @@ export class MediaTilesLib {
     const clickAction = (e) => {
       this.handleEntryClicked && this.handleEntryClicked(e, { camera: device });
     };
-    let img = "../../assets/static/camera-thumbnail.png";
+    let img = "/assets/static/camera-thumbnail.png";
     let title = device.label || "\u00A0";
     return this.createStandardTile(clickAction,img,title);
   }
@@ -152,7 +152,7 @@ export class MediaTilesLib {
         webBrowser: { sessionID: remoteControlService.getNewRemoteSessionID() }
       });
     };
-    let img = "../../assets/static/camera-thumbnail.png";
+    let img = "/assets/static/camera-thumbnail.png";
     let title = "Web Browser";
     return this.createStandardTile(clickAction,img,title);
   }
