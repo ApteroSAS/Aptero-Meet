@@ -337,6 +337,7 @@ AFRAME.registerComponent("media-video", {
       this.changeButton = this.el.querySelector(".video-change-button"); //aptero
       this.timeLabel = this.el.querySelector(".video-time-label");
       this.volumeLabel = this.el.querySelector(".video-volume-label");
+      this.linkButton = this.el.querySelector(".video-link-button");
 
       this.playPauseButton.object3D.addEventListener("interact", this.togglePlaying);
       this.seekForwardButton.object3D.addEventListener("interact", this.seekForward);
@@ -929,7 +930,8 @@ AFRAME.registerComponent("media-video", {
   updateHoverMenu() {
     if (!this.hoverMenu) return;
 
-    const pinnableElement = this.el.components["media-loader"].data.linkedEl || this.el;
+    const mediaLoader = this.el.components["media-loader"].data;
+    const pinnableElement = mediaLoader.linkedEl || this.el;
     const isPinned = pinnableElement.components.pinnable && pinnableElement.components.pinnable.data.pinned;
     this.playbackControls.object3D.visible = !this.data.hidePlaybackControls && !!this.video;
     this.timeLabel.object3D.visible = !this.data.hidePlaybackControls;
@@ -943,6 +945,8 @@ AFRAME.registerComponent("media-video", {
       !!this.video && !this.videoIsLive && (!isPinned || window.APP.hubChannel.can("pin_objects"));
 
     this.playPauseButton.object3D.visible = this.seekForwardButton.object3D.visible = this.seekBackButton.object3D.visible = mayModifyPlayHead;
+
+    this.linkButton.object3D.visible = !!mediaLoader.mediaOptions.href;
 
     if (this.videoIsLive) {
       this.timeLabel.setAttribute("text", "value", "LIVE");
