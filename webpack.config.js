@@ -605,6 +605,12 @@ module.exports = async (env, argv) => {
     ]),
     new CopyWebpackPlugin([
       {
+        from: "src/assets/images/favicon.ico",
+        to: "favicon.ico"
+      }
+    ]),
+    new CopyWebpackPlugin([
+      {
         from: "src/assets/manifest.webmanifest",
         to: "manifest.webmanifest"
       }

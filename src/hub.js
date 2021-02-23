@@ -558,7 +558,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
     //TODO aptero here add twilio
     try {
       // Meta endpoint exists only on dialog
-      await fetch(`https://${hub.host}:${hub.port}/meta`);
+      await fetch(hub.port==443?`https://${hub.host}/meta`:`https://${hub.host}:${hub.port}/meta`);
       adapter = "dialog";
     } catch (e) {
       // Ignore, set to janus.
@@ -566,7 +566,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
 
     scene.setAttribute("networked-scene", {
       room: hub.hub_id,
-      serverURL: `wss://${hub.host}:${hub.port}`,
+      serverURL: hub.port==443?`wss://${hub.host}`:`wss://${hub.host}:${hub.port}`,
       debug: !!isDebug,
       adapter
     });
