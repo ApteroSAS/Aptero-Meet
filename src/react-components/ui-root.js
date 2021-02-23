@@ -798,7 +798,7 @@ class UIRoot extends Component {
           showJoinRoom={!this.state.waitingOnAudio && !this.props.entryDisallowed}
           onJoinRoom={() => {
              //aptero
-            if (promptForNameAndAvatarBeforeEntry && !(this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now"))) {
+            if (!(this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now"))) {
               this.setState({ entering: true });
               this.props.hubChannel.sendEnteringEvent();
 
