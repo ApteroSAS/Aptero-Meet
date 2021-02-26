@@ -161,13 +161,13 @@ export function HomePage() {
           </Column>
         </Container>
       )}
-      <Container>
+      {/*<Container>
         <Column padding center grow>
           <Button lg preset="blue" as="a" href="/link">
             <FormattedMessage id="home-page.have-code" defaultMessage="Have a room code?" />
           </Button>
         </Column>
-      </Container>
+      </Container>*/}
     </PageContainer>
   );
 }
