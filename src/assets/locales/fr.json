@@ -356,7 +356,7 @@
     "preferences-screen.preference.disable-movement": "Désactiver le mouvement",
     "preferences-screen.preference.disable-noise-suppression": "Désactiver la suppression de bruit du microphone",
     "preferences-screen.preference.disable-sound-effects": "Désactiver les effets sonores",
-    "preferences-screen.preference.disable-strafing": "Désactiver le mitraillage",
+    "preferences-screen.preference.disable-strafing": "Désactiver le déplacement laterale",
     "preferences-screen.preference.disable-teleporter": "Désactiver la téléportation",
     "preferences-screen.preference.enable-dynamic-shadows": "Active les ombres dynamiques",
     "preferences-screen.preference.enable-gyro": "Activer le gyroscope (quand supporté par le navigateur/appareil)",
