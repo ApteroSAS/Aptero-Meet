@@ -1,6 +1,7 @@
 import axios from "axios";
 import { propertiesService } from "../properties/propertiesService";
 import { addEntryModeIfNotExist } from "../util/EntryMode";
+import configs from "../../utils/configs"
 
 export class RoomParameters {
     async getParameters(roomSID) {
@@ -66,6 +67,11 @@ export class RoomParameters {
             }
             if (roomConfig.entryMode) {
                 addEntryModeIfNotExist(roomConfig.entryMode);
+            }
+            if(roomConfig.AppConfigOverride){
+                Object.keys(roomConfig.AppConfigOverride).forEach(key => {
+                    configs.APP_CONFIG[key] = roomConfig.AppConfigOverride[key];
+                });
             }
         }
     }

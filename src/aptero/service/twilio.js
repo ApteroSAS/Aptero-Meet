@@ -21,7 +21,7 @@ export function addIceServers(iceServer) {
   window.iceServers.forEach(server => {
     iceServer.unshift(server);
   })
-  console.info("iceServer",iceServer);
+  //console.info("iceServer",iceServer);
   return iceServer;
 }
 
