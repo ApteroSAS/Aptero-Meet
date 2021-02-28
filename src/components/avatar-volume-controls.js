@@ -1,15 +1,102 @@
 import { VOLUME_LABELS } from "./media-views";
-import { eventEmitter } from "./audio-feedback";
-
 const MAX_VOLUME = 8;
 const SMALL_STEP = 1 / (VOLUME_LABELS.length / 2);
 const BIG_STEP = (MAX_VOLUME - 1) / (VOLUME_LABELS.length / 2);
+
+// Inserts analyser and gain nodes after audio source.
+// Analyses audio source volume and adjusts gain value
+// to make it in a certain range.
+class AudioNormalizer {
+  constructor(audio) {
+    this.audio = audio;
+    this.analyser = audio.context.createAnalyser();
+    this.connected = false;
+
+    // To analyse volume, 32 fftsize may be good enough
+    this.analyser.fftSize = 32;
+    this.gain = audio.context.createGain();
+    this.timeData = new Uint8Array(this.analyser.frequencyBinCount);
+    this.volumes = [];
+    this.volumeSum = 0;
+  }
+
+  apply() {
+    if (window.APP.store.state.preferences.audioNormalization) {
+      if (!this.connected) {
+        this.connect();
+      }
+    } else {
+      if (this.connected) {
+        this.disconnect();
+      }
+      return;
+    }
+
+    // Adjusts volume in "a rule of the thumb" way
+    // Any better algorithm?
+
+    // Regards the RMS of time-domain data as volume.
+    // Is this a right approach?
+    // Using the RMS of frequency-domain data would be another option.
+    this.analyser.getByteTimeDomainData(this.timeData);
+    const squareSum = this.timeData.reduce((sum, num) => sum + Math.pow(num - 128, 2), 0);
+    const volume = Math.sqrt(squareSum / this.analyser.frequencyBinCount);
+    const baseVolume = window.APP.store.state.preferences.audioNormalization;
+
+    // Regards volume under certain threshold as "not speaking" and skips.
+    // I'm not sure if 0.4 is an appropriate threshold.
+    if (volume >= Math.min(0.4, baseVolume)) {
+      this.volumeSum += volume;
+      this.volumes.push(volume);
+      // Sees only recent volume history because there is a chance
+      // that a speaker changes their master input volume.
+      // I'm not sure if 600 is an appropriate number.
+      while (this.volumes.length > 600) {
+        this.volumeSum -= this.volumes.shift();
+      }
+      // Adjusts volume after getting many enough volume history.
+      // I'm not sure if 60 is an appropriate number.
+      if (this.volumes.length >= 60) {
+        const averageVolume = this.volumeSum / this.volumes.length;
+        this.gain.gain.setTargetAtTime(baseVolume / averageVolume, this.audio.context.currentTime, 0.01);
+      }
+    }
+  }
+
+  connect() {
+    // Hacks. THREE.Audio connects audio nodes when source is set.
+    // If audio is not played yet, THREE.Audio.setFilters() doesn't
+    // reset connections. Then manually caling .connect()/disconnect() here.
+    // This might be a bug of Three.js and should be fixed in Three.js side?
+    if (this.audio.source && !this.audio.isPlaying) {
+      this.audio.disconnect();
+    }
+    const filters = this.audio.getFilters();
+    filters.unshift(this.analyser, this.gain);
+    this.audio.setFilters(filters);
+    if (this.audio.source && !this.audio.isPlaying) {
+      this.audio.connect();
+    }
+    this.connected = true;
+  }
+
+  disconnect() {
+    if (this.audio.source && !this.audio.isPlaying) {
+      this.audio.disconnect();
+    }
+    const filters = [this.analyser, this.gain];
+    this.audio.setFilters(this.audio.getFilters().filter(filter => !filters.includes(filter)));
+    if (this.audio.source && !this.audio.isPlaying) {
+      this.audio.connect();
+    }
+    this.connected = false;
+  }
+}
 
 AFRAME.registerComponent("avatar-volume-controls", {
   schema: {
     volume: { type: "number", default: 1.0 }
   },
-  aecEnabled: true,
 
   init() {
     this.volumeUp = this.volumeUp.bind(this);
@@ -21,52 +108,11 @@ AFRAME.registerComponent("avatar-volume-controls", {
     this.volumeUpButton.object3D.addEventListener("interact", this.volumeUp);
     this.volumeDownButton.object3D.addEventListener("interact", this.volumeDown);
     this.update = this.update.bind(this);
+    this.normalizer = null;
     window.APP.store.addEventListener("statechanged", this.update);
 
     this.updateVolumeLabel();
-    this.beforeVolumeDecrease = this.data.volume;
-
-    //Echo is when I speak and I heard my voice in the speaker (meaning that the sound of my voice got to the the speaker of the other participant and back through its mic)
-    //So we reduce the sound of the speaker when we speak so we heard less echo and also prevend echo feedback loop
-    // speak:network:start triggering while we speak just means that we are receiving echo (or the person is speaking at the same time as us
-    //this.checkEnableEchoCancellation();
-    if (this.aecEnabled) {
-      let started = false;
-      console.log("AEC enabled");
-      eventEmitter.on("speak:local:start", () => {
-        if(!started) {
-          started = true;
-          //we try to prevent echo by diminishing the sound when we speak
-          this.beforeVolumeDecrease = this.data.volume;
-          this.changeVolume(0.4);
-          //console.log("volume changed to " + this.data.volume);
-        }
-      });
-
-      eventEmitter.on("speak:local:stop", () => {
-        started = false;
-        //we try to prevent echo by diminishing the sound when we speak
-        this.changeVolume(this.beforeVolumeDecrease);
-        //console.log("volume changed to " + this.data.volume);
-      });
-    } else {
-      console.log("AEC disabled");
-    }
   },
-
-  /*checkEnableEchoCancellation() {
-    const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR();
-    //do not need AEC on mobile device or Quest so we remove it
-    this.aecEnabled = !isMobile;
-  },*/
-
-  changeVolume(v) {
-    if (this && this.el && this.data && this.data.volume && v) {
-      this.el.setAttribute("avatar-volume-controls", "volume", THREE.Math.clamp(v, 0, 1));
-      this.updateVolumeLabel();
-    }
-  },
-
   remove() {
     window.APP.store.removeEventListener("statechanged", this.update);
   },
@@ -95,12 +141,26 @@ AFRAME.registerComponent("avatar-volume-controls", {
         return;
       }
 
+      if (!this.normalizer) {
+        this.normalizer = new AudioNormalizer(audio);
+        this.avatarAudioSource.el.addEventListener("sound-source-set", () => {
+          const audio =
+            this.avatarAudioSource && this.avatarAudioSource.el.getObject3D(this.avatarAudioSource.attrName);
+          if (audio) {
+            this.normalizer = new AudioNormalizer(audio);
+            this.normalizer.apply();
+          }
+        });
+      }
+
+      this.normalizer.apply();
+
       const { audioOutputMode, globalVoiceVolume } = window.APP.store.state.preferences;
       const volumeModifier = (globalVoiceVolume !== undefined ? globalVoiceVolume : 100) / 100;
       let gain = volumeModifier * this.data.volume;
       if (audioOutputMode === "audio") {
         this.avatarAudioSource.el.object3D.getWorldPosition(positionA);
-        this.el.sceneEl.camera.getWorldPosition(positionB);
+        this.el.sceneEl.audioListener.getWorldPosition(positionB);
         const squaredDistance = positionA.distanceToSquared(positionB);
         gain = gain * Math.min(1, 10 / Math.max(1, squaredDistance));
       }

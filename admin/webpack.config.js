@@ -210,6 +210,12 @@ module.exports = (env, argv) => {
           to: "favicon.ico"
         }
       ]),
+      new CopyWebpackPlugin([
+        {
+          from: "src/aptero/properties/properties.js",
+          to: "properties.js"
+        }
+      ]),
       // Extract required css and add a content hash.
       new MiniCssExtractPlugin({
         filename: "assets/stylesheets/[name]-[contenthash].css",

@@ -25,7 +25,7 @@ import { waitForDOMContentLoaded } from "../utils/async-utils";
 
 import { SHAPE } from "three-ammo/constants";
 import { MICROSOFT_AUTH_ERROR, microsoftService } from "../aptero/service/MicrosoftService";
-import { IN_APP_WEB_BROWSER_PROTOCOL } from "../aptero/util/media-utils-lib";
+import { IN_APP_WEB_BROWSER_PROTOCOL } from "../aptero/react-components/media-utils-lib";
 
 let loadingObjectEnvMap;
 let loadingObject;
@@ -428,7 +428,7 @@ AFRAME.registerComponent("media-loader", {
 
         contentType = (result.meta && result.meta.expected_content_type) || contentType;
         thumbnail = result.meta && result.meta.thumbnail && proxiedUrlFor(result.meta.thumbnail);
-        //TOD still necessary?
+        //TODO still necessary?
         if(!thumbnail){
           thumbnail = window.APP_CONFIG.GLOBAL_ASSETS_PATH+"app-thumbnail.png";
         }
@@ -436,7 +436,7 @@ AFRAME.registerComponent("media-loader", {
 
       // todo: we don't need to proxy for many things if the canonical URL has permissive CORS headers
       accessibleUrl = proxiedUrlFor(canonicalUrl);
-      //Aptero microsoft integration feature
+      //Aptero microsoft integration feature TODO service
       if(accessibleUrl.endsWith(MICROSOFT_AUTH_ERROR)){
         if (this.el.components["position-at-border__freeze"]) {
           this.el.setAttribute("position-at-border__freeze", { isFlat: true });
@@ -531,6 +531,8 @@ AFRAME.registerComponent("media-loader", {
                 template: "#photo-hover-menu",
                 isFlat: true
               });
+            } else if (this.data.mediaOptions.href) {
+              this.el.setAttribute("hover-menu__link", { template: "#link-hover-menu", isFlat: true });
             }
           },
           { once: true }
@@ -609,6 +611,11 @@ AFRAME.registerComponent("media-loader", {
         if (this.data.mediaOptions.hasOwnProperty("batch") && !this.data.mediaOptions.batch) {
           batch = false;
         }
+        if (this.data.mediaOptions.hasOwnProperty("applyGravity")) {
+          this.el.setAttribute("floaty-object", {
+            modifyGravityOnRelease: !this.data.mediaOptions.applyGravity
+          });
+        }
         this.el.setAttribute(
           "gltf-model-plus",
           Object.assign({}, this.data.mediaOptions, {
@@ -627,9 +634,7 @@ AFRAME.registerComponent("media-loader", {
         this.el.addEventListener(
           "image-loaded",
           async () => {
-            //aptero change scene permission //TODO still necessary?
-            //const mayChangeScene = this.el.sceneEl.systems.permissions.can("update_hub");
-            const mayChangeScene = true;
+            const mayChangeScene = this.el.sceneEl.systems.permissions.can("update_hub");
 
             if (await isLocalHubsAvatarUrl(src)) {
               this.el.setAttribute("hover-menu__hubs-item", {

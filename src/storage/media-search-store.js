@@ -2,6 +2,7 @@ import { EventTarget } from "event-target-shim";
 import configs from "../utils/configs";
 import { getReticulumFetchUrl, fetchReticulumAuthenticated, hasReticulumServer } from "../utils/phoenix-utils";
 import { pushHistoryPath, sluglessPath, withSlug } from "../utils/history";
+import { processResponse } from "../aptero/service/EntryAPI";
 
 const EventEmitter = require("eventemitter3");
 
@@ -10,9 +11,10 @@ const EMPTY_RESULT = { entries: [], meta: {} };
 const URL_SOURCE_TO_TO_API_SOURCE = {
   objects: "objects",
   videos360: "videos360",
+  videos2d: "video2d",
   scenes: "scene_listings",
   images: "bing_images",
-  videos: "videos",
+  videos: "bing_videos",
   youtube: "youtube_videos",
   gifs: "tenor",
   sketchfab: "sketchfab",
@@ -21,23 +23,23 @@ const URL_SOURCE_TO_TO_API_SOURCE = {
   favorites: "favorites"
 };
 
-const desiredSources = ["objects", "videos360", "poly", "sketchfab", "videos", "scenes", "avatars", "gifs", "images"];
-const availableIntegrations = configs.AVAILABLE_INTEGRATIONS;
+const desiredSources = ["objects", "videos360", "videos2d", "poly", "sketchfab", "videos", "scenes", "avatars", "gifs", "images"];
 const availableSources = desiredSources.filter(source => {
   const apiSource = URL_SOURCE_TO_TO_API_SOURCE[source];
-  return !availableIntegrations.hasOwnProperty(apiSource) || availableIntegrations[apiSource];
+  return configs.integration(apiSource);
 });
+//export const SOURCES = availableSources;
+export const SOURCES = ["objects", "videos360", "videos2d", "scenes", "avatars"];
 
-//export const SOURCES = ["objects", "videos360", "videos", "scenes", "avatars"];
-export const SOURCES = ["objects", "videos", "videos360"];
 
 export const MEDIA_SOURCE_DEFAULT_FILTERS = {
   gifs: "trending",
   sketchfab: "featured",
   scenes: "featured",
   favorites: "my-favorites",
-  objects: "my-objects",
-  video360: "my-videos-360"
+  objects: "model/gltf-binary",
+  videos2d: "my-videos-2d",
+  videos360: "my-videos-360"
 };
 
 const SEARCH_CONTEXT_PARAMS = ["q", "filter", "cursor", "similar_to"];
@@ -81,6 +83,7 @@ export default class MediaSearchStore extends EventTarget {
     const currentRequestIndex = this.requestIndex;
     const searchParams = new URLSearchParams();
     const locationSearchParams = new URLSearchParams(location.search);
+    //TODO aptero filter
     let filter = locationSearchParams.get("filter");
     if (urlSource === "objects") {
       filter = "my-objects";
@@ -123,18 +126,7 @@ export default class MediaSearchStore extends EventTarget {
     this.dispatchEvent(new CustomEvent("statechanged"));
     const result = fetch ? await fetchReticulumAuthenticated(path) : EMPTY_RESULT;
 
-    if (result.entries) {
-      result.entries.forEach(entry => {
-        if (!entry.url.startsWith("https://") && entry.url.startsWith("http://")) {
-          entry.url = entry.url.replace("http://", "https://");//promote insecure content
-        }
-        if (entry.type === "room") {
-          if (window.location.href.startsWith("https://localhost")) {
-            entry.url = "/hub.html?hub_id=" + entry.id;
-          }
-        }
-      });
-    }
+    await processResponse(result.entries);//aptero
 
     if (this.requestIndex != currentRequestIndex) return;
 
@@ -258,7 +250,6 @@ export default class MediaSearchStore extends EventTarget {
       });
     });
   }
-
 
   sourceNavigateWithNoNav = (source, selectAction) => {
     this._sourceNavigate(source, true, false, selectAction);

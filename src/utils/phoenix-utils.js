@@ -12,7 +12,7 @@ export function isLocalClient() {
   return hasReticulumServer() && document.location.host !== configs.RETICULUM_SERVER;
 }
 
-export function hubUrl(hubId) {
+export function hubUrl(hubId, extraParams) {
   if (!hubId) {
     if (isLocalClient()) {
       hubId = new URLSearchParams(location.search).get("hub_id");
@@ -20,7 +20,22 @@ export function hubUrl(hubId) {
       hubId = location.pathname.split("/")[1];
     }
   }
-  return new URL(isLocalClient() ? `/hub.html?hub_id=${hubId}` : `/${hubId}`, location.href);
+
+  let url;
+  if (isLocalClient()) {
+    url = new URL(`/hub.html`, location.href);
+    url.searchParams.set("hub_id", hubId);
+  } else {
+    url = new URL(`/${hubId}`, location.href);
+  }
+
+  for (const key in extraParams) {
+    if (extraParams.hasOwnProperty(key)) {
+      url.searchParams.set(key, extraParams[key]);
+    }
+  }
+
+  return url;
 }
 
 const resolverLink = document.createElement("a");
@@ -156,14 +171,19 @@ export function fetchReticulumAuthenticated(url, method = "GET", payload) {
   if (payload) {
     params.body = JSON.stringify(payload);
   }
-  return fetch(retUrl, params).then(async r => {
-    const result = await r.text();
+  return fetch(retUrl, params).then(async response => {
+    if (!response.ok) {
+      throw new Error('API error');
+    }
+    const result = await response.text();
     try {
       return JSON.parse(result);
     } catch (e) {
       // Some reticulum responses, particularly DELETE requests, don't return json.
       return result;
     }
+  }).catch(() => {
+    return {entries:[]};
   });
 }
 
@@ -286,4 +306,16 @@ export function discordBridgesForPresences(presences) {
     }
   }
   return channels;
+}
+
+export function hasEmbedPresences(presences) {
+  for (const p of Object.values(presences)) {
+    for (const m of p.metas) {
+      if (m.context && m.context.embed) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
