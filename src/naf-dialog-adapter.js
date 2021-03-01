@@ -98,7 +98,7 @@ export default class DialogAdapter {
   }
 
   getIceServers(host, port, turn) {
-    const iceServers = [];
+    let iceServers = [];
 
     this._serverUrl = `wss://${host}:${port}`;
 
@@ -123,7 +123,7 @@ export default class DialogAdapter {
     } else {
       iceServers.push({ urls: "stun:stun1.l.google.com:19302" }, { urls: "stun:stun2.l.google.com:19302" });
     }
-    addIceServers(iceServers);
+    iceServers = addIceServers(iceServers);
     return iceServers;
   }
 
