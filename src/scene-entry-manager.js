@@ -25,6 +25,7 @@ import { SOUND_ENTER_SCENE } from "./systems/sound-effects-system";
 //aptero
 import { mediaViewEventEmitter } from "./components/media-views";
 import { networkService } from "./aptero/service/NetworkService";
+import { createTrack } from "./aptero/service/twilio";
 
 const isIOS = AFRAME.utils.device.isIOS();
 //aptero
@@ -426,7 +427,8 @@ export default class SceneEntryManager {
           }catch (e) {
             console.warn("force echoCancellation failled");
           }
-          newStream = await navigator.mediaDevices.getUserMedia(constraints);
+
+          newStream = await createTrack(constraints);
         }
       } catch (e) {
         isHandlingVideoShare = false;

@@ -1,3 +1,5 @@
+import { createTrack } from "../aptero/service/twilio";
+
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
 const isFirefoxReality = isMobileVR && navigator.userAgent.match(/Firefox/);
@@ -154,7 +156,8 @@ export default class MediaDevicesManager {
     }
 
     try {
-      const newStream = await navigator.mediaDevices.getUserMedia(constraints);
+      //aptero
+      const newStream = await createTrack(constraints);//Type MediaStream
 
       const audioSystem = this._scene.systems["hubs-systems"].audioSystem;
       audioSystem.addStreamToOutboundAudio("microphone", newStream);
@@ -169,7 +172,9 @@ export default class MediaDevicesManager {
             "Oculus Browser 6 bug hit: Audio stream track ended without calling stop. Recreating audio stream."
           );
 
-          const newStream = await navigator.mediaDevices.getUserMedia(constraints);
+          //aptero
+          const newStream = await createTrack(constraints);//Type MediaStream
+
           this.audioTrack = newStream.getAudioTracks()[0];
 
           audioSystem.addStreamToOutboundAudio("microphone", newStream);

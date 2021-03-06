@@ -37,6 +37,7 @@ import { addAnimationComponents } from "./utils/animation";
 import { authorizeOrSanitizeMessage } from "./utils/permissions-utils";
 import Cookies from "js-cookie";
 import "./naf-dialog-adapter";
+import "./aptero/twilio-adapter";
 
 import "./components/scene-components";
 import "./components/scale-in-screen-space";
@@ -227,7 +228,7 @@ import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
 import { ExitReason } from "./react-components/room/ExitedRoomScreen";
 import { OAuthScreenContainer } from "./react-components/auth/OAuthScreenContainer";
 import { SignInMessages } from "./react-components/auth/SignInModal";
-import { configureTurn, fetchICEservers } from "./aptero/service/twilio";
+import { configureTurn, createTrack, fetchICEservers } from "./aptero/service/twilio";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -554,14 +555,19 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
   // TODO Remove this once transition completed.
   // Wait for scene objects to load before connecting, so there is no race condition on network state.
   const connectToScene = async () => {
+
     let adapter = "janus";
-    //TODO aptero here add twilio
-    try {
-      // Meta endpoint exists only on dialog
-      await fetch(hub.port==443?`https://${hub.host}/meta`:`https://${hub.host}:${hub.port}/meta`);
-      adapter = "dialog";
-    } catch (e) {
-      // Ignore, set to janus.
+    if(configs.APP_CONFIG.adapter) {
+      //Aptero
+      adapter = configs.APP_CONFIG.adapter;
+    }else {
+      try {
+        // Meta endpoint exists only on dialog
+        await fetch(hub.port == 443 ? `https://${hub.host}/meta` : `https://${hub.host}:${hub.port}/meta`);
+        adapter = "dialog";
+      } catch (e) {
+        // Ignore, set to janus.
+      }
     }
 
     scene.setAttribute("networked-scene", {
@@ -733,7 +739,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // safari when initializing it later.
   if (["iOS", "Mac OS"].includes(detectedOS) && ["safari", "ios"].includes(browser.name)) {
     try {
-      await navigator.mediaDevices.getUserMedia({ audio: true });
+      await createTrack({ audio: true });//Type MediaStream
     } catch (e) {
       remountUI({ showSafariMicDialog: true });
       return;
