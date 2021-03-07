@@ -108,6 +108,9 @@ function getHoverableButton(hovered) {
   if (hovered.children) {
     // TODO: not sure if looping thru children here is desireable, but we did this to accomodate the rounded-button mixins
     for (let i = 0; i < hovered.children.length; i++) {
+      if(!hovered.children[i].components){
+        break;//aptero
+      }
       if (
         hasButtonComponent(hovered.children[i].components) ||
         hovered.children[i].classList.contains("teleport-waypoint-icon") ||

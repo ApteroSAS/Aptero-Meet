@@ -2,7 +2,7 @@ import classNames from "classnames";
 import React from "react";
 import { sceneEntryManagerEventEmitter } from "../../scene-entry-manager";
 import { liveStream } from "../service/LiveStream";
-import { remoteControlService } from "../service/RemoteControlService";
+import { remoteControlServiceV2 } from "../service/RemoteControlServiceV2";
 import CreateAvatar from "./CreateAvatar";
 import styles from "./scss/component/MediaTiles.scss";
 import PropTypes from "prop-types";
@@ -149,7 +149,7 @@ export class MediaTilesLib {
     const clickAction = (e) => {
       this.handleEntryClicked && this.handleEntryClicked(e, {
         url: WEB_BROWSER_URL_MODE,
-        webBrowser: { sessionID: remoteControlService.getNewRemoteSessionID() }
+        webBrowser: { sessionID: remoteControlServiceV2.getNewRemoteSessionID() }
       });
     };
     let img = "/assets/static/camera-thumbnail.png";

@@ -1,4 +1,4 @@
-import { remoteControlService } from "../service/RemoteControlService";
+import {remoteControlServiceV2} from "../service/RemoteControlServiceV2";
 
 export const IN_APP_WEB_BROWSER_PROTOCOL = "web-browser:";
 export const IN_APP_WEB_BROWSER_TRAIL = "/web-browser.mp4";
@@ -22,7 +22,52 @@ export const proxyURL = (url) => {
   return null;
 };
 
-export const remoteWebBrowser = (screenElement,texture,mediaData) => {
+export const remoteWebBrowser = async (screenElement,texture,mediaData) => {
+  let screenSRC = mediaData.src;
+  screenSRC = screenSRC.replace(IN_APP_WEB_BROWSER_PROTOCOL,"");
+  screenSRC = screenSRC.replace(IN_APP_WEB_BROWSER_TRAIL,"");
+  let metaData = JSON.parse(atob(screenSRC));
+  let remoteScreenSessionId = metaData.sessionID;
+
+
+  let screenId = await new Promise((resolve, reject) => {
+    NAF.utils.getNetworkedEntity(screenElement).then(networkedEl => {
+      //hovered
+      //unhovered
+      delete screenElement.components["hover-menu__video"];
+      let screenId = networkedEl.components.networked.data.networkId;
+      //singleActionButton:true;
+      //remoteControlService.registerEventOnElement(screenElement);
+      screenElement.setAttribute("tags","singleActionButton: true;");
+      resolve(screenId);
+    });
+  });
+  let connexionInfo = {
+    localSessionID: screenId,
+    remoteScreenSessionId: remoteScreenSessionId,
+    screenSizeX:metaData.width,
+    screenSizeY:metaData.height,
+    startUrl:metaData.startUrl
+  };
+  let rfb = await remoteControlServiceV2.getScreen(screenElement,connexionInfo);
+  remoteControlServiceV2.registerEventOnElement(screenElement);
+
+  // Setup a POT canvas
+  let canvas = rfb._canvas;
+  canvas.width = metaData.width || 1024;
+  canvas.height = metaData.height || 512;
+  texture = new THREE.Texture(canvas);
+
+  texture.isVideoTexture = true;
+  texture.image.duration = Infinity;
+  texture.image.play = () => { return Promise.resolve(true)};
+  texture.update = ()=>{
+    texture.needsUpdate = true;
+  };
+  return texture;
+};
+/*
+export const remoteWebBrowserV1 = (screenElement,texture,mediaData) => {
   let screenSRC = mediaData.src;
   screenSRC = screenSRC.replace(IN_APP_WEB_BROWSER_PROTOCOL,"");
   screenSRC = screenSRC.replace(IN_APP_WEB_BROWSER_TRAIL,"");
@@ -69,3 +114,4 @@ export const remoteWebBrowser = (screenElement,texture,mediaData) => {
   };
   return texture;
 };
+*/

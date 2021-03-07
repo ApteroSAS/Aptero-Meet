@@ -802,7 +802,7 @@ AFRAME.registerComponent("media-video", {
 
       if (url.startsWith(IN_APP_WEB_BROWSER_PROTOCOL)) {
         //APTERO
-        texture = remoteWebBrowser(this.el,texture,this.data);
+        texture = await remoteWebBrowser(this.el,texture,this.data);
       }else if (url.startsWith("hubs://")) {
         const streamClientId = url.substring(7).split("/")[1]; // /clients/<client id>/video is only URL for now
         const stream = await NAF.connection.adapter.getMediaStream(streamClientId, "video");
