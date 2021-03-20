@@ -1,4 +1,4 @@
-import { customActionRegister } from "../service/CustomActionRegister";
+import { customActionRegister } from "../service/api/CustomActionRegister";
 import { networkService } from "../service/NetworkService";
 import { spawnMediaInfrontOfPlayer } from "../util/Media";
 import { ObjectContentOrigins } from "../../object-types";
@@ -24,17 +24,7 @@ AFRAME.registerComponent("custom-controller-action", {
       try {
         if (this.data.actionIds) {
           this.data.actionIds.split("+").forEach(id => {
-            let actionData = customActionRegister.actions[id];
-            if (actionData) {
-              if (actionData.action.type === "animation") {
-                actionData.callback();
-                networkService.sendMessage("animation_play", { id })
-              } else if (actionData.action.type === "spawn") {
-                spawnMediaInfrontOfPlayer(actionData.action.url, ObjectContentOrigins.URL, null);
-              } else if (actionData.action.type === "url") {
-                window.open(actionData.action.url, "_blank");
-              }
-            }
+            customActionRegister.triggerAction(id);
           });
         }
       }catch(ex){

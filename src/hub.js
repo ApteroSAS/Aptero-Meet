@@ -229,6 +229,7 @@ import { ExitReason } from "./react-components/room/ExitedRoomScreen";
 import { OAuthScreenContainer } from "./react-components/auth/OAuthScreenContainer";
 import { SignInMessages } from "./react-components/auth/SignInModal";
 import { configureTurn, createTrack, fetchICEservers } from "./aptero/service/twilio";
+import { roomController } from "./aptero/service/api/RoomController";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -466,6 +467,7 @@ async function updateEnvironmentForHub(hub, entryManager) {
 }
 
 async function updateUIForHub(hub, hubChannel) {
+  roomController.setRoom(hub);//Aptero
   remountUI({ hub, entryDisallowed: !hubChannel.canEnterRoom(hub) });
 }
 

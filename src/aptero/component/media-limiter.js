@@ -1,4 +1,4 @@
-import { mediaLimiter } from "../service/MediaLimiter";
+import { mediaLimiter } from "../service/api/MediaLimiter";
 
 AFRAME.registerComponent("media-limiter", {
   schema: {  },

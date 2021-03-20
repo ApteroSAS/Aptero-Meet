@@ -17,7 +17,11 @@ export class MediaLimiter{
     this.limit=limite;
   }
 
+  process(jsondata){
+    this.setLimit(jsondata);
+  }
+
 }
 
 export const mediaLimiter = new MediaLimiter();
-mediaLimiter.setLimit(3);
+mediaLimiter.setLimit(25);
