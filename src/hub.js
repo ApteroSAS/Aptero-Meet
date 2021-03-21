@@ -118,6 +118,7 @@ import "./components/inspect-pivot-offset-from-camera";
 import "./components/optional-alternative-to-not-hide";
 import "./components/avatar-audio-source";
 import "./components/avatar-inspect-collider";
+import "./components/video-texture-target";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -816,7 +817,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   window.APP.mediaDevicesManager = new MediaDevicesManager(scene, store);
   window.APP.hubChannel = hubChannel;
 
-  const performConditionalSignIn = async (predicate, action, signInMessage, signInCompleteMessage, onFailure) => {
+  const performConditionalSignIn = async (predicate, action, signInMessage, onFailure) => {
     if (predicate()) return action();
 
     await handleExitTo2DInterstitial(true, () => remountUI({ showSignInDialog: false }));
@@ -824,7 +825,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     remountUI({
       showSignInDialog: true,
       signInMessage,
-      signInCompleteMessage,
       onContinueAfterSignIn: async () => {
         remountUI({ showSignInDialog: false });
         let actionError = null;

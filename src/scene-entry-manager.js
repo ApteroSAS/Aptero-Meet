@@ -410,7 +410,7 @@ export default class SceneEntryManager {
     let isHandlingVideoShare = false;
 
 //aptero
-    const shareVideoMediaStream = async (constraints, isDisplayMedia,data) => {
+    const shareVideoMediaStream = async (constraints, isDisplayMedia, target, data) => {
       if (isHandlingVideoShare) return;
       isHandlingVideoShare = true;
 
@@ -447,11 +447,13 @@ export default class SceneEntryManager {
         }
 
         await NAF.connection.adapter.setLocalMediaStream(mediaStream);
-        //aptero
+//aptero
         if(data && data.selectAction==="result"){
           data.src = `hubs://clients/${NAF.clientId}/video`;
           mediaViewEventEmitter.emit("share_video_media_stream_created",data);
-        }else{
+        } else if (target === "avatar") {
+          this.avatarRig.setAttribute("player-info", { isSharingAvatarCamera: true });
+        } else{
           currentVideoShareEntity = spawnMediaInfrontOfPlayer(mediaStream, undefined,data);
           // Wire up custom removal event which will stop the stream.
           currentVideoShareEntity.setAttribute("emit-scene-event-on-remove", "event:action_end_video_sharing");
@@ -463,7 +465,7 @@ export default class SceneEntryManager {
       isHandlingVideoShare = false;
     };
 
-    const processCamera = (data) => {
+    this.scene.addEventListener("action_share_camera", (event, data) => {
       const constraints = {
         video: {
           width: isIOS ? { max: 1280 } : { max: 1280, ideal: 720 },
@@ -487,7 +489,8 @@ export default class SceneEntryManager {
           constraints.video.deviceId = preferredCamera;
           break;
       }
-      shareVideoMediaStream(constraints,false,data);
+
+      shareVideoMediaStream(constraints, false, event.detail?.target,data);
     };
     sceneEntryManagerEventEmitter.on("action_share_camera",processCamera);
     this.scene.addEventListener("action_share_camera", processCamera);
@@ -536,6 +539,7 @@ export default class SceneEntryManager {
       await NAF.connection.adapter.setLocalMediaStream(mediaStream);
       currentVideoShareEntity = null;
 
+      this.avatarRig.setAttribute("player-info", { isSharingAvatarCamera: false });
       this.scene.emit("share_video_disabled");
       this.scene.removeState("sharing_video");
       isHandlingVideoShare = false;
