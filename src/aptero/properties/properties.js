@@ -34,8 +34,8 @@ window.APP_PROPS = {
     MICROSOFT_APP_ID: "caafb04c-8c13-4044-92a4-3648f79dc7e3",
     MICROSOFT_APP_AUTHORITY: "https://login.microsoftonline.com/apteroco.onmicrosoft.com",
     GLOBAL_ASSETS_PATH: "https://hub.aptero.co/data/global/",
-    adapter: "twilio",//dialog,janus,twilio
-    adapterParams: {url:"https://alphahub.aptero.co/service/twilio/token"},
+    adapter: "dialog",//dialog,janus,twilio
+    //adapterParams: {url:"https://alphahub.aptero.co/service/twilio/token"},
     features: {
       hide_powered_by: true,
       show_feedback_ui: false,

@@ -222,7 +222,7 @@ export const mlHandleEntryClicked = (evt, entry, parent) => {
     entry.shareScreen.type = is360 ? "360-equirectangular" : "2d";
     entry.shareScreen.selectAction = parent.state.selectAction;
     parent.selectEntry(entry);
-    sceneEntryManagerEventEmitter.emit(`action_share_screen`, entry.shareScreen);
+    sceneEntryManagerEventEmitter.emit(`action_share_screen`,"change_screen_to_share_screen", entry.shareScreen);
   } else if (entry.webBrowser) {
     const searchParams = new URLSearchParams(parent.props.history.location.search);
     const urlSource = parent.getUrlSource(searchParams);
@@ -237,7 +237,7 @@ export const mlHandleEntryClicked = (evt, entry, parent) => {
     entry.camera.type = is360 ? "360-equirectangular" : "2d";
     entry.camera.selectAction = parent.state.selectAction;
     parent.selectEntry(entry);
-    sceneEntryManagerEventEmitter.emit(`action_share_camera`, entry.camera);
+    sceneEntryManagerEventEmitter.emit(`action_share_camera`,"change_screen_to_camera", entry.camera);
   } else if (!entry.lucky_query) {
     parent.selectEntry(entry);
   } else {

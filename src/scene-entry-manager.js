@@ -409,7 +409,7 @@ export default class SceneEntryManager {
     let currentVideoShareEntity;
     let isHandlingVideoShare = false;
 
-//aptero
+    //aptero
     const shareVideoMediaStream = async (constraints, isDisplayMedia, target, data) => {
       if (isHandlingVideoShare) return;
       isHandlingVideoShare = true;
@@ -447,7 +447,7 @@ export default class SceneEntryManager {
         }
 
         await NAF.connection.adapter.setLocalMediaStream(mediaStream);
-//aptero
+        //aptero
         if(data && data.selectAction==="result"){
           data.src = `hubs://clients/${NAF.clientId}/video`;
           mediaViewEventEmitter.emit("share_video_media_stream_created",data);
@@ -465,7 +465,7 @@ export default class SceneEntryManager {
       isHandlingVideoShare = false;
     };
 
-    this.scene.addEventListener("action_share_camera", (event, data) => {
+    const processCamera = (event,data) => {
       const constraints = {
         video: {
           width: isIOS ? { max: 1280 } : { max: 1280, ideal: 720 },
@@ -496,7 +496,7 @@ export default class SceneEntryManager {
     this.scene.addEventListener("action_share_camera", processCamera);
 
     //Aptero contextual action button 
-    const processShareVideo = (data) => {
+    const processShareVideo = (target, data) => {
       shareVideoMediaStream(
         {
           video: {
@@ -512,7 +512,7 @@ export default class SceneEntryManager {
             autoGainControl: window.APP.store.state.preferences.disableAutoGainControl === true ? false : true
           }
         },
-        true,data||{}
+        true,target,data||{}
       );
     };
     sceneEntryManagerEventEmitter.on("action_share_screen",processShareVideo);

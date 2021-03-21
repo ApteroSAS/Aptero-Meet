@@ -11,7 +11,7 @@ export function pinEntity(entity){
   });
 }
 
-export function addMediaAndSetTransform(src, position, orientationRecv, scale, mediaOptions, contentOrigin,shouldPin) {
+export function addMediaAndSetTransform(src, position, quaternion, scale, mediaOptions, contentOrigin,shouldPin) {
   if (!contentOrigin) {
     contentOrigin = ObjectContentOrigins.URL;
   }
@@ -26,7 +26,8 @@ export function addMediaAndSetTransform(src, position, orientationRecv, scale, m
     mediaOptions ? mediaOptions : {}
   );
   entity.object3D.position.set(position.x, position.y, position.z);
-  entity.object3D.rotation.copy(orientationRecv);
+  //entity.object3D.rotation.copy(orientationRecv);
+  entity.object3D.setRotationFromQuaternion(quaternion);
   entity.object3D.scale.set(scale.x, scale.y, scale.z);
   entity.object3D.matrixNeedsUpdate = true;
   //important for case where I thrash the screen TODO workaround user can just deactivate screen share mode (no othe solution sice it cause a bug elsewhere

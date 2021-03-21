@@ -16,11 +16,11 @@ module.exports = {
   // https://eslint.org/docs/rules/
   rules: {
     // https://github.com/prettier/eslint-plugin-prettier
-    "prettier/prettier": "error",
+    "prettier/prettier": "off",
 
-    "prefer-const": "error",
+    "prefer-const": "off",
     "no-use-before-define": "error",
-    "no-var": "error",
+    "no-var": "off",
     "no-throw-literal": "error",
     // Light console usage is useful but remove debug logs before merging to master.
     "no-console": "off",

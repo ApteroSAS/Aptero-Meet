@@ -6,11 +6,11 @@ import { staticObjectManipulator } from "./StaticObjectManipulator";
 
 export class ChangeVideoService {
 
-  constructor(){
+  constructor() {
 
   }
 
-  start(){
+  start() {
     /* empty start to ensure the import is made*/
   }
 
@@ -30,6 +30,7 @@ export class ChangeVideoService {
   }*/
 
   videoChoosing = false;
+
   async changeVideo(networkID) {
     const entity = NAF.entities.entities[networkID];
     const mediaOptions = entity.components["media-loader"].data.mediaOptions;
@@ -38,6 +39,9 @@ export class ChangeVideoService {
       window.APP.mediaSearchStore.sourceNavigateWithResult(mediaOptions.projection === "360-equirectangular" ? "videos360" : "videos2d").then(entry => {
         scene.emit("action_end_video_sharing");
         this.videoChoosing = true;
+        const worldPosition = entity.object3D.getWorldPosition().clone();
+        const worldScale = entity.object3D.getWorldScale().clone();
+        const worldQuaternion = entity.object3D.getWorldQuaternion().clone();
         const rotation = entity.object3D.rotation.clone();
         const position = entity.object3D.position.clone();
         const scale = new THREE.Vector3();
@@ -46,7 +50,7 @@ export class ChangeVideoService {
         if (entry.camera || entry.shareScreen) {
           mediaViewEventEmitter.once("share_video_media_stream_created", (data) => {
             staticObjectManipulator.deactivateNode(networkID);
-            const currentVideoShareEntity = addMediaAndSetTransform(data.src, position, rotation, scale, mediaOptions, ObjectContentOrigins.URL, true);
+            const currentVideoShareEntity = addMediaAndSetTransform(data.src, worldPosition, worldQuaternion, worldScale, mediaOptions, ObjectContentOrigins.URL, true);
             setTimeout(() => {
               scene.addEventListener("action_end_video_sharing", () => {
                 if (this.videoChoosing) {
@@ -77,7 +81,7 @@ export class ChangeVideoService {
           this.videoChoosing = false;
         }
       });
-    }catch (e) {
+    } catch (e) {
       this.videoChoosing = false;
     }
   }
