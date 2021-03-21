@@ -467,7 +467,7 @@ async function updateEnvironmentForHub(hub, entryManager) {
 }
 
 async function updateUIForHub(hub, hubChannel) {
-  roomController.setRoom(hub);//Aptero
+  roomController.setRoom(hub,hubChannel);//Aptero
   remountUI({ hub, entryDisallowed: !hubChannel.canEnterRoom(hub) });
 }
 

@@ -227,7 +227,7 @@ export default class HubChannel extends EventTarget {
   };
 
   updateHub = settings => {
-    if (!this._permissions.update_hub) return "unauthorized";
+    //if (!this._permissions.update_hub) return "unauthorized";//#//TODO Aptero temporary hack disable security
     this.channel.push("update_hub", settings);
   };
 
