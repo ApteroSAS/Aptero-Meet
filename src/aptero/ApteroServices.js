@@ -6,6 +6,7 @@ import { video360Service } from "./service/Video360Service";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 
 import "./component/custom-controller-button";
+import "./component/custom-controller-ask-button";
 import "./component/media-limiter";
 import { gltfExtensionProcessorService } from "./service/api/GLTFExtensionProcessorService";
 import { staticObjectManipulator } from "./service/StaticObjectManipulator";

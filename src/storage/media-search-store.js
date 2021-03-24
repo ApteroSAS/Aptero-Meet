@@ -237,14 +237,18 @@ export default class MediaSearchStore extends EventTarget {
     this._sourceNavigate(this._stashedSource ? this._stashedSource : SOURCES[0], false, true);
   };
 
-//aptero TODO put in service
+  //aptero TODO put in service
+  resultAwaited = false;
   async sourceNavigateWithResult(source) {
     return new Promise((resolve,reject) => {
+      this.resultAwaited = true;
       this._sourceNavigate(source, true, false, "result");
       this.eventEmitter.once("action_selected_media_result_entry", (data) => {
         if(data.result === "cancel"){
+          this.resultAwaited = false;
           reject("cancel");
         }else {
+          this.resultAwaited = false;
           resolve(data.entry);
         }
       });

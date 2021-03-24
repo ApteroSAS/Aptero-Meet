@@ -1,11 +1,9 @@
 import { customActionRegister } from "../service/api/CustomActionRegister";
-import { networkService } from "../service/NetworkService";
-import { spawnMediaInfrontOfPlayer } from "../util/Media";
-import { ObjectContentOrigins } from "../../object-types";
 
 AFRAME.registerComponent("custom-controller-action", {
   schema: {
-    actionIds: { type: "string" }
+    actionIds: { type: "string" },
+    triggerId: { type: "string" }
   },
 
   init() {
@@ -24,7 +22,7 @@ AFRAME.registerComponent("custom-controller-action", {
       try {
         if (this.data.actionIds) {
           this.data.actionIds.split("+").forEach(id => {
-            customActionRegister.triggerAction(id);
+            customActionRegister.triggerAction(id,null);
           });
         }
       }catch(ex){

@@ -314,7 +314,14 @@ export default class SceneEntryManager {
 
     this.scene.addEventListener("add_media", e => {
       const contentOrigin = e.detail instanceof File ? ObjectContentOrigins.FILE : ObjectContentOrigins.URL;
-
+      //APTERO integration
+      if(this.mediaSearchStore.resultAwaited) {
+        let entry = { url: e.detail, contentOrigin};
+        let selectAction = "result";
+        this.scene.emit("action_selected_media_result_entry", { entry, selectAction })
+        this.mediaSearchStore.eventEmitter.emit("action_selected_media_result_entry", { entry, selectAction });
+        return;
+      }
       spawnMediaInfrontOfPlayer(e.detail, contentOrigin);
     });
 

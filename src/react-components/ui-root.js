@@ -1078,7 +1078,7 @@ class UIRoot extends Component {
 
     const renderEntryFlow = (!enteredOrWatching && this.props.hub) || this.isWaitingForAutoExit();
 
-    const canCreateRoom = !configs.feature("disable_room_creation") || configs.isAdmin;
+    const canCreateRoom = !configs.feature("disable_room_creation") || configs.isAdmin();
     const canCloseRoom = this.props.hubChannel && !!this.props.hubChannel.canOrWillIfCreator("close_hub");
     const isModerator = this.props.hubChannel && this.props.hubChannel.canOrWillIfCreator("kick_users") && !isMobileVR;
 
@@ -1236,7 +1236,10 @@ class UIRoot extends Component {
             id: "start-tour",
             label: <FormattedMessage id="more-menu.start-tour" defaultMessage="Start Tour" />,
             icon: SupportIcon,
-            onClick: () => this.props.scene.systems.tips.resetTips()
+            onClick: () => {
+              window.open("https://vimeo.com/524816064");
+              this.props.scene.systems.tips.resetTips()
+            }
           },
           configs.feature("show_docs_link") && {
             id: "help",

@@ -77,7 +77,7 @@ export class ChangeVideoService {
           });
         } else {
           staticObjectManipulator.deactivateNode(networkID);
-          addMediaAndSetTransform(entry.url, position, rotation, scale, mediaOptions, entry.contentOrigin, true);
+          addMediaAndSetTransform(entry.url, worldPosition, worldQuaternion, worldScale, mediaOptions, entry.contentOrigin, true);
           this.videoChoosing = false;
         }
       });
