@@ -723,6 +723,7 @@ function checkForAccountRequired() {
 
 document.addEventListener("DOMContentLoaded", async () => {
   await fetchICEservers();//APTERO
+  document.getElementById("version").innerHTML = process.env.BUILD_VERSION;
   if (isOAuthModal) {
     return;
   }

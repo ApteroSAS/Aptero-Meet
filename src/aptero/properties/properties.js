@@ -36,6 +36,12 @@ window.APP_PROPS = {
     GLOBAL_ASSETS_PATH: "https://hub.aptero.co/data/global/",
     adapter: "dialog",//dialog,janus,twilio
     //adapterParams: {url:"https://alphahub.aptero.co/service/twilio/token"},
+    turn:{
+      twilio:{
+        SID:"AC2b4884e41acc8b8ed9f7ee795969d76b",
+        auth:"U0tjYzMxZDM0N2YxOGVlYmM3MjNiMDgzNTc0ZTE2MWJjMDp6bFM1TjNmbGhWMEdOc0ZLcG1vbFBucW1TcWdMbEliNQ=="
+      }
+    },
     features: {
       hide_powered_by: true,
       show_feedback_ui: false,

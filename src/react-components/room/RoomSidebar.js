@@ -8,6 +8,7 @@ import { IconButton } from "../input/IconButton";
 import { Button } from "../input/Button";
 import { Column } from "../layout/Column";
 import { FormattedMessage, useIntl } from "react-intl";
+import configs from "../../utils/configs"
 
 function SceneAttribution({ attribution }) {
   const intl = useIntl();
@@ -169,6 +170,9 @@ export function RoomSidebar({ room, accountId, onClose, canEdit, onEdit, onChang
             onChangeScene={onChangeScene}
           />
         )}
+        <div>
+        {"Selected adapter : "+configs.APP_CONFIG.adapter}
+        </div>
       </Column>
     </Sidebar>
   );

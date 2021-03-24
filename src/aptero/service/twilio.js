@@ -3,7 +3,7 @@ import configs from "../../utils/configs";
 let forceTurnGlobal = false;
 let forceTcpGlobal = false;
 
-const AccountSID = "AC2b4884e41acc8b8ed9f7ee795969d76";
+const AccountSID = "AC2b4884e41acc8b8ed9f7ee795969d76b";
 import * as Video from 'twilio-video';
 
 //NOTE createLocalAudioTrack returns a LocalAudioTrack object that contains a MediaStreamTrack
@@ -24,8 +24,8 @@ export async function connectRoom(clientId,roomId){
   console.log("Twilio Connect Room");
   const { connect, createLocalVideoTrack, Logger } = require('twilio-video');
   // Join to the Room with the given AccessToken and ConnectOptions.
-  const roomName = "test2";//this._roomId
-  const apiUrl = "https://alphahub.aptero.co/service/twilio/token";
+  const roomName = roomId;
+  const apiUrl = configs.APP_CONFIG.adapterParams.url;
   const response = await fetch(apiUrl+`?identity=${clientId}&roomName=${roomName}`);
   // Extract the AccessToken from the Response.
   const token = await response.text();
@@ -70,7 +70,7 @@ export async function fetchICEservers() {
     const myHeaders = new Headers();
     myHeaders.append(
       "Authorization",
-      "Basic U0tjYzMxZDM0N2YxOGVlYmM3MjNiMDgzNTc0ZTE2MWJjMDp6bFM1TjNmbGhWMEdOc0ZLcG1vbFBucW1TcWdMbEliNQ=="
+      "Basic "+configs.APP_CONFIG.turn.twilio.auth
     );
 
     const requestOptions = {
@@ -78,7 +78,7 @@ export async function fetchICEservers() {
       headers: myHeaders,
       redirect: "follow"
     };
-    const twilioApi = "https://api.twilio.com/2010-04-01/Accounts/"+AccountSID+"/Tokens.json";
+    const twilioApi = "https://api.twilio.com/2010-04-01/Accounts/"+configs.APP_CONFIG.turn.twilio.SID+"/Tokens.json";
     const resp = await fetch(twilioApi, requestOptions);
     const servers = await resp.json();
     window.iceServers = [...servers.ice_servers];
@@ -117,7 +117,6 @@ export function filterServer(iceServers,forceTcp){
 }
 
 export function addIceServers(iceServer) {
-  iceServer = [];
   window.iceServers.forEach(server => {
     iceServer.unshift(server);
   });
