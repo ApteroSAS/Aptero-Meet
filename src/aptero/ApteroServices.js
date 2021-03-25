@@ -7,6 +7,7 @@ import { waitForDOMContentLoaded } from "../utils/async-utils";
 
 import "./component/custom-controller-button";
 import "./component/custom-controller-ask-button";
+import "./component/rtmp-auto-refresh"
 import "./component/media-limiter";
 import { gltfExtensionProcessorService } from "./service/api/GLTFExtensionProcessorService";
 import { staticObjectManipulator } from "./service/StaticObjectManipulator";

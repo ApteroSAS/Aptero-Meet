@@ -36,11 +36,11 @@ function InvitePopoverContent({ url, shortUrl, code, embed, inviteRequired, fetc
               </>
             }
           />
-          <CopyableTextInputField
+          {/* APTERO remove <CopyableTextInputField
             label={<FormattedMessage id="invite-popover.embed-code" defaultMessage="Embed Code" />}
             value={embed}
             buttonPreset="purple"
-          />
+          />*/}
         </>
       )}
     </Column>

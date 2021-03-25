@@ -1,4 +1,5 @@
 import { customActionRegister } from "../service/api/CustomActionRegister";
+import configs from "../../utils/configs";
 
 AFRAME.registerComponent("custom-controller-action-ask", {
   schema: {
@@ -6,24 +7,23 @@ AFRAME.registerComponent("custom-controller-action-ask", {
     triggerId: { type: "string" }
   },
 
-  applyPerm(){
-    this.el.object3D.visible = false; // TODO fix this feature
-    let authorizationData = customActionRegister.triggers[this.data.triggerId].authorization;
-    if(authorizationData.permission && window.APP.hubChannel.can(authorizationData.permission)){
-      this.el.object3D.visible.true;
+  applyPerm(object3D, data) {
+    object3D.visible = false;
+    let authorizationData = customActionRegister.triggers[data.triggerId].authorization;
+    if (configs.isAdmin()) {
+      object3D.visible = true;
     }
-    if(authorizationData.emails){
+    if (authorizationData.permission && window.APP.hubChannel.can(authorizationData.permission)) {
+      object3D.visible = true;
+    }
+    if (authorizationData.emails) {
       let ownerEmail = window.APP.hubChannel.store.state.credentials.email;
-      authorizationData.emails.split(",").forEach((email)=>{
-        if(ownerEmail ===email){
-          this.el.object3D.visible.true;
+      authorizationData.emails.split(",").forEach((email) => {
+        if (ownerEmail === email) {
+          object3D.visible = true;
         }
       });
     }
-    //account number
-    //permission
-    //hubchannel
-
   },
 
   init() {
@@ -39,16 +39,16 @@ AFRAME.registerComponent("custom-controller-action-ask", {
       this._updateUI();
     };
     let triggerData = customActionRegister.triggers[this.data.triggerId];
-    if(triggerData.authorization){
-      window.APP.hubChannel.addEventListener("permissions_updated", ()=>{
-        this.applyPerm();
+    if (triggerData.authorization) {
+      window.APP.hubChannel.addEventListener("permissions_updated", () => {
+        this.applyPerm(this.el.object3D, this.data);
       });
-      this.applyPerm();
+      this.applyPerm(this.el.object3D, this.data);
     }
 
     this.onClick = () => {
       try {
-        window.APP.mediaSearchStore.sourceNavigateWithResult( "videos2d").then(entry => {
+        window.APP.mediaSearchStore.sourceNavigateWithResult("videos2d").then(entry => {
           if (this.data.actionIds) {
             this.data.actionIds.split("+").forEach(id => {
               customActionRegister.triggerAction(id, entry);

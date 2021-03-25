@@ -1,9 +1,29 @@
 import { customActionRegister } from "../service/api/CustomActionRegister";
+import configs from "../../utils/configs";
 
 AFRAME.registerComponent("custom-controller-action", {
   schema: {
     actionIds: { type: "string" },
     triggerId: { type: "string" }
+  },
+
+  applyPerm(object3D, data) {
+    object3D.visible = false;
+    let authorizationData = customActionRegister.triggers[data.triggerId].authorization;
+    if (configs.isAdmin()) {
+      object3D.visible = true;
+    }
+    if (authorizationData.permission && window.APP.hubChannel.can(authorizationData.permission)) {
+      object3D.visible = true;
+    }
+    if (authorizationData.emails) {
+      let ownerEmail = window.APP.hubChannel.store.state.credentials.email;
+      authorizationData.emails.split(",").forEach((email) => {
+        if (ownerEmail === email) {
+          object3D.visible = true;
+        }
+      });
+    }
   },
 
   init() {
@@ -18,14 +38,23 @@ AFRAME.registerComponent("custom-controller-action", {
       this.hovering = false;
       this._updateUI();
     };
+
+    let triggerData = customActionRegister.triggers[this.data.triggerId];
+    if (triggerData.authorization) {
+      window.APP.hubChannel.addEventListener("permissions_updated", () => {
+        this.applyPerm(this.el.object3D, this.data);
+      });
+      this.applyPerm(this.el.object3D, this.data);
+    }
+
     this.onClick = () => {
       try {
         if (this.data.actionIds) {
           this.data.actionIds.split("+").forEach(id => {
-            customActionRegister.triggerAction(id,null);
+            customActionRegister.triggerAction(id, null);
           });
         }
-      }catch(ex){
+      } catch (ex) {
         console.error(ex);
       }
     };

@@ -239,19 +239,24 @@ export default class MediaSearchStore extends EventTarget {
 
   //aptero TODO put in service
   resultAwaited = false;
+  lastAction = () => {
+  };
+
   async sourceNavigateWithResult(source) {
-    return new Promise((resolve,reject) => {
+    return new Promise((resolve, reject) => {
       this.resultAwaited = true;
       this._sourceNavigate(source, true, false, "result");
-      this.eventEmitter.once("action_selected_media_result_entry", (data) => {
-        if(data.result === "cancel"){
+      this.eventEmitter.removeListener("action_selected_media_result_entry", this.lastAction);
+      this.lastAction = (data) => {
+        if (data.result === "cancel") {
           this.resultAwaited = false;
           reject("cancel");
-        }else {
+        } else {
           this.resultAwaited = false;
           resolve(data.entry);
         }
-      });
+      };
+      this.eventEmitter.once("action_selected_media_result_entry", this.lastAction);
     });
   }
 
@@ -335,9 +340,9 @@ export default class MediaSearchStore extends EventTarget {
     const { pathname } = history.location;
     const hasMediaPath = sluglessPath(history.location).startsWith("/media");
     pushHistoryPath(
-      history,
-      hasMediaPath ? withSlug(history.location, "/") : pathname,
-      this.getSearchClearedSearchParams(history.location).toString()
+        history,
+        hasMediaPath ? withSlug(history.location, "/") : pathname,
+        this.getSearchClearedSearchParams(history.location).toString()
     );
     this.dispatchEvent(new CustomEvent("media-exit"));
   };
