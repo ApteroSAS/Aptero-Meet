@@ -1,9 +1,9 @@
 import jwtDecode from "jwt-decode";
 import { EventTarget } from "event-target-shim";
-import { Presence } from "phoenix";
 import { migrateChannelToSocket, discordBridgesForPresences } from "./phoenix-utils";
 import configs from "./configs";
 import { roomParameters } from "../aptero/service/RoomParameters";
+import { Presence } from "../aptero/util/Presence";
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 const MS_PER_MONTH = 1000 * 60 * 60 * 24 * 30;
