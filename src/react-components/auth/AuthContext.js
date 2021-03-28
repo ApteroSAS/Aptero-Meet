@@ -33,6 +33,13 @@ async function checkIsAdmin(socket, store) {
       })
       .receive("error", error => {
         console.error("Error joining Phoenix Channel", error);
+        if(error.reason === "invalid_token") {
+          //Aptero in case we change the jwt key
+          window.APP.store.update({ credentials: { token: null, email: null } });
+          setTimeout(()=>{
+            window.location.reload();
+          },2000);
+        }
       })
       .receive("timeout", () => {
         console.error("Phoenix Channel join timed out");
