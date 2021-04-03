@@ -70,14 +70,14 @@ module.exports = (env, argv) => {
       RETICULUM_SOCKET_SERVER: "hubs.local",
       CORS_PROXY_SERVER: "hubs-proxy.local:4000",
       NON_CORS_PROXY_DOMAINS: "hubs.local,dev.reticulum.io",
-      BASE_ASSETS_PATH: "https://hubs.local:8989/",
+      BASE_ASSETS_PATH: "https://hubs.local:8080/",
       RETICULUM_SERVER: "hubs.local:4000",
       POSTGREST_SERVER: "",
       ITA_SERVER: ""
     });
   }
 
-  const defaultHostName = "hubs.local";
+  const defaultHostName = "localhost";
   const host = process.env.HOST_IP || defaultHostName;
 
   // Remove comments from .babelrc
@@ -103,8 +103,8 @@ module.exports = (env, argv) => {
     devServer: {
       https: createHTTPSConfig(),
       host: process.env.HOST_IP || "0.0.0.0",
-      port: process.env.PORT || "8989",
-      public: `${host}:${process.env.PORT || "8989"}`,
+      port: process.env.PORT || "8080",
+      public: `${host}:${process.env.PORT || "8080"}`,
       useLocalIp: true,
       allowedHosts: [host],
       headers: {
@@ -198,6 +198,10 @@ module.exports = (env, argv) => {
           }
         }
       ]
+    },
+    optimization: {
+      // We no not want to minimize our code. //TODO activate for prod => minimize: true
+      minimize: false
     },
     plugins: [
       new HTMLWebpackPlugin({

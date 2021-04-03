@@ -9,6 +9,7 @@
     "url": "https://github.com/mozilla/hubs.git"
   },
   "scripts": {
+    "start": "webpack-dev-server --mode=development",
     "dev": "webpack-dev-server --mode=development --env.dev",
     "build": "rimraf ./dist && webpack --mode=production",
     "prettier": "prettier --write '*.js' 'src/**/*.js'",

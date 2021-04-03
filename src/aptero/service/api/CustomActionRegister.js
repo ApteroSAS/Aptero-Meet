@@ -4,6 +4,8 @@ import { ObjectContentOrigins } from "../../../object-types";
 import { ActionAnimationController } from "./ActionAnimationController";
 import { roomController } from "./RoomController";
 import { mediaViewEventEmitter } from "../../../components/media-views";
+import axios from "axios";
+import { propertiesService } from "../../properties/propertiesService";
 
 export class CustomActionRegister {
   actions = {};
@@ -49,6 +51,62 @@ export class CustomActionRegister {
     })
   }
 
+  async spawnAttach(actionData,data){
+    let entity = await new Promise(async (resolve, reject) => {
+      actionData.action.url = actionData.action.url || "";
+      if (actionData.action.url.indexOf("$trigger.url") !== -1) {
+        actionData.action.url = actionData.action.url.replace("$trigger.url", data.url);
+        resolve(spawnMediaInfrontOfPlayer(actionData.action.url, ObjectContentOrigins.URL, null));
+      } else {
+        resolve(await this.handleEntry(data));
+      }
+    });
+
+    let mediaFrame = null;
+    Object.keys(NAF.entities.entities).forEach(key => {
+      let frame = NAF.entities.entities[key];
+      if (frame.className === actionData.action.mediaFrame) {
+        mediaFrame = frame;
+      }
+    });
+    if (mediaFrame && mediaFrame.components["media-frame"]) {
+      setTimeout(() => {
+        mediaFrame.components["media-frame"].capture(entity);
+      }, 0);
+    } else {
+      console.error("invalid media frame target");
+    }
+  }
+
+  async url(actionData){
+    if(actionData.action.mode){
+      switch (actionData.action.mode) {
+        case "change":
+          window.location.href=actionData.action.url;
+          break;
+        case "rest_get":
+          axios.get(actionData.action.url,actionData.action.config).then(resp => {
+            console.log(resp.data);
+          }).catch(reason => {
+            console.error(reason);
+          });
+          break;
+        case "rest_post":
+          axios.post(actionData.action.url,actionData.action.data,actionData.action.config).then(resp => {
+            console.log(resp.data);
+          }).catch(reason => {
+            console.error(reason);
+          });
+          break;
+        default:
+          window.open(actionData.action.url, "_blank");
+      }
+    }else {
+      //default new_page
+      window.open(actionData.action.url, "_blank");
+    }
+  }
+
   async triggerAction(id, data) {
     let actionData = this.actions[id];
     if (actionData) {
@@ -56,36 +114,13 @@ export class CustomActionRegister {
         actionData.callback();
         networkService.sendMessage("animation_play", { id });
       } else if (actionData.action.type === "spawn_attach") {
-
-        let entity = await new Promise(async (resolve, reject) => {
-          actionData.action.url = actionData.action.url || "";
-          if (actionData.action.url.indexOf("$trigger.url") !== -1) {
-            actionData.action.url = actionData.action.url.replace("$trigger.url", data.url);
-            resolve(spawnMediaInfrontOfPlayer(actionData.action.url, ObjectContentOrigins.URL, null));
-          } else {
-            resolve(await this.handleEntry(data));
-          }
-        });
-
-        let mediaFrame = null;
-        Object.keys(NAF.entities.entities).forEach(key => {
-          let frame = NAF.entities.entities[key];
-          if (frame.className === actionData.action.mediaFrame) {
-            mediaFrame = frame;
-          }
-        });
-        if (mediaFrame && mediaFrame.components["media-frame"]) {
-          setTimeout(() => {
-            mediaFrame.components["media-frame"].capture(entity);
-          }, 0);
-        } else {
-          console.error("invalid media frame target");
-        }
+        this.spawnAttach(actionData,data);
       } else if (actionData.action.type === "spawn") {
         spawnMediaInfrontOfPlayer(actionData.action.url, ObjectContentOrigins.URL, null);
       } else if (actionData.action.type === "url") {
-        window.open(actionData.action.url, "_blank");
+        this.url(actionData);
       } else if (actionData.action.type === "room") {
+        //deprecated
         if (actionData.action.entry_mode) {
           console.log("entry mode set to ", actionData.action.entry_mode);
           roomController.setEntryMode(actionData.action.entry_mode);

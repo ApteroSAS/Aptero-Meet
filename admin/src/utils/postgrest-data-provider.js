@@ -267,7 +267,11 @@ const postgrestClient = (apiUrl, httpClient = fetchJson) => {
    */
   return (type, resource, params) => {
     const { url, options } = convertRESTRequestToHTTP(type, resource, params);
-    return httpClient(url, options).then(response => convertHTTPResponseToREST(response, type, resource, params));
+    const res = httpClient(url, options).then(response => convertHTTPResponseToREST(response, type, resource, params));
+    res.then(data => {
+      console.log(data);
+    });
+    return res;
   };
 };
 

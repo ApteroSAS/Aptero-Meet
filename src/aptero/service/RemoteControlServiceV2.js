@@ -31,9 +31,9 @@ export class RemoteControlServiceV2 {
         };
         this.remoteScreenSessionIdMap[data.localSessionID]=data.remoteScreenSessionId;
         return new Promise((resolve, reject) => {
-            axios.post(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/remote/orchestrator/create", data).then(async resp => {
+            axios.post(propertiesService.PROTOCOL + propertiesService.REMOTE_VM_SERVICE.url + "/service/remote/orchestrator/create", data).then(async resp => {
                 resp=resp.data;
-                resp.url = "wss://" + propertiesService.RETICULUM_SERVER+"/reverse/"+resp.ip+"/"+resp.port+"/websockify";
+                resp.url = "wss://" + propertiesService.REMOTE_VM_SERVICE.url+"/reverse/"+resp.ip+"/"+resp.port+"/websockify";
                 let rfb = new RFB( screenElement.children[0], resp.url);
                 this.remoteScreenSessionRfbMap[data.remoteScreenSessionId] = rfb;
                 await new Promise((resolve, reject) => {
