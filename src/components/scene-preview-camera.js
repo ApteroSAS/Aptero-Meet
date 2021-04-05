@@ -99,10 +99,12 @@ AFRAME.registerComponent("scene-preview-camera", {
   },
 
   remove: function() {
-    const systems = AFRAME.scenes[0].systems["hubs-systems"] || AFRAME.scenes[0].systems["scene-systems"];
+    if(AFRAME.scenes[0]) {
+      const systems = AFRAME.scenes[0].systems["hubs-systems"] || AFRAME.scenes[0].systems["scene-systems"];
 
-    if (systems) {
-      systems.scenePreviewCameraSystem.unregister(this.el);
+      if (systems) {
+        systems.scenePreviewCameraSystem.unregister(this.el);
+      }
     }
   }
 });

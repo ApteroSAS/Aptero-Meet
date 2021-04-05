@@ -2,8 +2,10 @@ const tempVector3 = new THREE.Vector3();
 const tempQuaternion = new THREE.Quaternion();
 
 export function getLastWorldPosition(src, target) {
-  src.updateMatrices();
-  target.setFromMatrixPosition(src.matrixWorld);
+  if(src) {
+    src.updateMatrices();
+    target.setFromMatrixPosition(src.matrixWorld);
+  }
   return target;
 }
 

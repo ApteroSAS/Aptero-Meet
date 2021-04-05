@@ -1,8 +1,5 @@
 import { networkService } from "./NetworkService";
 import { waitForDOMContentLoaded } from "../../utils/async-utils";
-import { addMediaAndSetTransform } from "../util/Media";
-import { Vector3 } from "three";
-
 
 const floatEqual = (a, b, ep) => {
   if (a === b) {
@@ -23,12 +20,15 @@ export class StaticObjectManipulator {
   deactivatedEntity = {};
   LastDeactivatedEntitySend = null;
   staticEntities = {};
+  deactivated = false;//TODO deactive
 
   constructor() {
   }
 
   start() {
-
+    if(this.deactivated){
+      return;
+    }
     networkService.eventEmitter.once("adapter_ready", () => {
       //When the network is ready on our side we store the static media
       const entKeys = Object.keys(NAF.entities.entities);
@@ -97,6 +97,7 @@ export class StaticObjectManipulator {
   markInvisible(netID) {
     const ent = NAF.entities.entities[netID];
     if (!ent) return;
+    if(ent.components["media-frame"]) return;
     this.deactivatedEntity[netID] = netID;
     ent.object3D.visible = false;
     console.info("deactivate : " + netID);
@@ -186,7 +187,7 @@ export class StaticObjectManipulator {
   }
 
   storeStaticMedia(key, entity) {
-    if (this.isStaticMedia(key) && entity.components["media-loader"]) {
+    if (this.isStaticMedia(key) && entity.components["media-loader"] && !entity.components["media-frame"]) {
       this.staticEntities[key] = {
         entity: entity,
         position: {

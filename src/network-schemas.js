@@ -1,3 +1,5 @@
+import { getMediaVideoComponent } from "./aptero/util/network-schemas-lib";
+
 function registerNetworkSchemas() {
   const vectorRequiresUpdate = epsilon => {
     return () => {
@@ -84,7 +86,7 @@ function registerNetworkSchemas() {
 
   NAF.schemas.add({
     template: "#interactable-media",
-    components: [
+    components: [...getMediaVideoComponent(),
       {
         component: "position",
         requiresNetworkUpdate: vectorRequiresUpdate(0.001)
@@ -113,7 +115,7 @@ function registerNetworkSchemas() {
       },
       "pinnable"
     ],
-    nonAuthorizedComponents: [
+    nonAuthorizedcomponents: [...getMediaVideoComponent(),
       {
         component: "media-video",
         property: "time"
@@ -174,12 +176,12 @@ function registerNetworkSchemas() {
       }
     ],
     // TODO we probably want media frames to support permissioning of some form
-    nonAuthorizedComponents: ["media-frame"]
+    nonAuthorizedcomponents: ["media-frame"]
   });
 
   NAF.schemas.add({
     template: "#static-media",
-    components: [
+    components: [...getMediaVideoComponent(),
       // TODO: Optimize checking mediaOptions with requiresNetworkUpdate.
       "media-loader",
       {
@@ -187,7 +189,7 @@ function registerNetworkSchemas() {
         property: "time"
       }
     ],
-    nonAuthorizedComponents: [
+    nonAuthorizedcomponents: [...getMediaVideoComponent(),
       {
         component: "media-video",
         property: "time"
@@ -197,7 +199,7 @@ function registerNetworkSchemas() {
 
   NAF.schemas.add({
     template: "#static-controlled-media",
-    components: [
+    components: [...getMediaVideoComponent(),
       // TODO: Optimize checking mediaOptions with requiresNetworkUpdate.
       "media-loader",
       {
@@ -213,7 +215,7 @@ function registerNetworkSchemas() {
         property: "index"
       }
     ],
-    nonAuthorizedComponents: [
+    nonAuthorizedcomponents: [...getMediaVideoComponent(),
       {
         component: "media-video",
         property: "time"
@@ -285,7 +287,7 @@ function registerNetworkSchemas() {
       },
       "waypoint"
     ],
-    nonAuthorizedComponents: [
+    nonAuthorizedcomponents: [
       {
         component: "position",
         requiresNetworkUpdate: vectorRequiresUpdate(0.001)

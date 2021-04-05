@@ -94,7 +94,7 @@ export class MediaFramesSystem {
           }
         } else {
           // captured object was removed
-          frame.release();
+          //frame.release(); // Aptero modification
         }
       }
     }
@@ -200,7 +200,7 @@ AFRAME.registerComponent("media-frame", {
     }
 
     // Ownership race, whoever owns the old object needs to take care of "ejecting" it
-    if (oldData.targetId !== "empty" && oldData.tergetId !== this.data.targetId) {
+    if (oldData.targetId !== "empty" && oldData.targetId !== this.data.targetId) {
       const capturedEl = document.getElementById(oldData.targetId);
       if (capturedEl && NAF.utils.isMine(capturedEl)) {
         capturedEl.object3D.translateZ(this.data.bounds.z);

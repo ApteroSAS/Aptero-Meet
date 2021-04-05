@@ -13,6 +13,7 @@ AFRAME.registerComponent("rtmp-auto-refresh", {
         if (c["media-video"] && c["media-video"].videoTexture && c["media-video"].videoTexture.hls) {
           const hls = c["media-video"].videoTexture.hls;
           if(hls!==this.lastHls) {
+            console.log("RTMP setup hls listener")
             this.lastHls = hls;
             if(this.errCallback) {
               this.lastHls.off("hlsError", this.errCallback);
@@ -54,20 +55,20 @@ AFRAME.registerComponent("rtmp-auto-refresh", {
             /*nothing*/
           }
         } else if (c["media-loader"]) {
+          console.log("RTMP update 1")
           // Otherwise fall back to hard resolve-level refresh which should work for any media
-          fetch(c["media-loader"].data.src)
-              .then(() => {
+          fetch(c["media-loader"].data.src).then(() => {
                 c["media-loader"].update(c["media-loader"].data, true);
               })
               .catch(() => {/*ignore*/});
         }
       }else{
-        const c = this.el.components;
-        c["media-loader"].refresh();
+        console.log("RTMP grab network");
+        //const c = this.el.components;
+        //c["media-loader"].refresh();
         NAF.utils
             .getNetworkedEntity(this.el)
-            .then(networkedEl => (this.targetEl = networkedEl))
-            .catch(() => this.el.parentNode.removeChild(this.el));
+            .then(networkedEl => (this.targetEl = networkedEl));
       }
     }, 4000);
   },
