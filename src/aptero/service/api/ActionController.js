@@ -48,10 +48,8 @@ export class ActionController {
     entry.triggers.forEach((trigger, index) => {
       let triggerId = networkId + "_" + meshName + "_" + masterindex + "_" + pairIndex + "_" + index;
       customActionRegister.triggers[triggerId]=trigger;
-      if (trigger.type === "btn") {
-        this.createButtonOnElement("custom-controller-action", triggerId, actionIds, element, trigger.position, trigger.rotation, trigger.text, trigger.size, trigger.textWidth, trigger.style);
-      } else if (trigger.type === "btn-ask") {
-        this.createButtonOnElement("custom-controller-action-ask", triggerId, actionIds, element, trigger.position, trigger.rotation, trigger.text, trigger.size, trigger.textWidth, trigger.style);
+      if (trigger.type === "btn" || trigger.type === "btn-ask") {
+        this.createButtonOnElement(trigger.type, triggerId, actionIds, element, trigger.position, trigger.rotation, trigger.text, trigger.size, trigger.textWidth, trigger.style);
       } else {
         throw new Error("invalid btn type");
       }
@@ -72,7 +70,7 @@ export class ActionController {
         //"       mixin=\"rounded-text-action-button\"\n" +
         "       mixin=\"" + (style || "rounded-button") + "\"\n" +
         "       is-remote-hover-target\n" +
-        "       " + type + "=\"actionIds:" + actionsIds.join("+") + ";triggerId:" + triggerId + "\"\n" +
+        "       custom-controller-action=\"actionIds:" + actionsIds.join("+") + ";triggerId:" + triggerId + ";type:" + type + "\"\n" +
         "       tags=\"singleActionButton:true\"\n" +
         "       scale=\"" + (size || "1") + " " + (size || "1") + " " + (size || "1") + "\" \n" +
         "       rotation=\"" + (rotationDeg ? (rotationDeg.x + " " + rotationDeg.y + " " + rotationDeg.z) : "0 0 0") + "\"\n" +

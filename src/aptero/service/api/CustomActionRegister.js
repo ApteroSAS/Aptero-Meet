@@ -205,7 +205,7 @@ export class CustomActionRegister {
           mediaFrame = frame;
         }
       });
-      if (mediaFrame) {
+      /*if (mediaFrame) {
         NAF.utils.getNetworkedEntity(mediaFrame).then(async networkedEl => {
           if (!NAF.utils.isMine(networkedEl)) {
             NAF.utils.takeOwnership(networkedEl);
@@ -214,7 +214,8 @@ export class CustomActionRegister {
         });
       } else {
         resolve(mediaFrame);
-      }
+      }*/
+      resolve(mediaFrame);
     });
   }
 
@@ -278,12 +279,12 @@ export class CustomActionRegister {
         networkService.sendMessage("animation_play", { id });
       } else if (actionData.action.type === "spawn_attach") {
         let entry = this.convertToEntry(id, data);
-        this.spawnAttach(actionData, entry);
+        await this.spawnAttach(actionData, entry);
       } else if (actionData.action.type === "remove_from_media_frame") {
-        this.removeFromMediaFrame(actionData);
+        await this.removeFromMediaFrame(actionData);
       } else if (actionData.action.type === "spawn") {
         let entry = this.convertToEntry(id, data);
-        this.handleEntry(entry);
+        await this.handleEntry(entry);
       } else if (actionData.action.type === "url") {
         this.url(actionData);
       } else if (actionData.action.type === "room") {

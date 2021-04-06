@@ -4,7 +4,8 @@ import configs from "../../utils/configs";
 AFRAME.registerComponent("custom-controller-action", {
   schema: {
     actionIds: { type: "string" },
-    triggerId: { type: "string" }
+    triggerId: { type: "string" },
+    type: { type: "string" }
   },
 
   applyPerm(object3D, data) {
@@ -46,16 +47,29 @@ AFRAME.registerComponent("custom-controller-action", {
       });
       this.applyPerm(this.el.object3D, this.data);
     }
-
-    this.onClick = () => {
-      try {
-        if (this.data.actionIds) {
-          this.data.actionIds.split("+").forEach(id => {
-            customActionRegister.triggerAction(id, null);
+    this.clickWIP = false;
+    this.onClick = async () => {
+      if (!this.clickWIP) {
+        this.clickWIP = true;
+        try {
+          let entry = null;
+          if (this.data.type === "btn-ask") {
+            entry = await window.APP.mediaSearchStore.sourceNavigateWithResult("videos2d");
+          }
+          if (this.data.actionIds) {
+            let ids = this.data.actionIds.split("+");
+            for (const id of ids) {
+              await customActionRegister.triggerAction(id, entry);
+            }
+          }
+          await new Promise(resolve => {
+            setTimeout(resolve,600);//prevent spam click
           });
+          this.clickWIP = false;
+        } catch (ex) {
+          this.clickWIP = false;
+          console.error(ex);
         }
-      } catch (ex) {
-        console.error(ex);
       }
     };
   },

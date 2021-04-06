@@ -244,19 +244,23 @@ export default class MediaSearchStore extends EventTarget {
 
   async sourceNavigateWithResult(source) {
     return new Promise((resolve, reject) => {
-      this.resultAwaited = true;
-      this._sourceNavigate(source, true, false, "result");
-      this.eventEmitter.removeListener("action_selected_media_result_entry", this.lastAction);
-      this.lastAction = (data) => {
-        if (data.result === "cancel") {
-          this.resultAwaited = false;
-          reject("cancel");
-        } else {
-          this.resultAwaited = false;
-          resolve(data.entry);
-        }
-      };
-      this.eventEmitter.once("action_selected_media_result_entry", this.lastAction);
+      if(!this.resultAwaited) {
+        this.resultAwaited = true;
+        this._sourceNavigate(source, true, false, "result");
+        this.eventEmitter.removeListener("action_selected_media_result_entry", this.lastAction);
+        this.lastAction = (data) => {
+          if (data.result === "cancel") {
+            this.resultAwaited = false;
+            reject("cancel");
+          } else {
+            this.resultAwaited = false;
+            resolve(data.entry);
+          }
+        };
+        this.eventEmitter.once("action_selected_media_result_entry", this.lastAction);
+      }else{
+        reject("selection in progress");
+      }
     });
   }
 
