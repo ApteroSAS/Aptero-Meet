@@ -318,8 +318,7 @@ export default class SceneEntryManager {
       if(this.mediaSearchStore.resultAwaited) {
         let entry = { url: e.detail, contentOrigin};
         let selectAction = "result";
-        this.scene.emit("action_selected_media_result_entry", { entry, selectAction })
-        this.mediaSearchStore.eventEmitter.emit("action_selected_media_result_entry", { entry, selectAction });
+        this.scene.emit("action_selected_media_result_entry", { entry, selectAction });
         return;
       }
       spawnMediaInfrontOfPlayer(e.detail, contentOrigin);

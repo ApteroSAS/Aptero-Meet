@@ -529,6 +529,8 @@ AFRAME.registerComponent("media-video", {
       return;
     }
 
+    /*
+    TODO aptero removed because it seems strange
     const disablePositionalAudio = window.getPreferences("audioOutputMode") === "audio";
     const shouldSetPositionalAudioProperties =
       this.audio && this.data.audioType === "pannernode" && !disablePositionalAudio;
@@ -536,6 +538,7 @@ AFRAME.registerComponent("media-video", {
       this.setPositionalAudioProperties();
       return;
     }
+    */
   },
 
   setupAudio() {

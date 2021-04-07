@@ -1,6 +1,9 @@
 export function getMediaVideoComponent() {
-  return [
-      {
+  return [/*{
+    component: "media-loader",
+    property: "mediaOptions"
+  },*/
+    /*  {
       component: "media-video",
       property: "distanceModel"
     }, {
@@ -21,6 +24,6 @@ export function getMediaVideoComponent() {
     }, {
       component: "media-video",
       property: "coneOuterGain"
-    }
+    }*/
   ];
 }

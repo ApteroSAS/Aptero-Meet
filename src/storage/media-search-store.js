@@ -4,8 +4,6 @@ import { getReticulumFetchUrl, fetchReticulumAuthenticated, hasReticulumServer }
 import { pushHistoryPath, sluglessPath, withSlug } from "../utils/history";
 import { processResponse } from "../aptero/service/EntryAPI";
 
-const EventEmitter = require("eventemitter3");
-
 const EMPTY_RESULT = { entries: [], meta: {} };
 
 const URL_SOURCE_TO_TO_API_SOURCE = {
@@ -47,8 +45,6 @@ const SEARCH_CONTEXT_PARAMS = ["q", "filter", "cursor", "similar_to"];
 // This class is responsible for fetching and storing media search results and provides a
 // convenience API for performing history updates relevant to search navigation.
 export default class MediaSearchStore extends EventTarget {
-  eventEmitter = new EventEmitter();
-
   constructor() {
     super();
 
@@ -238,29 +234,28 @@ export default class MediaSearchStore extends EventTarget {
   };
 
   //aptero TODO put in service
-  resultAwaited = false;
+  resultAwaited = false;//used externaly as information
   lastAction = () => {
   };
 
   async sourceNavigateWithResult(source) {
     return new Promise((resolve, reject) => {
-      if(!this.resultAwaited) {
-        this.resultAwaited = true;
-        this._sourceNavigate(source, true, false, "result");
-        this.eventEmitter.removeListener("action_selected_media_result_entry", this.lastAction);
-        this.lastAction = (data) => {
-          if (data.result === "cancel") {
+      this.lastAction({detail:{ result: "cancel" }});
+      this.resultAwaited = true;
+      const sceneEl = AFRAME.scenes[0];
+      sceneEl.removeEventListener("action_selected_media_result_entry", this.lastAction);
+      this._sourceNavigate(source, true, false, "result");
+      this.lastAction = (data) => {
+        data = data.detail;
+        if (data.result === "cancel") {
             this.resultAwaited = false;
-            reject("cancel");
-          } else {
+          reject("cancel");
+        } else {
             this.resultAwaited = false;
-            resolve(data.entry);
-          }
-        };
-        this.eventEmitter.once("action_selected_media_result_entry", this.lastAction);
-      }else{
-        reject("selection in progress");
-      }
+          resolve(data.entry);
+        }
+      };
+      sceneEl.addEventListener("action_selected_media_result_entry", this.lastAction,{once:true});
     });
   }
 

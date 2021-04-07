@@ -344,7 +344,7 @@ function setupPeerConnectionConfig(adapter) {
   if(adapter.setTurnConfig){
     adapter.setTurnConfig(forceTcp, forceTurn);
   }
-  configureTurn(forceTcp, forceTurn,adapter);
+  configureTurn(forceTurn,forceTcp,adapter);
 }
 
 async function updateEnvironmentForHub(hub, entryManager) {
@@ -515,7 +515,6 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
     //aptero modification
     onMediaSearchResultEntrySelected: (entry, selectAction) => {
       scene.emit("action_selected_media_result_entry", { entry, selectAction })
-      mediaSearchStore.eventEmitter.emit("action_selected_media_result_entry", { entry, selectAction });
     },
     onMediaSearchCancelled: entry => scene.emit("action_media_search_cancelled", entry),
     onAvatarSaved: entry => scene.emit("action_avatar_saved", entry),

@@ -26,11 +26,11 @@ export class CustomActionRegister {
     this.actions[actionid] = { action: action };
   }
 
-  async handleEntry(entry) {
+  async handleEntry(entry, mediaOptions = null) {
     return new Promise((resolve, reject) => {
       if (entry.camera || entry.shareScreen) {
         mediaViewEventEmitter.once("share_video_media_stream_created", (data) => {
-          let entity = spawnMediaInfrontOfPlayer(data.src, ObjectContentOrigins.URL, null);
+          let entity = spawnMediaInfrontOfPlayer(data.src, ObjectContentOrigins.URL, mediaOptions);
           let pool = () => {
             if (!(entity.object3D && entity.getObject3D("mesh"))) {
               setTimeout(pool, 500);
@@ -46,12 +46,12 @@ export class CustomActionRegister {
           setTimeout(pool, 500);
         });
       } else {
-        resolve(spawnMediaInfrontOfPlayer(entry.url, entry.contentOrigin, null));
+        resolve(spawnMediaInfrontOfPlayer(entry.url, entry.contentOrigin, mediaOptions));
       }
     });
   }
 
-  async applyAudio(entity, actionData) {
+  /*async applyAudio(entity, actionData) {
     entity.addEventListener("media-loaded", () => {
       let mediaVideo = entity.components["media-video"];
       if (mediaVideo && actionData.action.audio) {
@@ -79,6 +79,22 @@ export class CustomActionRegister {
         applyPersistentSync(entity.components["networked"].data.networkId);
       }
     }, { once: true });
+  }*/
+
+  getMediaOptionSetting(actionData) {
+    if(actionData && actionData.action && actionData.action.audio) {
+      return {
+        distanceModel: actionData.action.audio.distanceModel,
+        rolloffFactor: actionData.action.audio.rolloffFactor,
+        refDistance: actionData.action.audio.refDistance,
+        maxDistance: actionData.action.audio.maxDistance,
+        coneInnerAngle: actionData.action.audio.coneInnerAngle,
+        coneOuterAngle: actionData.action.audio.coneOuterAngle,
+        coneOuterGain: actionData.action.audio.coneOuterGain
+      };
+    }else{
+      return null;
+    }
   }
 
   async convertToNetEntity(entity) {
@@ -113,9 +129,9 @@ export class CustomActionRegister {
     if (mediaFrame && mediaFrame.components["media-frame"]) {
       await this.removeOldMediaFrameEntity(mediaFrame);
       let entity = await new Promise(async (resolve, reject) => {
-        let entity = await this.handleEntry(entry);
+        let entity = await this.handleEntry(entry,this.getMediaOptionSetting(actionData) );
 
-        this.applyAudio(entity, actionData);
+        //this.applyAudio(entity, actionData);
         resolve(await this.convertToNetEntity(entity));
       });
       this.onReady(entity, async () => {
@@ -155,7 +171,7 @@ export class CustomActionRegister {
               NAF.utils.takeOwnership(networkedEl);
             }
             //unpin
-            if(!capturedEl.components["media-video"].data.src.startsWith("hubs://")) {
+            if (!capturedEl.components["media-video"].data.src.startsWith("hubs://")) {
               await unpinEntity(networkedEl);
             }
             //start remove animation
@@ -284,7 +300,7 @@ export class CustomActionRegister {
         await this.removeFromMediaFrame(actionData);
       } else if (actionData.action.type === "spawn") {
         let entry = this.convertToEntry(id, data);
-        await this.handleEntry(entry);
+        await this.handleEntry(entry,this.getMediaOptionSetting(actionData));
       } else if (actionData.action.type === "url") {
         this.url(actionData);
       } else if (actionData.action.type === "room") {
