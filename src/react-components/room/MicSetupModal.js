@@ -14,6 +14,7 @@ import { ToggleInput } from "../input/ToggleInput";
 import { ToolbarButton } from "../input/ToolbarButton";
 import { Column } from "../layout/Column";
 import { FormattedMessage } from "react-intl";
+import { minimumQualityService } from "../../aptero/service/MinimumQualityService";
 
 const micButtonDiameter = 96;
 
@@ -121,10 +122,14 @@ export function MicSetupModal({
             <ToggleInput
               label={<FormattedMessage id="mic-setup-modal.mute-mic-toggle" defaultMessage="Mute My Microphone" />}
               checked={microphoneMuted}
-              onChange={onChangeMicrophoneMuted}
+              onChange={()=>{
+                onChangeMicrophoneMuted();
+                minimumQualityService.notifyMicChanged();
+              }}
             />
           </>
         )}
+
         <Button preset="green" onClick={onEnterRoom}>
           <FormattedMessage id="mic-setup-modal.enter-room-button" defaultMessage="Enter Room" />
         </Button>

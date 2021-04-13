@@ -47,6 +47,7 @@ import { ToolbarButton } from "./input/ToolbarButton";
 import { RoomEntryModal } from "./room/RoomEntryModal";
 import { EnterOnDeviceModal } from "./room/EnterOnDeviceModal";
 import { MicPermissionsModal } from "./room/MicPermissionsModal";
+import { FallbackModal } from "../aptero/react-components/FallbackModal";
 import { MicSetupModalContainer } from "./room/MicSetupModalContainer";
 import { InvitePopoverContainer } from "./room/InvitePopoverContainer";
 import { MoreMenuPopoverButton, CompactMoreMenuButton, MoreMenuContextProvider } from "./room/MoreMenuPopover";
@@ -94,6 +95,7 @@ import { TweetModalContainer } from "./room/TweetModalContainer";
 import { TipContainer, FullscreenTip } from "./room/TipContainer";
 import { SpectatingLabel } from "./room/SpectatingLabel";
 import { SignInMessages } from "./auth/SignInModal";
+import { minimumQualityService } from "../aptero/service/MinimumQualityService";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -880,7 +882,14 @@ class UIRoot extends Component {
         microphoneEnabled={!!this.mediaDevicesManager.audioTrack}
         microphoneMuted={muteOnEntry}
         onChangeMicrophoneMuted={() => this.props.store.update({ preferences: { muteMicOnEntry: !muteOnEntry } })}
-        onEnterRoom={this.onAudioReadyButton}
+        onEnterRoom={() => {
+            if (minimumQualityService.getErrorDetected()) {
+              this.pushHistoryState("entry_step", "fallback");
+            } else {
+              this.onAudioReadyButton()
+            }
+          }
+        }
         onBack={() => this.props.history.goBack()}
       />
     );
@@ -1025,6 +1034,10 @@ class UIRoot extends Component {
           </StateRoute>
           <StateRoute stateKey="entry_step" stateValue="mic_grant" history={this.props.history}>
             <MicPermissionsModal onBack={() => this.props.history.goBack()} />
+          </StateRoute>
+          <StateRoute stateKey="entry_step" stateValue="fallback" history={this.props.history}>
+            {/*aptero*/}
+            <FallbackModal onBack={() => this.props.history.goBack()} onEnterRoom={()=> {this.onAudioReadyButton()} }/>
           </StateRoute>
           <StateRoute stateKey="entry_step" stateValue="audio" history={this.props.history}>
             {this.renderAudioSetupPanel()}

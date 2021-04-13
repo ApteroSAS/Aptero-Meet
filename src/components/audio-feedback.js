@@ -2,6 +2,7 @@ import { findAncestorWithComponent } from "../utils/scene-graph";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { easeOutQuadratic } from "../utils/easing";
 import { registerComponentInstance, deregisterComponentInstance } from "../utils/component-utils";
+import { minimumQualityService } from "../aptero/service/MinimumQualityService";
 
 // This computation is expensive, so we run on at most one avatar per frame, including quiet avatars.
 // However if we detect an avatar is seen speaking (its volume is above DISABLE_AT_VOLUME_THRESHOLD)
@@ -35,7 +36,7 @@ export function getAudioFeedbackScale(fromObject, toObject, minScale, maxScale, 
 
 function updateVolume(component) {
   const newRawVolume = calculateVolume(component.analyser, component.levels);
-
+  minimumQualityService.notifyMicLevel(newRawVolume);
   const newPerceivedVolume = Math.log(THREE.Math.mapLinear(newRawVolume, 0, 1, 1, Math.E));
 
   component.volume = newPerceivedVolume < MIN_VOLUME_THRESHOLD ? 0 : newPerceivedVolume;

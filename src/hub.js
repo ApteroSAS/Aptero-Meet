@@ -231,6 +231,7 @@ import { OAuthScreenContainer } from "./react-components/auth/OAuthScreenContain
 import { SignInMessages } from "./react-components/auth/SignInModal";
 import { configureTurn, createTrack, fetchICEservers } from "./aptero/service/twilio";
 import { roomController } from "./aptero/service/api/RoomController";
+import { minimumQualityService } from "./aptero/service/MinimumQualityService";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -341,6 +342,7 @@ function remountUI(props) {
 function setupPeerConnectionConfig(adapter) {
   const forceTurn = qs.get("force_turn");
   const forceTcp = qs.get("force_tcp");
+
   if(adapter.setTurnConfig){
     adapter.setTurnConfig(forceTcp, forceTurn);
   }
@@ -721,7 +723,8 @@ function checkForAccountRequired() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  await fetchICEservers();//APTERO
+  let iceServer = await fetchICEservers();//APTERO
+  await minimumQualityService.checkTurnServerAndSwitchToTCP(iceServer);
   document.getElementById("version").innerHTML = process.env.BUILD_VERSION;
   if (isOAuthModal) {
     return;
