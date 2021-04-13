@@ -6,6 +6,7 @@ RMDIR /s /q .\www\
 
 rem build app
 cd ..
+call npm i
 call npm run build
 cd docker
 xcopy ..\dist .\www\ /s /e
