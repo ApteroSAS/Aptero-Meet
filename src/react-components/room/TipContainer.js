@@ -15,9 +15,11 @@ let turnRightKey = "E";
 // implimentation we may want to cook up our own polyfill based on observing key inputs
 if (window.navigator.keyboard !== undefined && window.navigator.keyboard.getLayoutMap) {
   window.navigator.keyboard.getLayoutMap().then(function(map) {
-    moveKeys = `${map.get("KeyW")} ${map.get("KeyA")} ${map.get("KeyS")} ${map.get("KeyD")}`.toUpperCase();
-    turnLeftKey = map.get("KeyQ").toUpperCase();
-    turnRightKey = map.get("KeyE").toUpperCase();
+    if(map.get("KeyQ")) {
+      moveKeys = `${map.get("KeyW")} ${map.get("KeyA")} ${map.get("KeyS")} ${map.get("KeyD")}`.toUpperCase();
+      turnLeftKey = map.get("KeyQ").toUpperCase();
+      turnRightKey = map.get("KeyE").toUpperCase();
+    }
   });
 }
 
