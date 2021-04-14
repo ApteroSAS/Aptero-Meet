@@ -8,7 +8,7 @@ import backgroundUrl from "../../assets/images/home-hero-background-unbranded.pn
 import { createAvatarCustomTileV2 } from "../../aptero/react-components/media-tiles-lib";
 
 export default {
-  title: "MediaBrowser",
+  title: "Room/MediaBrowser",
   parameters: {
     layout: "fullscreen"
   }

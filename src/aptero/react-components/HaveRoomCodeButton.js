@@ -10,7 +10,7 @@ export function HaveRoomCodeButton() {
     <Button
       lg={breakpoint === "sm" || breakpoint === "md"}
       xl={breakpoint !== "sm" && breakpoint !== "md"}
-      preset="blue"
+      preset="primary"
       style={{width: '100%'}}
       as="a" href="/link"
     >

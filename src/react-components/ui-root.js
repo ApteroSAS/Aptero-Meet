@@ -39,7 +39,6 @@ import maskEmail from "../utils/mask-email";
 import qsTruthy from "../utils/qs_truthy";
 import { LoadingScreenContainer } from "./room/LoadingScreenContainer";
 
-import "./styles/global.scss";
 import { RoomLayoutContainer } from "./room/RoomLayoutContainer";
 import roomLayoutStyles from "./layout/RoomLayout.scss";
 import { useAccessibleOutlineStyle } from "./input/useAccessibleOutlineStyle";
@@ -530,8 +529,8 @@ class UIRoot extends Component {
     const hasGrantedMic = (await grantedMicLabels()).length > 0;
 
     if (hasGrantedMic) {
-      if (!this.mediaDevicesManager.isMicDeviceSelected) {
-        await this.mediaDevicesManager.setMediaStreamToDefault();
+      if (!this.mediaDevicesManager.isMicShared) {
+        await this.mediaDevicesManager.startLastUsedMicShare();
       }
       this.beginOrSkipAudioSetup();
     } else {
@@ -559,16 +558,17 @@ class UIRoot extends Component {
   };
 
   micDeviceChanged = async deviceId => {
-    this.mediaDevicesManager.selectMicDevice(deviceId);
+    this.mediaDevicesManager.startMicShare(deviceId);
   };
 
   onRequestMicPermission = async () => {
     // TODO: Show an error state if getting the microphone permissions fails
-    await this.mediaDevicesManager.setMediaStreamToDefault();
+    await this.mediaDevicesManager.startLastUsedMicShare();
     this.beginOrSkipAudioSetup();
   };
 
   beginOrSkipAudioSetup = () => {
+    console.log(this.props.forcedVREntryType);
     const skipAudioSetup = this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now");
 
     if (skipAudioSetup) {
@@ -600,20 +600,16 @@ class UIRoot extends Component {
     this.props.store.update({
       settings: { micMuted: false }
     });
-    await this.props.enterScene(this.mediaDevicesManager.mediaStream, this.state.enterInVR, muteOnEntry);
+    await this.props.enterScene(this.state.enterInVR, muteOnEntry);
 
     this.setState({ entered: true, entering: false, showShareDialog: false });
 
-    const mediaStream = this.mediaDevicesManager.mediaStream;
+    if (this.mediaDevicesManager.isMicShared) {
+      console.log(`Using microphone: ${this.mediaDevicesManager.selectedMicLabel}`);
+    }
 
-    if (mediaStream) {
-      if (this.mediaDevicesManager.audioTrack) {
-        console.log(`Using microphone: ${this.mediaDevicesManager.audioTrack.label}`);
-      }
-
-      if (mediaStream.getVideoTracks().length > 0) {
-        console.log("Screen sharing enabled.");
-      }
+    if (this.mediaDevicesManager.isVideoShared) {
+      console.log("Screen sharing enabled.");
     }
   };
 
@@ -879,7 +875,7 @@ class UIRoot extends Component {
         selectedMicrophone={this.mediaDevicesManager.selectedMicDeviceId}
         microphoneOptions={this.mediaDevicesManager.micDevices}
         onChangeMicrophone={this.micDeviceChanged}
-        microphoneEnabled={!!this.mediaDevicesManager.audioTrack}
+        microphoneEnabled={this.mediaDevicesManager.isMicShared}
         microphoneMuted={muteOnEntry}
         onChangeMicrophoneMuted={() => this.props.store.update({ preferences: { muteMicOnEntry: !muteOnEntry } })}
         onEnterRoom={() => {
@@ -986,6 +982,7 @@ class UIRoot extends Component {
         </div>
       );
     }
+    if (this.props.isBotMode) return this.renderBotMode();
     if (isLoading) {
       return <LoadingScreenContainer scene={this.props.scene} onLoaded={this.onLoadingFinished} />;
     }
@@ -1002,7 +999,6 @@ class UIRoot extends Component {
     }
 
     if (this.props.showInterstitialPrompt) return this.renderInterstitialPrompt();
-    if (this.props.isBotMode) return this.renderBotMode();
 
     const entered = this.state.entered;
     const watching = this.state.watching;
@@ -1532,13 +1528,13 @@ class UIRoot extends Component {
                         <ToolbarButton
                           icon={<EnterIcon />}
                           label={<FormattedMessage id="toolbar.join-room-button" defaultMessage="Join Room" />}
-                          preset="green"
+                          preset="accept"
                           onClick={() => this.setState({ watching: false })}
                         />
                         {enableSpectateVRButton && (
                           <ToolbarButton
                             icon={<VRIcon />}
-                            preset="purple"
+                            preset="accent5"
                             label={
                               <FormattedMessage id="toolbar.spectate-in-vr-button" defaultMessage="Spectate in VR" />
                             }
@@ -1551,7 +1547,7 @@ class UIRoot extends Component {
                       <>
                         <VoiceButtonContainer
                           scene={this.props.scene}
-                          microphoneEnabled={!!this.mediaDevicesManager.audioTrack}
+                          microphoneEnabled={this.mediaDevicesManager.isMicShared}
                         />
                         <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel} />
                         <PlacePopoverContainer
@@ -1591,7 +1587,7 @@ class UIRoot extends Component {
                       <ToolbarButton
                         icon={<LeaveIcon />}
                         label={<FormattedMessage id="toolbar.leave-room-button" defaultMessage="Leave" />}
-                        preset="red"
+                        preset="cancel"
                         onClick={() => {
                           this.showNonHistoriedDialog(LeaveRoomModal, {
                             destinationUrl: "/",
@@ -1649,7 +1645,8 @@ function UIRootHooksWrapper(props) {
 
 UIRootHooksWrapper.propTypes = {
   scene: PropTypes.object.isRequired,
-  messageDispatch: PropTypes.object
+  messageDispatch: PropTypes.object,
+  store: PropTypes.object.isRequired
 };
 
 export default UIRootHooksWrapper;
