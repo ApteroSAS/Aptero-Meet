@@ -3,7 +3,7 @@ import { pinEntity, spawnMediaInfrontOfPlayer, unpinEntity } from "../../util/Me
 import { ObjectContentOrigins } from "../../../object-types";
 import { ActionAnimationController } from "./ActionAnimationController";
 import { roomController } from "./RoomController";
-import { mediaViewEventEmitter } from "../../../components/media-views";
+import { mediaViewEventEmitter } from "../ChangeVideoService";
 import axios from "axios";
 import { applyPersistentSync } from "../../../utils/permissions-utils";
 

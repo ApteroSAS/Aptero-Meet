@@ -10,7 +10,6 @@ const forceEnableTouchscreen = hackyMobileSafariTest();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
 const isDebug = qsTruthy("debug");
 const qs = new URLSearchParams(location.search);
-const EventEmitter = require("eventemitter3");
 
 import { addMedia, getPromotionTokenForFile } from "./utils/media-utils";
 import {
@@ -23,13 +22,10 @@ import { ObjectContentOrigins } from "./object-types";
 import { getAvatarSrc, getAvatarType } from "./utils/avatar-utils";
 import { SOUND_ENTER_SCENE } from "./systems/sound-effects-system";
 //aptero
-import { mediaViewEventEmitter } from "./components/media-views";
+import { mediaViewEventEmitter, lastVideoShareData } from "./aptero/service/ChangeVideoService";
 import { networkService } from "./aptero/service/NetworkService";
-import { createTrack } from "./aptero/service/twilio";
 
 const isIOS = AFRAME.utils.device.isIOS();
-//aptero
-export const sceneEntryManagerEventEmitter = new EventEmitter();
 
 export default class SceneEntryManager {
   constructor(hubChannel, authChannel, history) {
@@ -415,14 +411,16 @@ export default class SceneEntryManager {
     let currentVideoShareEntity;
     let isHandlingVideoShare = false;
 
-    const shareSuccess = (isDisplayMedia, isVideoTrackAdded, target, data) => {
+    const shareSuccess = (isDisplayMedia, isVideoTrackAdded, target) => {
       isHandlingVideoShare = false;
 
       if (isVideoTrackAdded) {
 
-        if(data && data.selectAction==="result"){
-          data.src = `hubs://clients/${NAF.clientId}/video`;
-          mediaViewEventEmitter.emit("share_video_media_stream_created",data);
+        if(lastVideoShareData.data && lastVideoShareData.data.selectAction==="result"){
+          //Aptero integration
+          lastVideoShareData.data.src = `hubs://clients/${NAF.clientId}/video`;
+          mediaViewEventEmitter.emit("share_video_media_stream_created", {...lastVideoShareData.data});
+          lastVideoShareData.data = null;
         } else if (target === "avatar") {
           this.avatarRig.setAttribute("player-info", { isSharingAvatarCamera: true });
         } else{
@@ -442,7 +440,7 @@ export default class SceneEntryManager {
       this.scene.emit("share_video_failed");
     };
 
-    const processCamera = (event,data) => {
+    this.scene.addEventListener("action_share_camera", event => {
       if (isHandlingVideoShare) return;
       isHandlingVideoShare = true;
 
@@ -471,12 +469,9 @@ export default class SceneEntryManager {
       }
 
       this.mediaDevicesManager.startVideoShare(constraints, false, event.detail?.target, shareSuccess, shareError);
-    };
-    sceneEntryManagerEventEmitter.on("action_share_camera",processCamera);
-    this.scene.addEventListener("action_share_camera", processCamera);
+    });
 
-    //Aptero contextual action button 
-    const processShareVideo = (target, data) => {
+    this.scene.addEventListener("action_share_screen", () => {
       if (isHandlingVideoShare) return;
       isHandlingVideoShare = true;
 
@@ -500,12 +495,9 @@ export default class SceneEntryManager {
         shareSuccess,
         shareError
       );
-    };
-    sceneEntryManagerEventEmitter.on("action_share_screen",processShareVideo);
-    this.scene.addEventListener("action_share_screen", processShareVideo);
+    });
 
-    //Aptero contextual action button
-    const endVideoSharing = async () => {
+    this.scene.addEventListener("action_end_video_sharing", async () => {
       if (isHandlingVideoShare) return;
       isHandlingVideoShare = true;
 
@@ -521,14 +513,12 @@ export default class SceneEntryManager {
       this.scene.emit("share_video_disabled");
       this.scene.removeState("sharing_video");
       isHandlingVideoShare = false;
-    };
+    });
 
     this.scene.addEventListener("action_end_mic_sharing", async () => {
       await this.mediaDevicesManager.stopMicShare();
       this.scene.emit("action_mute");
     });
-    sceneEntryManagerEventEmitter.on("action_end_video_sharing", endVideoSharing);
-    this.scene.addEventListener("action_end_video_sharing", endVideoSharing);
 
     this.scene.addEventListener("action_selected_media_result_entry", async e => {
       // TODO spawn in space when no rights

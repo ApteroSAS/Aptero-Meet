@@ -111,9 +111,6 @@ export function createKTX2Texture(url) {
   });
 }
 
-const EventEmitter = require("eventemitter3");
-export const mediaViewEventEmitter = new EventEmitter();
-
 class GIFTexture extends THREE.Texture {
   constructor(frames, delays, disposals) {
     super(document.createElement("canvas"));
