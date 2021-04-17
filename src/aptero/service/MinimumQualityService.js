@@ -21,6 +21,7 @@ class MinimumQualityService {
     }
 
     getCheckStatus(){
+        this.stopFPSTest();
         return this.globalIssueDetected;
     }
 
@@ -99,6 +100,39 @@ class MinimumQualityService {
 
     notifyMicChanged() {
         this.globalIssueDetected["mic-activity-issue"]=true;
+    }
+
+    lastCalledTime=0;
+    fps=-1;
+    fpsNumber = 1;
+    average = 0;
+
+    startFPSTest() {
+        this.fpsTestLoop = true;
+        const fpsTestLoop = () => {
+            if(!this.lastCalledTime) {
+                this.lastCalledTime = performance.now();
+                this.fps = 0;
+                return;
+            }
+            let delta = (performance.now() - this.lastCalledTime)/1000;
+            this.lastCalledTime = performance.now();
+            this.fps = 1/delta;
+            this.average = this.average*((this.fpsNumber-1)/this.fpsNumber) + this.fps*(1/this.fpsNumber);
+            this.fpsNumber++;
+
+            //console.log("fps :"+ this.average + "/" + this.fps);
+            if (this.fpsTestLoop) requestAnimationFrame(fpsTestLoop);
+
+        };
+        fpsTestLoop();
+    }
+
+    stopFPSTest() {
+        this.fpsTestLoop = false;
+        if(this.average<25){
+            this.globalIssueDetected["fps-issue"] = true;
+        }
     }
 }
 

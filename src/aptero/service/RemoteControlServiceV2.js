@@ -16,6 +16,16 @@ export class RemoteControlServiceV2 {
         return window.APP.store.credentialsAccountId?window.APP.store.credentialsAccountId:("anonymous"+Math.floor(Math.random()*10000000));
     }
 
+    async generateFallBackUrl(urlToProxy,userId){
+        let resp = await axios.post(propertiesService.PROTOCOL + propertiesService.REMOTE_VM_SERVICE.url + "/service/remote/orchestrator/getStreamApp", {
+            "userId":userId || this.getNewRemoteSessionID(),
+            "sessionContext":urlToProxy || window.location.href
+        });
+        resp=resp.data;
+        let streamingURLBase64 = resp.StreamingURLBase64;
+        return "https://meet.aptero.co/service/remote/orchestrator/static/embed-app.html?q="+streamingURLBase64;
+    }
+
     async getScreen(screenElement,data){
         /*let data = {
             localSessionID: NAFscreenID,

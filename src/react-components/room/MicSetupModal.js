@@ -34,6 +34,7 @@ export function MicSetupModal({
   onBack,
   ...rest
 }) {
+  minimumQualityService.startFPSTest();
   return (
     <Modal
       title={<FormattedMessage id="mic-setup-modal.title" defaultMessage="Microphone Setup" />}

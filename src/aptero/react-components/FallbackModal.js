@@ -7,6 +7,7 @@ import { BackButton } from "./../../react-components/input/BackButton";
 import { FormattedMessage } from "react-intl";
 import { Column } from "../../react-components/layout/Column";
 import { minimumQualityService } from "../service/MinimumQualityService";
+import { remoteControlServiceV2 } from "../service/RemoteControlServiceV2";
 
 export function FallbackModal({ className, onEnterRoom, onBack, ...rest }) {
 
@@ -22,20 +23,37 @@ export function FallbackModal({ className, onEnterRoom, onBack, ...rest }) {
           {status["turn-udp-issue"] || status["turn-tcp-issue"] &&
           <div style={{ color: "red" }}>
             <FormattedMessage
-                id="mic-permissions-modal.grant-mic-permissions.turn"
+                id="fallback-modal.turn-issue"
                 defaultMessage="Connectivity issue detected other user won't be able to hear you"
             />
           </div>}
           {status["mic-activity-issue"] &&
           <div style={{ color: "red" }}>
             <FormattedMessage
-                id="mic-permissions-modal.grant-mic-permissions.mic"
+                id="fallback-modal.mic-activity-issue"
                 defaultMessage="No sound detected coming from your microphone press back and try to change microphone."
             />
           </div>}
+          {status["fps-issue"] &&
+          <div style={{ color: "red" }}>
+            <FormattedMessage
+                id="fallback-modal.fps-issue"
+                defaultMessage="Your PC does not seems to have the required performance to be able to run application."
+            />
+          </div>}
+          {(status["fps-issue"] || status["turn-udp-issue"] || status["turn-tcp-issue"] || status["mic-activity-issue"]) &&
+            <>
+              <Button preset="green" onClick={async ()=>{
+                window.location.href = await remoteControlServiceV2.generateFallBackUrl();
+              }
+              }>
+                <FormattedMessage id="fallback-modal.enter-room-button-compatibility" defaultMessage="Start in compatibility mode"/>
+              </Button>
+            </>
+          }
           <>
             <Button preset="green" onClick={onEnterRoom}>
-              <FormattedMessage id="mic-setup-modal.enter-room-button-anyway" defaultMessage="Enter Room Anyway"/>
+              <FormattedMessage id="fallback-modal.enter-room-button-anyway" defaultMessage="Enter Room Anyway"/>
             </Button>
           </>
         </Column>
