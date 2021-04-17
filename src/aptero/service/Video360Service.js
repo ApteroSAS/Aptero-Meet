@@ -12,20 +12,17 @@ export class Video360Service {
 
   start(){
     // eslint-disable-next-line no-unused-vars
-    networkService.onMessageRecv(({ session_id, type, body, from }) => {
-      const action_type = type;
-      if (action_type === "events:play_video_360") {
-        console.log("events:play_video_360");
-        this.play(body.time, false);
-      }
-      if (action_type === "events:pause_video_360") {
+    networkService.onMessage("events:play_video_360",({ session_id, type, body, from }) => {
+      console.log("events:play_video_360");
+      this.play(body.time, false);
+    });
+    networkService.onMessage("events:pause_video_360",({ session_id, type, body, from }) => {
         console.log("events:pause_video_360");
         this.pause(body.time, false);
-      }
-      if (action_type === "events:time_video_360") {
+    });
+    networkService.onMessage("events:time_video_360",({ session_id, type, body, from }) => {
         console.log("events:time_video_360");
         this.setTime(body.time, false);
-      }
     });
   }
 

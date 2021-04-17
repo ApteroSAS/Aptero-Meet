@@ -15,6 +15,46 @@ export class CustomActionRegister {
     this.actionAnimationController = new ActionAnimationController();
   }
 
+  async triggerAction(id, data) {
+    let actionData = this.actions[id];
+    if (actionData) {
+      if (actionData.action.type === "animation") {
+        actionData.callback();
+        networkService.sendMessage("animation_play", { id });
+      } else if (actionData.action.type === "spawn_attach") {
+        let entry = this.convertToEntry(id, data);
+        await this.spawnAttach(actionData, entry);
+      } else if (actionData.action.type === "remove_from_media_frame") {
+        await this.removeFromMediaFrame(actionData);
+      } else if (actionData.action.type === "spawn") {
+        let entry = this.convertToEntry(id, data);
+        await this.handleEntry(entry,this.getMediaOptionSetting(actionData));
+      } else if (actionData.action.type === "url") {
+        this.url(actionData);
+      } else if (actionData.action.type === "room") {
+        //deprecated
+        if (actionData.action.entry_mode) {
+          console.log("entry mode set to ", actionData.action.entry_mode);
+          roomController.setEntryMode(actionData.action.entry_mode);
+        }
+      }else if (actionData.action.type === "room_sound") {
+        /*
+            distanceModel: {
+            default: "inverse",
+            oneOf: ["linear", "inverse", "exponential"]
+          },
+          maxDistance: { default: 10000 },
+          refDistance: { default: 1 },
+          rolloffFactor: { default: 1 }
+        * */
+        //1 change room parameter in mongodb (need jwt in request)
+        //2 ask everyone to update from room parameter (or room server send a broadcast via chat?)
+        //3 dynmicaly change switch the sound? for each client
+          //parcour all naf entities and find avatar-audio-source and change audio
+      }
+    }
+  }
+
   async start() {
     this.actionAnimationController.init();
   }
@@ -50,36 +90,6 @@ export class CustomActionRegister {
       }
     });
   }
-
-  /*async applyAudio(entity, actionData) {
-    entity.addEventListener("media-loaded", () => {
-      let mediaVideo = entity.components["media-video"];
-      if (mediaVideo && actionData.action.audio) {
-        let initialSettings = mediaVideo.data;
-        entity.setAttribute("media-video", {
-          distanceModel: actionData.action.audio.distanceModel || initialSettings.distanceModel,
-          rolloffFactor: actionData.action.audio.rolloffFactor || initialSettings.rolloffFactor,
-          refDistance: actionData.action.audio.refDistance || initialSettings.refDistance,
-          maxDistance: actionData.action.audio.maxDistance || initialSettings.maxDistance,
-          coneInnerAngle: actionData.action.audio.coneInnerAngle || initialSettings.coneInnerAngle,
-          coneOuterAngle: actionData.action.audio.coneOuterAngle || initialSettings.coneOuterAngle,
-          coneOuterGain: actionData.action.audio.coneOuterGain || initialSettings.coneOuterGain
-        });
-        entity.setAttribute("media-loader", {
-          mediaOptions: {
-            distanceModel: actionData.action.audio.distanceModel || initialSettings.distanceModel,
-            rolloffFactor: actionData.action.audio.rolloffFactor || initialSettings.rolloffFactor,
-            refDistance: actionData.action.audio.refDistance || initialSettings.refDistance,
-            maxDistance: actionData.action.audio.maxDistance || initialSettings.maxDistance,
-            coneInnerAngle: actionData.action.audio.coneInnerAngle || initialSettings.coneInnerAngle,
-            coneOuterAngle: actionData.action.audio.coneOuterAngle || initialSettings.coneOuterAngle,
-            coneOuterGain: actionData.action.audio.coneOuterGain || initialSettings.coneOuterGain
-          }
-        });
-        applyPersistentSync(entity.components["networked"].data.networkId);
-      }
-    }, { once: true });
-  }*/
 
   getMediaOptionSetting(actionData) {
     if(actionData && actionData.action && actionData.action.audio) {
@@ -287,31 +297,6 @@ export class CustomActionRegister {
     return entry;
   }
 
-  async triggerAction(id, data) {
-    let actionData = this.actions[id];
-    if (actionData) {
-      if (actionData.action.type === "animation") {
-        actionData.callback();
-        networkService.sendMessage("animation_play", { id });
-      } else if (actionData.action.type === "spawn_attach") {
-        let entry = this.convertToEntry(id, data);
-        await this.spawnAttach(actionData, entry);
-      } else if (actionData.action.type === "remove_from_media_frame") {
-        await this.removeFromMediaFrame(actionData);
-      } else if (actionData.action.type === "spawn") {
-        let entry = this.convertToEntry(id, data);
-        await this.handleEntry(entry,this.getMediaOptionSetting(actionData));
-      } else if (actionData.action.type === "url") {
-        this.url(actionData);
-      } else if (actionData.action.type === "room") {
-        //deprecated
-        if (actionData.action.entry_mode) {
-          console.log("entry mode set to ", actionData.action.entry_mode);
-          roomController.setEntryMode(actionData.action.entry_mode);
-        }
-      }
-    }
-  }
 }
 
 export const customActionRegister = new CustomActionRegister();

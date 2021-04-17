@@ -1492,9 +1492,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   hubPhxChannel.on("message", ({ session_id, type, body, from }) => {
-    //TODO hack waitting for server implementation
-    //aptero modifciation
-    networkService.processMessage({ session_id, type, body, from });
     const getAuthor = () => {
       const userInfo = hubChannel.presence.state[session_id];
       if (from) {

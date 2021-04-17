@@ -26,9 +26,11 @@ export class RoomInteractableRemover {
   }
 
   start(){
-    networkService.onMessage("RoomRemover-remove-entity", (networkID) => {
+    networkService.onMessage("RoomRemover-remove-entity", ({ session_id, type, body, from }) => {
+      const networkID = body;
     });
-    networkService.onMessage("RoomRemover-remove-entity-all", (removedEntity) => {
+    networkService.onMessage("RoomRemover-remove-entity-all", ({ session_id, type, body, from }) => {
+      const removedEntity = body;
       this.removeNode(removedEntity);
     });
 

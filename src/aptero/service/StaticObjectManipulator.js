@@ -40,7 +40,8 @@ export class StaticObjectManipulator {
     ///////////////////////////
     //when a new client connects we send him the state of the room what is deactivated etc...
     //////////////////////////
-    networkService.onMessage("StaticObjectManipulator-update", (data) => {
+    networkService.onMessage("StaticObjectManipulator-update", ({ session_id, type, body, from }) => {
+      const data = body;
       if (data && data.deactivatedEntities && NAF.clientId !== data.fromClientID && (data.toClientID === "ANY" ? true : NAF.clientId === data.toClientID)) {
         if(!this.mapEquals(this.deactivatedEntity,data.deactivatedEntities)) {
           this.deactivatedEntity = data.deactivatedEntities;

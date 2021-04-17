@@ -9,20 +9,16 @@ export class NetworkService {
     /* empty start to ensure the import is made*/
   }
 
-  sendMessage(type,data){
-    this.hubPhxChannel.push("message", { type: type, body:data });
+  setPhoenixChannel(hubPhxChannel) {
+    this.hubPhxChannel = hubPhxChannel;
+    this.hubPhxChannel.on("message", ({ session_id, type, body, from }) => {
+      this.eventEmitter.emit("msg_recv",{ session_id, type, body, from });
+      this.eventEmitter.emit(type,{ session_id, type, body, from });
+    });
   }
 
-  /**
-   *
-   * @param callback { session_id, type, body, from }
-   * @returns {Function}
-   */
-  onMessageRecv(callback){
-    this.eventEmitter.on("msg_recv",callback);
-    return ()=>{
-      this.eventEmitter.off("msg_recv",callback);
-    }
+  sendMessage(type,data){
+    this.hubPhxChannel.push("message", { type: type, body:data });
   }
 
   onMessage(type,callback){
@@ -32,6 +28,11 @@ export class NetworkService {
     }
   }
 
+
+  /**
+   * Network utils
+   */
+
   getClientId(){
     return NAF.clientId;
   }
@@ -39,20 +40,11 @@ export class NetworkService {
   async getElementNetworkId(element){
     return new Promise((resolve) => {
       NAF.utils
-        .getNetworkedEntity(element)
-        .then(networkedEl => {
-          resolve(networkedEl.components.networked.data.networkId);
-        })
+          .getNetworkedEntity(element)
+          .then(networkedEl => {
+            resolve(networkedEl.components.networked.data.networkId);
+          })
     });
-  }
-
-  processMessage({ session_id, type, body, from }) {
-    this.eventEmitter.emit("msg_recv",{ session_id, type, body, from });
-    this.eventEmitter.emit(type,body);
-  }
-
-  setPhoenixChannel(hubPhxChannel) {
-    this.hubPhxChannel = hubPhxChannel;
   }
 
   notifyAdapterReady(){

@@ -4,8 +4,8 @@ import { customActionRegister } from "./CustomActionRegister";
 export class ActionAnimationController{
 
     init(){
-        networkService.onMessage("animation_play", (data) => {
-            let actionid = data.id;
+        networkService.onMessage("animation_play", ({ session_id, type, body, from }) => {
+            let actionid = body.id;
             let action = customActionRegister.actions[actionid];
             if (action) {
                 action.callback();
