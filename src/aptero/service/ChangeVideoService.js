@@ -1,8 +1,11 @@
 //import { roomInteractableRemover } from "./RoomInteractableRemover";
-import { mediaViewEventEmitter } from "../../components/media-views";
 import { ObjectContentOrigins } from "../../object-types";
 import { addMediaAndSetTransform } from "../util/Media";
 import { staticObjectManipulator } from "./StaticObjectManipulator";
+
+const EventEmitter = require("eventemitter3");
+export const mediaViewEventEmitter = new EventEmitter();
+export let lastVideoShareData = {};
 
 export class ChangeVideoService {
 
