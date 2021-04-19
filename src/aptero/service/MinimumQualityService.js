@@ -93,7 +93,6 @@ class MinimumQualityService {
     MIN_VOLUME_THRESHOLD = 0.0075;
     notifyMicLevel(micLevel) {
         if(micLevel>this.MIN_VOLUME_THRESHOLD){
-            console.log(micLevel);
             this.globalIssueDetected["mic-activity-issue"]=false;
         }
     }
