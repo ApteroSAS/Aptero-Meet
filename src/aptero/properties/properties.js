@@ -10,7 +10,7 @@ window.APP_PROPS = {
   RETICULUM_SERVER: "alphahub.aptero.co",
 
   // CORS proxy.
-  CORS_PROXY_SERVER: "alphahub.aptero.co",
+  CORS_PROXY_SERVER: "corsproxy.aptero.co",
 
   // The thumbnailing backend to connect to.
   // See here for the server code: https://github.com/MozillaReality/farspark or https://github.com/MozillaReality/nearspark

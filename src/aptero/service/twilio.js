@@ -48,7 +48,12 @@ export async function createTrack(constraints){
       return new MediaStream([localTracks[0].mediaStreamTrack]);
     })
   }else{
-    return navigator.mediaDevices.getUserMedia(constraints);//Type MediaStream
+    try {
+      return await navigator.mediaDevices.getUserMedia(constraints);//Type MediaStream
+    }catch(err){
+      delete constraints.audio["deviceId"];
+      return navigator.mediaDevices.getUserMedia(constraints);//Type MediaStream
+    }
   }
 }
 

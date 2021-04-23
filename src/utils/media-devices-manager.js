@@ -227,7 +227,7 @@ export default class MediaDevicesManager {
       if (isDisplayMedia) {
         newStream = await navigator.mediaDevices.getDisplayMedia(constraints);
       } else {
-        newStream = await navigator.mediaDevices.getUserMedia(constraints);
+        newStream = await createTrack(constraints);
       }
 
       const videoTracks = newStream ? newStream.getVideoTracks() : [];
