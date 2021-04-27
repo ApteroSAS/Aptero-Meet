@@ -107,7 +107,12 @@ class MinimumQualityService {
     average = 0;
 
     startFPSTest() {
+        this.lastCalledTime=0;
+        this.fps=-1;
+        this.fpsNumber = 1;
+        this.average = 0;
         this.fpsTestLoop = true;
+        this.globalIssueDetected["fps-issue"] = false;
         const fpsTestLoop = () => {
             if(!this.lastCalledTime) {
                 this.lastCalledTime = performance.now();
@@ -129,7 +134,8 @@ class MinimumQualityService {
 
     stopFPSTest() {
         this.fpsTestLoop = false;
-        if(this.average<25){
+        if(this.average<25 && this.fpsNumber>25){
+            //fps number > than 25 at 25 fps means at least one second of measurement
             this.globalIssueDetected["fps-issue"] = true;
         }
     }

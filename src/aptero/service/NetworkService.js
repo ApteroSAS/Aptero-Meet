@@ -1,3 +1,5 @@
+import DistributedSoundSystem from "./DistributedSoundSystem";
+
 const EventEmitter = require("eventemitter3");
 
 export class NetworkService {

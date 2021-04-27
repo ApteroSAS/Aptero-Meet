@@ -17,9 +17,11 @@ export class RemoteControlServiceV2 {
     }
 
     async generateFallBackUrl(urlToProxy,userId){
+        urlToProxy = urlToProxy || window.location.href
+        let tutoURL = "https://meet.aptero.co/service/remote/orchestrator/static/tutoRedirect.html?url="+urlToProxy;
         let resp = await axios.post(propertiesService.PROTOCOL + propertiesService.REMOTE_VM_SERVICE.url + "/service/remote/orchestrator/getStreamApp", {
             "userId":userId || this.getNewRemoteSessionID(),
-            "sessionContext":urlToProxy || window.location.href
+            "sessionContext":tutoURL
         });
         resp=resp.data;
         let streamingURLBase64 = resp.StreamingURLBase64;
