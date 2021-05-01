@@ -31,6 +31,7 @@ window.APP_PROPS = {
   AVAILABLE_INTEGRATIONS:{"objects":true, "videos360":true, "videos2d":true, "scenes":true, "avatars":true,"tenor":false,"poly":false, "sketchfab":false,"bing_videos":false},
 
   REMOTE_VM_SERVICE:{ url:"meet.aptero.co"},
+  WEBRTC_BRIDGE_URL:"http://localhost:8195",
 
   APP_CONFIG: {
     MICROSOFT_APP_ID: "caafb04c-8c13-4044-92a4-3648f79dc7e3",

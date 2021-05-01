@@ -1,11 +1,33 @@
+import axios from "axios";
+import { propertiesService } from "../properties/propertiesService";
 
 export default class DistributedSoundSystem {
   audioBotList = {};
-  constructor(networkService){
-    networkService.onMessage("distributed-system-bot-creation", ({ session_id, type, body, from }) => {
-      console.log(body);
-      this.audioBotList[body] = true;
+  networkService;
+
+  async updateAudioBot(){
+    return axios.get(propertiesService.WEBRTC_BRIDGE_URL+"/bot").then(resp => {
+      let botlist = resp.data;
+      this.audioBotList={};
+      botlist.forEach(value => {
+        this.audioBotList[value] = true;
+      })
+    }).catch(reason => {
+      console.error(reason);
     });
+  }
+
+  constructor(networkService){
+    this.networkService = networkService;
+  }
+
+  async start(){
+    //TODO reactivate in aptero service
+    await this.updateAudioBot();
+    this.networkService.onMessage("distributed-system-bot-creation", ({ session_id, type, body, from }) => {
+      this.updateAudioBot();
+    });
+
     document.body.addEventListener("clientConnected", async (evt) => {
       //TODO create a sound emitter
       let streamClientId = evt.detail.clientId;

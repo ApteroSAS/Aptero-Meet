@@ -11,7 +11,8 @@ import "./component/media-limiter";
 import { gltfExtensionProcessorService } from "./service/api/GLTFExtensionProcessorService";
 import { staticObjectManipulator } from "./service/StaticObjectManipulator";
 import { roomParameters } from "./service/RoomParameters";
-import DistributedSoundSystem from "./service/DistributedSoundSystem";
+//import DistributedSoundSystem from "./service/DistributedSoundSystem";
+import SoundSystem from "./service/SoundSystem";
 
 export class ApteroServices{
   constructor(){
@@ -20,11 +21,11 @@ export class ApteroServices{
   async start(){
     waitForDOMContentLoaded().then(async () => {
       await networkService.start();
-      new DistributedSoundSystem(networkService);
+      await new SoundSystem(networkService).start();
+      //await new DistributedSoundSystem(networkService).start();
       await changeVideoService.start();
       await liveStream.start();
       await microsoftService.start();
-      //await roomInteractableRemover.start();
       await staticObjectManipulator.start();
       await video360Service.start();
       await gltfExtensionProcessorService.start();

@@ -316,13 +316,20 @@ export default class DialogAdapter extends EventEmitter {
     this._protoo = new protooClient.Peer(protooTransport);
 
     this._protoo.on("disconnected", () => {
-      this.emitRTCEvent("info", "Signaling", () => `Disconnected`);
-      this.disconnect();
+      console.warn("protoo disconnected");
+      //TODO Aptero
+      setTimeout(()=>{
+        if (this._protoo && !this._protoo.connected) {
+          console.warn("Do protoo timeout disconnected");
+          this.emitRTCEvent("info", "Signaling", () => `Disconnected`);
+          this.disconnect();
+        }
+      },3000);
     });
 
     this._protoo.on("failed", attempt => {
       this.emitRTCEvent("error", "Signaling", () => `Failed: ${attempt}, retrying...`);
-
+      console.warn("protoo failed",attempt);
       if (this._isReconnect) {
         this._reconnectingListener && this._reconnectingListener();
       }
@@ -330,6 +337,7 @@ export default class DialogAdapter extends EventEmitter {
 
     this._protoo.on("close", () => {
       this.emitRTCEvent("error", "Signaling", () => `Closed`);
+      console.warn("protoo close");
       this.disconnect();
     });
 
@@ -432,6 +440,7 @@ export default class DialogAdapter extends EventEmitter {
 
       switch (notification.method) {
         case "newPeer": {
+          console.warn("newPeer")
           const peer = notification.data;
           this.newPeer(peer);
 
@@ -439,6 +448,7 @@ export default class DialogAdapter extends EventEmitter {
         }
 
         case "peerClosed": {
+          console.warn("peerClosed")
           const { peerId } = notification.data;
           this.closePeer(peerId);
 
@@ -446,6 +456,7 @@ export default class DialogAdapter extends EventEmitter {
         }
 
         case "consumerClosed": {
+          console.warn("consumerClosed")
           const { consumerId } = notification.data;
           const consumer = this._consumers.get(consumerId);
 
@@ -461,6 +472,7 @@ export default class DialogAdapter extends EventEmitter {
         }
 
         case "peerBlocked": {
+          console.warn("peerBlocked")
           const { peerId } = notification.data;
           document.body.dispatchEvent(new CustomEvent("blocked", { detail: { clientId: peerId } }));
 
@@ -468,6 +480,7 @@ export default class DialogAdapter extends EventEmitter {
         }
 
         case "peerUnblocked": {
+          console.warn("peerUnblocked")
           const { peerId } = notification.data;
           document.body.dispatchEvent(new CustomEvent("unblocked", { detail: { clientId: peerId } }));
 
@@ -480,6 +493,7 @@ export default class DialogAdapter extends EventEmitter {
         }
 
         case "consumerLayersChanged": {
+          console.warn("consumerLayersChanged")
           const { consumerId, spatialLayer, temporalLayer } = notification.data;
 
           const consumer = this._consumers.get(consumerId);
@@ -501,6 +515,7 @@ export default class DialogAdapter extends EventEmitter {
         }
 
         case "consumerScore": {
+          console.warn("consumerScore")
           const { consumerId, score } = notification.data;
 
           const consumer = this._consumers.get(consumerId);

@@ -64,6 +64,22 @@ export class RoomParameters {
                 Object.keys(roomConfig.preferencesOverride).forEach(key => {
                     window.APP.override.preferences[key] = roomConfig.preferencesOverride[key];
                 });
+                await new Promise(resolve => {
+                    setTimeout(() => {
+                        let as = AFRAME.scenes[0].systems["hubs-systems"].audioSettingsSystem.audioSettings;
+                        if (as) {
+                            Object.keys(as).forEach(key => {
+                                as[key] = window.getPreferences(key) || as[key];
+                            });
+                            //special cases
+                            as.avatarDistanceModel = window.getPreferences("distanceModel") || as.avatarDistanceModel;
+                            as.avatarRolloffFactor = window.getPreferences("rolloffFactor") || as.avatarRolloffFactor;
+                            as.avatarRefDistance = window.getPreferences("refDistance") || as.avatarRefDistance;
+                            as.avatarMaxDistance = window.getPreferences("maxDistance") || as.avatarMaxDistance;
+                        }
+                        resolve();
+                    }, 0);//wait for AFRAME.scenes[0]
+                });
             }
             if (roomConfig.entryMode) {
                 addEntryModeIfNotExist(roomConfig.entryMode);

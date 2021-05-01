@@ -27,6 +27,7 @@ export class ActionController {
       jsonData = jsonData.substring(1, jsonData.length - 1);
     }
     if (typeof jsonData === "string") {
+      jsonData = jsonData.replaceAll("\\\"","\"");
       jsonData = JSON.parse(jsonData);
     }
     jsonData.forEach(async (entry, index) => {

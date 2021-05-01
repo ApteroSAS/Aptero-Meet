@@ -37,20 +37,6 @@ export class CustomActionRegister {
           console.log("entry mode set to ", actionData.action.entry_mode);
           roomController.setEntryMode(actionData.action.entry_mode);
         }
-      }else if (actionData.action.type === "room_sound") {
-        /*
-            distanceModel: {
-            default: "inverse",
-            oneOf: ["linear", "inverse", "exponential"]
-          },
-          maxDistance: { default: 10000 },
-          refDistance: { default: 1 },
-          rolloffFactor: { default: 1 }
-        * */
-        //1 change room parameter in mongodb (need jwt in request)
-        //2 ask everyone to update from room parameter (or room server send a broadcast via chat?)
-        //3 dynmicaly change switch the sound? for each client
-          //parcour all naf entities and find avatar-audio-source and change audio
       }
     }
   }

@@ -1499,7 +1499,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       } else if (userInfo) {
         return userInfo.metas[0].profile.displayName;
       } else {
-        return "Mystery user";
+        return "System";
       }
     };
 

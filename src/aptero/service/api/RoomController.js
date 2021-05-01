@@ -1,3 +1,4 @@
+//deprecated
 export class RoomController{
 
     setEntryMode(mode){
