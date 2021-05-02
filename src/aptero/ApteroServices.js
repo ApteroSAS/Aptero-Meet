@@ -20,7 +20,13 @@ import "./adapter/naf-dialog-io-adapter";
 
 export class ApteroServices{
   constructor(){
-    roomParameters.getAndApplyRoomParameters();//called as soon as possible
+    roomParameters.getRoomParameters();//called as soon as possible
+  }
+
+  applySoftRedirect(){
+    if(window.location.host === "hub.aptero.co") {
+      window.location.href = window.location.href.replace("hub.aptero.co", "meet.aptero.co");
+    }
   }
 
   start(audioSettingsSystem){
@@ -39,6 +45,7 @@ export class ApteroServices{
   }
   
   async onEnterRoom(){
+    await roomParameters.applyRoomParameters();
     await roomParameters.applyDefaultAudioSettingsSystem(this.audioSettingsSystem);
   }
 

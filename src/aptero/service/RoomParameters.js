@@ -23,7 +23,7 @@ export class RoomParameters {
     async applyPermissionAsync(permission, admin) {
         permission["show_spawn_and_move_media"] = true;//default value
         let roomConfig = await this.getParameters(permission.hub_id);
-        this.getAndApplyRoomParameters();//also update preferences
+        this.applyRoomParameters();//also update preferences
         if (roomConfig) {
             if (roomConfig.permission) {
                 permission = { ...permission, ...roomConfig.permission };
@@ -55,48 +55,53 @@ export class RoomParameters {
 
     async applyDefaultAudioSettingsSystem(audioSettingsSystem) {
         //let audioSettings = AFRAME.scenes[0].systems["hubs-systems"].audioSettingsSystem.audioSettings;
-        await this.getAndApplyRoomParameters();//ensure parameters are retrieved
+        let roomConfig = await this.getRoomParameters();//ensure parameters are retrieved
         let audioSettings = audioSettingsSystem.audioSettings;
-        if (audioSettings) {
+        if (audioSettings && roomConfig && roomConfig.preferencesOverride) {
             console.log("applyDefaultAudioSettingsSystem");
             Object.keys(audioSettings).forEach(key => {
-                audioSettings[key] = window.getPreferences(key) || audioSettings[key];
+                audioSettings[key] = roomConfig.preferencesOverride[key] || audioSettings[key];
             });
             //special cases
-            audioSettings.avatarDistanceModel = window.getPreferences("distanceModel") || audioSettings.avatarDistanceModel;
-            audioSettings.avatarRolloffFactor = window.getPreferences("rolloffFactor") || audioSettings.avatarRolloffFactor;
-            audioSettings.avatarRefDistance = window.getPreferences("refDistance") || audioSettings.avatarRefDistance;
-            audioSettings.avatarMaxDistance = window.getPreferences("maxDistance") || audioSettings.avatarMaxDistance;
+            audioSettings.avatarDistanceModel = roomConfig.preferencesOverride["distanceModel"] || audioSettings.avatarDistanceModel;
+            audioSettings.avatarRolloffFactor = roomConfig.preferencesOverride["rolloffFactor"] || audioSettings.avatarRolloffFactor;
+            audioSettings.avatarRefDistance = roomConfig.preferencesOverride["refDistance"] || audioSettings.avatarRefDistance;
+            audioSettings.avatarMaxDistance = roomConfig.preferencesOverride["maxDistance"] || audioSettings.avatarMaxDistance;
         }
     }
 
-    async getAndApplyRoomParameters() {
+    async getRoomParameters() {
         if(!this.fetch) {
             const qs = new URLSearchParams(window.location.search);
             const roomSID = qs.get("hub_id") || document.location.pathname.substring(1).split("/")[0];
-            window.APP.override = { preferences: {} };
-            let roomConfig = await this.getParameters(roomSID);
-            if (roomConfig) {
-                if (roomConfig.preferences) {
-                    Object.keys(roomConfig.preferences).forEach(key => {
-                        window.APP.store.state.preferences[key] = roomConfig.preferences[key];
-                    });
-                }
-                if (roomConfig.preferencesOverride) {
-                    Object.keys(roomConfig.preferencesOverride).forEach(key => {
-                        window.APP.override.preferences[key] = roomConfig.preferencesOverride[key];
-                    });
-                }
-                if (roomConfig.entryMode) {
-                    addEntryModeIfNotExist(roomConfig.entryMode);
-                }
-                if (roomConfig.AppConfigOverride) {
-                    Object.keys(roomConfig.AppConfigOverride).forEach(key => {
-                        configs.APP_CONFIG[key] = roomConfig.AppConfigOverride[key];
-                    });
-                }
-            }
+            this.roomConfig = await this.getParameters(roomSID);
             this.fetch = true;
+        }
+        return this.roomConfig;
+    }
+
+    async applyRoomParameters() {
+        let roomConfig = await this.getRoomParameters();
+        window.APP.override = { preferences: {} };
+        if (roomConfig) {
+            if (roomConfig.preferences) {
+                Object.keys(roomConfig.preferences).forEach(key => {
+                    window.APP.store.state.preferences[key] = roomConfig.preferences[key];
+                });
+            }
+            if (roomConfig.preferencesOverride) {
+                Object.keys(roomConfig.preferencesOverride).forEach(key => {
+                    window.APP.override.preferences[key] = roomConfig.preferencesOverride[key];
+                });
+            }
+            if (roomConfig.entryMode) {
+                addEntryModeIfNotExist(roomConfig.entryMode);
+            }
+            if (roomConfig.AppConfigOverride) {
+                Object.keys(roomConfig.AppConfigOverride).forEach(key => {
+                    configs.APP_CONFIG[key] = roomConfig.AppConfigOverride[key];
+                });
+            }
         }
     }
     
