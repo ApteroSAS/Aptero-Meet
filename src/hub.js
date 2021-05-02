@@ -38,7 +38,6 @@ import { addAnimationComponents } from "./utils/animation";
 import { authorizeOrSanitizeMessage } from "./utils/permissions-utils";
 import Cookies from "js-cookie";
 import "./naf-dialog-adapter";
-import "./aptero/twilio-adapter";
 
 import "./components/scene-components";
 import "./components/scale-in-screen-space";
@@ -235,6 +234,7 @@ import { ThemeProvider } from "./react-components/styles/theme";
 import { configureTurn, createTrack, fetchICEservers } from "./aptero/service/twilio";
 import { roomController } from "./aptero/service/api/RoomController";
 import { minimumQualityService } from "./aptero/service/MinimumQualityService";
+import { choseAdapter } from "./aptero/adapter/adapter-config";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -573,14 +573,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
   // TODO Remove this once transition completed.
   // Wait for scene objects to load before connecting, so there is no race condition on network state.
   const connectToScene = async () => {
-    let adapter = "dialog";
-
-    //Aptero
-    if(configs.APP_CONFIG.adapter) {
-      adapter = configs.APP_CONFIG.adapter;
-    }else{
-      configs.APP_CONFIG.adapter = adapter;
-    }
+    let adapter = choseAdapter();
 
     scene.setAttribute("networked-scene", {
       room: hub.hub_id,

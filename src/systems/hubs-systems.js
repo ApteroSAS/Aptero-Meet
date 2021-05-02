@@ -72,7 +72,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.emojiSystem = new EmojiSystem(this.el);
     //APTERO SERVICE DEFINITION
     this.apteroService = apteroService;
-    this.apteroService.start();
+    this.apteroService.start(this.audioSettingsSystem);
     //END APTERO SERVICE
   },
 

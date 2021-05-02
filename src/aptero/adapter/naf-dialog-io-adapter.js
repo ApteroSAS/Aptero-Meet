@@ -1,7 +1,7 @@
 import * as mediasoupClient from "mediasoup-client";
 import protooClient from "protoo-client";
 import { debug as newDebug } from "debug";
-import { addIceServers, connectRoom, convertId } from "./service/twilio";
+import { addIceServers } from "./../service/twilio";
 import EventEmitter from "eventemitter3";
 
 // NOTE this adapter does not properly fire the onOccupantsReceived events since those are only needed for
@@ -27,27 +27,34 @@ let debug = console.log;
 let error = console.error;
 let info = console.log;
 if(newDebug){
-	debug = newDebug("twilio-adapter:debug");
-  //const warn = newDebug("naf-dialog-adapter:warn");
-	error = newDebug("twilio-adapter:error");
-	info = newDebug("twilio-adapter:info");
+	debug = newDebug("naf-dialog-adapter:debug");
+	//const warn = newDebug("naf-dialog-adapter:warn");
+	error = newDebug("naf-dialog-adapter:error");
+	info = newDebug("naf-dialog-adapter:info");
 }
 
 const PC_PROPRIETARY_CONSTRAINTS = {
   optional: [{ googDscp: true }]
 };
 
-const INITIAL_ROOM_RECONNECTION_INTERVAL = 2000;
+const WEBCAM_SIMULCAST_ENCODINGS = [
+  { scaleResolutionDownBy: 4, maxBitrate: 500000 },
+  { scaleResolutionDownBy: 2, maxBitrate: 1000000 },
+  { scaleResolutionDownBy: 1, maxBitrate: 5000000 }
+];
 
+// Used for simulcast screen sharing.
+const SCREEN_SHARING_SIMULCAST_ENCODINGS = [{ dtx: true, maxBitrate: 1500000 }, { dtx: true, maxBitrate: 6000000 }];
 
-export default class TwilioAdapter extends EventEmitter{
+export default class DialogIOAdapter extends EventEmitter {
   constructor() {
     super();
 
     this._timeOffsets = [];
     this._occupants = {};
     this._micProducer = null;
-    this._videoProducer = null;
+    this._cameraProducer = null;
+    this._shareProducer = null;
     this._mediaStreams = {};
     this._localMediaStream = null;
     this._consumers = new Map();
@@ -59,18 +66,24 @@ export default class TwilioAdapter extends EventEmitter{
     this._serverTimeRequests = 0;
     this._avgTimeOffset = 0;
     this._blockedClients = new Map();
-    this.type = "twilio";
+    this.type = "dialog-io";
     this.occupants = {}; // This is a public field
     this._forceTcp = false;
     this._forceTurn = false;
     this._iceTransportPolicy = "all";
-    this._reconnectionDelay = INITIAL_ROOM_RECONNECTION_INTERVAL;
-    this._reconnectionTimeout = null;
-    this._reconnectionAttempts = 0;
-    this._lastSendConnectionState = null;
-    this._lastRecvConnectionState = null;
     this._closed = true;
     this.scene = document.querySelector("a-scene");
+    this._serverParams = {};
+    this._consumerStats = {};
+    this._isReconnect = false;
+  }
+
+  get consumerStats() {
+    return this._consumerStats;
+  }
+
+  get downlinkBwe() {
+    return this._downlinkBwe;
   }
 
   get serverUrl() {
@@ -92,6 +105,10 @@ export default class TwilioAdapter extends EventEmitter{
     if (this._forceTurn || this._forceTcp) {
       this._iceTransportPolicy = "relay";
     }
+  }
+
+  setServerParams(params) {
+    this._serverParams = params;
   }
 
   getIceServers(host, port, turn) {
@@ -226,7 +243,7 @@ export default class TwilioAdapter extends EventEmitter{
         await this.iceRestart(this._sendTransport);
       } else {
         // If the transport is closed but the signaling is connected, we try to recreate
-        const { host, port, turn } = await window.APP.hubChannel.getHost();
+        const { host, port, turn } = this._serverParams;
         const iceServers = this.getIceServers(host, port, turn);
         await this.recreateSendTransport(iceServers);
       }
@@ -245,8 +262,6 @@ export default class TwilioAdapter extends EventEmitter{
     if (connectionState === "failed") {
       this.restartSendICE();
     }
-
-    this._lastSendConnectionState = connectionState;
   }
 
   async recreateRecvTransport(iceServers) {
@@ -271,7 +286,7 @@ export default class TwilioAdapter extends EventEmitter{
         await this.iceRestart(this._recvTransport);
       } else {
         // If the transport is closed but the signaling is connected, we try to recreate
-        const { host, port, turn } = await window.APP.hubChannel.getHost();
+        const { host, port, turn } = this._serverParams;
         const iceServers = this.getIceServers(host, port, turn);
         await this.recreateRecvTransport(iceServers);
       }
@@ -281,8 +296,8 @@ export default class TwilioAdapter extends EventEmitter{
   }
 
   /**
-   * Checks the Send Transport ICE status and restarts it in case is in failed or disconnected states.
-   * This is called by the Send Transport "connectionstatechange" event listener.
+   * Checks the ReeceiveReeceive Transport ICE status and restarts it in case is in failed state.
+   * This is called by the Reeceive Transport "connectionstatechange" event listener.
    * @param {boolean} connectionState The transport connection state (ICE connection state)
    */
   checkRecvIceStatus(connectionState) {
@@ -290,73 +305,58 @@ export default class TwilioAdapter extends EventEmitter{
     if (connectionState === "failed") {
       this.restartRecvICE();
     }
-
-    this._lastRecvConnectionState = connectionState;
   }
 
   async connect() {
     const urlWithParams = new URL(this._serverUrl);
     urlWithParams.searchParams.append("roomId", this._roomId);
     urlWithParams.searchParams.append("peerId", this._clientId);
-    this._twilioroom = await connectRoom(this._clientId,this._roomId);
-    this._twilioroom.on('participantConnected', participant => {
-      console.log(`Participant connected: ${participant.identity}`);
-      let onTrack = (track)=>{
-        //RemoteAudioTrack
-        let peerId = convertId(participant.identity);
-        let kind = track.kind;
-        console.log(" Add consumer:",track);
-        track.appData = {peerId};
-        track.track = track.mediaStreamTrack;
-        this._consumers.set(peerId, track);
-        this.resolvePendingMediaRequestForTrack(peerId, track.track);
 
-        if (kind === "audio") {
-          const initialAudioResolver = this._initialAudioConsumerResolvers.get(peerId);
-
-          if (initialAudioResolver) {
-            initialAudioResolver();
-            this._initialAudioConsumerResolvers.delete(peerId);
-          }
-        }
-        //document.getElementById('remote-media-div').appendChild(track.attach());
-      };
-      participant.tracks.forEach(publication => {
-        if (publication.isSubscribed) {
-          const track = publication.track;
-          onTrack(track);
-        }
-      });
-
-      participant.on('trackSubscribed', track => {
-        onTrack(track);
-      });
-    });
-
-    this._twilioroom.on('participantDisconnected', participant => {
-      console.log(`Participant disconnected: ${participant.identity}`);
-    });
-
-    const protooTransport = new protooClient.WebSocketTransport(urlWithParams.toString());
+    const protooTransport = new protooClient.WebSocketIOTransport(urlWithParams.toString());
     this._protoo = new protooClient.Peer(protooTransport);
 
-    await new Promise(res => {
-      this._protoo.on("open", async () => {
-        this.emitRTCEvent("info", "Signaling", () => `Open`);
-        this._closed = false;
-        await this._joinRoom();
-        res();
-      });
+    this._protoo.on("disconnected", () => {
+      this.emitRTCEvent("info", "Signaling", () => `Disconnected`);
+      this.disconnect();
     });
 
-    this._protoo.on("disconnected", () => {
-      this.emitRTCEvent("info", "Signaling", () => `Diconnected`);
-      this.disconnect();
+    this._protoo.on("failed", attempt => {
+      this.emitRTCEvent("error", "Signaling", () => `Failed: ${attempt}, retrying...`);
+      console.warn("protoo failed",attempt);
+      if (this._isReconnect) {
+        this._reconnectingListener && this._reconnectingListener();
+      }
     });
 
     this._protoo.on("close", () => {
-      this.emitRTCEvent("info", "Signaling", () => `Close`);
+      this.emitRTCEvent("error", "Signaling", () => `Closed`);
+      console.warn("protoo close");
       this.disconnect();
+      setTimeout(()=>{
+        this.reconnect(500);
+      },1000);
+    });
+
+    await new Promise((resolve, reject) => {
+      this._protoo.on("open", async () => {
+        this.emitRTCEvent("info", "Signaling", () => `Open`);
+        this._closed = false;
+
+        // We only need to call the reconnect callbacks if it's a reconnection.
+        if (this._isReconnect) {
+          this._reconnectedListener && this._reconnectedListener();
+        } else {
+          this._isReconnect = true;
+        }
+
+        try {
+          await this._joinRoom();
+          resolve();
+        } catch (err) {
+          this.emitRTCEvent("warn", "Adapter", () => `Error during connect: ${error}`);
+          reject(err);
+        }
+      });
     });
 
     // eslint-disable-next-line no-unused-vars
@@ -392,6 +392,16 @@ export default class TwilioAdapter extends EventEmitter{
               this.removeConsumer(consumer.id);
             });
 
+            if (kind === "video") {
+              const { spatialLayers, temporalLayers } = mediasoupClient.parseScalabilityMode(
+                consumer.rtpParameters.encodings[0].scalabilityMode
+              );
+
+              this._consumerStats[consumer.id] = this._consumerStats[consumer.id] || {};
+              this._consumerStats[consumer.id]["spatialLayers"] = spatialLayers;
+              this._consumerStats[consumer.id]["temporalLayers"] = temporalLayers;
+            }
+
             // We are ready. Answer the protoo request so the server will
             // resume this Consumer (which was paused for now if video).
             accept();
@@ -426,6 +436,7 @@ export default class TwilioAdapter extends EventEmitter{
 
       switch (notification.method) {
         case "newPeer": {
+          console.warn("newPeer")
           const peer = notification.data;
           this.newPeer(peer);
 
@@ -433,6 +444,7 @@ export default class TwilioAdapter extends EventEmitter{
         }
 
         case "peerClosed": {
+          console.warn("peerClosed")
           const { peerId } = notification.data;
           this.closePeer(peerId);
 
@@ -440,10 +452,14 @@ export default class TwilioAdapter extends EventEmitter{
         }
 
         case "consumerClosed": {
+          console.warn("consumerClosed")
           const { consumerId } = notification.data;
           const consumer = this._consumers.get(consumerId);
 
-          if (!consumer) break;
+          if (!consumer) {
+            info(`consumerClosed event received without related consumer: ${consumerId}`);
+            break;
+          }
 
           consumer.close();
           this.removeConsumer(consumer.id);
@@ -452,6 +468,7 @@ export default class TwilioAdapter extends EventEmitter{
         }
 
         case "peerBlocked": {
+          console.warn("peerBlocked")
           const { peerId } = notification.data;
           document.body.dispatchEvent(new CustomEvent("blocked", { detail: { clientId: peerId } }));
 
@@ -459,10 +476,53 @@ export default class TwilioAdapter extends EventEmitter{
         }
 
         case "peerUnblocked": {
+          console.warn("peerUnblocked")
           const { peerId } = notification.data;
           document.body.dispatchEvent(new CustomEvent("unblocked", { detail: { clientId: peerId } }));
 
           break;
+        }
+
+        case "downlinkBwe": {
+          this._downlinkBwe = notification.data;
+          break;
+        }
+
+        case "consumerLayersChanged": {
+          console.warn("consumerLayersChanged")
+          const { consumerId, spatialLayer, temporalLayer } = notification.data;
+
+          const consumer = this._consumers.get(consumerId);
+
+          if (!consumer) {
+            info(`consumerLayersChanged event received without related consumer: ${consumerId}`);
+            break;
+          }
+
+          this._consumerStats[consumerId] = this._consumerStats[consumerId] || {};
+          this._consumerStats[consumerId]["spatialLayer"] = spatialLayer;
+          this._consumerStats[consumerId]["temporalLayer"] = temporalLayer;
+
+          // TODO: If spatialLayer/temporalLayer are null, that's probably because the current downlink
+          // it's not enough forany spatial layer bitrate. In that case the server has paused the consumer.
+          // At this point we it would be nice to give the user some visual cue that this stream is paused.
+          // ie. A grey overlay with some icon or replacing the video stream por a generic person image.
+          break;
+        }
+
+        case "consumerScore": {
+          console.warn("consumerScore")
+          const { consumerId, score } = notification.data;
+
+          const consumer = this._consumers.get(consumerId);
+
+          if (!consumer) {
+            info(`consumerScore event received without related consumer: ${consumerId}`);
+            break;
+          }
+
+          this._consumerStats[consumerId] = this._consumerStats[consumerId] || {};
+          this._consumerStats[consumerId]["score"] = score;
         }
       }
     });
@@ -552,8 +612,12 @@ export default class TwilioAdapter extends EventEmitter{
     if (this._clientId === clientId) {
       if (kind === "audio" && this._micProducer) {
         track = this._micProducer.track;
-      } else if (kind === "video" && this._videoProducer) {
-        track = this._videoProducer.track;
+      } else if (kind === "video") {
+        if (this._cameraProducer && !this._cameraProducer.closed) {
+          track = this._cameraProducer.track;
+        } else if (this._shareProducer && !this._shareProducer.closed) {
+          track = this._shareProducer.track;
+        }
       }
     } else {
       this._consumers.forEach(consumer => {
@@ -600,10 +664,9 @@ export default class TwilioAdapter extends EventEmitter{
     this.reliableTransport(undefined, dataType, data);
   }
 
-  setReconnectionListeners(reconnectingListener, reconnectedListener, reconnectionErrorListener) {
+  setReconnectionListeners(reconnectingListener, reconnectedListener) {
     this._reconnectingListener = reconnectingListener;
     this._reconnectedListener = reconnectedListener;
-    this._reconnectionErrorListener = reconnectionErrorListener;
   }
 
   syncOccupants() {
@@ -615,24 +678,24 @@ export default class TwilioAdapter extends EventEmitter{
     const sendTransportInfo = await this._protoo.request("createWebRtcTransport", {
       producing: true,
       consuming: false,
-        sctpCapabilities: undefined
-      });
+      sctpCapabilities: undefined
+    });
 
-      this._sendTransport = this._mediasoupDevice.createSendTransport({
-        id: sendTransportInfo.id,
-        iceParameters: sendTransportInfo.iceParameters,
-        iceCandidates: sendTransportInfo.iceCandidates,
-        dtlsParameters: sendTransportInfo.dtlsParameters,
-        sctpParameters: sendTransportInfo.sctpParameters,
-        iceServers,
-        iceTransportPolicy: this._iceTransportPolicy,
-        proprietaryConstraints: PC_PROPRIETARY_CONSTRAINTS
-      });
+    this._sendTransport = this._mediasoupDevice.createSendTransport({
+      id: sendTransportInfo.id,
+      iceParameters: sendTransportInfo.iceParameters,
+      iceCandidates: sendTransportInfo.iceCandidates,
+      dtlsParameters: sendTransportInfo.dtlsParameters,
+      sctpParameters: sendTransportInfo.sctpParameters,
+      iceServers,
+      iceTransportPolicy: this._iceTransportPolicy,
+      proprietaryConstraints: PC_PROPRIETARY_CONSTRAINTS
+    });
 
-      this._sendTransport.on("connect", (
-          { dtlsParameters },
-          callback,
-          errback // eslint-disable-line no-shadow
+    this._sendTransport.on("connect", (
+      { dtlsParameters },
+      callback,
+      errback // eslint-disable-line no-shadow
     ) => {
       this.emitRTCEvent("info", "RTC", () => `Send transport [connect]`);
       this._sendTransport.observer.on("close", () => {
@@ -642,44 +705,44 @@ export default class TwilioAdapter extends EventEmitter{
       this._sendTransport.observer.on("newproducer", producer => {
         this.emitRTCEvent("info", "RTC", () => `Send transport [newproducer]: ${producer.id}`);
       });
-        this._sendTransport.observer.on("newconsumer", consumer => {
-          this.emitRTCEvent("info", "RTC", () => `Send transport [newconsumer]: ${consumer.id}`);
+      this._sendTransport.observer.on("newconsumer", consumer => {
+        this.emitRTCEvent("info", "RTC", () => `Send transport [newconsumer]: ${consumer.id}`);
+      });
+
+      this._protoo
+        .request("connectWebRtcTransport", {
+          transportId: this._sendTransport.id,
+          dtlsParameters
+        })
+        .then(callback)
+        .catch(errback);
+    });
+
+    this._sendTransport.on("connectionstatechange", connectionState => {
+      let level = "info";
+      if (connectionState === "failed" || connectionState === "disconnected") {
+        level = "error";
+      }
+      this.emitRTCEvent(level, "RTC", () => `Send transport [connectionstatechange]: ${connectionState}`);
+
+      this.checkSendIceStatus(connectionState);
+    });
+
+    this._sendTransport.on("produce", async ({ kind, rtpParameters, appData }, callback, errback) => {
+      this.emitRTCEvent("info", "RTC", () => `Send transport [produce]: ${kind}`);
+      try {
+        // eslint-disable-next-line no-shadow
+        const { id } = await this._protoo.request("produce", {
+          transportId: this._sendTransport.id,
+          kind,
+          rtpParameters,
+          appData
         });
 
-        this._protoo
-            .request("connectWebRtcTransport", {
-              transportId: this._sendTransport.id,
-              dtlsParameters
-            })
-            .then(callback)
-            .catch(errback);
-      });
-
-      this._sendTransport.on("connectionstatechange", connectionState => {
-        let level = "info";
-        if (connectionState === "failed" || connectionState === "disconnected") {
-          level = "error";
-        }
-        this.emitRTCEvent(level, "RTC", () => `Send transport [connectionstatechange]: ${connectionState}`);
-
-        this.checkSendIceStatus(connectionState);
-      });
-
-      this._sendTransport.on("produce", async ({ kind, rtpParameters, appData }, callback, errback) => {
-        this.emitRTCEvent("info", "RTC", () => `Send transport [produce]: ${kind}`);
-        try {
-          // eslint-disable-next-line no-shadow
-          const { id } = await this._protoo.request("produce", {
-            transportId: this._sendTransport.id,
-            kind,
-            rtpParameters,
-            appData
-          });
-
-          callback({ id });
-        } catch (error) {
-          this.emitRTCEvent("error", "Signaling", () => `[produce] error: ${error}`);
-          errback(error);
+        callback({ id });
+      } catch (error) {
+        this.emitRTCEvent("error", "Signaling", () => `[produce] error: ${error}`);
+        errback(error);
       }
     });
 
@@ -691,21 +754,21 @@ export default class TwilioAdapter extends EventEmitter{
   async closeSendTransport() {
     if (this._micProducer) {
       this._micProducer.close();
-      this._protoo.connected && this._protoo.request("closeProducer", { producerId: this._micProducer.id });
+      this._protoo?.connected && this._protoo?.request("closeProducer", { producerId: this._micProducer.id });
       this._micProducer = null;
     }
 
     if (this._videoProducer) {
       this._videoProducer.close();
-      this._protoo.connected && this._protoo.request("closeProducer", { producerId: this._videoProducer.id });
+      this._protoo?.connected && this._protoo?.request("closeProducer", { producerId: this._videoProducer.id });
       this._videoProducer = null;
     }
 
-    if (!this._sendTransport?._closed) {
+    if (this._sendTransport && !this._sendTransport._closed) {
       this._sendTransport.close();
     }
 
-    if (this._protoo.connected) {
+    if (this._protoo?.connected) {
       try {
         await this._protoo.request("closeWebRtcTransport", { transportId: this._sendTransport?.id });
       } catch (err) {
@@ -718,24 +781,24 @@ export default class TwilioAdapter extends EventEmitter{
     // Create mediasoup Transport for sending (unless we don't want to consume).
     const recvTransportInfo = await this._protoo.request("createWebRtcTransport", {
       producing: false,
-        consuming: true,
-        sctpCapabilities: undefined
-      });
+      consuming: true,
+      sctpCapabilities: undefined
+    });
 
-      this._recvTransport = this._mediasoupDevice.createRecvTransport({
-        id: recvTransportInfo.id,
-        iceParameters: recvTransportInfo.iceParameters,
-        iceCandidates: recvTransportInfo.iceCandidates,
-        dtlsParameters: recvTransportInfo.dtlsParameters,
-        sctpParameters: recvTransportInfo.sctpParameters,
-        iceServers,
-        iceTransportPolicy: this._iceTransportPolicy
-      });
+    this._recvTransport = this._mediasoupDevice.createRecvTransport({
+      id: recvTransportInfo.id,
+      iceParameters: recvTransportInfo.iceParameters,
+      iceCandidates: recvTransportInfo.iceCandidates,
+      dtlsParameters: recvTransportInfo.dtlsParameters,
+      sctpParameters: recvTransportInfo.sctpParameters,
+      iceServers,
+      iceTransportPolicy: this._iceTransportPolicy
+    });
 
-      this._recvTransport.on("connect", (
-          { dtlsParameters },
-          callback,
-          errback // eslint-disable-line no-shadow
+    this._recvTransport.on("connect", (
+      { dtlsParameters },
+      callback,
+      errback // eslint-disable-line no-shadow
     ) => {
       this.emitRTCEvent("info", "RTC", () => `Receive transport [connect]`);
       this._recvTransport.observer.on("close", () => {
@@ -743,37 +806,37 @@ export default class TwilioAdapter extends EventEmitter{
         !this._recvTransport?._closed && this._recvTransport.close();
       });
       this._recvTransport.observer.on("newproducer", producer => {
-          this.emitRTCEvent("info", "RTC", () => `Receive transport [newproducer]: ${producer.id}`);
-        });
-        this._recvTransport.observer.on("newconsumer", consumer => {
-          this.emitRTCEvent("info", "RTC", () => `Receive transport [newconsumer]: ${consumer.id}`);
-        });
-
-        this._protoo
-            .request("connectWebRtcTransport", {
-              transportId: this._recvTransport.id,
-              dtlsParameters
-            })
-            .then(callback)
-            .catch(errback);
+        this.emitRTCEvent("info", "RTC", () => `Receive transport [newproducer]: ${producer.id}`);
+      });
+      this._recvTransport.observer.on("newconsumer", consumer => {
+        this.emitRTCEvent("info", "RTC", () => `Receive transport [newconsumer]: ${consumer.id}`);
       });
 
-      this._recvTransport.on("connectionstatechange", connectionState => {
-        let level = "info";
-        if (connectionState === "failed" || connectionState === "disconnected") {
-          level = "error";
-        }
-        this.emitRTCEvent(level, "RTC", () => `Receive transport [connectionstatechange]: ${connectionState}`);
+      this._protoo
+        .request("connectWebRtcTransport", {
+          transportId: this._recvTransport.id,
+          dtlsParameters
+        })
+        .then(callback)
+        .catch(errback);
+    });
+
+    this._recvTransport.on("connectionstatechange", connectionState => {
+      let level = "info";
+      if (connectionState === "failed" || connectionState === "disconnected") {
+        level = "error";
+      }
+      this.emitRTCEvent(level, "RTC", () => `Receive transport [connectionstatechange]: ${connectionState}`);
 
       this.checkRecvIceStatus(connectionState);
     });
   }
 
   async closeRecvTransport() {
-    if (!this._recvTransport?._closed) {
+    if (this._recvTransport && !this._recvTransport._closed) {
       this._recvTransport.close();
     }
-    if (this._protoo.connected) {
+    if (this._protoo?.connected) {
       try {
         await this._protoo.request("closeWebRtcTransport", { transportId: this._recvTransport?.id });
       } catch (err) {
@@ -789,53 +852,44 @@ export default class TwilioAdapter extends EventEmitter{
   async _joinRoom() {
     debug("_joinRoom()");
 
-    try {
-      this._mediasoupDevice = new mediasoupClient.Device({});
+    this._mediasoupDevice = new mediasoupClient.Device({});
 
-      const routerRtpCapabilities = await this._protoo.request("getRouterRtpCapabilities");
+    const routerRtpCapabilities = await this._protoo.request("getRouterRtpCapabilities");
 
-      await this._mediasoupDevice.load({ routerRtpCapabilities });
+    await this._mediasoupDevice.load({ routerRtpCapabilities });
 
-      const { host, port, turn } = await window.APP.hubChannel.getHost();
-      const iceServers = this.getIceServers(host, port, turn);
+    const { host, port, turn } = this._serverParams;
+    const iceServers = this.getIceServers(host, port, turn);
 
-      await this.createSendTransport(iceServers);
-      await this.createRecvTransport(iceServers);
+    await this.createSendTransport(iceServers);
+    await this.createRecvTransport(iceServers);
 
-      const { peers } = await this._protoo.request("join", {
-        displayName: this._clientId,
-        device: this._device,
-        rtpCapabilities: this._mediasoupDevice.rtpCapabilities,
-        sctpCapabilities: this._useDataChannel ? this._mediasoupDevice.sctpCapabilities : undefined,
-        token: this._joinToken
-      });
+    const { peers } = await this._protoo.request("join", {
+      displayName: this._clientId,
+      device: this._device,
+      rtpCapabilities: this._mediasoupDevice.rtpCapabilities,
+      sctpCapabilities: this._useDataChannel ? this._mediasoupDevice.sctpCapabilities : undefined,
+      token: this._joinToken
+    });
 
-      const audioConsumerPromises = [];
-      this.occupants = {};
+    const audioConsumerPromises = [];
+    this.occupants = {};
 
-      // Create a promise that will be resolved once we attach to all the initial consumers.
-      // This will gate the connection flow until all voices will be heard.
-      for (let i = 0; i < peers.length; i++) {
-        const peerId = peers[i].id;
-        this._onOccupantConnected(peerId);
-        this.occupants[peerId] = peers[i];
-        if (!peers[i].hasProducers) continue;
-        audioConsumerPromises.push(new Promise(res => this._initialAudioConsumerResolvers.set(peerId, res)));
-      }
+    // Create a promise that will be resolved once we attach to all the initial consumers.
+    // This will gate the connection flow until all voices will be heard.
+    for (let i = 0; i < peers.length; i++) {
+      const peerId = peers[i].id;
+      this._onOccupantConnected(peerId);
+      this.occupants[peerId] = peers[i];
+      if (!peers[i].hasProducers) continue;
+      audioConsumerPromises.push(new Promise(res => this._initialAudioConsumerResolvers.set(peerId, res)));
+    }
 
-      this._connectSuccess(this._clientId);
-      this._initialAudioConsumerPromise = Promise.all(audioConsumerPromises);
+    this._connectSuccess(this._clientId);
+    this._initialAudioConsumerPromise = Promise.all(audioConsumerPromises);
 
-      if (this._onOccupantsChanged) {
-        this._onOccupantsChanged(this.occupants);
-      }
-    } catch (err) {
-      this.emitRTCEvent("error", "Adapter", () => `Join room failed: ${error}`);
-      error("_joinRoom() failed:%o", err);
-
-      if (!this._reconnectionTimeout) {
-        this._reconnectionTimeout = setTimeout(() => this.reconnect(), this._reconnectionDelay);
-      }
+    if (this._onOccupantsChanged) {
+      this._onOccupantsChanged(this.occupants);
     }
   }
 
@@ -865,19 +919,7 @@ export default class TwilioAdapter extends EventEmitter{
             track.enabled = false;
           }
 
-          // stopTracks = false because otherwise the track will end during a temporary disconnect
-          this._micProducer = await this._sendTransport.produce({
-            track,
-            stopTracks: false,
-            zeroRtpOnPause: true,
-            disableTrackOnPause: true,
-            codecOptions: { opusStereo: false, opusDtx: true }
-          });
-
-          this._micProducer.on("transportclose", () => {
-            this.emitRTCEvent("info", "RTC", () => `Mic transport closed`);
-            this._micProducer = null;
-          });
+          await this.enabledMic(track);
 
           if (!this._micEnabled) {
             this._micProducer.pause();
@@ -887,27 +929,12 @@ export default class TwilioAdapter extends EventEmitter{
       } else {
         sawVideo = true;
 
-        if (this._videoProducer) {
-          if (this._videoProducer.track !== track) {
-            this._videoProducer.track.stop();
-            this._videoProducer.replaceTrack(track);
-          }
-        } else {
-          // TODO simulcasting
-
-          // stopTracks = false because otherwise the track will end during a temporary disconnect
-          this._videoProducer = await this._sendTransport.produce({
-            track,
-            stopTracks: false,
-            zeroRtpOnPause: true,
-            disableTrackOnPause: true,
-            codecOptions: { videoGoogleStartBitrate: 1000 }
-          });
-
-          this._videoProducer.on("transportclose", () => {
-            this.emitRTCEvent("info", "RTC", () => `Video transport closed`);
-            this._videoProducer = null;
-          });
+        if (track._hubs_contentHint === "share") {
+          await this.disableCamera();
+          await this.enableShare(track);
+        } else if (track._hubs_contentHint === "camera") {
+          await this.disableShare();
+          await this.enableCamera(track);
         }
       }
 
@@ -920,27 +947,108 @@ export default class TwilioAdapter extends EventEmitter{
       this._micProducer = null;
     }
 
-    if (!sawVideo && this._videoProducer) {
-      this._videoProducer.close();
-      this._protoo.request("closeProducer", { producerId: this._videoProducer.id });
-      this._videoProducer = null;
+    if (!sawVideo) {
+      this.disableCamera();
+      this.disableShare();
     }
 
     this._localMediaStream = stream;
   }
 
-  enableMicrophone(enabled) {
-    if(this._twilioroom) {
-      if (enabled) {
-        this._twilioroom.localParticipant.audioTracks.forEach(publication => {
-          publication.track.enable();
-        });
-      } else {
-        this._twilioroom.localParticipant.audioTracks.forEach(publication => {
-          publication.track.disable();
-        });
+  async enabledMic(track) {
+    // stopTracks = false because otherwise the track will end during a temporary disconnect
+    this._micProducer = await this._sendTransport.produce({
+      track,
+      stopTracks: false,
+      codecOptions: { opusStereo: false, opusDtx: true },
+      zeroRtpOnPause: true,
+      disableTrackOnPause: true
+    });
+
+    this._micProducer.on("transportclose", () => {
+      this.emitRTCEvent("info", "RTC", () => `Mic transport closed`);
+      this._micProducer = null;
+    });
+  }
+
+  async enableCamera(track) {
+    // stopTracks = false because otherwise the track will end during a temporary disconnect
+    this._cameraProducer = await this._sendTransport.produce({
+      track,
+      stopTracks: false,
+      codecOptions: { videoGoogleStartBitrate: 1000 },
+      encodings: WEBCAM_SIMULCAST_ENCODINGS,
+      zeroRtpOnPause: true,
+      disableTrackOnPause: true
+    });
+
+    this._cameraProducer.on("transportclose", () => {
+      this.emitRTCEvent("info", "RTC", () => `Camera transport closed`);
+      this.disableCamera();
+    });
+    this._cameraProducer.observer.on("trackended", () => {
+      this.emitRTCEvent("info", "RTC", () => `Camera track ended`);
+      this.disableCamera();
+    });
+  }
+
+  async disableCamera() {
+    if (!this._cameraProducer) return;
+
+    this._cameraProducer.close();
+
+    try {
+      if (!this._sendTransport.closed) {
+        await this._protoo.request("closeProducer", { producerId: this._cameraProducer.id });
       }
+    } catch (error) {
+      console.error(`disableCamera(): ${error}`);
     }
+
+    this._cameraProducer = null;
+  }
+
+  async enableShare(track) {
+    // stopTracks = false because otherwise the track will end during a temporary disconnect
+    this._shareProducer = await this._sendTransport.produce({
+      track,
+      stopTracks: false,
+      codecOptions: { videoGoogleStartBitrate: 1000 },
+      encodings: SCREEN_SHARING_SIMULCAST_ENCODINGS,
+      zeroRtpOnPause: true,
+      disableTrackOnPause: true,
+      appData: {
+        share: true
+      }
+    });
+
+    this._shareProducer.on("transportclose", () => {
+      this.emitRTCEvent("info", "RTC", () => `Desktop Share transport closed`);
+      this.disableShare();
+    });
+    this._shareProducer.observer.on("trackended", () => {
+      this.emitRTCEvent("info", "RTC", () => `Desktop Share transport track ended`);
+      this.disableShare();
+    });
+  }
+
+  async disableShare() {
+    if (!this._shareProducer) return;
+
+    this._shareProducer.close();
+
+    try {
+      if (!this._sendTransport.closed) {
+        await this._protoo.request("closeProducer", { producerId: this._shareProducer.id });
+      }
+    } catch (error) {
+      console.error(`disableShare(): ${error}`);
+    }
+
+    this._shareProducer = null;
+  }
+
+  enableMicrophone(enabled) {
     if (this._micProducer) {
       if (enabled) {
         this._micProducer.resume();
@@ -967,9 +1075,6 @@ export default class TwilioAdapter extends EventEmitter{
   }
 
   disconnect() {
-    if(this._twilioroom) {
-      this._twilioroom.disconnect();
-    }
     if (this._closed) return;
 
     this._closed = true;
@@ -989,70 +1094,40 @@ export default class TwilioAdapter extends EventEmitter{
 
     debug("disconnect()");
 
+    // Close mediasoup Transports.
+    this.closeSendTransport();
+    this.closeRecvTransport();
+
     // Close protoo Peer, though may already be closed if this is happening due to websocket breakdown
     if (this._protoo && this._protoo.connected) {
       this._protoo.close();
       this.emitRTCEvent("info", "Signaling", () => `[close]`);
     }
-
-    // Close mediasoup Transports.
-    this.closeSendTransport();
-    this.closeRecvTransport();
-
-    this._lastRecvConnectionState = null;
-    this._lastSendConnectionState = null;
   }
 
-  reconnect() {
-    // Dispose of all networked entities and other resources tied to the session.
+  reconnect(timeout = 2000) {
+    // The Protoo WebSocketTransport server url cannot be updated after it's been created so we need to orce a diconnect/connect
+    // to make sure we are using the updated server url for the WSS if it has changed.
     this.disconnect();
-
-    this.connect()
-        .then(() => {
-          this._reconnectionDelay = INITIAL_ROOM_RECONNECTION_INTERVAL;
-          this._reconnectionAttempts = 0;
-
-          if (this._reconnectedListener) {
-            this._reconnectedListener();
-          }
-
-          clearInterval(this._reconnectionTimeout);
-          this._reconnectionTimeout = null;
-        })
-        .catch(error => {
-          this._reconnectionDelay += 1000;
-          this._reconnectionAttempts++;
-
-          if (this._reconnectionAttempts > this.max_reconnectionAttempts && this._reconnectionErrorListener) {
-            return this._reconnectionErrorListener(
-                new Error("Connection could not be reestablished, exceeded maximum number of reconnection attempts.")
-            );
-          }
-
-          this.emitRTCEvent("warn", "Adapter", () => `Error during reconnect, retrying: ${error}`);
-          console.warn("Error during reconnect, retrying.");
-          console.warn(error);
-
-          if (this._reconnectingListener) {
-            this._reconnectingListener(this._reconnectionDelay);
-          }
-
-          if (!this._reconnectionTimeout) {
-            this._reconnectionTimeout = setTimeout(() => this.reconnect(), this._reconnectionDelay);
-          }
-        });
+    if (this._protoo) {
+      this._protoo.removeAllListeners();
+      this._protoo.close();
+    }
+    setTimeout(() => {
+      this.connect();
+    }, timeout);
   }
 
   kick(clientId, permsToken) {
     return this._protoo
-        .request("kick", {
-          room_id: this.room,
-          user_id: clientId,
-          token: permsToken
-        })
-        .then(() => {
-          document.body.dispatchEvent(new CustomEvent("kicked", { detail: { clientId: clientId } }));
-        });
+      .request("kick", {
+        room_id: this.room,
+        user_id: clientId,
+        token: permsToken
+      })
+      .then(() => {
+        document.body.dispatchEvent(new CustomEvent("kicked", { detail: { clientId: clientId } }));
+      });
   }
 
   block(clientId) {
@@ -1142,7 +1217,7 @@ export default class TwilioAdapter extends EventEmitter{
     } else {
       const storedMessage = this._frozenUpdates.get(networkId);
       const storedData =
-          storedMessage.dataType === "um" ? this.dataForUpdateMultiMessage(networkId, storedMessage) : storedMessage.data;
+        storedMessage.dataType === "um" ? this.dataForUpdateMultiMessage(networkId, storedMessage) : storedMessage.data;
 
       // Avoid updating components if the entity data received did not come from the current owner.
       const isOutdatedMessage = data.lastOwnerTime < storedData.lastOwnerTime;
@@ -1246,4 +1321,4 @@ export default class TwilioAdapter extends EventEmitter{
   }
 }
 
-NAF.adapters.register("twilio", TwilioAdapter);
+NAF.adapters.register("dialog-io", DialogIOAdapter);

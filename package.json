@@ -199,7 +199,7 @@
     "ora": "^4.0.2",
     "phoenix-channels": "^1.0.0",
     "prettier": "^1.7.0",
-    "protoo-client": "^4.0.4",
+    "protoo-client": "github:ApteroSAS/protoo#client",
     "raw-loader": "^0.5.1",
     "react-is": "^16.13.1",
     "request": "^2.88.2",

@@ -14,11 +14,17 @@ import { roomParameters } from "./service/RoomParameters";
 //import DistributedSoundSystem from "./service/DistributedSoundSystem";
 import SoundSystem from "./service/SoundSystem";
 
+//adapter
+import "./adapter/naf-twilio-adapter";
+import "./adapter/naf-dialog-io-adapter";
+
 export class ApteroServices{
   constructor(){
+    roomParameters.getAndApplyRoomParameters();//called as soon as possible
   }
 
-  async start(){
+  start(audioSettingsSystem){
+    this.audioSettingsSystem = audioSettingsSystem;
     waitForDOMContentLoaded().then(async () => {
       await networkService.start();
       await new SoundSystem(networkService).start();
@@ -31,9 +37,9 @@ export class ApteroServices{
       await gltfExtensionProcessorService.start();
     });
   }
-
-  async onEnterRoom(roomSID) {
-    await roomParameters.applyConfig(roomSID);
+  
+  async onEnterRoom(){
+    await roomParameters.applyDefaultAudioSettingsSystem(this.audioSettingsSystem);
   }
 
   tick(){

@@ -316,15 +316,8 @@ export default class DialogAdapter extends EventEmitter {
     this._protoo = new protooClient.Peer(protooTransport);
 
     this._protoo.on("disconnected", () => {
-      console.warn("protoo disconnected");
-      //TODO Aptero
-      setTimeout(()=>{
-        if (this._protoo && !this._protoo.connected) {
-          console.warn("Do protoo timeout disconnected");
-          this.emitRTCEvent("info", "Signaling", () => `Disconnected`);
-          this.disconnect();
-        }
-      },3000);
+      this.emitRTCEvent("info", "Signaling", () => `Disconnected`);
+      this.disconnect();
     });
 
     this._protoo.on("failed", attempt => {

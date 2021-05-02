@@ -4,6 +4,8 @@ import { addEntryModeIfNotExist } from "../util/EntryMode";
 import configs from "../../utils/configs"
 
 export class RoomParameters {
+    fetch=false;
+
     async getParameters(roomSID) {
         return await new Promise((resolve, reject) => {
             axios.get(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/room/room/" + roomSID).then(resp => {
@@ -21,7 +23,7 @@ export class RoomParameters {
     async applyPermissionAsync(permission, admin) {
         permission["show_spawn_and_move_media"] = true;//default value
         let roomConfig = await this.getParameters(permission.hub_id);
-        this.applyConfig(permission.hub_id);//also update preferences
+        this.getAndApplyRoomParameters();//also update preferences
         if (roomConfig) {
             if (roomConfig.permission) {
                 permission = { ...permission, ...roomConfig.permission };
@@ -51,46 +53,53 @@ export class RoomParameters {
         return permission;
     }
 
-    async applyConfig(roomSID) {
-        window.APP.override = { preferences: {} };
-        let roomConfig = await this.getParameters(roomSID);
-        if (roomConfig) {
-            if (roomConfig.preferences) {
-                Object.keys(roomConfig.preferences).forEach(key => {
-                    window.APP.store.state.preferences[key] = roomConfig.preferences[key];
-                });
-            }
-            if (roomConfig.preferencesOverride) {
-                Object.keys(roomConfig.preferencesOverride).forEach(key => {
-                    window.APP.override.preferences[key] = roomConfig.preferencesOverride[key];
-                });
-                await new Promise(resolve => {
-                    setTimeout(() => {
-                        let as = AFRAME.scenes[0].systems["hubs-systems"].audioSettingsSystem.audioSettings;
-                        if (as) {
-                            Object.keys(as).forEach(key => {
-                                as[key] = window.getPreferences(key) || as[key];
-                            });
-                            //special cases
-                            as.avatarDistanceModel = window.getPreferences("distanceModel") || as.avatarDistanceModel;
-                            as.avatarRolloffFactor = window.getPreferences("rolloffFactor") || as.avatarRolloffFactor;
-                            as.avatarRefDistance = window.getPreferences("refDistance") || as.avatarRefDistance;
-                            as.avatarMaxDistance = window.getPreferences("maxDistance") || as.avatarMaxDistance;
-                        }
-                        resolve();
-                    }, 0);//wait for AFRAME.scenes[0]
-                });
-            }
-            if (roomConfig.entryMode) {
-                addEntryModeIfNotExist(roomConfig.entryMode);
-            }
-            if(roomConfig.AppConfigOverride){
-                Object.keys(roomConfig.AppConfigOverride).forEach(key => {
-                    configs.APP_CONFIG[key] = roomConfig.AppConfigOverride[key];
-                });
-            }
+    async applyDefaultAudioSettingsSystem(audioSettingsSystem) {
+        //let audioSettings = AFRAME.scenes[0].systems["hubs-systems"].audioSettingsSystem.audioSettings;
+        await this.getAndApplyRoomParameters();//ensure parameters are retrieved
+        let audioSettings = audioSettingsSystem.audioSettings;
+        if (audioSettings) {
+            console.log("applyDefaultAudioSettingsSystem");
+            Object.keys(audioSettings).forEach(key => {
+                audioSettings[key] = window.getPreferences(key) || audioSettings[key];
+            });
+            //special cases
+            audioSettings.avatarDistanceModel = window.getPreferences("distanceModel") || audioSettings.avatarDistanceModel;
+            audioSettings.avatarRolloffFactor = window.getPreferences("rolloffFactor") || audioSettings.avatarRolloffFactor;
+            audioSettings.avatarRefDistance = window.getPreferences("refDistance") || audioSettings.avatarRefDistance;
+            audioSettings.avatarMaxDistance = window.getPreferences("maxDistance") || audioSettings.avatarMaxDistance;
         }
     }
+
+    async getAndApplyRoomParameters() {
+        if(!this.fetch) {
+            const qs = new URLSearchParams(window.location.search);
+            const roomSID = qs.get("hub_id") || document.location.pathname.substring(1).split("/")[0];
+            window.APP.override = { preferences: {} };
+            let roomConfig = await this.getParameters(roomSID);
+            if (roomConfig) {
+                if (roomConfig.preferences) {
+                    Object.keys(roomConfig.preferences).forEach(key => {
+                        window.APP.store.state.preferences[key] = roomConfig.preferences[key];
+                    });
+                }
+                if (roomConfig.preferencesOverride) {
+                    Object.keys(roomConfig.preferencesOverride).forEach(key => {
+                        window.APP.override.preferences[key] = roomConfig.preferencesOverride[key];
+                    });
+                }
+                if (roomConfig.entryMode) {
+                    addEntryModeIfNotExist(roomConfig.entryMode);
+                }
+                if (roomConfig.AppConfigOverride) {
+                    Object.keys(roomConfig.AppConfigOverride).forEach(key => {
+                        configs.APP_CONFIG[key] = roomConfig.AppConfigOverride[key];
+                    });
+                }
+            }
+            this.fetch = true;
+        }
+    }
+    
 }
 
 export const roomParameters = new RoomParameters();
