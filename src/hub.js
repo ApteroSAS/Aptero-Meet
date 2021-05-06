@@ -231,10 +231,9 @@ import { ExitReason } from "./react-components/room/ExitedRoomScreen";
 import { OAuthScreenContainer } from "./react-components/auth/OAuthScreenContainer";
 import { SignInMessages } from "./react-components/auth/SignInModal";
 import { ThemeProvider } from "./react-components/styles/theme";
-import { configureTurn, createTrack, fetchICEservers } from "./aptero/service/twilio";
 import { roomController } from "./aptero/service/api/RoomController";
 import { minimumQualityService } from "./aptero/service/MinimumQualityService";
-import { choseAdapter } from "./aptero/adapter/adapter-config";
+import { choseAdapter, configureTurn, createTrack, fetchICEservers } from "./aptero/adapter/adapter-config";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;

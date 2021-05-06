@@ -1,8 +1,8 @@
 import * as mediasoupClient from "mediasoup-client";
 import protooClient from "protoo-client";
 import { debug as newDebug } from "debug";
-import { addIceServers } from "./aptero/service/twilio";
 import EventEmitter from "eventemitter3";
+import { addIceServers } from "./aptero/adapter/adapter-config";
 
 // NOTE this adapter does not properly fire the onOccupantsReceived events since those are only needed for
 // data channels, which are not yet supported. To fire that event, this class would need to keep a list of

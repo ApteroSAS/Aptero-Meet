@@ -14,9 +14,9 @@ import { roomParameters } from "./service/RoomParameters";
 //import DistributedSoundSystem from "./service/DistributedSoundSystem";
 import SoundSystem from "./service/SoundSystem";
 
+
 //adapter
-import "./adapter/naf-twilio-adapter";
-import "./adapter/naf-dialog-io-adapter";
+import "./adapter/adapter-config";
 
 export class ApteroServices{
   constructor(){

@@ -171,7 +171,7 @@ export function RoomSidebar({ room, accountId, onClose, canEdit, onEdit, onChang
           />
         )}
         <div>
-        {"Selected adapter : "+configs.APP_CONFIG.adapter}
+        {"Selected adapter : "+configs.APP_CONFIG.adapterParams.adapter}
         </div>
       </Column>
     </Sidebar>

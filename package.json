@@ -73,6 +73,7 @@
     "aframe": "github:mozillareality/aframe#6fdea0cdaae21eb6ad779c089eb005011191c29a",
     "aframe-rounded": "^1.0.3",
     "aframe-slice9-component": "^1.0.0",
+    "agora-rtc-sdk-ng": "^4.4.0",
     "ammo-debug-drawer": "github:infinitelee/ammo-debug-drawer#561fd698109e61456f34136a53dd08b45d4ad9ca",
     "ammo.js": "github:mozillareality/ammo.js#a38109e87e300c820da14c9615be379caf03d77a",
     "animejs": "github:mozillareality/anime#883d028420c7eb8c2934290e5d10827be4640318",

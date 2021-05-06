@@ -1,4 +1,4 @@
-import { createTrack } from "../aptero/service/twilio";
+import { createTrack } from "../aptero/adapter/adapter-config";
 
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
@@ -224,11 +224,7 @@ export default class MediaDevicesManager {
     let videoTrackAdded = false;
 
     try {
-      if (isDisplayMedia) {
-        newStream = await navigator.mediaDevices.getDisplayMedia(constraints);
-      } else {
-        newStream = await createTrack(constraints);
-      }
+      newStream = await createTrack(constraints,isDisplayMedia);
 
       const videoTracks = newStream ? newStream.getVideoTracks() : [];
       if (videoTracks.length > 0) {

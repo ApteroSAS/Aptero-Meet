@@ -1,4 +1,4 @@
-import { filterServer } from "./twilio";
+import { filterServer } from "../adapter/adapter-config";
 
 class MinimumQualityService {
 

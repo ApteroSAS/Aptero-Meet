@@ -1,8 +1,9 @@
 import * as mediasoupClient from "mediasoup-client";
 import protooClient from "protoo-client";
 import { debug as newDebug } from "debug";
-import { addIceServers, connectRoom, convertId } from "../service/twilio";
+import { connectRoom, convertId } from "./twilio";
 import EventEmitter from "eventemitter3";
+import { addIceServers, getAdapterConfig } from "./adapter-config";
 
 // NOTE this adapter does not properly fire the onOccupantsReceived events since those are only needed for
 // data channels, which are not yet supported. To fire that event, this class would need to keep a list of
@@ -79,6 +80,10 @@ export default class NafTwilioAdapter extends EventEmitter{
 
   setServerUrl(url) {
     this._serverUrl = url;
+  }
+
+  setServerParams(params) {
+    this._serverParams = params;
   }
 
   setJoinToken(joinToken) {
@@ -337,7 +342,12 @@ export default class NafTwilioAdapter extends EventEmitter{
       console.log(`Participant disconnected: ${participant.identity}`);
     });
 
-    const protooTransport = new protooClient.WebSocketTransport(urlWithParams.toString());
+    let protooTransport;
+    if(getAdapterConfig().transport && getAdapterConfig().transport=="WebSocketTransport"){
+      protooTransport = new protooClient.WebSocketTransport(urlWithParams.toString());
+    }else {
+      protooTransport = new protooClient.WebSocketIOTransport(urlWithParams.toString());
+    }
     this._protoo = new protooClient.Peer(protooTransport);
 
     await new Promise(res => {
@@ -351,7 +361,9 @@ export default class NafTwilioAdapter extends EventEmitter{
 
     this._protoo.on("disconnected", () => {
       this.emitRTCEvent("info", "Signaling", () => `Diconnected`);
-      this.disconnect();
+      setTimeout(() => {
+        this.disconnect();
+      }, 2000);
     });
 
     this._protoo.on("close", () => {
