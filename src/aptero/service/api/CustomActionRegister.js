@@ -48,8 +48,9 @@ export class CustomActionRegister {
   setup(htmlElement, action, actionid) {
     if (action.type === "animation") {
       this.actionAnimationController.setup(htmlElement, action, actionid);
+    }else {
+      this.actions[actionid] = { action: action };
     }
-    this.actions[actionid] = { action: action };
   }
 
   async handleEntry(entry, mediaOptions = null) {

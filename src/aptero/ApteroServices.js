@@ -6,7 +6,7 @@ import { video360Service } from "./service/Video360Service";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 
 import "./component/custom-controller-button";
-import "./component/rtmp-auto-refresh"
+import "./component/rtmp-auto-refresh";
 import "./component/media-limiter";
 import { gltfExtensionProcessorService } from "./service/api/GLTFExtensionProcessorService";
 import { staticObjectManipulator } from "./service/StaticObjectManipulator";
@@ -18,18 +18,18 @@ import SoundSystem from "./service/SoundSystem";
 //adapter
 import "./adapter/adapter-config";
 
-export class ApteroServices{
-  constructor(){
+export class ApteroServices {
+  constructor() {
     roomParameters.getRoomParameters();//called as soon as possible
   }
 
-  applySoftRedirect(){
-    if(window.location.host === "hub.aptero.co") {
+  applySoftRedirect() {
+    if (window.location.host === "hub.aptero.co") {
       window.location.href = window.location.href.replace("hub.aptero.co", "meet.aptero.co");
     }
   }
 
-  start(audioSettingsSystem){
+  start(audioSettingsSystem) {
     this.audioSettingsSystem = audioSettingsSystem;
     waitForDOMContentLoaded().then(async () => {
       await networkService.start();
@@ -43,17 +43,33 @@ export class ApteroServices{
       await gltfExtensionProcessorService.start();
     });
   }
-  
-  async onEnterRoom(){
+
+  async waitAudioSettingsSystem() {
+    return new Promise((resolve, reject) => {
+      if (this.audioSettingsSystem) {
+        resolve();
+      } else {
+        setTimeout(() => {
+          if (!this.audioSettingsSystem) {
+            this.waitAudioSettingsSystem();
+            resolve();
+          }
+        }, 200);
+      }
+    });
+  }
+
+  async onEnterRoom() {
     await roomParameters.applyRoomParameters();
+    await this.waitAudioSettingsSystem();
     await roomParameters.applyDefaultAudioSettingsSystem(this.audioSettingsSystem);
   }
 
-  tick(){
+  tick() {
 
   }
 
-  remove(){
+  remove() {
 
   }
 }
