@@ -9,6 +9,41 @@ import { Column } from "../../react-components/layout/Column";
 import { minimumQualityService } from "../service/MinimumQualityService";
 import { remoteControlServiceV2 } from "../service/RemoteControlServiceV2";
 
+export function fallbackVMButton(){
+  return <>
+    <Button preset="green" onClick={async ()=>{
+      window.location.href = await remoteControlServiceV2.generateFallBackUrl();
+    }
+    }>
+      <FormattedMessage id="fallback-modal.enter-room-error-button-compatibility" defaultMessage="Retart in compatibility mode"/>
+    </Button>
+  </>
+}
+
+export function fallbackTCPButton(){
+  const tcpUrl = new URL(document.location.toString());
+  const tcpParams = new URLSearchParams(tcpUrl.search);
+  tcpParams.set("force_tcp", true);
+  tcpUrl.search = tcpParams.toString();
+  return <>
+    <Button preset="green" onClick={async ()=>{
+      window.location.href = tcpUrl.toString();
+    }
+    }>
+      <FormattedMessage id="fallback-modal.enter-room-error-button-tcp" defaultMessage="Retart in TCP mode"/>
+    </Button>
+  </>
+}
+
+export function comboFallbackButton(){
+  return <>{
+    fallbackVMButton()
+  }{
+    fallbackTCPButton()
+  }
+  </>
+}
+
 export function FallbackModal({ className, onEnterRoom, onBack, ...rest }) {
 
   const status = minimumQualityService.getCheckStatus();
@@ -42,14 +77,7 @@ export function FallbackModal({ className, onEnterRoom, onBack, ...rest }) {
             />
           </div>}
           {(status["fps-issue"] || status["turn-udp-issue"] || status["turn-tcp-issue"] || status["mic-activity-issue"]) &&
-            <>
-              <Button preset="green" onClick={async ()=>{
-                window.location.href = await remoteControlServiceV2.generateFallBackUrl();
-              }
-              }>
-                <FormattedMessage id="fallback-modal.enter-room-button-compatibility" defaultMessage="Start in compatibility mode"/>
-              </Button>
-            </>
+            fallbackVMButton()
           }
           <>
             <Button preset="green" onClick={onEnterRoom}>

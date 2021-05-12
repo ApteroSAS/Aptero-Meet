@@ -512,6 +512,9 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
   }
 
   const hub = data.hubs[0];
+  if(qs.has("offline")){
+    hub.port=666;
+  }
   let embedToken = hub.embed_token;
 
   if (!embedToken) {
@@ -1413,7 +1416,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         adapter.setServerParams(await window.APP.hubChannel.getHost());
         adapter.setReconnectionListeners(
           async () => {
-            const { host, port } = await hubChannel.getHost();
+            let { host, port } = await hubChannel.getHost();
             const newServerURL = `wss://${host}:${port}`;
             // If the Dialog server url has changed, the server has rolled over and we need to reconnect using an updated server URL.
             if (adapter.serverUrl !== newServerURL) {
