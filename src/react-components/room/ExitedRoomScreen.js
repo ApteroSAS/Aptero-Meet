@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { defineMessages, FormattedMessage, useIntl } from "react-intl";
 import { LoadingScreenLayout } from "../layout/LoadingScreenLayout";
 import { Button } from "../input/Button";
+import { comboFallbackButton } from "../../aptero/react-components/FallbackModal";
 
 export const ExitReason = {
   exited: "exited",
@@ -47,7 +48,7 @@ const messages = defineMessages({
   },
   [ExitReason.connectError]: {
     id: "exited-room-screen.reason.connect-error",
-    defaultMessage: "Unable to connect to this room, please try again later."
+    defaultMessage: "Unable to connect to this room due to network issues (VPN proxy etc...)."
   },
   [ExitReason.versionMismatch]: {
     id: "exited-room-screen.reason.version-mismatch",
@@ -121,18 +122,7 @@ export function ExitedRoomScreen({ reason, showTerms, termsUrl, logoSrc, showSou
       <>
         <b>{intl.formatMessage(messages[reason])}</b>
 
-        {reason === ExitReason.connectError && (
-          <p>
-            <FormattedMessage
-              id="exited-room-screen.connect-tcp"
-              defaultMessage="You can try <a>connecting via TCP</a>, which may work better on some networks."
-              values={{
-                // eslint-disable-next-line react/display-name
-                a: chunks => <a href={tcpUrl.toString()}>{chunks}</a>
-              }}
-            />
-          </p>
-        )}
+        {reason === ExitReason.connectError && comboFallbackButton()}
         {/*![ExitReason.left, ExitReason.disconnected, ExitReason.sceneError].includes(reason) && (
           <p>
             <FormattedMessage
