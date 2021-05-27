@@ -1,23 +1,19 @@
 import configs from "../../utils/configs";
-//adapterRegister
-import "./naf-twilio-adapter";
-import "./naf-dialog-io-adapter";
-import "./naf-agora-adapter";
-import { createTwilioTrack } from "./twilio";
-import { createAgoraTrack } from "./agora";
+import { lazyLoad } from "./adapterRegistrer";
 
 let defaultAdapter = "dialog-io";
 
 let forceTurnGlobal = false;
 let forceTcpGlobal = false;
 
-export function choseAdapter() {
+export async function choseAdapter() {
   let adapter = defaultAdapter;
   //Aptero
   if (configs.APP_CONFIG.adapterParams.adapter) {
     adapter = configs.APP_CONFIG.adapterParams.adapter;
   }
   configs.APP_CONFIG.adapterParams.adapter = adapter;
+  await lazyLoad(adapter);
   return adapter;
 }
 
@@ -30,8 +26,10 @@ export async function createTrack(constraints, isDisplayDevice) {
     delete constraints["audio"];
   }
   if (configs.APP_CONFIG.adapterParams.adapter === "twilio") {
+    let { createTwilioTrack:createTwilioTrack } = await import('./twilio')
     return createTwilioTrack(constraints, isDisplayDevice);
   } else if (configs.APP_CONFIG.adapterParams.adapter === "agora") {
+    let { createAgoraTrack:createAgoraTrack } = await import('./agora')
     return createAgoraTrack(constraints, isDisplayDevice);
   } else {
     if (isDisplayDevice) {

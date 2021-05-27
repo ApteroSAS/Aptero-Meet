@@ -1,10 +1,6 @@
-import * as microsoftTeams from "@microsoft/teams-js";
-import * as Msal from "msal";
-import { ImplicitMSALAuthenticationProvider } from "@microsoft/microsoft-graph-client/lib/src/ImplicitMSALAuthenticationProvider";
-import { MSALAuthenticationProviderOptions } from "@microsoft/microsoft-graph-client/lib/src/MSALAuthenticationProviderOptions";
-import { Client } from "@microsoft/microsoft-graph-client/lib/src/Client";
-import configs from "../../utils/configs";
-window.Buffer = window.Buffer || require('buffer').Buffer;
+
+
+import configs from "../../../utils/configs";
 
 const EventEmitter = require("eventemitter3");
 export const MICROSOFT_AUTH_ERROR = "error_microsoft_not_authorized";
@@ -46,6 +42,10 @@ export class MicrosoftService{
       }
     }
     //this.overrideXHRSendRequest();
+    window.Buffer = window.Buffer || (await import('buffer')).Buffer;
+    let Msal = (await import('msal')).default
+    let { ImplicitMSALAuthenticationProvider } = (await import("@microsoft/microsoft-graph-client/lib/src/ImplicitMSALAuthenticationProvider"));
+    let { MSALAuthenticationProviderOptions } = (await import("@microsoft/microsoft-graph-client/lib/src/MSALAuthenticationProviderOptions"));
     this.msalInstance = new Msal.UserAgentApplication(this.msalConfig);
     const options = new MSALAuthenticationProviderOptions(this.scopes);
     this.authProvider = new ImplicitMSALAuthenticationProvider(this.msalInstance, options);
@@ -55,7 +55,11 @@ export class MicrosoftService{
     const options2 = {
       authProvider : this.authProvider, // An instance created from previous step
     };
+    //import { Client } from "@microsoft/microsoft-graph-client/lib/src/Client";
+    let { Client } = (await import("@microsoft/microsoft-graph-client/lib/src/Client"))
     this.client = Client.initWithMiddleware(options2);
+    //import * as microsoftTeams from "@microsoft/teams-js";
+    let microsoftTeams = (await import("@microsoft/teams-js")).default
     await microsoftTeams.initialize();
     this.passiveLogin();
   }
@@ -113,7 +117,7 @@ export class MicrosoftService{
   }
 
   async convertSharingUrlToDownloadUrl(url){
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const stoken = this.urlToToSharingToken(url);
       this.client.api('/shares/'+stoken+'/driveItem').get().then((res) => {
         resolve(res["@microsoft.graph.downloadUrl"]);
@@ -149,7 +153,7 @@ export class MicrosoftService{
 
   async passiveLogin() {
     // if using cdn version, 'Msal' will be available in the global scope
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       // if the user is already logged in you can acquire a token
       if (this.msalInstance.getAccount()) {
         this.msalInstance.acquireTokenSilent(this.loginRequest)

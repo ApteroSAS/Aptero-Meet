@@ -1,8 +1,6 @@
 import { networkService } from "../NetworkService";
 import { customActionRegister } from "./CustomActionRegister";
 
-let jquery = require("jquery");
-
 export class ActionController {
   async start() {
     await customActionRegister.start();
@@ -36,6 +34,7 @@ export class ActionController {
   }
 
   async processEntry(entry, elid, sceneuuid, meshuuid, meshName, pairIndex, masterindex) {
+    const jquery = (await import('jquery')).default
     let element = jquery("#" + elid);
     let htmlElement = element.get()[0];
     let networkId = await networkService.getElementNetworkId(htmlElement);

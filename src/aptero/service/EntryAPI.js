@@ -29,6 +29,9 @@ export async function processResponse(entries) {
               thumbnailRenderer.generateThumbnailFromUrlRemote(entry.url).then(dataurl => {
                 entry.images.preview.url = dataurl;
                 resolve({ url: entry.url, preview: dataurl })
+              }).catch(reason => {
+                console.error(reason);
+                resolve({ url: entry.url, preview: window.APP_PROPS.APP_CONFIG.GLOBAL_ASSETS_PATH+"app-thumbnail.png" })
               });
             });
             previewLoadPromises.push(entry.onPreviewLoaded);

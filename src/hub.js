@@ -222,7 +222,7 @@ import qsTruthy from "./utils/qs_truthy";
 //aptero service
 import {video360Service } from "./aptero/service/Video360Service";
 import { networkService } from "./aptero/service/NetworkService";
-import { microsoftService } from "./aptero/service/MicrosoftService";
+import { microsoftService } from "./aptero/service/MicrosoftIntegration/MicrosoftService";
 import { staticObjectManipulator } from "./aptero/service/StaticObjectManipulator";
 import { apteroService } from "./aptero/ApteroServices";
 
@@ -575,7 +575,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
   // TODO Remove this once transition completed.
   // Wait for scene objects to load before connecting, so there is no race condition on network state.
   const connectToScene = async () => {
-    let adapter = choseAdapter();
+    let adapter = await choseAdapter();
 
     scene.setAttribute("networked-scene", {
       room: hub.hub_id,

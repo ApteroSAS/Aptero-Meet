@@ -15,7 +15,7 @@ export function fallbackVMButton(){
       window.location.href = await remoteControlServiceV2.generateFallBackUrl();
     }
     }>
-      <FormattedMessage id="fallback-modal.enter-room-error-button-compatibility" defaultMessage="Retart in compatibility mode"/>
+      <FormattedMessage id="fallback-modal.enter-room-error-button-compatibility" defaultMessage="Restart in compatibility mode"/>
     </Button>
   </>
 }
@@ -30,7 +30,7 @@ export function fallbackTCPButton(){
       window.location.href = tcpUrl.toString();
     }
     }>
-      <FormattedMessage id="fallback-modal.enter-room-error-button-tcp" defaultMessage="Retart in TCP mode"/>
+      <FormattedMessage id="fallback-modal.enter-room-error-button-tcp" defaultMessage="Restart in TCP mode"/>
     </Button>
   </>
 }

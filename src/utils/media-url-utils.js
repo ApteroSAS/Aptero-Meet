@@ -1,6 +1,6 @@
 import { hasReticulumServer } from "./phoenix-utils";
 import configs from "./configs";
-import { microsoftService } from "../aptero/service/MicrosoftService";
+import { microsoftService } from "../aptero/service/MicrosoftIntegration/MicrosoftService";
 import { proxyURL } from "../aptero/react-components/media-utils-lib";
 
 const nonCorsProxyDomains = (configs.NON_CORS_PROXY_DOMAINS || "").split(",");

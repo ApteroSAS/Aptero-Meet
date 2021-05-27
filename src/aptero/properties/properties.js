@@ -38,7 +38,7 @@ window.APP_PROPS = {
     MICROSOFT_APP_AUTHORITY: "https://login.microsoftonline.com/apteroco.onmicrosoft.com",
     GLOBAL_ASSETS_PATH: "https://hub.aptero.co/data/global/",
     adapterParams: {
-      adapter: "agora",//dialog,dialog-io,janus,twilio,agora
+      adapter: "dialog-io",//dialog,dialog-io,janus,twilio,agora
       transport: "WebSocketIOTransport",
       url:"https://alphahub.aptero.co/service/agora"
       //url:"https://alphahub.aptero.co/service/twilio/token"

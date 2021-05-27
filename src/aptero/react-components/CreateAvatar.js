@@ -48,7 +48,7 @@ export default class CreateAvatar extends Component {
   render() {
     return (
       <React.Fragment>
-        {!this.state.done && <div style={{ backgroundColor: "#232323", height: "600px",width:"100%" }} className="container"></div>}
+        {!this.state.done && <div style={{ backgroundColor: "#232323", height: "600px", minHeight: "600px", width:"100%" }} className="container"></div>}
         {this.state.done && <div style={{ backgroundColor: "#232323", height: "400px" }} className="container">Done</div>}
       </React.Fragment>
       );

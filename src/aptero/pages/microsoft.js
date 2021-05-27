@@ -1,4 +1,4 @@
-import { microsoftService } from "../service/MicrosoftService";
+import { microsoftService } from "../service/MicrosoftIntegration/MicrosoftService";
 
 async function main() {
   await microsoftService.start(() => {

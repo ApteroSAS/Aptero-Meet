@@ -466,7 +466,8 @@ module.exports = async (env, argv) => {
 
     optimization: {
     // We no not want to minimize our code. //TODO activate for prod => minimize: true
-    minimize: false,
+    //minimize: false,
+      minimize: argv.mode === "production" ? true : false,
       splitChunks: {
         maxAsyncRequests: 10,
         maxInitialRequests: 10,

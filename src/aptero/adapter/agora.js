@@ -1,6 +1,4 @@
-import configs from "../../utils/configs";
 import AgoraRTC from "agora-rtc-sdk-ng";
-import * as Video from "twilio-video";
 import { getAdapterConfig } from "./adapter-config";
 
 

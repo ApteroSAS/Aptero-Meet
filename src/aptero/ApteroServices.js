@@ -1,6 +1,6 @@
 import { liveStream } from "./service/LiveStream";
 import { changeVideoService } from "./service/ChangeVideoService";
-import { microsoftService } from "./service/MicrosoftService";
+import { microsoftService } from "./service/MicrosoftIntegration/MicrosoftService";
 import { networkService } from "./service/NetworkService";
 import { video360Service } from "./service/Video360Service";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
@@ -37,7 +37,7 @@ export class ApteroServices {
       //await new DistributedSoundSystem(networkService).start();
       await changeVideoService.start();
       await liveStream.start();
-      await microsoftService.start();
+      //await microsoftService.start(); //TODO Warning produce lots of payload in hub-vendor
       await staticObjectManipulator.start();
       await video360Service.start();
       await gltfExtensionProcessorService.start();

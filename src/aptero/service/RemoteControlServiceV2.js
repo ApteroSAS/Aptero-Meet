@@ -1,6 +1,5 @@
 import { propertiesService } from "../properties/propertiesService";
 import axios from "axios";
-import RFB from "@novnc/novnc/core/rfb";
 
 export class RemoteControlServiceV2 {
 
@@ -46,6 +45,7 @@ export class RemoteControlServiceV2 {
             axios.post(propertiesService.PROTOCOL + propertiesService.REMOTE_VM_SERVICE.url + "/service/remote/orchestrator/create", data).then(async resp => {
                 resp=resp.data;
                 resp.url = "wss://" + propertiesService.REMOTE_VM_SERVICE.url+"/reverse/"+resp.ip+"/"+resp.port+"/websockify";
+                let RFB = (await import('@novnc/novnc/core/rfb')).default
                 let rfb = new RFB( screenElement.children[0], resp.url);
                 this.remoteScreenSessionRfbMap[data.remoteScreenSessionId] = rfb;
                 await new Promise((resolve, reject) => {

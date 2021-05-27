@@ -1,5 +1,5 @@
 import uuid from "uuid/v4";
-import { microsoftService } from "../aptero/service/MicrosoftService";
+import { microsoftService } from "../aptero/service/MicrosoftIntegration/MicrosoftService";
 
 export default class AuthChannel {
   constructor(store) {
