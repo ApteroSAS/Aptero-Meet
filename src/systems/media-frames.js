@@ -94,7 +94,10 @@ export class MediaFramesSystem {
           }
         } else {
           // captured object was removed
-          //frame.release(); // Aptero modification
+          // TODO Aptero modification
+          // this line of code is usefull for the case where we put share screen or camera in media frame and close it with the button
+          // BUT for the button remove feature it is also necessary more dev needed
+          frame.release();
         }
       }
     }
@@ -135,6 +138,7 @@ AFRAME.registerComponent("media-frame", {
   },
 
   init() {
+    this.tmpWorldPosition = new THREE.Vector3();
     //TODO these visuals need work
     this.el.setObject3D(
       "guide",
@@ -249,9 +253,11 @@ AFRAME.registerComponent("media-frame", {
   },
 
   snapObject(capturedEl) {
-    // TODO this assumes media frames are all in world space
-    capturedEl.object3D.position.copy(this.el.object3D.position);
-    capturedEl.object3D.rotation.copy(this.el.object3D.rotation);
+    this.el.object3D.getWorldPosition(this.tmpWorldPosition);
+    capturedEl.object3D.position.copy(this.tmpWorldPosition);
+    const worldQuat = new THREE.Quaternion();
+    this.el.object3D.getWorldQuaternion(worldQuat);
+    capturedEl.object3D.setRotationFromQuaternion(worldQuat);
     capturedEl.object3D.matrixNeedsUpdate = true;
     capturedEl.components["floaty-object"].setLocked(true);
   },
@@ -262,9 +268,13 @@ AFRAME.registerComponent("media-frame", {
         targetId: capturableEntity.id,
         originalTargetScale: new THREE.Vector3().copy(capturableEntity.object3D.scale)
       });
-      // TODO this assumes media frames are all in world space
-      capturableEntity.object3D.position.copy(this.el.object3D.position);
-      capturableEntity.object3D.rotation.copy(this.el.object3D.rotation);
+      const worldPosition = new THREE.Vector3();
+      this.el.object3D.getWorldPosition(worldPosition);
+      capturableEntity.object3D.position.copy(worldPosition);
+      const worldQuat = new THREE.Quaternion();
+      this.el.object3D.updateWorldMatrix(true);
+      this.el.object3D.getWorldQuaternion(worldQuat);
+      capturableEntity.object3D.setRotationFromQuaternion(worldQuat);
       capturableEntity.object3D.scale.setScalar(
         scaleForAspectFit(this.data.bounds, capturableEntity.getObject3D("mesh").scale)
       );

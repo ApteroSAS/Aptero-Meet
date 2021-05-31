@@ -16,15 +16,11 @@ export class RemoteControlServiceV2 {
     }
 
     async generateFallBackUrl(urlToProxy,userId){
-        urlToProxy = urlToProxy || window.location.href
-        let tutoURL = "https://meet.aptero.co/service/remote/orchestrator/static/tutoRedirect.html?url="+urlToProxy;
-        let resp = await axios.post(propertiesService.PROTOCOL + propertiesService.REMOTE_VM_SERVICE.url + "/service/remote/orchestrator/getStreamApp", {
-            "userId":userId || this.getNewRemoteSessionID(),
-            "sessionContext":tutoURL
-        });
-        resp=resp.data;
-        let streamingURLBase64 = resp.StreamingURLBase64;
-        return "https://meet.aptero.co/service/remote/orchestrator/static/embed-app.html?q="+streamingURLBase64;
+        urlToProxy = urlToProxy || window.location.href;
+        let theURL= new URL('https://meet.aptero.co/service/remote/orchestrator/static/app/embed-app-v2.html');
+        theURL.searchParams.set("q",btoa(urlToProxy));
+        theURL.searchParams.set("u",userId || this.getNewRemoteSessionID());
+        return theURL.toString();
     }
 
     async getScreen(screenElement,data){
