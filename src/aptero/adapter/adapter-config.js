@@ -13,6 +13,9 @@ export async function choseAdapter() {
     adapter = configs.APP_CONFIG.adapterParams.adapter;
   }
   configs.APP_CONFIG.adapterParams.adapter = adapter;
+  if(new URL(window.location.href).searchParams.get("offline2")){
+    adapter="none";
+  }
   await lazyLoad(adapter);
   return adapter;
 }

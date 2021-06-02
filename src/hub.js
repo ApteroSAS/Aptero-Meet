@@ -658,7 +658,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
     updateUIForHub(hub, hubChannel);
     scene.emit("hub_updated", { hub });
 
-    if (!isEmbed) {
+    if (!isEmbed || (new URL(window.location.href).searchParams.get("hideui"))) {
       loadEnvironmentAndConnect();
     } else {
       remountUI({
@@ -671,7 +671,13 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
     }
   };
 
-  connectToScene();
+  connectToScene().then(() => {
+    //TODO migrate in aptero notify service
+    if(new URL(window.location.href).searchParams.get("offline2")) {
+      console.log("load finished => disconect from server")
+      hubChannel.channel.socket.teardown();
+    }
+  });
 }
 
 async function runBotMode(scene, entryManager) {
@@ -845,7 +851,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   remountUI({
     performConditionalSignIn,
     embed: isEmbed,
-    showPreload: isEmbed
+    showPreload: isEmbed && !(new URL(window.location.href).searchParams.get("hideui"))
   });
   entryManager.performConditionalSignIn = performConditionalSignIn;
   entryManager.init();

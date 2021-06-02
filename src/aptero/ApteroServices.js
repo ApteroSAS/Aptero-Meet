@@ -18,6 +18,33 @@ import SoundSystem from "./service/SoundSystem";
 //adapter
 import "./adapter/adapter-config";
 
+//event handling for iframe #morgane
+window.focus();
+window.addEventListener("keydown", function(e) {
+  if (["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(e.code) > -1) {
+    e.preventDefault();
+  }
+}, false);
+if((new URL(window.location.href).searchParams.get("hideui"))) {
+  //no space button if hide ui mode
+  window.addEventListener("keydown", function(e) {
+    if (["Space"].indexOf(e.code) > -1) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }, true);
+}
+/*window.addEventListener("scroll", function(e) {
+  e.preventDefault();
+});*/
+
+
+function sendIframeMessage(type,data){
+  if(window.top){
+    window.top.postMessage(JSON.stringify({type,data}), '*')
+  }
+}
+
 export class ApteroServices {
   constructor() {
     roomParameters.getRoomParameters();//called as soon as possible
@@ -71,6 +98,16 @@ export class ApteroServices {
 
   remove() {
 
+  }
+
+  notifySceneEntered() {
+    setTimeout(()=>{
+      sendIframeMessage("entered",{})
+    },1000);
+  }
+
+  notifyLoadingState(state, action) {
+    sendIframeMessage("loading",{state,action})
   }
 }
 

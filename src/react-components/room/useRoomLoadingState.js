@@ -1,7 +1,9 @@
 import { useEffect, useReducer, useRef, useCallback } from "react";
 import { useIntl, defineMessages } from "react-intl";
+import { apteroService } from "../../aptero/ApteroServices";
 
 function reducer(state, action) {
+  apteroService.notifyLoadingState(state,action);
   switch (action.type) {
     case "object-loading":
       return { ...state, objectCount: state.objectCount + 1, messageKey: "loadingObjects" };

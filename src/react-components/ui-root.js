@@ -95,6 +95,7 @@ import { TipContainer, FullscreenTip } from "./room/TipContainer";
 import { SpectatingLabel } from "./room/SpectatingLabel";
 import { SignInMessages } from "./auth/SignInModal";
 import { minimumQualityService } from "../aptero/service/MinimumQualityService";
+import { apteroService } from "../aptero/ApteroServices";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -113,6 +114,8 @@ async function grantedMicLabels() {
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
 const AUTO_EXIT_TIMER_SECONDS = 10;
+
+const aptGuiVisible = !(new URL(window.location.href).searchParams.get("hideui"));//aptero
 
 class UIRoot extends Component {
   willCompileAndUploadMaterials = false;
@@ -528,7 +531,7 @@ class UIRoot extends Component {
 
     const hasGrantedMic = (await grantedMicLabels()).length > 0;
 
-    if (hasGrantedMic) {
+    if (hasGrantedMic || new URL(window.location.href).searchParams.get("offline2")) {
       if (!this.mediaDevicesManager.isMicShared) {
         await this.mediaDevicesManager.startLastUsedMicShare();
       }
@@ -610,6 +613,7 @@ class UIRoot extends Component {
     if (this.mediaDevicesManager.isVideoShared) {
       console.log("Screen sharing enabled.");
     }
+    apteroService.notifySceneEntered();
   };
 
   attemptLink = async () => {
@@ -784,7 +788,7 @@ class UIRoot extends Component {
       setTimeout(() => this.handleForceEntry(), 500);
     }
     // TODO: What does onEnteringCanceled do?
-    return (
+    return (aptGuiVisible &&
       <>
         <RoomEntryModal
           appName={configs.translation("app-name")}
@@ -1282,7 +1286,6 @@ class UIRoot extends Component {
         ].filter(item => item)
       }
     ];
-
     return (
       <MoreMenuContextProvider>
         <ReactAudioContext.Provider value={this.state.audioContext}>
@@ -1358,8 +1361,9 @@ class UIRoot extends Component {
                   <>
                     {!this.state.dialog && renderEntryFlow ? entryDialog : undefined}
                     {!this.props.selectedObject && <CompactMoreMenuButton />}
-                    {(!this.props.selectedObject ||
-                      (this.props.breakpoint !== "sm" && this.props.breakpoint !== "md")) && (
+                    {(aptGuiVisible && (
+                      !this.props.selectedObject ||
+                      (this.props.breakpoint !== "sm" && this.props.breakpoint !== "md"))) && (
                       <ContentMenu>
                         {showObjectList && (
                           <ObjectsMenuButton
@@ -1398,7 +1402,7 @@ class UIRoot extends Component {
                         />
                       )}
                     <TipContainer
-                      hide={this.props.activeObject}
+                      hide={this.props.activeObject || !aptGuiVisible}
                       inLobby={watching}
                       inRoom={entered}
                       isEmbedded={this.props.embed}
@@ -1513,14 +1517,14 @@ class UIRoot extends Component {
                   )
                 }
                 modal={this.state.dialog}
-                toolbarLeft={
+                toolbarLeft={!aptGuiVisible?null:
                   <InvitePopoverContainer
                     hub={this.props.hub}
                     hubChannel={this.props.hubChannel}
                     scene={this.props.scene}
                   />
                 }
-                toolbarCenter={
+                toolbarCenter={ !aptGuiVisible?null:
                   <>
                     {watching && (
                       <>
@@ -1571,7 +1575,7 @@ class UIRoot extends Component {
                       )}
                   </>
                 }
-                toolbarRight={
+                toolbarRight={!aptGuiVisible?null:
                   <>
                     {entered &&
                       isMobileVR && (

@@ -14,4 +14,7 @@ export async function lazyLoad(adapter){
   if (adapter==="agora") {
     await import('./naf-'+adapter+'-adapter')
   }
+  if (adapter==="none") {
+    await import('./naf-'+adapter+'-adapter')
+  }
 }
