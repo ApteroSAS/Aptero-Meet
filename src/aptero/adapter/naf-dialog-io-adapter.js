@@ -26,11 +26,11 @@ import { addIceServers, getAdapterConfig } from "./adapter-config";
 let debug = console.log;
 let error = console.error;
 let info = console.log;
-if (newDebug) {
-  debug = newDebug("naf-dialog-adapter:debug");
-  //const warn = newDebug("naf-dialog-adapter:warn");
-  error = newDebug("naf-dialog-adapter:error");
-  info = newDebug("naf-dialog-adapter:info");
+if(newDebug){
+	debug = newDebug("naf-dialog-adapter:debug");
+	//const warn = newDebug("naf-dialog-adapter:warn");
+	error = newDebug("naf-dialog-adapter:error");
+	info = newDebug("naf-dialog-adapter:info");
 }
 
 const PC_PROPRIETARY_CONSTRAINTS = {
@@ -141,8 +141,7 @@ export default class DialogIOAdapter extends EventEmitter {
     return iceServers;
   }
 
-  setApp() {
-  }
+  setApp() {}
 
   setRoom(roomId) {
     this._roomId = roomId;
@@ -216,9 +215,9 @@ export default class DialogIOAdapter extends EventEmitter {
   async iceRestart(transport) {
     // Force an ICE restart to gather new candidates and trigger a reconnection
     this.emitRTCEvent(
-        "log",
-        "RTC",
-        () => `Restarting ${transport.id === this._sendTransport.id ? "send" : "receive"} transport ICE`
+      "log",
+      "RTC",
+      () => `Restarting ${transport.id === this._sendTransport.id ? "send" : "receive"} transport ICE`
     );
     const iceParameters = await this._protoo.request("restartIce", { transportId: transport.id });
     await transport.restartIce({ iceParameters });
@@ -333,7 +332,7 @@ export default class DialogIOAdapter extends EventEmitter {
 
     this._protoo.on("failed", attempt => {
       this.emitRTCEvent("error", "Signaling", () => `Failed: ${attempt}, retrying...`);
-      console.warn("protoo failed", attempt);
+      console.warn("protoo failed",attempt);
       if (this._isReconnect) {
         this._reconnectingListener && this._reconnectingListener();
       }
@@ -373,7 +372,7 @@ export default class DialogIOAdapter extends EventEmitter {
     // eslint-disable-next-line no-unused-vars
     this._protoo.on("request", async (request, accept, reject) => {
       this.emitRTCEvent("info", "Signaling", () => `Request [${request.method}]: ${request.data?.id}`);
-      debug("proto \"request\" event [method:%s, data:%o]", request.method, request.data?.id);
+      debug('proto "request" event [method:%s, data:%o]', request.method, request.data?.id);
 
       switch (request.method) {
         case "newConsumer": {
@@ -405,7 +404,7 @@ export default class DialogIOAdapter extends EventEmitter {
 
             if (kind === "video") {
               const { spatialLayers, temporalLayers } = mediasoupClient.parseScalabilityMode(
-                  consumer.rtpParameters.encodings[0].scalabilityMode
+                consumer.rtpParameters.encodings[0].scalabilityMode
               );
 
               this._consumerStats[consumer.id] = this._consumerStats[consumer.id] || {};
@@ -432,7 +431,7 @@ export default class DialogIOAdapter extends EventEmitter {
             this.emit("stream_updated", peerId, kind);
           } catch (err) {
             this.emitRTCEvent("error", "Adapter", () => `Error: ${err}`);
-            error("\"newConsumer\" request failed:%o", err);
+            error('"newConsumer" request failed:%o', err);
 
             throw err;
           }
@@ -443,11 +442,11 @@ export default class DialogIOAdapter extends EventEmitter {
     });
 
     this._protoo.on("notification", notification => {
-      debug("proto \"notification\" event [method:%s, data:%o]", notification.method, notification.data);
+      debug('proto "notification" event [method:%s, data:%o]', notification.method, notification.data);
 
       switch (notification.method) {
         case "newPeer": {
-          console.warn("newPeer");
+          console.warn("newPeer")
           const peer = notification.data;
           this.newPeer(peer);
 
@@ -455,7 +454,7 @@ export default class DialogIOAdapter extends EventEmitter {
         }
 
         case "peerClosed": {
-          console.warn("peerClosed");
+          console.warn("peerClosed")
           const { peerId } = notification.data;
           this.closePeer(peerId);
 
@@ -463,7 +462,7 @@ export default class DialogIOAdapter extends EventEmitter {
         }
 
         case "consumerClosed": {
-          console.warn("consumerClosed");
+          console.warn("consumerClosed")
           const { consumerId } = notification.data;
           const consumer = this._consumers.get(consumerId);
 
@@ -479,7 +478,7 @@ export default class DialogIOAdapter extends EventEmitter {
         }
 
         case "peerBlocked": {
-          console.warn("peerBlocked");
+          console.warn("peerBlocked")
           const { peerId } = notification.data;
           document.body.dispatchEvent(new CustomEvent("blocked", { detail: { clientId: peerId } }));
 
@@ -487,7 +486,7 @@ export default class DialogIOAdapter extends EventEmitter {
         }
 
         case "peerUnblocked": {
-          console.warn("peerUnblocked");
+          console.warn("peerUnblocked")
           const { peerId } = notification.data;
           document.body.dispatchEvent(new CustomEvent("unblocked", { detail: { clientId: peerId } }));
 
@@ -500,7 +499,7 @@ export default class DialogIOAdapter extends EventEmitter {
         }
 
         case "consumerLayersChanged": {
-          console.warn("consumerLayersChanged");
+          console.warn("consumerLayersChanged")
           const { consumerId, spatialLayer, temporalLayer } = notification.data;
 
           const consumer = this._consumers.get(consumerId);
@@ -522,7 +521,7 @@ export default class DialogIOAdapter extends EventEmitter {
         }
 
         case "consumerScore": {
-          console.warn("consumerScore");
+          console.warn("consumerScore")
           const { consumerId, score } = notification.data;
 
           const consumer = this._consumers.get(consumerId);
@@ -590,11 +589,9 @@ export default class DialogIOAdapter extends EventEmitter {
     return true;
   }
 
-  startStreamConnection() {
-  }
+  startStreamConnection() {}
 
-  closeStreamConnection() {
-  }
+  closeStreamConnection() {}
 
   resolvePendingMediaRequestForTrack(clientId, track) {
     const requests = this._pendingMediaRequests.get(clientId);
@@ -667,15 +664,12 @@ export default class DialogIOAdapter extends EventEmitter {
   sendData(clientId, dataType, data) {
     this.unreliableTransport(clientId, dataType, data);
   }
-
   sendDataGuaranteed(clientId, dataType, data) {
     this.reliableTransport(clientId, dataType, data);
   }
-
   broadcastData(dataType, data) {
     this.unreliableTransport(undefined, dataType, data);
   }
-
   broadcastDataGuaranteed(dataType, data) {
     this.reliableTransport(undefined, dataType, data);
   }
@@ -709,9 +703,9 @@ export default class DialogIOAdapter extends EventEmitter {
     });
 
     this._sendTransport.on("connect", (
-        { dtlsParameters },
-        callback,
-        errback // eslint-disable-line no-shadow
+      { dtlsParameters },
+      callback,
+      errback // eslint-disable-line no-shadow
     ) => {
       this.emitRTCEvent("info", "RTC", () => `Send transport [connect]`);
       this._sendTransport.observer.on("close", () => {
@@ -726,12 +720,12 @@ export default class DialogIOAdapter extends EventEmitter {
       });
 
       this._protoo
-          .request("connectWebRtcTransport", {
-            transportId: this._sendTransport.id,
-            dtlsParameters
-          })
-          .then(callback)
-          .catch(errback);
+        .request("connectWebRtcTransport", {
+          transportId: this._sendTransport.id,
+          dtlsParameters
+        })
+        .then(callback)
+        .catch(errback);
     });
 
     this._sendTransport.on("connectionstatechange", connectionState => {
@@ -812,9 +806,9 @@ export default class DialogIOAdapter extends EventEmitter {
     });
 
     this._recvTransport.on("connect", (
-        { dtlsParameters },
-        callback,
-        errback // eslint-disable-line no-shadow
+      { dtlsParameters },
+      callback,
+      errback // eslint-disable-line no-shadow
     ) => {
       this.emitRTCEvent("info", "RTC", () => `Receive transport [connect]`);
       this._recvTransport.observer.on("close", () => {
@@ -829,12 +823,12 @@ export default class DialogIOAdapter extends EventEmitter {
       });
 
       this._protoo
-          .request("connectWebRtcTransport", {
-            transportId: this._recvTransport.id,
-            dtlsParameters
-          })
-          .then(callback)
-          .catch(errback);
+        .request("connectWebRtcTransport", {
+          transportId: this._recvTransport.id,
+          dtlsParameters
+        })
+        .then(callback)
+        .catch(errback);
     });
 
     this._recvTransport.on("connectionstatechange", connectionState => {
@@ -1136,14 +1130,14 @@ export default class DialogIOAdapter extends EventEmitter {
 
   kick(clientId, permsToken) {
     return this._protoo
-        .request("kick", {
-          room_id: this.room,
-          user_id: clientId,
-          token: permsToken
-        })
-        .then(() => {
-          document.body.dispatchEvent(new CustomEvent("kicked", { detail: { clientId: clientId } }));
-        });
+      .request("kick", {
+        room_id: this.room,
+        user_id: clientId,
+        token: permsToken
+      })
+      .then(() => {
+        document.body.dispatchEvent(new CustomEvent("kicked", { detail: { clientId: clientId } }));
+      });
   }
 
   block(clientId) {
@@ -1233,7 +1227,7 @@ export default class DialogIOAdapter extends EventEmitter {
     } else {
       const storedMessage = this._frozenUpdates.get(networkId);
       const storedData =
-          storedMessage.dataType === "um" ? this.dataForUpdateMultiMessage(networkId, storedMessage) : storedMessage.data;
+        storedMessage.dataType === "um" ? this.dataForUpdateMultiMessage(networkId, storedMessage) : storedMessage.data;
 
       // Avoid updating components if the entity data received did not come from the current owner.
       const isOutdatedMessage = data.lastOwnerTime < storedData.lastOwnerTime;
