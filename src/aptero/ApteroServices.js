@@ -21,8 +21,13 @@ import "./adapter/adapter-config";
 //event handling for iframe #morgane
 window.focus();
 window.addEventListener("keydown", function(e) {
-  if (["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(e.code) > -1) {
+  if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(e.code) > -1) {
     e.preventDefault();
+  }
+}, false);
+window.addEventListener("keydown", function(e) {
+  if (["space"].indexOf(e.code) > -1) {
+    e.stopPropagation();
   }
 }, false);
 if((new URL(window.location.href).searchParams.get("hideui"))) {
