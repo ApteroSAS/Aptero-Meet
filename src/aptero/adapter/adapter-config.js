@@ -1,5 +1,6 @@
 import configs from "../../utils/configs";
 import { lazyLoad } from "./adapterRegistrer";
+import { propertiesService } from "../properties/propertiesService";
 
 let defaultAdapter = "dialog-io";
 
@@ -15,6 +16,13 @@ export async function choseAdapter() {
   configs.APP_CONFIG.adapterParams.adapter = adapter;
   if(new URL(window.location.href).searchParams.get("offline2")){
     adapter="none";
+  }
+  try {
+    const url = propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/room/adapter/" + adapter + "/profile";
+    const resp = await fetch(url);
+    configs.APP_CONFIG.adapterParams = { ...(configs.APP_CONFIG.adapterParams), ...(await resp.json()) };
+  } catch (err) {
+    console.error(err);
   }
   await lazyLoad(adapter);
   return adapter;

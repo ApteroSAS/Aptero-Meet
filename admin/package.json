@@ -21,6 +21,7 @@
   "dependencies": {
     "@iarna/toml": "^2.2.3",
     "aframe": "github:mozillareality/aframe#hubs/master",
+    "axios": "^0.21.1",
     "classnames": "^2.2.5",
     "hubs": "file:..",
     "react": "^16.1.1",

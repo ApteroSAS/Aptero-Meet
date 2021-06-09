@@ -30,6 +30,7 @@ import { SystemEditor } from "./react-components/system-editor";
 import { ServiceEditor, AppConfigEditor } from "./react-components/service-editor";
 import { ServerAccess } from "./react-components/server-access";
 import { ContentCDN } from "./react-components/content-cdn";
+import {ApteroSystem} from "./aptero/aptero-system";
 import { ImportContent } from "./react-components/import-content";
 import { AutoEndSessionDialog } from "./react-components/auto-end-session-dialog";
 import Store from "hubs/src/storage/store";
@@ -247,8 +248,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const importRoute = <Route exact path="/import" component={ImportContent} />;
   const accessRoute = <Route exact path="/server-access" component={ServerAccess} />;
   const cdnRoute = <Route exact path="/content-cdn" component={ContentCDN} />;
+  const aptRoute = <Route exact path="/aptero-system" component={ApteroSystem} />;
 
-  const customRoutes = [homeRoute, importRoute, accessRoute, cdnRoute];
+  const customRoutes = [homeRoute, importRoute, accessRoute, cdnRoute, aptRoute];
 
   try {
     const appConfigSchema = schemaByCategories({

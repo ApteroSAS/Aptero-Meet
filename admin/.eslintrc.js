@@ -13,11 +13,11 @@ module.exports = {
   plugins: ["prettier", "react"],
   rules: {
     "react/prop-types": "off",
-    "prettier/prettier": "error",
-    "prefer-const": "error",
-    "no-use-before-define": "error",
-    "no-var": "error",
-    "no-throw-literal": "error",
+    "prettier/prettier": "warn",
+    "prefer-const": "warn",
+    "no-use-before-define": "warn",
+    "no-var": "warn",
+    "no-throw-literal": "warn",
     "no-console": "off"
   },
   extends: ["prettier", "plugin:react/recommended", "eslint:recommended"]
