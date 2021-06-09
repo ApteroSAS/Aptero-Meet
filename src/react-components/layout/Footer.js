@@ -28,7 +28,7 @@ export function Footer({
               values={{
                 // eslint-disable-next-line react/display-name
                 a: chunks => (
-                  <a className={styles.link} href="https://hubs.mozilla.com/cloud">
+                  <a className={styles.link} href="https://www.aptero.co/cloud">
                     {chunks}
                   </a>
                 )

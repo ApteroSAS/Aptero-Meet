@@ -452,7 +452,7 @@ class MediaBrowserContainer extends Component {
             <a
               target="_blank"
               rel="noopener noreferrer"
-              href={configs.link("issue_report", "https://hubs.mozilla.com/docs/help.html")}
+              href={configs.link("issue_report", "https://www.aptero.co/docs/help.html")}
             >
               <FormattedMessage id="media-browser.report-issue" defaultMessage="Report Issue" />
             </a>

@@ -63,7 +63,7 @@ export const Base = () => (
             timestamp={nextTimestamp()}
             messages={[
               { type: "chat", body: "https://mozilla.org" },
-              { type: "chat", body: "Test message with url. https://hubs.mozilla.com Best site :point_up:" },
+              { type: "chat", body: "Test message with url. https://www.aptero.co Best site :point_up:" },
               { type: "chat", body: ":thumbsup:" }
             ]}
           />
@@ -81,7 +81,7 @@ export const Base = () => (
             timestamp={nextTimestamp()}
             messages={[
               { type: "chat", body: "https://mozilla.org" },
-              { type: "chat", body: "Test message with url. https://hubs.mozilla.com" }
+              { type: "chat", body: "Test message with url. https://www.aptero.co" }
             ]}
           />
         </ChatMessageList>

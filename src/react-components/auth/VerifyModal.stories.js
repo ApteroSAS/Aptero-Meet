@@ -25,7 +25,7 @@ export const Verified = () => (
   <Page style={{ backgroundImage: `url(${backgroundUrl})`, backgroundSize: "cover" }}>
     <Center>
       <VerifyModal>
-        <EmailVerified origin="hubs.mozilla.com" />
+        <EmailVerified origin="www.aptero.co" />
       </VerifyModal>
     </Center>
   </Page>

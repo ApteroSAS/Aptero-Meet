@@ -52,7 +52,7 @@ const menu = [
         id: "help",
         label: "Help",
         icon: SupportIcon,
-        href: "https://hubs.mozilla.com/docs"
+        href: "https://www.aptero.co/docs"
       },
       {
         id: "tos",

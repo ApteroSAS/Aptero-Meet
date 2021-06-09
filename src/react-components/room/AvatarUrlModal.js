@@ -20,13 +20,14 @@ export function AvatarUrlModal({ onSubmit, onClose }) {
           type="url"
           required
           ref={register}
-          description={
-            <a href="https://hubs.mozilla.com/docs/intro-avatars.html" target="_blank" rel="noopener noreferrer">
+          description={<>
+            {/*removed APTERO <a href="https://www.aptero.co/docs/intro-avatars.html" target="_blank" rel="noopener noreferrer">
               <FormattedMessage
                 id="avatar-url-modal.custom-avatar-docs-link"
                 defaultMessage="Learn more about custom avatars"
               />
-            </a>
+            </a>*/}
+          </>
           }
         />
         <ApplyButton type="submit" />
