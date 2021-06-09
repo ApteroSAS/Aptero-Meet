@@ -2,21 +2,25 @@ import configs from "../../utils/configs";
 import { lazyLoad } from "./adapterRegistrer";
 import { propertiesService } from "../properties/propertiesService";
 
-let defaultAdapter = "dialog-io";
+let defaultAdapter = configs.APP_CONFIG.adapterParams.adapter;
 
 let forceTurnGlobal = false;
 let forceTcpGlobal = false;
 
 export async function choseAdapter() {
   let adapter = defaultAdapter;
-  //Aptero
+  //compute right adapter
   if (configs.APP_CONFIG.adapterParams.adapter) {
     adapter = configs.APP_CONFIG.adapterParams.adapter;
   }
-  configs.APP_CONFIG.adapterParams.adapter = adapter;
   if(new URL(window.location.href).searchParams.get("offline2")){
     adapter="none";
   }
+  if(adapter==="default"){
+    adapter = defaultAdapter;
+  }
+  configs.APP_CONFIG.adapterParams.adapter = adapter;
+  //fetch profile
   try {
     const url = propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/room/adapter/" + adapter + "/profile";
     const resp = await fetch(url);
@@ -37,10 +41,10 @@ export async function createTrack(constraints, isDisplayDevice) {
     delete constraints["audio"];
   }
   if (configs.APP_CONFIG.adapterParams.adapter === "twilio") {
-    let { createTwilioTrack:createTwilioTrack } = await import('./twilio')
+    let { createTwilioTrack:createTwilioTrack } = await import('./twilio');
     return createTwilioTrack(constraints, isDisplayDevice);
   } else if (configs.APP_CONFIG.adapterParams.adapter === "agora") {
-    let { createAgoraTrack:createAgoraTrack } = await import('./agora')
+    let { createAgoraTrack:createAgoraTrack } = await import('./agora');
     return createAgoraTrack(constraints, isDisplayDevice);
   } else {
     if (isDisplayDevice) {
