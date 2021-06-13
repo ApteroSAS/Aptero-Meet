@@ -1,5 +1,5 @@
 // Read configs from global variable if available, otherwise use the process.env injected from build.
-import { propertiesService } from "../../../src/aptero/properties/propertiesService";
+import { propertiesService } from "../aptero/properties/propertiesService";
 
 //const configs = {};
 const configs = propertiesService;

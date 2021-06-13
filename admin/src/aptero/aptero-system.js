@@ -10,7 +10,7 @@ import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import { getAdminInfo, getEditableConfig, getConfig, putConfig } from "../utils/ita";
 import axios from "axios";
-import { propertiesService } from "../../../src/aptero/properties/propertiesService";
+import { propertiesService } from "./properties/propertiesService";
 
 // NOTE there's a mysterious uncaught exception in a promise when this component is shown, that seems
 // to be coupled with the "All 3rd party content" typography block. It's a mystery.
@@ -52,8 +52,8 @@ class ApteroSystemComponent extends Component {
       hubsid: this.state.roomsid,
       jwt: window.APP.store.state.credentials.token
     };
-    let newjwt = await axios.post("https://" + propertiesService.RETICULUM_SERVER + "/service/room" + "/room/jwt/helper/mongo", mongoData);
-    let result = await axios.post("https://" + propertiesService.RETICULUM_SERVER + "/service/room/" + "room/update/mongo", { jwt: newjwt.data });
+    let newjwt = await axios.post("https://" + propertiesService.RETICULUM_SOCKET_SERVER + "/service/room" + "/room/jwt/helper/mongo", mongoData);
+    let result = await axios.post("https://" + propertiesService.RETICULUM_SOCKET_SERVER + "/service/room/" + "room/update/mongo", { jwt: newjwt.data });
     console.log(result.data);
   }
 

@@ -6,15 +6,15 @@ import "./naf-agora-adapter";*/
 
 export async function lazyLoad(adapter){
   if (adapter==="twilio") {
-    await import('./naf-'+adapter+'-adapter')
+    await import('./naf-twilio-adapter')
   }
   if (adapter==="dialog-io") {
-    await import('./naf-'+adapter+'-adapter')
+    await import('./naf-dialog-io-adapter')
   }
   if (adapter==="agora") {
-    await import('./naf-'+adapter+'-adapter')
+    await import('./naf-agora-adapter')
   }
   if (adapter==="none") {
-    await import('./naf-'+adapter+'-adapter')
+    await import('./naf-none-adapter')
   }
 }
