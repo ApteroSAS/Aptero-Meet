@@ -17,6 +17,7 @@ import SoundSystem from "./service/SoundSystem";
 
 //adapter
 import "./adapter/adapter-config";
+import { ThirdPersonService } from "./service/ThirdPersonService";
 
 //event handling for iframe #morgane
 window.focus();
@@ -51,6 +52,7 @@ function sendIframeMessage(type,data){
 }
 
 export class ApteroServices {
+  thirdPersonService = new ThirdPersonService();
   constructor() {
     roomParameters.getRoomParameters();//called as soon as possible
   }
@@ -73,6 +75,7 @@ export class ApteroServices {
       await staticObjectManipulator.start();
       await video360Service.start();
       await gltfExtensionProcessorService.start();
+      await this.thirdPersonService.start();
     });
   }
 
@@ -101,8 +104,8 @@ export class ApteroServices {
 
   }
 
-  remove() {
-
+  async remove() {
+    await this.thirdPersonService.stop();
   }
 
   notifySceneEntered() {

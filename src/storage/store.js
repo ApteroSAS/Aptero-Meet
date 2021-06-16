@@ -127,7 +127,8 @@ export const SCHEMA = {
         disableAutoGainControl: { type: "bool" },
         locale: { type: "string" },
         showRtcDebugPanel: { type: "bool" },
-        theme: { type: "string" }
+        theme: { type: "string" },
+        thirdPersonMode: { type: "bool" },
       }
     },
 

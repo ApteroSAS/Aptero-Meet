@@ -481,6 +481,10 @@ const preferenceLabels = defineMessages({
   theme: {
     id: "preferences-screen.preference.theme",
     defaultMessage: "Theme"
+  },
+  thirdPersonMode: {
+    id: "preferences-screen.preference.thirdPersonMode",
+    defaultMessage: "Third Person Mode"
   }
 });
 
@@ -985,6 +989,7 @@ class PreferencesScreen extends Component {
       [
         CATEGORY_MISC,
         [
+          { key: "thirdPersonMode", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
           {
             key: "locale",
             prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,

@@ -1586,6 +1586,7 @@ class UIRoot extends Component {
                           onClick={() => exit2DInterstitialAndEnterVR(true)}
                         />
                       )}
+                    {/*APTERO
                     {entered && (
                       <ToolbarButton
                         icon={<LeaveIcon />}
@@ -1598,7 +1599,7 @@ class UIRoot extends Component {
                           });
                         }}
                       />
-                    )}
+                    )}*/}
                     <MoreMenuPopoverButton menu={moreMenu} />
                   </>
                 }
