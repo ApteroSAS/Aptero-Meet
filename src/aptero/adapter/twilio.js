@@ -1,5 +1,6 @@
 import configs from "../../utils/configs";
 import * as Video from "twilio-video";
+import { propertiesService } from "../properties/propertiesService";
 
 
 
@@ -17,14 +18,37 @@ export function convertId(twilioCLientId){
 }
 
 export async function createTwilioTrack(constraints) {
-    let room = currentRoom;
-    return Video.createLocalTracks(constraints).then(localTracks => {
+  let room = currentRoom;
+  let track;
+  if (constraints.audio) {
+    //https://www.twilio.com/docs/video/javascript-v1-getting-started#specify-constraints
+    let localTracks = await Video.createLocalTracks(constraints);
       console.log("currentTracks updated: " + localTracks);
       if (room) {
         room.localParticipant?.publishTrack(localTracks[0]);
       }
       return new MediaStream([localTracks[0].mediaStreamTrack]);
-    });
+  } else if (constraints.video) {
+    if (constraints.video.mediaSource === "camera") {
+      //https://www.twilio.com/docs/video/javascript-v1-getting-started#specify-constraints
+      let localTracks = await Video.createLocalTracks(constraints);
+      console.log("currentTracks updated: " + localTracks);
+      if (room) {
+        room.localParticipant?.publishTrack(localTracks[0]);
+      }
+      return new MediaStream([localTracks[0].mediaStreamTrack]);
+    } else {
+      //https://www.twilio.com/docs/video/javascript-v1-screen-capture-chrome
+      let stream = await navigator.mediaDevices.getDisplayMedia();
+      let localTracks = await Video.LocalVideoTrack(stream.getTracks()[0]);
+      console.log("currentTracks updated: " + localTracks);
+      if (room) {
+        room.localParticipant?.publishTrack(localTracks);
+      }
+      return new MediaStream([localTracks.mediaStreamTrack]);
+    }
+  }
+  return new MediaStream([track.getMediaStreamTrack()]);
 }
 
 export async function connectRoom(clientId,roomId){
@@ -33,7 +57,15 @@ export async function connectRoom(clientId,roomId){
   const { connect, createLocalVideoTrack, Logger } = require('twilio-video');
   // Join to the Room with the given AccessToken and ConnectOptions.
   const roomName = roomId;
-  const apiUrl = configs.APP_CONFIG.adapterParams.url;
+  let apiUrl;
+  if(!configs.APP_CONFIG.adapterParams.url) {
+    const url = propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/room/adapter/twilio/profile";
+    const resp = await fetch(url);
+    const adapterParams = await resp.json();
+    apiUrl = adapterParams.url;
+  }else{
+    apiUrl = configs.APP_CONFIG.adapterParams.url;
+  }
   const response = await fetch(apiUrl+`?identity=${clientId}&roomName=${roomName}`);
   // Extract the AccessToken from the Response.
   const token = await response.text();
