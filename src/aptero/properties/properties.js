@@ -37,6 +37,11 @@ window.APP_PROPS = {
     MICROSOFT_APP_ID: "caafb04c-8c13-4044-92a4-3648f79dc7e3",
     MICROSOFT_APP_AUTHORITY: "https://login.microsoftonline.com/apteroco.onmicrosoft.com",
     GLOBAL_ASSETS_PATH: "https://hub.aptero.co/data/global/",
+    LOGGER:{
+      URL:"https://aptero.co/tracking",
+      ACTIVATED:false,
+      ORIGIN:"meet-frontend-localhost"
+    },
     adapterParams: {
       adapter: "dialog-io",//dialog,dialog-io,janus,twilio,agora,default
     },

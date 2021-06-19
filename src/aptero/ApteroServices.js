@@ -18,6 +18,7 @@ import SoundSystem from "./service/SoundSystem";
 //adapter
 import "./adapter/adapter-config";
 import { ThirdPersonService } from "./service/ThirdPersonService";
+import {aptLogger} from "./service/log/Logger";
 
 //event handling for iframe #morgane
 window.focus();
@@ -55,6 +56,8 @@ export class ApteroServices {
   thirdPersonService = new ThirdPersonService();
   constructor() {
     roomParameters.getRoomParameters();//called as soon as possible
+    aptLogger.setProperties(window.APP_CONFIG.LOGGER);
+    aptLogger.setAdditionalData("version",process.env.BUILD_VERSION);
   }
 
   applySoftRedirect() {
@@ -76,6 +79,7 @@ export class ApteroServices {
       await video360Service.start();
       await gltfExtensionProcessorService.start();
       await this.thirdPersonService.start();
+      await aptLogger.start();
     });
   }
 
@@ -95,7 +99,9 @@ export class ApteroServices {
   }
 
   async onEnterRoom() {
-    await roomParameters.applyRoomParameters();
+    let roomConfig = await roomParameters.applyRoomParameters();
+    aptLogger.setUserId(window.APP.store.credentialsAccountId);
+    aptLogger.track("room_entered",roomConfig.roomSID);
     await this.waitAudioSettingsSystem();
     await roomParameters.applyDefaultAudioSettingsSystem(this.audioSettingsSystem);
   }

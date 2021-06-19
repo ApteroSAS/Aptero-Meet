@@ -103,6 +103,7 @@ export class RoomParameters {
                 });
             }
         }
+        return roomConfig;
     }
     
 }
