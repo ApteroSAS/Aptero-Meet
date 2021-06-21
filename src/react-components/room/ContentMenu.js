@@ -6,6 +6,7 @@ import styles from "./ContentMenu.scss";
 import { ReactComponent as ObjectsIcon } from "../icons/Objects.svg";
 import { ReactComponent as PeopleIcon } from "../icons/People.svg";
 import { FormattedMessage } from "react-intl";
+import { customMenuService } from "../../aptero/service/CustomMenuService";
 
 export function ContentMenuButton({ active, children, ...props }) {
   return (
@@ -31,15 +32,31 @@ export function ObjectsMenuButton(props) {
   );
 }
 
+export function CustomMenuButton(props) {
+  if(customMenuService.isActivated()){
+    const title = customMenuService.getButtonTitle();
+    return (
+      <ContentMenuButton {...props}>
+        <ObjectsIcon />
+        <span>
+          {title}
+        </span>
+      </ContentMenuButton>
+    );
+  }else{
+    return <></>;
+  }
+}
+
 export function PeopleMenuButton(props) {
-  return (
-    <ContentMenuButton {...props}>
-      <PeopleIcon />
-      <span>
-        <FormattedMessage id="content-menu.people-menu-button" defaultMessage="People" />
-      </span>
-    </ContentMenuButton>
-  );
+    return (
+      <ContentMenuButton {...props}>
+        <PeopleIcon />
+        <span>
+          <FormattedMessage id="content-menu.people-menu-button" defaultMessage="People" />
+        </span>
+      </ContentMenuButton>
+    );
 }
 
 export function ContentMenu({ children }) {
