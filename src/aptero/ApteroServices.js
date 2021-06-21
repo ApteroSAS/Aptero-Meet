@@ -99,9 +99,16 @@ export class ApteroServices {
   }
 
   async onEnterRoom() {
-    let roomConfig = await roomParameters.applyRoomParameters();
+    await roomParameters.applyRoomParameters();
     aptLogger.setUserId(window.APP.store.credentialsAccountId);
-    aptLogger.track("room_entered",roomConfig.roomSID);
+    const qs = new URLSearchParams(window.location.search);
+    const roomSID = qs.get("hub_id") || document.location.pathname.substring(1).split("/")[0];
+    aptLogger.track("room_entered",{
+      datastr:roomSID,
+      roomsid:roomSID,
+      email:window.APP?.store?.state?.credentials?.email,
+      name:window.APP?.store?.state?.profile?.displayName
+    });
     await this.waitAudioSettingsSystem();
     await roomParameters.applyDefaultAudioSettingsSystem(this.audioSettingsSystem);
   }

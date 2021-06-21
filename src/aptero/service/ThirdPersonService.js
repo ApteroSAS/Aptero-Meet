@@ -10,6 +10,6 @@ export class ThirdPersonService{
   };
 
   async stop(){
-    window.APP.storee.removeEventListener("statechanged", this.storeUpdated);
+    window.APP.store.removeEventListener("statechanged", this.storeUpdated);
   }
 }
