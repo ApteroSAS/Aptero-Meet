@@ -51,7 +51,7 @@ import { MicSetupModalContainer } from "./room/MicSetupModalContainer";
 import { InvitePopoverContainer } from "./room/InvitePopoverContainer";
 import { MoreMenuPopoverButton, CompactMoreMenuButton, MoreMenuContextProvider } from "./room/MoreMenuPopover";
 import { ChatSidebarContainer, ChatContextProvider, ChatToolbarButtonContainer } from "./room/ChatSidebarContainer";
-import { ContentMenu, PeopleMenuButton, ObjectsMenuButton } from "./room/ContentMenu";
+import { ContentMenu, PeopleMenuButton, ObjectsMenuButton, CustomMenuButton } from "./room/ContentMenu";
 import { ReactComponent as CameraIcon } from "./icons/Camera.svg";
 import { ReactComponent as AvatarIcon } from "./icons/Avatar.svg";
 import { ReactComponent as AddIcon } from "./icons/Add.svg";
@@ -96,6 +96,9 @@ import { SpectatingLabel } from "./room/SpectatingLabel";
 import { SignInMessages } from "./auth/SignInModal";
 import { minimumQualityService } from "../aptero/service/MinimumQualityService";
 import { apteroService } from "../aptero/ApteroServices";
+import { CustomPopoverButton } from "../aptero/react-components/CustomPopoverButton";
+import { CustomSidebarContainer } from "../aptero/react-components/CustomSidebarContainer";
+import { customMenuService } from "../aptero/service/CustomMenuService";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -1365,6 +1368,11 @@ class UIRoot extends Component {
                       !this.props.selectedObject ||
                       (this.props.breakpoint !== "sm" && this.props.breakpoint !== "md"))) && (
                       <ContentMenu>
+                        {customMenuService.isActivated() &&
+                        <CustomMenuButton
+                          active={this.state.sidebarId === "custom"}
+                          onClick={() => this.toggleSidebar("custom")}
+                        />}
                         {showObjectList && (
                           <ObjectsMenuButton
                             active={this.state.sidebarId === "objects"}
@@ -1426,6 +1434,11 @@ class UIRoot extends Component {
                 sidebar={
                   this.state.sidebarId ? (
                     <>
+                      {this.state.sidebarId === "custom" && (
+                        <CustomSidebarContainer
+                          onClose={() => this.setSidebar(null)}
+                        />
+                      )}
                       {this.state.sidebarId === "chat" && (
                         <ChatSidebarContainer
                           presences={this.props.presences}
