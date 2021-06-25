@@ -5,6 +5,7 @@ import { networkService } from "./service/NetworkService";
 import { video360Service } from "./service/Video360Service";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 
+
 import "./component/custom-controller-button";
 import "./component/rtmp-auto-refresh";
 import "./component/media-limiter";
@@ -19,6 +20,7 @@ import SoundSystem from "./service/SoundSystem";
 import "./adapter/adapter-config";
 import { ThirdPersonService } from "./service/ThirdPersonService";
 import {aptLogger} from "./service/log/Logger";
+import { startSelfTest } from "./service/SelfTestService";
 
 //event handling for iframe #morgane
 window.focus();
@@ -55,6 +57,7 @@ function sendIframeMessage(type,data){
 export class ApteroServices {
   thirdPersonService = new ThirdPersonService();
   constructor() {
+    startSelfTest();
     roomParameters.getRoomParameters();//called as soon as possible
     aptLogger.setProperties(window.APP_CONFIG.LOGGER);
     aptLogger.setAdditionalData("version",process.env.BUILD_VERSION);

@@ -12,7 +12,7 @@ export function userFromPresence(sessionId, presence, micPresences, mySessionId)
 }
 
 function usePeopleList(presences, mySessionId, micUpdateFrequency = 500) {
-  const [people, setPeople] = useState([]);
+  let [people, setPeople] = useState([]);
 
   useEffect(
     () => {
@@ -38,7 +38,10 @@ function usePeopleList(presences, mySessionId, micUpdateFrequency = 500) {
     },
     [presences, micUpdateFrequency, setPeople, mySessionId]
   );
-
+  //aptero state cleanup
+  people = people.filter(value => {
+    return presences[value.id];
+  });
   return people;
 }
 

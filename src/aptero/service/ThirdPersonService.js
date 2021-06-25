@@ -2,6 +2,7 @@
 export class ThirdPersonService{
   async start(){
     window.APP.store.addEventListener("statechanged", this.storeUpdated);
+    this.storeUpdated();
   }
 
   storeUpdated = () => {

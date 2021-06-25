@@ -1,6 +1,12 @@
 import { CAMERA_MODE_INSPECT } from "./camera-system";
 
 export class SingleActionButtonSystem {
+  lastClicked = false;
+  constructor(){
+    document.addEventListener('click', event => {
+      this.lastClicked =true;
+    });
+  }
   tick() {
     this.didInteractThisFrame = false;
     const interaction = AFRAME.scenes[0].systems.interaction;
@@ -13,7 +19,7 @@ export class SingleActionButtonSystem {
     const hovered = interaction.state.rightRemote.hovered;
     if (
       hovered &&
-      userinput.get(interaction.options.rightRemote.grabPath) &&
+        (userinput.get(interaction.options.rightRemote.grabPath)||this.lastClicked) &&
       hovered.components.tags &&
       hovered.components.tags.data.singleActionButton
     ) {
@@ -36,6 +42,7 @@ export class SingleActionButtonSystem {
         object3D: interaction.options.leftRemote.entity.object3D
       });
     }
+    this.lastClicked=false;
   }
 }
 
