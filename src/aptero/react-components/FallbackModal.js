@@ -45,7 +45,6 @@ export function comboFallbackButton(){
 }
 
 export function FallbackModal({ className, onEnterRoom, onBack, ...rest }) {
-
   const status = minimumQualityService.getCheckStatus();
   return (
       <Modal

@@ -21,6 +21,7 @@ import "./adapter/adapter-config";
 import { ThirdPersonService } from "./service/ThirdPersonService";
 import {aptLogger} from "./service/log/Logger";
 import { startSelfTest } from "./service/SelfTestService";
+import { minimumQualityService } from "./service/MinimumQualityService";
 
 //event handling for iframe #morgane
 window.focus();
@@ -117,7 +118,7 @@ export class ApteroServices {
   }
 
   tick() {
-
+    minimumQualityService.tick();
   }
 
   async remove() {
@@ -125,8 +126,10 @@ export class ApteroServices {
   }
 
   notifySceneEntered() {
+    minimumQualityService.initialCheckFinished();
     setTimeout(()=>{
-      sendIframeMessage("entered",{})
+      this.thirdPersonService.storeUpdated();
+      sendIframeMessage("entered",{});
     },1000);
   }
 

@@ -1,4 +1,102 @@
 import { filterServer } from "../adapter/adapter-config";
+import { useState } from "react";
+
+class FpsBalancer{
+
+    lastCalledTime=0;
+    fps=-1;
+    fpsNumber = 1;
+    average = 0;
+    lastTestStart = performance.now();
+
+    startFPSTest() {
+        this.lastCalledTime=0;
+        this.fps=-1;
+        this.fpsNumber = 1;
+        this.average = 0;
+        this.fpsTestLoop = true;
+        const fpsTestLoop = () => {
+            if(!this.lastCalledTime) {
+                //first frame timing
+                this.lastCalledTime = performance.now();
+            }else {
+                let delta = (performance.now() - this.lastCalledTime) / 1000;
+                this.lastCalledTime = performance.now();
+                this.fps = 1 / delta;
+                this.average = this.average * ((this.fpsNumber - 1) / this.fpsNumber) + this.fps * (1 / this.fpsNumber);
+                this.fpsNumber++;
+            }
+            //console.log("fps :"+ this.average + "/" + this.fps);
+            if (this.fpsTestLoop) requestAnimationFrame(fpsTestLoop);
+
+        };
+        fpsTestLoop();
+    }
+
+    stopFPSTest() {
+        this.fpsTestLoop = false;
+        return {
+            fps:this.fps,
+            fpsNumber : this.fpsNumber,
+            average: this.average,
+        }
+    }
+
+    tick(){
+        try {
+            if (!this.balancing) {
+                return;
+            }
+            if (!this.fpsTestLoop && document.visibilityState !== "hidden") {
+                this.startFPSTest();
+                this.lastTestStart = performance.now();
+            }
+            if (performance.now() - this.lastTestStart > 5000) {
+                let result = this.stopFPSTest();
+                console.log(result);
+                const deltaFPS = result.fps-30;//between -30 and 30
+                const ratio = deltaFPS/100;//between -30% and 30%
+                if (result.fps < 20 || result.fps >= 55) {
+                    this.changeResolution(1+ratio);
+                }
+            }
+        }catch (e) {
+            console.error(e);
+        }
+    }
+
+    startBalancing() {
+        this.balancing = true;
+        const preferences = window.APP.store.state.preferences;
+        if(preferences.maxResolutionWidth>window.screen.width || preferences.maxResolutionHeight>window.screen.height){
+            let newWidth = Math.round(Math.min(Math.max(preferences.maxResolutionWidth, 240), window.screen.width));
+            let newHeight = Math.round(Math.min(Math.max(preferences.maxResolutionHeight, 240), window.screen.height));
+            window.APP.store.update({
+                preferences: { maxResolutionWidth: newWidth, maxResolutionHeight: newHeight }
+            });
+        }
+        // startSimulation and pauseSimulation defined elsewhere
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "hidden") {
+                this.stopFPSTest();
+            }
+        }, false);
+    }
+
+    changeResolution(ratio) {
+        const preferences = window.APP.store.state.preferences;
+        let newWidth = Math.round(Math.min(Math.max(preferences.maxResolutionWidth*ratio, 240), window.screen.width));
+        let newHeight = Math.round(Math.min(Math.max(preferences.maxResolutionHeight*ratio, 240), window.screen.height));
+        if(preferences.maxResolutionWidth!==newWidth || preferences.maxResolutionHeight!==newHeight) {
+            preferences.maxResolutionWidth = newWidth;
+            preferences.maxResolutionHeight = newHeight;
+            window.APP.store.update({
+                preferences: { maxResolutionWidth: newWidth, maxResolutionHeight: newHeight }
+            });
+            console.log("change resolution:" + ratio + " / " + preferences.maxResolutionWidth + " / " + preferences.maxResolutionHeight);
+        }
+    }
+}
 
 class MinimumQualityService {
 
@@ -17,7 +115,16 @@ class MinimumQualityService {
     };
 
     constructor(){
+        this.fpsBalancer = new FpsBalancer();
         this.notifyMicChanged();//for default mic
+    }
+
+    tick(){
+        this.fpsBalancer.tick();
+    }
+
+    initialCheckFinished(){
+        this.fpsBalancer.startBalancing();
     }
 
     getCheckStatus(){
@@ -101,40 +208,14 @@ class MinimumQualityService {
         this.globalIssueDetected["mic-activity-issue"]=true;
     }
 
-    lastCalledTime=0;
-    fps=-1;
-    fpsNumber = 1;
-    average = 0;
-
     startFPSTest() {
-        this.lastCalledTime=0;
-        this.fps=-1;
-        this.fpsNumber = 1;
-        this.average = 0;
-        this.fpsTestLoop = true;
         this.globalIssueDetected["fps-issue"] = false;
-        const fpsTestLoop = () => {
-            if(!this.lastCalledTime) {
-                this.lastCalledTime = performance.now();
-                this.fps = 0;
-                return;
-            }
-            let delta = (performance.now() - this.lastCalledTime)/1000;
-            this.lastCalledTime = performance.now();
-            this.fps = 1/delta;
-            this.average = this.average*((this.fpsNumber-1)/this.fpsNumber) + this.fps*(1/this.fpsNumber);
-            this.fpsNumber++;
-
-            //console.log("fps :"+ this.average + "/" + this.fps);
-            if (this.fpsTestLoop) requestAnimationFrame(fpsTestLoop);
-
-        };
-        fpsTestLoop();
+        this.fpsBalancer.startFPSTest();
     }
 
     stopFPSTest() {
-        this.fpsTestLoop = false;
-        if(this.average<25 && this.fpsNumber>25){
+        let result = this.fpsBalancer.stopFPSTest();
+        if(result.average<25 && result.fpsNumber>25){
             //fps number > than 25 at 25 fps means at least one second of measurement
             this.globalIssueDetected["fps-issue"] = true;
         }

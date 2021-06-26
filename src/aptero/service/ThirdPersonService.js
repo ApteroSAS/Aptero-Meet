@@ -7,7 +7,9 @@ export class ThirdPersonService{
 
   storeUpdated = () => {
     const thirdPersonMode = window.APP.store.state.preferences["thirdPersonMode"];
-    AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.setThirdPersonMode(thirdPersonMode);
+    if(AFRAME.scenes[0]) {
+      AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.setThirdPersonMode(thirdPersonMode);
+    }
   };
 
   async stop(){
