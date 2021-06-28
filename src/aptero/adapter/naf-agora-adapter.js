@@ -155,7 +155,7 @@ export default class NafAgoraAdapter extends EventEmitter {
    * Gets transport/consumer/producer stats on the server side.
    */
   async getServerStats() {
-    if (this.getConnectStatus() === NAF.adapters.NOT_CONNECTED) {
+    if (!this || (this.getConnectStatus() === NAF.adapters.NOT_CONNECTED)) {
       // Signaling channel not connected, no reason to get remote RTC stats.
       return;
     }
