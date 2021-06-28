@@ -96,9 +96,9 @@ import { SpectatingLabel } from "./room/SpectatingLabel";
 import { SignInMessages } from "./auth/SignInModal";
 import { minimumQualityService } from "../aptero/service/MinimumQualityService";
 import { apteroService } from "../aptero/ApteroServices";
-import { CustomPopoverButton } from "../aptero/react-components/CustomPopoverButton";
 import { CustomSidebarContainer } from "../aptero/react-components/CustomSidebarContainer";
 import { customMenuService } from "../aptero/service/CustomMenuService";
+import TestPanel from "../aptero/react-components/TestPanel";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -1655,6 +1655,7 @@ function UIRootHooksWrapper(props) {
     <ChatContextProvider messageDispatch={props.messageDispatch}>
       <ObjectListProvider scene={props.scene}>
         <UIRoot breakpoint={breakpoint} {...props} />
+        <TestPanel/>
       </ObjectListProvider>
     </ChatContextProvider>
   );

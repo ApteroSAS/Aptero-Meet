@@ -20,8 +20,8 @@ import SoundSystem from "./service/SoundSystem";
 import "./adapter/adapter-config";
 import { ThirdPersonService } from "./service/ThirdPersonService";
 import {aptLogger} from "./service/log/Logger";
-import { startSelfTest } from "./service/SelfTestService";
 import { minimumQualityService } from "./service/MinimumQualityService";
+import { selfTestService } from "./service/SelfTestService";
 
 //event handling for iframe #morgane
 window.focus();
@@ -58,7 +58,7 @@ function sendIframeMessage(type,data){
 export class ApteroServices {
   thirdPersonService = new ThirdPersonService();
   constructor() {
-    startSelfTest();
+    selfTestService.startSelfTest();
     roomParameters.getRoomParameters();//called as soon as possible
     aptLogger.setProperties(window.APP_CONFIG.LOGGER);
     aptLogger.setAdditionalData("version",process.env.BUILD_VERSION);
@@ -88,7 +88,7 @@ export class ApteroServices {
   }
 
   async waitAudioSettingsSystem() {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       if (this.audioSettingsSystem) {
         resolve();
       } else {

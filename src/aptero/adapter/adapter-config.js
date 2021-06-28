@@ -117,7 +117,7 @@ export function addIceServers(iceServer) {
     iceServer.unshift(server);
   });
   iceServer = filterServer(iceServer, forceTcpGlobal);
-  console.log(iceServer);
+  console.log("WebRTC",iceServer);
   return iceServer;
 }
 

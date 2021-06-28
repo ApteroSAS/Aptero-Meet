@@ -220,7 +220,6 @@ import detectConcurrentLoad from "./utils/concurrent-load-detector";
 
 import qsTruthy from "./utils/qs_truthy";
 //aptero service
-import {video360Service } from "./aptero/service/Video360Service";
 import { networkService } from "./aptero/service/NetworkService";
 import { microsoftService } from "./aptero/service/MicrosoftIntegration/MicrosoftService";
 import { staticObjectManipulator } from "./aptero/service/StaticObjectManipulator";
