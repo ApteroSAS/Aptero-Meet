@@ -3,9 +3,11 @@ import { CAMERA_MODE_INSPECT } from "./camera-system";
 export class SingleActionButtonSystem {
   lastClicked = false;
   constructor(){
-    document.addEventListener('click', event => {
-      this.lastClicked =true;
-    });
+    if(AFRAME.utils.device.isMobile()) {
+      document.addEventListener("click", () => {
+        this.lastClicked = true;
+      });
+    }
   }
   tick() {
     this.didInteractThisFrame = false;
