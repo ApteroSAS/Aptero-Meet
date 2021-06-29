@@ -2,7 +2,6 @@ import React from "react";
 import { defineMessage, useIntl } from "react-intl";
 import { ReactComponent as MoreIcon } from "../../react-components/icons/More.svg";
 import styles from "./CustomPopoverButton.scss";
-import classNames from "classnames";
 
 const customPopoverTitle = defineMessage({
   id: "custom-popover.title",
