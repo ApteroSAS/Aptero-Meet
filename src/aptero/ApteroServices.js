@@ -21,7 +21,7 @@ import "./adapter/adapter-config";
 import { ThirdPersonService } from "./service/ThirdPersonService";
 import {aptLogger} from "./service/log/Logger";
 import { minimumQualityService } from "./service/MinimumQualityService";
-import { selfTestService } from "./service/SelfTestService";
+import { notifySceneEntered, startSelfTest } from "./service/SelfTestService.loader";
 
 //event handling for iframe #morgane
 window.focus();
@@ -58,7 +58,7 @@ function sendIframeMessage(type,data){
 export class ApteroServices {
   thirdPersonService = new ThirdPersonService();
   constructor() {
-    selfTestService.startSelfTest();
+    startSelfTest();
     roomParameters.getRoomParameters();//called as soon as possible
     aptLogger.setProperties(window.APP_CONFIG.LOGGER);
     aptLogger.setAdditionalData("version",process.env.BUILD_VERSION);
@@ -127,6 +127,7 @@ export class ApteroServices {
 
   notifySceneEntered() {
     minimumQualityService.initialCheckFinished();
+    notifySceneEntered();
     setTimeout(()=>{
       this.thirdPersonService.storeUpdated();
       sendIframeMessage("entered",{});
