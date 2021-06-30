@@ -1,6 +1,5 @@
 import { liveStream } from "./service/LiveStream";
 import { changeVideoService } from "./service/ChangeVideoService";
-import { microsoftService } from "./service/MicrosoftIntegration/MicrosoftService";
 import { networkService } from "./service/NetworkService";
 import { video360Service } from "./service/Video360Service";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
@@ -21,7 +20,7 @@ import "./adapter/adapter-config";
 import { ThirdPersonService } from "./service/ThirdPersonService";
 import {aptLogger} from "./service/log/Logger";
 import { minimumQualityService } from "./service/MinimumQualityService";
-import { notifySceneEntered, startSelfTest } from "./service/SelfTestService.loader";
+import { notifySceneEntered, startSelfTest, testTick } from "./service/SelfTestService.loader";
 
 //event handling for iframe #morgane
 window.focus();
@@ -119,6 +118,7 @@ export class ApteroServices {
 
   tick() {
     minimumQualityService.tick();
+    testTick();
   }
 
   async remove() {

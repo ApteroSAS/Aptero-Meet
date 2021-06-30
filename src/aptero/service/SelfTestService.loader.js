@@ -1,5 +1,5 @@
 import qsTruthy from "../../utils/qs_truthy";
-import React, { Component } from "react";
+import React, { Component, Suspense } from "react";
 
 const testMode = qsTruthy("test");
 
@@ -17,21 +17,27 @@ export async function notifySceneEntered() {
   }
 }
 
+export async function testTick() {
+  if (testMode) {
+    const selfTestService = (await import("../service/SelfTestService.module"));
+    selfTestService.selfTestService.tick();
+  }
+}
+
+
+const TestPanel = React.lazy(() => import("../react-components/TestPanel"));
 
 export default class TestPanelLazy extends Component {
-  state = {
-    child: <></>,
-  };
-
   componentDidMount = async () => {
-    if(testMode) {
-      const TestPanel = (await import("../react-components/TestPanel"))
-      //TestPanel.default
-      this.setState({ child: new TestPanel.default() })
-    }
   };
 
   render() {
-      return this.state.child;
+    if (!testMode) {
+      return <></>;
+    } else {
+      return <Suspense fallback={<div>loading ...</div>}>
+        <TestPanel/>
+      </Suspense>;
+    }
   }
 }

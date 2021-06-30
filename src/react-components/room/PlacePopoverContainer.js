@@ -42,7 +42,7 @@ export function PlacePopoverContainer({ scene, mediaSearchStore, showNonHistorie
           }
         ];
 
-        if (hubChannel.can("spawn_and_move_media")) {
+        if (hubChannel.can("spawn_and_move_media") && hubChannel.can("show_spawn_and_move_media")) {
           nextItems = [
             ...nextItems,
             // TODO: Create text/link dialog

@@ -23,7 +23,7 @@ export class RoomParameters {
     async applyPermissionAsync(permission, admin) {
         permission["show_spawn_and_move_media"] = true;//default value
         let roomConfig = await this.getParameters(permission.hub_id);
-        this.applyRoomParameters();//also update preferences
+        await this.applyRoomParameters();//also update preferences
         if (roomConfig) {
             if (roomConfig.permission) {
                 permission = { ...permission, ...roomConfig.permission };

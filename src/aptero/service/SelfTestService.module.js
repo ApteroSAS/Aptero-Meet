@@ -1,5 +1,6 @@
 import qsTruthy from "../../utils/qs_truthy";
 import { waitForDOMContentLoaded } from "../../utils/async-utils";
+import { getMicrophonePresences } from "../../utils/microphone-presence";
 
 //TODO detect for others
 // [done] connected / disconected
@@ -11,9 +12,12 @@ import { waitForDOMContentLoaded } from "../../utils/async-utils";
 // global status ok or not
 
 export class SelfTestServiceModule {
-  clients = {};
-  errorDetected = false;
-  consoleErrorDetected = false;
+  state = {
+    clients: {},
+    errorDetected: false,
+    consoleErrorDetected: false,
+    micErrorDetected: false
+  };
   notifyUpdate = () => {
   };
 
@@ -22,31 +26,30 @@ export class SelfTestServiceModule {
     if (this.testMode) {
       const self = this;
       const oldcerr = console.error;
-      console.error = (data1,...data) => {
-        this.consoleErrorDetected = true;
+      console.error = (data1, ...data) => {
+        this.state.consoleErrorDetected = true;
         self.notifyUpdate();
-        oldcerr(data1,data);
-      }
+        oldcerr(data1, data);
+      };
       window.addEventListener("error", () => {
-        this.errorDetected = true;
+        this.state.errorDetected = true;
         self.notifyUpdate();
       });
 
       waitForDOMContentLoaded().then(() => {
-        document.body.addEventListener("clientConnected", (evt) => {
+        /*document.body.addEventListener("clientConnected", (evt) => {
           console.log("clientConnected", evt);
           let clientID = evt.detail.clientId;
           if (clientID !== NAF.clientId) {
             this.createClient(clientID);
             self.notifyUpdate();
           }
-        });
+        });*/
         document.body.addEventListener("clientDisconnected", (evt) => {
           console.log("clientDisconnected", evt);
           let clientID = evt.detail.clientId;
-          if (clientID !== NAF.clientId) {
-            this.createClient(clientID);
-            this.clients[clientID].connected = false;
+          if (clientID !== NAF.clientId && this.state.clients[clientID]) {
+            this.state.clients[clientID].connected = false;
             self.notifyUpdate();
           }
         });
@@ -54,54 +57,63 @@ export class SelfTestServiceModule {
     }
   }
 
-  updateAllFromPresence(){
+  updateAllFromPresence() {
     const state = window.APP.hubChannel.presence.state;
     Object.keys(window.APP.hubChannel.presence.state).forEach(clientID => {
-      if (clientID !== NAF.clientId && this.clients[clientID].connected) {
+      if (clientID !== NAF.clientId &&
+        state[clientID].metas[0].profile.displayName &&
+        state[clientID].metas[0].profile.displayName.startsWith("TEST_BOT_")) {
         this.createClient(clientID);
-        this.clients[clientID].displayName = state[clientID].metas[0].profile.displayName;
-        this.clients[clientID].identityName = state[clientID].metas[0].profile.identityName;
+        this.state.clients[clientID].displayName = state[clientID].metas[0].profile.displayName;
+        this.state.clients[clientID].identityName = state[clientID].metas[0].profile.identityName;
       }
     });
     this.notifyUpdate();
   }
 
   getRndInteger(min, max) {
-    return Math.floor(Math.random() * (max - min) ) + min;
+    return Math.floor(Math.random() * (max - min)) + min;
   }
 
   notifySceneEntered() {
     if (this.testMode) {
-      AFRAME.scenes[0].addEventListener("presence_updated", (e)=>{
-        this.createClient(e.detail.sessionId);
+      AFRAME.scenes[0].addEventListener("presence_updated", (e) => {
         this.updateAllFromPresence();
-        if (e.detail.profile && e.detail.sessionId !== NAF.clientId && this.clients[e.detail.sessionId].connected) {
-          this.clients[e.detail.sessionId].displayName = e.detail.profile.displayName;
+        //special part to be sure to have the name
+        if (e.detail.profile && e.detail.sessionId !== NAF.clientId &&
+          e.detail.profile.displayName &&
+          e.detail.profile.displayName.startsWith("TEST_BOT_")
+        ) {
+          this.createClient(e.detail.sessionId);
+          this.state.clients[e.detail.sessionId].displayName = e.detail.profile.displayName;
         }
+        this.notifyUpdate();
       });
+
       this.updateAllFromPresence();
-      setTimeout(()=>{
-        if(!window.APP.store.state.profile.displayName.startsWith("TEST_BOT_")) {
+
+      setTimeout(() => {
+        if (!window.APP.store.state.profile.displayName.startsWith("TEST_BOT_")) {
           window.APP.store.update({
             profile: {
-              displayName: "TEST_BOT_" + this.getRndInteger(100000, 900000),
+              displayName: "TEST_BOT_" + this.getRndInteger(100000, 900000)
             }
-          })
+          });
           AFRAME.scenes[0].emit("avatar_updated");
         }
-      },500);
+      }, 500);
     }
   }
 
   createClient(id) {
     if (NAF.clientId) {
-      delete this.clients[NAF.clientId];
+      delete this.state.clients[NAF.clientId];
     }
     if (id === NAF.clientId) {
       return;
     }
-    if(!this.clients[id]) {
-      this.clients[id] = { id: id, connected: true };
+    if (!this.state.clients[id]) {
+      this.state.clients[id] = { id: id, connected: true };
     }
   }
 
@@ -125,14 +137,31 @@ export class SelfTestServiceModule {
   startMicTest() {
     //reset mic state
     this.micTestInProgress = true;
-    Object.keys(this.clients).forEach(key => {
-      this.clients[key].micTest = false;
+    Object.keys(this.state.clients).forEach(key => {
+      this.state.clients[key].micTest = false;
     });
     this.notifyUpdate();
   }
 
   stopMicTest() {
     this.micTestInProgress = false;
+    Object.keys(this.state.clients).forEach(key => {
+      if (!this.state.clients[key].micTest && this.state.clients[key].displayName.startsWith("TEST_BOT_")) {
+        this.state.micErrorDetected = true;
+      }
+    });
+    this.notifyUpdate();
+  }
+
+  tick() {
+    if (this.micTestInProgress) {
+      const micPresences = getMicrophonePresences();
+      micPresences.forEach((presence, key) => {
+        if (presence.talking && key !== NAF.clientId && this.state.clients[key].connected) {
+          this.state.clients[key].micTest = true;
+        }
+      });
+    }
   }
 }
 
