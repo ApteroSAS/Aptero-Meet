@@ -54,7 +54,8 @@ window.APP_PROPS = {
     features: {
       hide_powered_by: true,
       show_feedback_ui: false,
-      disable_room_creation: true
+      disable_room_creation: true,
+      staticObjectManipulator: false
     },
     links:{
       privacy_notice:"https://aptero.co/privacy.html",

@@ -631,7 +631,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
 
     const connect = () => {
       // Safety guard just in case Protoo doens't fail in some case so we don't get stuck in the loading screen forever.
-      connectionErrorTimeout = setTimeout(onConnectionError, 30000, entryManager, "Timeout connecting to the room");
+      connectionErrorTimeout = setTimeout(onConnectionError, 60000, entryManager, "Timeout connecting to the room");
       scene.components["networked-scene"]
         .connect()
         .then(() => {

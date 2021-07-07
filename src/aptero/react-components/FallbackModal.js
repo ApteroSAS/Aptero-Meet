@@ -21,10 +21,8 @@ export function fallbackVMButton(){
 }
 
 export function fallbackTCPButton(){
-  const tcpUrl = new URL(document.location.toString());
-  const tcpParams = new URLSearchParams(tcpUrl.search);
-  tcpParams.set("force_tcp", true);
-  tcpUrl.search = tcpParams.toString();
+  const tcpUrl = new URL(window.location.toString());
+  tcpUrl.searchParams.set("force_tcp", true);
   return <>
     <Button preset="green" onClick={async ()=>{
       window.location.href = tcpUrl.toString();

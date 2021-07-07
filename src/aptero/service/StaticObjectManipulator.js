@@ -1,5 +1,6 @@
 import { networkService } from "./NetworkService";
 import { waitForDOMContentLoaded } from "../../utils/async-utils";
+import { propertiesService } from "../properties/propertiesService";
 
 const floatEqual = (a, b, ep) => {
   if (a === b) {
@@ -20,13 +21,13 @@ export class StaticObjectManipulator {
   deactivatedEntity = {};
   LastDeactivatedEntitySend = null;
   staticEntities = {};
-  deactivated = false;//TODO deactive
+  activated = propertiesService.APP_CONFIG.features.staticObjectManipulator || true;//TODO deactive
 
   constructor() {
   }
 
   start() {
-    if(this.deactivated){
+    if(this.activated){
       return;
     }
     networkService.eventEmitter.once("adapter_ready", () => {

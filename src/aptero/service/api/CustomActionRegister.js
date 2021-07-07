@@ -1,11 +1,17 @@
 import { networkService } from "../NetworkService";
-import { pinEntity, spawnMediaInfrontOfPlayer, unpinEntity } from "../../util/Media";
+import {
+  pinEntity,
+  spawnMediaInfrontOfPlayer,
+  spawnMedia,
+  unpinEntity
+} from "../../util/Media";
 import { ObjectContentOrigins } from "../../../object-types";
 import { ActionAnimationController } from "./ActionAnimationController";
 import { roomController } from "./RoomController";
 import { mediaViewEventEmitter } from "../ChangeVideoService";
 import axios from "axios";
 import { applyPersistentSync } from "../../../utils/permissions-utils";
+import { removeNetworkedObject } from "../../../utils/removeNetworkedObject";
 
 export class CustomActionRegister {
   actions = {};
@@ -53,27 +59,20 @@ export class CustomActionRegister {
     }
   }
 
-  async handleEntry(entry, mediaOptions = null) {
+  async handleEntry(entry, mediaOptions = null,transform) {
     return new Promise((resolve, reject) => {
       if (entry.camera || entry.shareScreen) {
         mediaViewEventEmitter.once("share_video_media_stream_created", (data) => {
-          let entity = spawnMediaInfrontOfPlayer(data.src, ObjectContentOrigins.URL, mediaOptions);
-          let pool = () => {
-            if (!(entity.object3D && entity.getObject3D("mesh"))) {
-              setTimeout(pool, 500);
-            } else {
-              resolve(entity);
-              entity.sceneEl.addEventListener("action_end_video_sharing", () => {
-                if (entity.parentNode) {
-                  entity.parentNode.removeChild(entity);
-                }
-              }, { once: true });
+          let {entity,orientation} = spawnMedia(data.src, ObjectContentOrigins.URL, mediaOptions);
+          resolve({entity,orientation});
+          AFRAME.scenes[0].addEventListener("action_end_video_sharing", () => {
+            if (entity.parentNode) {
+              entity.parentNode.removeChild(entity);
             }
-          };
-          setTimeout(pool, 500);
+          }, { once: true });
         });
       } else {
-        resolve(spawnMediaInfrontOfPlayer(entry.url, entry.contentOrigin, mediaOptions));
+        resolve(spawnMedia(entry.url, entry.contentOrigin, mediaOptions));
       }
     });
   }
@@ -106,37 +105,53 @@ export class CustomActionRegister {
   }
 
   onReady(entity, callback) {
-    if (entity.getObject3D("mesh") && entity.getObject3D("mesh").scale) {
-      callback();
-    } else {
-      const promise1 = new Promise((resolve, reject) => {
+    //if (entity.getObject3D("mesh") && entity.getObject3D("mesh").scale) {
+    //  callback();
+    //} else {
+      let promises = [];
+      promises.push(new Promise((resolve, reject) => {
         entity.addEventListener("media-loaded", resolve);
+      }));
+      if(entity.components["media-video"]) {
+        promises.push(new Promise((resolve, reject) => {
+          entity.addEventListener("video-loaded", resolve);
+        }));
+      }
+      const timeout = new Promise((resolve, reject) => {
+        setTimeout(resolve, 3000);
       });
-      const promise2 = new Promise((resolve, reject) => {
-        setTimeout(resolve, 800);
-      });
-      Promise.race([promise1, promise2]).then((value) => {
+      Promise.race([Promise.all(promises),timeout]).then((value) => {
         callback();
       });
-    }
+    //}
   }
 
   async spawnAttach(actionData, entry) {
     let mediaFrame = await this.findMediaFrameByName(actionData.action.mediaFrame);
     if (mediaFrame && mediaFrame.components["media-frame"]) {
+      let mediaFrameComponent = mediaFrame.components["media-frame"];
+      const mfv = mediaFrameComponent.el.object3D.position;
       await this.removeOldMediaFrameEntity(mediaFrame);
       let entity = await new Promise(async (resolve, reject) => {
-        let entity = await this.handleEntry(entry,this.getMediaOptionSetting(actionData) );
-
+        let {entity,orientation} = await this.handleEntry(entry,this.getMediaOptionSetting(actionData));
+        entity.object3D.position.x = mfv.x;
+        entity.object3D.position.y = mfv.y;
+        entity.object3D.position.z = mfv.z;
+        orientation.then(()=>{
+          const q = entity.object3D.quaternion;
+          entity.object3D.quaternion.set(q.x,q.y,q.z,q.w);
+        });
+        entity = await this.convertToNetEntity(entity);
         //this.applyAudio(entity, actionData);
-        resolve(await this.convertToNetEntity(entity));
+        resolve(entity);
       });
       this.onReady(entity, async () => {
         setTimeout(async () => {
-          let mediaFrameComponent = mediaFrame.components["media-frame"];
+          //apply scale to disable mediaframe old scale?
+          /*capturableEntity.object3D.scale.setScalar(
+            scaleForAspectFit(this.data.bounds, capturableEntity.getObject3D("mesh").scale)
+          );*/
           mediaFrameComponent.capture(entity);
-          //TODO tmp force pin
-          //actionData.action.pin = true;
           if (actionData.action.pin) {
             await pinEntity(entity);
           }
@@ -153,16 +168,27 @@ export class CustomActionRegister {
     return new Promise(async (resolve, reject) => {
       if (mediaFrame && mediaFrame.components["media-frame"]) {
         let mediaFrameComponent = mediaFrame.components["media-frame"];
-        const capturedEl = document.getElementById(mediaFrameComponent.data.targetId);
+        //1 find the element to remove
+        let capturedEl = document.getElementById(mediaFrameComponent.data.targetId);
+        const bodyUUID = mediaFrameComponent.el.components["body-helper"].uuid;
+        const mediaFrameSystem = AFRAME.scenes[0].systems["hubs-systems"].mediaFramesSystem;
+        const physicalyPresentInMediaFrameEl = mediaFrameSystem.getCapturableEntityCollidingWithBody(mediaFrameComponent.data.mediaType, bodyUUID);//physicaly present but not linked
+        capturedEl = capturedEl || physicalyPresentInMediaFrameEl;
+
+        //2 release the element just in case
+        if(mediaFrameComponent.data.targetId !== "empty") {
+          mediaFrameComponent.release();
+        }
+
         if (capturedEl) {
+          //1.1 stop sharing
           const scene = capturedEl.sceneEl;
           if (capturedEl.components["media-video"].data.src.startsWith("hubs://")) {
             //hubs:// is the protocole for sharescreen and webcam media
             scene.emit("action_end_video_sharing");
           }
-        }
-        mediaFrameComponent.release();
-        if (capturedEl) {
+          //removeNetworkedObject(capturedEl.sceneEl, capturedEl);
+          //3 destroy the element
           NAF.utils.getNetworkedEntity(capturedEl).then(async networkedEl => {
             if (!NAF.utils.isMine(networkedEl)) {
               NAF.utils.takeOwnership(networkedEl);

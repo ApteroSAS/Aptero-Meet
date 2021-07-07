@@ -91,9 +91,9 @@ export class ApteroServices {
       if (this.audioSettingsSystem) {
         resolve();
       } else {
-        setTimeout(() => {
+        setTimeout(async () => {
           if (!this.audioSettingsSystem) {
-            this.waitAudioSettingsSystem();
+            await this.waitAudioSettingsSystem();
             resolve();
           }
         }, 200);
@@ -101,7 +101,25 @@ export class ApteroServices {
     });
   }
 
+  async waitAframeScene() {
+    return new Promise((resolve) => {
+      if (AFRAME && AFRAME.scenes && AFRAME.scenes[0]) {
+        resolve();
+      } else {
+        setTimeout(async () => {
+          if (!(AFRAME && AFRAME.scenes && AFRAME.scenes[0])) {
+            await this.waitAframeScene();
+            resolve();
+          }
+        }, 200);
+      }
+    });
+  }
+
+
+
   async onEnterRoom() {
+    await this.waitAframeScene();
     await roomParameters.applyRoomParameters();
     aptLogger.setUserId(window.APP.store.credentialsAccountId);
     const qs = new URLSearchParams(window.location.search);
