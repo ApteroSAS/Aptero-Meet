@@ -237,14 +237,21 @@ export default class MediaSearchStore extends EventTarget {
   resultAwaited = false;//used externaly as information
   lastAction = () => {
   };
+  async cancelSearchWithResult(wait=0) {
+      this.lastAction({detail:{ result: "cancel" }});
+      //wait propagation of event
+      await new Promise((resolve) => {
+        setTimeout(resolve,wait);
+      });
+  }
 
   async sourceNavigateWithResult(source) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       this.lastAction({detail:{ result: "cancel" }});
       this.resultAwaited = true;
       const sceneEl = AFRAME.scenes[0];
       sceneEl.removeEventListener("action_selected_media_result_entry", this.lastAction);
-      this._sourceNavigate(source, true, false, "result");
+      await this._sourceNavigate(source, true, false, "result");
       this.lastAction = (data) => {
         data = data.detail;
         if (data.result === "cancel") {

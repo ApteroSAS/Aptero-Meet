@@ -36,6 +36,18 @@ export function getAdapterConfig() {
   return configs.APP_CONFIG.adapterParams || {};
 }
 
+export async function unpublishVideoTrack() {
+  if (configs.APP_CONFIG.adapterParams.adapter === "twilio") {
+    let { unpublishVideoTrack:unpublishVideoTrack } = await import('./twilio');
+    await unpublishVideoTrack();
+  }
+}
+export async function setlistenerEndShareVideo(){
+  AFRAME.scenes[0].addEventListener("action_end_video_sharing", () => {
+    unpublishVideoTrack();
+  });
+}
+
 export async function createTrack(constraints, isDisplayDevice) {
   if (constraints.video) {
     delete constraints["audio"];

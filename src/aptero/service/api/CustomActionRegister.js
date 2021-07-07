@@ -145,6 +145,11 @@ export class CustomActionRegister {
         //this.applyAudio(entity, actionData);
         resolve(entity);
       });
+
+      if (entity.components["media-video"].data.src.startsWith("hubs://")) {
+        entity.setAttribute("stop-share-screen-on-destroy", { target: NAF.clientId });
+      }
+
       this.onReady(entity, async () => {
         setTimeout(async () => {
           //apply scale to disable mediaframe old scale?

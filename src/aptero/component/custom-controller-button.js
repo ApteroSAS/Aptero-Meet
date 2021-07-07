@@ -49,6 +49,10 @@ AFRAME.registerComponent("custom-controller-action", {
     }
     this.clickWIP = false;
     this.onClick = async () => {
+      if (this.data.type === "btn-ask") {
+        //special case for search with result. Closing the search panel is not detected so we have to unblock the previous click in case the panel is still open
+        await window.APP.mediaSearchStore.cancelSearchWithResult(0);
+      }
       if (!this.clickWIP) {
         this.clickWIP = true;
         try {

@@ -12,9 +12,18 @@ consists of several tracks such as video or audio tracks. Each track is
 specified as an instance of MediaStreamTrack.You can obtain a MediaStream
 object either by using the constructor or by calling */
 export let currentRoom = null;
+export let videoTrack = null;
 
 export function convertId(twilioCLientId){
   return twilioCLientId.split("/")[0];
+}
+
+export async function unpublishVideoTrack() {
+  if(videoTrack) {
+    currentRoom.localParticipant?.unpublishTrack(videoTrack);
+    videoTrack.stop();
+    videoTrack = null;
+  }
 }
 
 export async function createTwilioTrack(constraints) {
@@ -36,7 +45,8 @@ export async function createTwilioTrack(constraints) {
       if (room) {
         room.localParticipant?.publishTrack(localTracks[0]);
       }
-      return new MediaStream([localTracks[0].mediaStreamTrack]);
+      videoTrack = localTracks[0].mediaStreamTrack;
+      return new MediaStream([videoTrack]);
     } else {
       //https://www.twilio.com/docs/video/javascript-v1-screen-capture-chrome
       let stream = await navigator.mediaDevices.getDisplayMedia();
@@ -45,7 +55,8 @@ export async function createTwilioTrack(constraints) {
       if (room) {
         room.localParticipant?.publishTrack(localTracks);
       }
-      return new MediaStream([localTracks.mediaStreamTrack]);
+      videoTrack = localTracks.mediaStreamTrack;
+      return new MediaStream([videoTrack]);
     }
   }
   return new MediaStream([track.getMediaStreamTrack()]);

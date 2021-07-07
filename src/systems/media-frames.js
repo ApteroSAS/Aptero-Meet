@@ -94,10 +94,10 @@ export class MediaFramesSystem {
           }
         } else {
           // captured object was removed
-          // TODO Aptero modification
+          // TODO Aptero modification to check
           // this line of code is usefull for the case where we put share screen or camera in media frame and close it with the button
           // BUT for the button remove feature it is also necessary more dev needed
-          frame.release();
+          // frame.release();
         }
       }
     }

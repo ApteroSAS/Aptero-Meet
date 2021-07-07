@@ -8,6 +8,7 @@ import { waitForDOMContentLoaded } from "../utils/async-utils";
 import "./component/custom-controller-button";
 import "./component/rtmp-auto-refresh";
 import "./component/media-limiter";
+import "./component/stop-share-screen-on-destroy";
 import { gltfExtensionProcessorService } from "./service/api/GLTFExtensionProcessorService";
 import { staticObjectManipulator } from "./service/StaticObjectManipulator";
 import { roomParameters } from "./service/RoomParameters";
@@ -21,6 +22,7 @@ import { ThirdPersonService } from "./service/ThirdPersonService";
 import {aptLogger} from "./service/log/Logger";
 import { minimumQualityService } from "./service/MinimumQualityService";
 import { notifySceneEntered, startSelfTest, testTick } from "./service/SelfTestService.loader";
+import { setlistenerEndShareVideo } from "./adapter/adapter-config";
 
 //event handling for iframe #morgane
 window.focus();
@@ -120,6 +122,7 @@ export class ApteroServices {
 
   async onEnterRoom() {
     await this.waitAframeScene();
+    await setlistenerEndShareVideo();
     await roomParameters.applyRoomParameters();
     aptLogger.setUserId(window.APP.store.credentialsAccountId);
     const qs = new URLSearchParams(window.location.search);
