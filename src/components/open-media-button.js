@@ -3,6 +3,16 @@ import { guessContentType } from "../utils/media-url-utils";
 import { handleExitTo2DInterstitial } from "../utils/vr-interstitial";
 import { duplicateEntryModeOnSrc } from "../aptero/util/EntryMode";
 
+function isValidHttpUrl(string) {
+  let url;
+  try {
+    url = new URL(string);
+  } catch (_) {
+    return false;
+  }
+  return url.protocol === "http:" || url.protocol === "https:";
+}
+
 AFRAME.registerComponent("open-media-button", {
   schema: {
     onlyOpenLink: { type: "boolean" }
@@ -21,7 +31,7 @@ AFRAME.registerComponent("open-media-button", {
 
       if (visible) {
         let label = "open link";
-        if (!this.data.onlyOpenLink) {
+        if (!this.data.onlyOpenLink && isValidHttpUrl(src)) {
           if (await isLocalHubsAvatarUrl(src)) {
             label = "use avatar";
           } else if ((await isLocalHubsSceneUrl(src)) && mayChangeScene) {

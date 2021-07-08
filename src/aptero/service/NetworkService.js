@@ -5,29 +5,30 @@ const EventEmitter = require("eventemitter3");
 export class NetworkService {
   eventEmitter = new EventEmitter();
 
-  constructor(){}
+  constructor() {
+  }
 
-  start(){
+  start() {
     /* empty start to ensure the import is made*/
   }
 
   setPhoenixChannel(hubPhxChannel) {
     this.hubPhxChannel = hubPhxChannel;
     this.hubPhxChannel.on("message", ({ session_id, type, body, from }) => {
-      this.eventEmitter.emit("msg_recv",{ session_id, type, body, from });
-      this.eventEmitter.emit(type,{ session_id, type, body, from });
+      this.eventEmitter.emit("msg_recv", { session_id, type, body, from });
+      this.eventEmitter.emit(type, { session_id, type, body, from });
     });
   }
 
-  sendMessage(type,data){
-    this.hubPhxChannel.push("message", { type: type, body:data });
+  sendMessage(type, data) {
+    this.hubPhxChannel.push("message", { type: type, body: data });
   }
 
-  onMessage(type,callback){
-    this.eventEmitter.on(type,callback);
-    return ()=>{
-      this.eventEmitter.off(type,callback);
-    }
+  onMessage(type, callback) {
+    this.eventEmitter.on(type, callback);
+    return () => {
+      this.eventEmitter.off(type, callback);
+    };
   }
 
 
@@ -35,21 +36,23 @@ export class NetworkService {
    * Network utils
    */
 
-  getClientId(){
+  getClientId() {
     return NAF.clientId;
   }
 
-  async getElementNetworkId(element){
+  async getElementNetworkId(element) {
     return new Promise((resolve) => {
       NAF.utils
-          .getNetworkedEntity(element)
-          .then(networkedEl => {
-            resolve(networkedEl.components.networked.data.networkId);
-          })
+        .getNetworkedEntity(element)
+        .then(networkedEl => {
+          resolve(networkedEl.components.networked.data.networkId);
+        }).catch(() => {
+        resolve(null);
+      });
     });
   }
 
-  notifyAdapterReady(){
+  notifyAdapterReady() {
     this.eventEmitter.emit("adapter_ready");
   }
 }

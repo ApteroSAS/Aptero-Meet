@@ -34,10 +34,10 @@ export class ActionController {
   }
 
   async processEntry(entry, elid, sceneuuid, meshuuid, meshName, pairIndex, masterindex) {
-    const jquery = (await import('jquery')).default
+    const jquery = (await import('jquery')).default;
     let element = jquery("#" + elid);
     let htmlElement = element.get()[0];
-    let networkId = await networkService.getElementNetworkId(htmlElement);
+    let networkId = await networkService.getElementNetworkId(htmlElement) || "local";
     console.log("registered custom animation controller", sceneuuid, meshuuid, meshName, element);
     let actionIds = [];
     entry.actions.forEach((action, index) => {
@@ -70,6 +70,7 @@ export class ActionController {
         //"       mixin=\"rounded-text-action-button\"\n" +
         "       mixin=\"" + (style || "rounded-button") + "\"\n" +
         "       is-remote-hover-target\n" +
+        "       class='interactable'\n" +
         "       custom-controller-action=\"actionIds:" + actionsIds.join("+") + ";triggerId:" + triggerId + ";type:" + type + "\"\n" +
         "       tags=\"singleActionButton:true\"\n" +
         "       scale=\"" + (size || "1") + " " + (size || "1") + " " + (size || "1") + "\" \n" +

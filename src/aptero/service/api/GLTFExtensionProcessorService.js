@@ -10,16 +10,21 @@ export class GLTFExtensionProcessorService {
     await this.actionController.start();
   }
 
-  processGltfFile(gltf, el) {
-    let scene = gltf.scene || gltf.scenes[0];
-    let sceneuuid = scene.uuid;
-    scene.children.forEach(mesh => {
-      let meshuuid = mesh.uuid;
-      let meshName = mesh.name;
+  processMeshFile(rootMesh,sceneuuid) {
+    rootMesh.children.forEach(mesh => {
+      const meshuuid = mesh.uuid;
+      const meshName = mesh.name;
+      const el = mesh.el;
+      if(mesh.children){
+        this.processMeshFile(mesh,sceneuuid);
+      }
       if (mesh.userData) {
         Object.keys(mesh.userData).forEach((value, masterindex) => {
           let jsonData = mesh.userData[value];
           if (value.startsWith("apt.action.controller")) {
+            if(!el.id){
+              el.setAttribute("id",sceneuuid+"_"+meshuuid+"_"+masterindex+"_random_id")//TODO add random id
+            }
             this.actionController.process(jsonData,el.id,sceneuuid,meshuuid,meshName,masterindex);
           }
           if (value === "apt.limit.pdf") {
@@ -28,6 +33,11 @@ export class GLTFExtensionProcessorService {
         });
       }
     });
+  }
+
+  processGltfFile(children,sceneuuid) {
+    let root = {children};
+    this.processMeshFile(root,sceneuuid);
   }
 }
 

@@ -586,6 +586,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       const indexToEntityMap = {};
 
       let object3DToSet = this.model;
+      let children = [...(gltf.scene || gltf.scenes[0]).children];//aptero
       if (
         this.data.inflate &&
         (this.inflatedEl = inflateEntities(
@@ -641,7 +642,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       rewires.forEach(f => f());
 
       object3DToSet.visible = true;
-      gltfExtensionProcessorService.processGltfFile(gltf,this.el);//Aptero entry point for personalized animation library
+      gltfExtensionProcessorService.processGltfFile(children,this.model.uuid);//Aptero entry point for personalized animation library
       this.el.emit("model-loaded", { format: "gltf", model: object3DToSet });
     } catch (e) {
       gltfCache.release(src);
