@@ -901,7 +901,9 @@ export default class NafTwilioAdapter extends EventEmitter{
 
         if (this._videoProducer) {
           if (this._videoProducer.track !== track) {
-            this._videoProducer.track.stop();
+            if(this._videoProducer.track) {
+              this._videoProducer.track.stop();
+            }
             this._videoProducer.replaceTrack(track);
           }
         } else {
