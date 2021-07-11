@@ -29,11 +29,12 @@ export class ActionController {
       jsonData = JSON.parse(jsonData);
     }
     jsonData.forEach(async (entry, index) => {
-      await this.processEntry(entry, id, sceneuuid, meshuuid, meshName, index, masterindex);
+      const version = entry.version || 1;
+      await this.processEntry(entry, id, sceneuuid, meshuuid, meshName, index, masterindex,version);
     });
   }
 
-  async processEntry(entry, elid, sceneuuid, meshuuid, meshName, pairIndex, masterindex) {
+  async processEntry(entry, elid, sceneuuid, meshuuid, meshName, pairIndex, masterindex,version) {
     const jquery = (await import('jquery')).default;
     let element = jquery("#" + elid);
     let htmlElement = element.get()[0];
@@ -42,6 +43,11 @@ export class ActionController {
     let actionIds = [];
     entry.actions.forEach((action, index) => {
       let actionid = networkId + "_" + meshName + "_" + masterindex + "_" + pairIndex + "_" + index + "_" + (action.data || "");
+      let differentiator = 0;
+      while (customActionRegister.actionExist(actionid+ "_"+ differentiator)){
+        differentiator++;
+      }
+      actionid = actionid + "_"+ differentiator;
       actionIds.push(actionid);
       customActionRegister.setup(htmlElement, action, actionid);
     });
@@ -49,7 +55,13 @@ export class ActionController {
       let triggerId = networkId + "_" + meshName + "_" + masterindex + "_" + pairIndex + "_" + index;
       customActionRegister.triggers[triggerId]=trigger;
       if (trigger.type === "btn" || trigger.type === "btn-ask") {
-        this.createButtonOnElement(trigger.type, triggerId, actionIds, element, trigger.position, trigger.rotation, trigger.text, trigger.size, trigger.textWidth, trigger.style);
+        if(!trigger.position){
+          trigger.position=new THREE.Vector3(0,0,0);
+        }
+        if(!trigger.rotation){
+          trigger.rotation=new THREE.Vector3(0,0,0);
+        }
+        this.createButtonOnElement(trigger.type, triggerId, actionIds, element, trigger.position, trigger.rotation, trigger.text, trigger.size, trigger.textWidth, trigger.style,version);
       } else {
         throw new Error("invalid btn type");
       }
@@ -57,13 +69,19 @@ export class ActionController {
 
   }
 
-  createButtonOnElement(type, triggerId, actionsIds, element, position, rotationDeg, text, size, textWidth, style, addReverse = true) {
+  createButtonOnElement(type, triggerId, actionsIds, element, position, rotationDeg, text, size, textWidth, style, version = 1, addReverse = true) {
     if (addReverse) {
-      this.createButtonOnElement(type, triggerId, actionsIds, element, position, rotationDeg, text, size, textWidth, style, false);
+      this.createButtonOnElement(type, triggerId, actionsIds, element, position, rotationDeg, text, size, textWidth, style,version, false);
       rotationDeg.y += 180;
     }
     //1) apply transform to button
-    let positionUpdated = element.get()[0].object3D.parent.localToWorld(new THREE.Vector3(position.x / 10, position.z / 10, -position.y / 10));
+    let positionUpdated = new THREE.Vector3(position.x,position.y,position.z);
+    if(version===1) {
+      //TODO deprecated v1
+      positionUpdated.z = -(position.y)+0.25;
+      positionUpdated.y = position.z;
+      size = (+size) * 4
+    }
     //element.append('<a-box color="tomato" position="'+positionUpdated.x+' '+positionUpdated.y+' '+positionUpdated.z+'" depth="0.1" height="0.1" width="0.1"></a-box>')
     element.append(
         "   <a-entity\n" +

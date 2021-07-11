@@ -20,6 +20,17 @@ export class RoomParameters {
         return ["change_screen", "show_spawn_and_move_media", "share_screen"];
     }
 
+    canMove(entity){
+        if(entity.getAttribute("forbidden-to-move")){
+            return false;
+        }
+        /*const isPinned = entity.components.pinnable && entity.components.pinnable.data.pinned;
+        if(isPinned && window.APP.hubChannel.can("spawn_and_move_media") && window.APP.hubChannel.can("pin_objects")){
+            return true;
+        }*/
+        return null;//default
+    }
+
     async applyPermissionAsync(permission, admin) {
         permission["show_spawn_and_move_media"] = true;//default value
         let roomConfig = await this.getParameters(permission.hub_id);

@@ -37,6 +37,10 @@ export class MediaFramesSystem {
   constructor(physicsSystem, interactionSystem) {
     this.physicsSystem = physicsSystem;
     this.interactionSystem = interactionSystem;
+    this.sceneEntered = false;
+    window.addEventListener("apt_scene_entered", ()=>{
+      this.sceneEntered = true;
+    });
   }
 
   tick() {
@@ -97,7 +101,10 @@ export class MediaFramesSystem {
           // TODO Aptero modification to check
           // this line of code is usefull for the case where we put share screen or camera in media frame and close it with the button
           // BUT for the button remove feature it is also necessary more dev needed
-          // frame.release();
+          // usefull if we remove an object from the media frame it release it
+          if(this.sceneEntered) {//GRACE period waiting for NAF to finish its sync
+            frame.release();
+          }
         }
       }
     }
@@ -268,6 +275,10 @@ AFRAME.registerComponent("media-frame", {
         targetId: capturableEntity.id,
         originalTargetScale: new THREE.Vector3().copy(capturableEntity.object3D.scale)
       });
+      console.log(this);
+      console.log(this.el);
+      console.log(capturableEntity.id);
+      console.log(this.data);
       const worldPosition = new THREE.Vector3();
       this.el.object3D.getWorldPosition(worldPosition);
       capturableEntity.object3D.position.copy(worldPosition);

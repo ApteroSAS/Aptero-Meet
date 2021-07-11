@@ -223,7 +223,10 @@ export const mlHandleEntryClicked = (evt, entry, parent) => {
     entry.shareScreen.selectAction = parent.state.selectAction;
     parent.selectEntry(entry);
     lastVideoShareData.data =  entry.shareScreen;
-    AFRAME.scenes[0].emit(`action_share_screen`,"change_screen_to_share_screen");
+    AFRAME.scenes[0].emit("action_end_video_sharing");
+    setTimeout(()=>{
+      AFRAME.scenes[0].emit(`action_share_screen`,"change_screen_to_share_screen");
+    },0)
   } else if (entry.webBrowser) {
     const searchParams = new URLSearchParams(parent.props.history.location.search);
     const urlSource = parent.getUrlSource(searchParams);
@@ -239,7 +242,10 @@ export const mlHandleEntryClicked = (evt, entry, parent) => {
     entry.camera.selectAction = parent.state.selectAction;
     parent.selectEntry(entry);
     lastVideoShareData.data =  entry.camera;
-    AFRAME.scenes[0].emit(`action_share_camera`,"change_screen_to_camera");
+    AFRAME.scenes[0].emit("action_end_video_sharing");
+    setTimeout(()=> {
+      AFRAME.scenes[0].emit("action_share_camera", "change_screen_to_camera");
+    },0);
   } else if (!entry.lucky_query) {
     parent.selectEntry(entry);
   } else {

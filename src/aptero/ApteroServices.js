@@ -9,6 +9,7 @@ import "./component/custom-controller-button";
 import "./component/rtmp-auto-refresh";
 import "./component/media-limiter";
 import "./component/stop-share-screen-on-destroy";
+import "./component/release-media-frame-on-destroy";
 import { gltfExtensionProcessorService } from "./service/api/GLTFExtensionProcessorService";
 import { staticObjectManipulator } from "./service/StaticObjectManipulator";
 import { roomParameters } from "./service/RoomParameters";
@@ -153,6 +154,7 @@ export class ApteroServices {
       this.thirdPersonService.storeUpdated();
       sendIframeMessage("entered",{});
     },1000);
+    window.dispatchEvent(new CustomEvent("apt_scene_entered", {}));
   }
 
   notifyLoadingState(state, action) {

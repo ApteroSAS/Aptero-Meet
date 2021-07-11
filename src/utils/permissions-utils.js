@@ -1,5 +1,7 @@
 // Brief overview of client authorization can be found in the wiki:
 // https://github.com/mozilla/hubs/wiki/Hubs-authorization
+import { roomParameters } from "../aptero/service/RoomParameters";
+
 export function showHoverEffect(el) {
   const isFrozen = el.sceneEl.is("frozen");
   const isPinned = el.components.pinnable && el.components.pinnable.data.pinned;
@@ -15,6 +17,9 @@ export function showHoverEffect(el) {
 }
 
 export function canMove(entity) {
+  if(roomParameters.canMove(entity)!==null){
+    return roomParameters.canMove(entity);
+  }
   const isPinned = entity.components.pinnable && entity.components.pinnable.data.pinned;
   const networkedTemplate = entity && entity.components.networked && entity.components.networked.data.template;
   const isCamera = networkedTemplate === "#interactable-camera";

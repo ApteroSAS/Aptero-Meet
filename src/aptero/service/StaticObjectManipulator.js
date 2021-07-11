@@ -21,7 +21,7 @@ export class StaticObjectManipulator {
   deactivatedEntity = {};
   LastDeactivatedEntitySend = null;
   staticEntities = {};
-  activated = propertiesService.APP_CONFIG.features.staticObjectManipulator || true;//TODO deactive
+  activated = propertiesService.APP_CONFIG.features.staticObjectManipulator || true;//TODO deactive Bug always true
 
   constructor() {
   }

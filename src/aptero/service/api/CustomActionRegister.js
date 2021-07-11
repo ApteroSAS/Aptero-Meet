@@ -59,18 +59,30 @@ export class CustomActionRegister {
     }
   }
 
+  actionExist(actionid){
+    return !!this.actions[actionid];
+  }
+
   async handleEntry(entry, mediaOptions = null,transform) {
     return new Promise((resolve, reject) => {
       if (entry.camera || entry.shareScreen) {
-        mediaViewEventEmitter.once("share_video_media_stream_created", (data) => {
+        let entityResult = null;
+        let onCreate = (data) => {
           let {entity,orientation} = spawnMedia(data.src, ObjectContentOrigins.URL, mediaOptions);
+          entityResult = entity;
           resolve({entity,orientation});
-          AFRAME.scenes[0].addEventListener("action_end_video_sharing", () => {
-            if (entity.parentNode) {
-              entity.parentNode.removeChild(entity);
+        };
+        AFRAME.scenes[0].addEventListener("action_end_video_sharing", () => {
+          if(entityResult) {
+            if (entityResult.parentNode) {
+              entityResult.parentNode.removeChild(entityResult);
             }
-          }, { once: true });
-        });
+          }else{
+            reject("premature end of share screen/camera");
+            mediaViewEventEmitter.removeListener("share_video_media_stream_created", onCreate)
+          }
+        }, { once: true });
+        mediaViewEventEmitter.once("share_video_media_stream_created",onCreate );
       } else {
         resolve(spawnMedia(entry.url, entry.contentOrigin, mediaOptions));
       }
@@ -130,24 +142,36 @@ export class CustomActionRegister {
     let mediaFrame = await this.findMediaFrameByName(actionData.action.mediaFrame);
     if (mediaFrame && mediaFrame.components["media-frame"]) {
       let mediaFrameComponent = mediaFrame.components["media-frame"];
-      const mfv = mediaFrameComponent.el.object3D.position;
+      const mfvWorldPos = new THREE.Vector3();
+      mediaFrameComponent.el.object3D.getWorldPosition(mfvWorldPos);
       await this.removeOldMediaFrameEntity(mediaFrame);
       let entity = await new Promise(async (resolve, reject) => {
-        let {entity,orientation} = await this.handleEntry(entry,this.getMediaOptionSetting(actionData));
-        entity.object3D.position.x = mfv.x;
-        entity.object3D.position.y = mfv.y;
-        entity.object3D.position.z = mfv.z;
-        orientation.then(()=>{
-          const q = entity.object3D.quaternion;
-          entity.object3D.quaternion.set(q.x,q.y,q.z,q.w);
-        });
-        entity = await this.convertToNetEntity(entity);
-        //this.applyAudio(entity, actionData);
-        resolve(entity);
+        try {
+          let {entity,orientation} = await this.handleEntry(entry,this.getMediaOptionSetting(actionData));
+          entity.object3D.position.copy(mfvWorldPos);
+          orientation.then(()=>{
+            const worldQuat = new THREE.Quaternion();
+            mediaFrameComponent.object3D.getWorldQuaternion(worldQuat);
+            entity.object3D.setRotationFromQuaternion(worldQuat);
+            entity.object3D.updateWorldMatrix(true);
+          });
+          entity = await this.convertToNetEntity(entity);
+          //this.applyAudio(entity, actionData);
+          resolve(entity);
+        } catch (e) {
+          reject(e);
+        }
       });
 
       if (entity.components["media-video"].data.src.startsWith("hubs://")) {
         entity.setAttribute("stop-share-screen-on-destroy", { target: NAF.clientId });
+      }
+      entity.setAttribute("release-media-frame-on-destroy", { target: actionData.action.mediaFrame });
+
+      if(actionData.action.attribute) {
+        Object.keys(actionData.action.attribute).forEach(att => {// eg "forbidden-to-move"
+          entity.setAttribute(att, actionData.action.attribute[att]);
+        })
       }
 
       this.onReady(entity, async () => {
@@ -156,12 +180,15 @@ export class CustomActionRegister {
           /*capturableEntity.object3D.scale.setScalar(
             scaleForAspectFit(this.data.bounds, capturableEntity.getObject3D("mesh").scale)
           );*/
+          console.log(entity.id)
+          await NAF.utils.takeOwnership(mediaFrameComponent.el);
+          //NAF.entities.completeSync(NAF.clientId,true);
           mediaFrameComponent.capture(entity);
           if (actionData.action.pin) {
             await pinEntity(entity);
           }
-          applyPersistentSync(entity.components["networked"].data.networkId);
-          applyPersistentSync(mediaFrame.components["networked"].data.networkId);
+          //applyPersistentSync(entity.components["networked"].data.networkId);//TODO usefull?
+          //applyPersistentSync(mediaFrame.components["networked"].data.networkId);//TODO usefull?
         }, 0);
       });
     } else {
@@ -249,16 +276,6 @@ export class CustomActionRegister {
           mediaFrame = frame;
         }
       });
-      /*if (mediaFrame) {
-        NAF.utils.getNetworkedEntity(mediaFrame).then(async networkedEl => {
-          if (!NAF.utils.isMine(networkedEl)) {
-            NAF.utils.takeOwnership(networkedEl);
-          }
-          resolve(mediaFrame);
-        });
-      } else {
-        resolve(mediaFrame);
-      }*/
       resolve(mediaFrame);
     });
   }
