@@ -24,19 +24,19 @@ export class StaticObjectManipulator {
   activated = propertiesService.APP_CONFIG.features.staticObjectManipulator || true;//TODO deactive Bug always true
 
   constructor() {
+    window.addEventListener("apt_scene_entered", () => {
+      //When the network is ready on our side we store the static media
+      const entKeys = Object.keys(NAF.entities.entities);
+      entKeys.forEach(keyA => {
+        this.storeStaticMedia(keyA, NAF.entities.entities[keyA]);
+      });
+    },{once:true});
   }
 
   start() {
     if(this.activated){
       return;
     }
-    networkService.eventEmitter.once("adapter_ready", () => {
-      //When the network is ready on our side we store the static media
-      const entKeys = Object.keys(NAF.entities.entities);
-      entKeys.forEach(keyA => {
-        this.storeStaticMedia(keyA, NAF.entities.entities[keyA]);
-      });
-    });
 
     ///////////////////////////
     //when a new client connects we send him the state of the room what is deactivated etc...

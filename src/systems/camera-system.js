@@ -241,7 +241,7 @@ export class CameraSystem {
   setThirdPersonMode(enabled) {
     if(enabled && !isHeadsetConnected && this.mode === CAMERA_MODE_FIRST_PERSON) {
       this.mode = CAMERA_MODE_THIRD_PERSON_NEAR;
-    }else if(this.mode === CAMERA_MODE_THIRD_PERSON_NEAR) {
+    }else if(!enabled && this.mode === CAMERA_MODE_THIRD_PERSON_NEAR) {
       this.mode = CAMERA_MODE_FIRST_PERSON;
     }
     return this.mode;

@@ -6,6 +6,7 @@ let defaultAdapter = configs.APP_CONFIG.adapterParams.adapter;
 
 let forceTurnGlobal = false;
 let forceTcpGlobal = false;
+let profile = null;
 
 export async function choseAdapter() {
   let adapter = defaultAdapter;
@@ -24,7 +25,9 @@ export async function choseAdapter() {
   try {
     const url = propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/room/adapter/" + adapter + "/profile";
     const resp = await fetch(url);
-    configs.APP_CONFIG.adapterParams = { ...(configs.APP_CONFIG.adapterParams), ...(await resp.json()) };
+    const recvProfile = await resp.json();
+    profile = { ...(configs.APP_CONFIG.adapterParams), ...recvProfile };
+    configs.APP_CONFIG.adapterParams = profile;
   } catch (err) {
     console.error(err);
   }
@@ -33,7 +36,7 @@ export async function choseAdapter() {
 }
 
 export function getAdapterConfig() {
-  return configs.APP_CONFIG.adapterParams || {};
+  return profile || {};
 }
 
 export async function unpublishVideoTrack() {

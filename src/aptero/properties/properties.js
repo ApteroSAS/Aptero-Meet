@@ -55,7 +55,7 @@ window.APP_PROPS = {
       hide_powered_by: true,
       show_feedback_ui: false,
       disable_room_creation: true,
-      staticObjectManipulator: false
+      staticObjectManipulator: true //warning bug if set to false
     },
     links:{
       privacy_notice:"https://aptero.co/privacy.html",

@@ -643,7 +643,9 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
         .catch(connectError => {
           clearTimeout(connectionErrorTimeout);
           connectionErrorTimeout = null;
-          adapter.disconnect();
+          if(adapter.disconnect) {
+            adapter.disconnect();
+          }
           onConnectionError(entryManager, connectError);
         });
     };
