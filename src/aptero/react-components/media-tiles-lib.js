@@ -199,15 +199,45 @@ export class MediaTilesLib {
 
 }
 
+export function completeEntry (entry,is360,selectAction) {
+  if(!entry){
+    return;
+  }
+  if (entry.shareScreen) {
+    entry.shareScreen.type = is360 ? "360-equirectangular" : "2d";
+    entry.shareScreen.selectAction = selectAction;
+    lastVideoShareData.data =  entry.shareScreen;
+    AFRAME.scenes[0].emit("action_end_video_sharing");
+    setTimeout(()=>{
+      AFRAME.scenes[0].emit(`action_share_screen`,"change_screen_to_share_screen");
+    },0)
+  } else if (entry.webBrowser) {
+    entry.webBrowser.type = is360 ? "360-equirectangular" : "2d";
+    entry.webBrowser.selectAction = selectAction;
+  } else if (entry.camera) {
+    entry.camera.type = is360 ? "360-equirectangular" : "2d";
+    entry.camera.selectAction = selectAction;
+    lastVideoShareData.data =  entry.camera;
+    AFRAME.scenes[0].emit("action_end_video_sharing");
+    setTimeout(()=> {
+      AFRAME.scenes[0].emit("action_share_camera", "change_screen_to_camera");
+    },0);
+  }
+  return entry;
+}
+
 export const mlHandleEntryClicked = (evt, entry, parent) => {
   evt.preventDefault();
   if(!entry){
     return;
   }
-  if (entry.createLiveEntry) {
+  let is360 = false;
+  if(parent) {
     const searchParams = new URLSearchParams(parent.props.history.location.search);
     const urlSource = parent.getUrlSource(searchParams);
-    const is360 = urlSource === "videos360";
+    is360 = urlSource === "videos360";
+  }
+  if (entry.createLiveEntry) {
     liveStream.createStream(is360).then(entry => {
       parent.setState((state) => {
         const newState = { ...state };
@@ -215,37 +245,9 @@ export const mlHandleEntryClicked = (evt, entry, parent) => {
         return newState;
       });
     });
-  } else if (entry.shareScreen) {
-    const searchParams = new URLSearchParams(parent.props.history.location.search);
-    const urlSource = parent.getUrlSource(searchParams);
-    const is360 = urlSource === "videos360";
-    entry.shareScreen.type = is360 ? "360-equirectangular" : "2d";
-    entry.shareScreen.selectAction = parent.state.selectAction;
-    parent.selectEntry(entry);
-    lastVideoShareData.data =  entry.shareScreen;
-    AFRAME.scenes[0].emit("action_end_video_sharing");
-    setTimeout(()=>{
-      AFRAME.scenes[0].emit(`action_share_screen`,"change_screen_to_share_screen");
-    },0)
-  } else if (entry.webBrowser) {
-    const searchParams = new URLSearchParams(parent.props.history.location.search);
-    const urlSource = parent.getUrlSource(searchParams);
-    const is360 = urlSource === "videos360";
-    entry.webBrowser.type = is360 ? "360-equirectangular" : "2d";
-    entry.webBrowser.selectAction = parent.state.selectAction;
-    parent.selectEntry(entry);
-  } else if (entry.camera) {
-    const searchParams = new URLSearchParams(parent.props.history.location.search);
-    const urlSource = parent.getUrlSource(searchParams);
-    const is360 = urlSource === "videos360";
-    entry.camera.type = is360 ? "360-equirectangular" : "2d";
-    entry.camera.selectAction = parent.state.selectAction;
-    parent.selectEntry(entry);
-    lastVideoShareData.data =  entry.camera;
-    AFRAME.scenes[0].emit("action_end_video_sharing");
-    setTimeout(()=> {
-      AFRAME.scenes[0].emit("action_share_camera", "change_screen_to_camera");
-    },0);
+  }else if (entry.shareScreen || entry.webBrowser || entry.camera) {
+    const entryCompeted = completeEntry(entry,is360,parent.state.selectAction);
+    parent.selectEntry(entryCompeted);
   } else if (!entry.lucky_query) {
     parent.selectEntry(entry);
   } else {

@@ -233,39 +233,6 @@ export default class MediaSearchStore extends EventTarget {
     this._sourceNavigate(this._stashedSource ? this._stashedSource : SOURCES[0], false, true);
   };
 
-  //aptero TODO put in service
-  resultAwaited = false;//used externaly as information
-  lastAction = () => {
-  };
-  async cancelSearchWithResult(wait=0) {
-      this.lastAction({detail:{ result: "cancel" }});
-      //wait propagation of event
-      await new Promise((resolve) => {
-        setTimeout(resolve,wait);
-      });
-  }
-
-  async sourceNavigateWithResult(source) {
-    return new Promise(async (resolve, reject) => {
-      this.lastAction({detail:{ result: "cancel" }});
-      this.resultAwaited = true;
-      const sceneEl = AFRAME.scenes[0];
-      sceneEl.removeEventListener("action_selected_media_result_entry", this.lastAction);
-      await this._sourceNavigate(source, true, false, "result");
-      this.lastAction = (data) => {
-        data = data.detail;
-        if (data.result === "cancel") {
-            this.resultAwaited = false;
-          reject("cancel");
-        } else {
-            this.resultAwaited = false;
-          resolve(data.entry);
-        }
-      };
-      sceneEl.addEventListener("action_selected_media_result_entry", this.lastAction,{once:true});
-    });
-  }
-
   sourceNavigateWithNoNav = (source, selectAction) => {
     this._sourceNavigate(source, true, false, selectAction);
   };

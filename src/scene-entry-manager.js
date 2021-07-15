@@ -24,6 +24,7 @@ import { SOUND_ENTER_SCENE } from "./systems/sound-effects-system";
 //aptero
 import { mediaViewEventEmitter, lastVideoShareData } from "./aptero/service/ChangeVideoService";
 import { networkService } from "./aptero/service/NetworkService";
+import { searchService } from "./aptero/service/SearchService";
 
 const isIOS = AFRAME.utils.device.isIOS();
 
@@ -311,7 +312,7 @@ export default class SceneEntryManager {
     this.scene.addEventListener("add_media", e => {
       const contentOrigin = e.detail instanceof File ? ObjectContentOrigins.FILE : ObjectContentOrigins.URL;
       //APTERO integration
-      if(this.mediaSearchStore.resultAwaited) {
+      if(searchService.resultAwaited) {
         let entry = { url: e.detail, contentOrigin};
         let selectAction = "result";
         this.scene.emit("action_selected_media_result_entry", { entry, selectAction });

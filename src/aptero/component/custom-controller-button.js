@@ -1,5 +1,6 @@
 import { customActionRegister } from "../service/api/CustomActionRegister";
 import configs from "../../utils/configs";
+import { searchService } from "../service/SearchService";
 
 AFRAME.registerComponent("custom-controller-action", {
   schema: {
@@ -52,14 +53,14 @@ AFRAME.registerComponent("custom-controller-action", {
     this.onClick = async () => {
       if (this.data.type === "btn-ask") {
         //special case for search with result. Closing the search panel is not detected so we have to unblock the previous click in case the panel is still open
-        await window.APP.mediaSearchStore.cancelSearchWithResult(0);
+        await searchService.cancelSearchWithResult(0);
       }
       if (!this.clickWIP) {
         this.clickWIP = true;
         try {
           let entry = null;
           if (this.data.type === "btn-ask") {
-            entry = await window.APP.mediaSearchStore.sourceNavigateWithResult("videos2d");
+            entry = await searchService.sourceNavigateWithResult(this.data.source || "videos2d-simple");
           }
           if (this.data.actionIds) {
             let ids = this.data.actionIds.split("+");

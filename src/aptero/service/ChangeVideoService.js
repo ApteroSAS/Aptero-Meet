@@ -2,6 +2,7 @@
 import { ObjectContentOrigins } from "../../object-types";
 import { addMediaAndSetTransform } from "../util/Media";
 import { staticObjectManipulator } from "./StaticObjectManipulator";
+import { searchService } from "./SearchService";
 
 const EventEmitter = require("eventemitter3");
 export const mediaViewEventEmitter = new EventEmitter();
@@ -39,7 +40,7 @@ export class ChangeVideoService {
     const mediaOptions = entity.components["media-loader"].data.mediaOptions;
     const scene = entity.sceneEl;
     try {
-      window.APP.mediaSearchStore.sourceNavigateWithResult(mediaOptions.projection === "360-equirectangular" ? "videos360" : "videos2d").then(entry => {
+      searchService.sourceNavigateWithResult(mediaOptions.projection === "360-equirectangular" ? "videos360" : "videos2d").then(entry => {
         scene.emit("action_end_video_sharing");
         this.videoChoosing = true;
         const worldPosition = entity.object3D.getWorldPosition().clone();

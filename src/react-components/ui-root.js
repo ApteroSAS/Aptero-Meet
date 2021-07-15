@@ -98,7 +98,7 @@ import { minimumQualityService } from "../aptero/service/MinimumQualityService";
 import { apteroService } from "../aptero/ApteroServices";
 import { CustomSidebarContainer } from "../aptero/react-components/CustomSidebarContainer";
 import { customMenuService } from "../aptero/service/CustomMenuService";
-import TestPanelLazy from "../aptero/service/SelfTestService.loader";
+import AptRoot from "../aptero/react-components/AptRoot";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -1655,7 +1655,7 @@ function UIRootHooksWrapper(props) {
     <ChatContextProvider messageDispatch={props.messageDispatch}>
       <ObjectListProvider scene={props.scene}>
         <UIRoot breakpoint={breakpoint} {...props} />
-        <TestPanelLazy/>
+        <AptRoot/>
       </ObjectListProvider>
     </ChatContextProvider>
   );
