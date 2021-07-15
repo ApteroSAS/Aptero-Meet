@@ -7,6 +7,10 @@ import { useMicrophone } from "./useMicrophone";
 import { FormattedMessage } from "react-intl";
 
 export function VoiceButtonContainer({ scene, microphoneEnabled }) {
+  if(window.APP_CONFIG.adapterParams.adapter === "none"){
+    return <></>
+  }
+
   const buttonRef = useRef();
 
   const { isMuted, volume, toggleMute } = useMicrophone(scene);

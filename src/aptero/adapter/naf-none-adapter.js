@@ -1,6 +1,8 @@
 import EventEmitter from "eventemitter3";
 
 export default class NoneAdapter extends EventEmitter {
+  occupants = {};
+
   constructor() {
     super();
   }

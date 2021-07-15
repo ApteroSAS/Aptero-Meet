@@ -576,7 +576,7 @@ class UIRoot extends Component {
   beginOrSkipAudioSetup = () => {
     const skipAudioSetup = this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now");
 
-    if (skipAudioSetup) {
+    if (skipAudioSetup || window.APP_CONFIG.adapterParams.adapter === "none") {
       this.onAudioReadyButton();
     } else {
       this.pushHistoryState("entry_step", "audio");
@@ -601,9 +601,9 @@ class UIRoot extends Component {
     // Push the new history state before going into VR, otherwise menu button will take us back
     clearHistoryState(this.props.history);
 
-    const muteOnEntry = this.props.store.state.preferences["muteMicOnEntry"] || false;
+    const muteOnEntry = window.APP_CONFIG.adapterParams.adapter === "none" || this.props.store.state.preferences["muteMicOnEntry"] || false;
     this.props.store.update({
-      settings: { micMuted: false }
+      settings: { micMuted: muteOnEntry }
     });
     await this.props.enterScene(this.state.enterInVR, muteOnEntry);
 

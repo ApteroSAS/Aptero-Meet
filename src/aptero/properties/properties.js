@@ -43,7 +43,7 @@ window.APP_PROPS = {
       ORIGIN:"meet-frontend-localhost"
     },
     adapterParams: {
-      adapter: "dialog-io",//dialog,dialog-io,janus,twilio,agora,default
+      adapter: "dialog-io",//dialog,dialog-io,janus,twilio,agora,default,none
     },
     turn:{
       twilio:{

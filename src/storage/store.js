@@ -349,7 +349,8 @@ export default class Store extends EventTarget {
     if (!valid) {
       // Intentionally not including details about the state or validation result here, since we don't want to leak
       // sensitive data in the error message.
-      throw new Error(`Write to store failed schema validation.`);
+      console.log(`Write to store failed schema validation.`)
+      //throw new Error(`Write to store failed schema validation.`);
     }
 
     localStorage.setItem(LOCAL_STORE_KEY, JSON.stringify(finalState));
