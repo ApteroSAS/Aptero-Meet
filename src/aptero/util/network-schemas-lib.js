@@ -1,5 +1,7 @@
 export function getMediaVideoComponent() {
-  return [/*{
+  return [
+    "forbidden-to-move"
+    /*{
     component: "media-loader",
     property: "mediaOptions"
   },*/
