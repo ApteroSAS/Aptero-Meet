@@ -151,9 +151,11 @@ export class CustomActionRegister {
           entity.object3D.position.copy(mfvWorldPos);
           orientation.then(()=>{
             const worldQuat = new THREE.Quaternion();
-            mediaFrameComponent.object3D.getWorldQuaternion(worldQuat);
-            entity.object3D.setRotationFromQuaternion(worldQuat);
-            entity.object3D.updateWorldMatrix(true);
+            if(mediaFrameComponent.object3D) {//TODO is this a bug? in which case this is undefined?
+              mediaFrameComponent.object3D.getWorldQuaternion(worldQuat);
+              entity.object3D.setRotationFromQuaternion(worldQuat);
+              entity.object3D.updateWorldMatrix(true);
+            }
           });
           entity = await this.convertToNetEntity(entity);
           //this.applyAudio(entity, actionData);
@@ -180,7 +182,6 @@ export class CustomActionRegister {
           /*capturableEntity.object3D.scale.setScalar(
             scaleForAspectFit(this.data.bounds, capturableEntity.getObject3D("mesh").scale)
           );*/
-          console.log(entity.id)
           await NAF.utils.takeOwnership(mediaFrameComponent.el);
           //NAF.entities.completeSync(NAF.clientId,true);
           mediaFrameComponent.capture(entity);

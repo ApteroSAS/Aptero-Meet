@@ -22,10 +22,7 @@ export async function createAgoraTrack(constraints) {
       AgoraRTC.createCameraVideoTrack()
    */
   let track;
-  if (constraints.audio) {
-    //https://docs.agora.io/en/Video/API%20Reference/web_ng/interfaces/microphoneaudiotrackinitconfig.html
-    track = await AgoraRTC.createMicrophoneAudioTrack({ microphoneId: constraints.audio.deviceId?.exact[0] });
-  } else if (constraints.video) {
+  if (constraints.video) { //First check if constraint video because we can have an audio constraint in case of a share screen
     if (constraints.video.mediaSource === "camera") {
       //https://docs.agora.io/en/Voice/API%20Reference/web_ng/interfaces/iagorartc.html#createcameravideotrack
       //https://docs.agora.io/en/Video/API%20Reference/web_ng/interfaces/customvideotrackinitconfig.html
@@ -35,6 +32,9 @@ export async function createAgoraTrack(constraints) {
       //https://docs.agora.io/en/Voice/API%20Reference/web_ng/interfaces/screenvideotrackinitconfig.html
       track = await AgoraRTC.createScreenVideoTrack();
     }
+  }else if (constraints.audio) {
+    //https://docs.agora.io/en/Video/API%20Reference/web_ng/interfaces/microphoneaudiotrackinitconfig.html
+    track = await AgoraRTC.createMicrophoneAudioTrack({ microphoneId: constraints.audio.deviceId?.exact[0] });
   }
   return new MediaStream([track.getMediaStreamTrack()]);
 }

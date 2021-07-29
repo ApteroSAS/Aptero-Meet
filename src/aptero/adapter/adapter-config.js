@@ -52,9 +52,6 @@ export async function setlistenerEndShareVideo(){
 }
 
 export async function createTrack(constraints, isDisplayDevice) {
-  if (constraints.video) {
-    delete constraints["audio"];
-  }
   if (configs.APP_CONFIG.adapterParams.adapter === "twilio") {
     let { createTwilioTrack:createTwilioTrack } = await import('./twilio');
     return createTwilioTrack(constraints, isDisplayDevice);

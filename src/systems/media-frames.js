@@ -275,10 +275,6 @@ AFRAME.registerComponent("media-frame", {
         targetId: capturableEntity.id,
         originalTargetScale: new THREE.Vector3().copy(capturableEntity.object3D.scale)
       });
-      console.log(this);
-      console.log(this.el);
-      console.log(capturableEntity.id);
-      console.log(this.data);
       const worldPosition = new THREE.Vector3();
       this.el.object3D.getWorldPosition(worldPosition);
       capturableEntity.object3D.position.copy(worldPosition);

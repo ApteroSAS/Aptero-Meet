@@ -74,7 +74,7 @@ AFRAME.registerComponent("custom-controller-action", {
           this.clickWIP = false;
         } catch (ex) {
           this.clickWIP = false;
-          console.error(ex);
+          console.warn(ex);
         }
       }
     };

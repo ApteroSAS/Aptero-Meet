@@ -29,15 +29,7 @@ export async function unpublishVideoTrack() {
 export async function createTwilioTrack(constraints) {
   let room = currentRoom;
   let track;
-  if (constraints.audio) {
-    //https://www.twilio.com/docs/video/javascript-v1-getting-started#specify-constraints
-    let localTracks = await Video.createLocalTracks(constraints);
-      console.log("currentTracks updated: " + localTracks);
-      if (room) {
-        room.localParticipant?.publishTrack(localTracks[0]);
-      }
-      return new MediaStream([localTracks[0].mediaStreamTrack]);
-  } else if (constraints.video) {
+  if (constraints.video) { //First check if constraint video because we can have an audio constraint in case of a share screen
     if (constraints.video.mediaSource === "camera") {
       //https://www.twilio.com/docs/video/javascript-v1-getting-started#specify-constraints
       let localTracks = await Video.createLocalTracks(constraints);
@@ -49,7 +41,7 @@ export async function createTwilioTrack(constraints) {
       return new MediaStream([videoTrack]);
     } else {
       //https://www.twilio.com/docs/video/javascript-v1-screen-capture-chrome
-      let stream = await navigator.mediaDevices.getDisplayMedia();
+      let stream = await navigator.mediaDevices.getDisplayMedia(constraints);
       let localTracks = await Video.LocalVideoTrack(stream.getTracks()[0]);
       console.log("currentTracks updated: " + localTracks);
       if (room) {
@@ -58,6 +50,14 @@ export async function createTwilioTrack(constraints) {
       videoTrack = localTracks.mediaStreamTrack;
       return new MediaStream([videoTrack]);
     }
+  }else if (constraints.audio) {
+    //https://www.twilio.com/docs/video/javascript-v1-getting-started#specify-constraints
+    let localTracks = await Video.createLocalTracks(constraints);
+    console.log("currentTracks updated: " + localTracks);
+    if (room) {
+      room.localParticipant?.publishTrack(localTracks[0]);
+    }
+    return new MediaStream([localTracks[0].mediaStreamTrack]);
   }
   return new MediaStream([track.getMediaStreamTrack()]);
 }

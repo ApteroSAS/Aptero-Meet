@@ -540,6 +540,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
 
   scene.addEventListener("action_selected_media_result_entry", e => {
     const { entry, selectAction } = e.detail;
+    if (!entry) return;
     if ((entry.type !== "scene_listing" && entry.type !== "scene") || selectAction !== "use") return;
     if (!hubChannel.can("update_hub")) return;
 

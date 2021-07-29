@@ -481,9 +481,9 @@ export default class SceneEntryManager {
           video: {
             // Work around BMO 1449832 by calculating the width. This will break for multi monitors if you share anything
             // other than your current monitor that has a different aspect ratio.
-            width: 720 * (screen.width / screen.height),
-            height: 720,
-            frameRate: 30
+            //width: 720 * (screen.width / screen.height),
+            height: {ideal: 768},
+            frameRate: {ideal: 15},
           },
           audio: {
             echoCancellation: window.APP.store.state.preferences.disableEchoCancellation === true ? false : true,

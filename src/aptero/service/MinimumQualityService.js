@@ -1,5 +1,8 @@
 import { filterServer } from "../adapter/adapter-config";
-import { useState } from "react";
+
+function clampInt (value, min, max) {
+  return Math.round(Math.min(Math.max(value, min), max));
+}
 
 class FpsBalancer {
 
@@ -55,8 +58,13 @@ class FpsBalancer {
         let result = this.stopFPSTest();
         const deltaFPS = result.fps - 30;//between -30 and 30
         const ratio = deltaFPS / 100;//between -30% and 30%
-        if (result.fps < 20 || result.fps >= 55) {
+        if (result.fps < 25 || result.fps >= 55) {
           this.changeResolution(1 + ratio);
+        }
+        const preferences = window.APP.store.state.preferences;
+        if((preferences.maxResolutionWidth < 600 || preferences.maxResolutionHeight < 600) && preferences.materialQualitySetting!=="low"){
+          preferences.materialQualitySetting = "low";
+          console.log("switching to low resolution mode for next app start")
         }
       }
     } catch (e) {
@@ -68,8 +76,8 @@ class FpsBalancer {
     this.balancing = true;
     const preferences = window.APP.store.state.preferences;
     if (preferences.maxResolutionWidth > window.screen.width || preferences.maxResolutionHeight > window.screen.height) {
-      let newWidth = Math.round(Math.min(Math.max(preferences.maxResolutionWidth, 240), window.screen.width));
-      let newHeight = Math.round(Math.min(Math.max(preferences.maxResolutionHeight, 240), window.screen.height));
+      let newWidth = clampInt(preferences.maxResolutionWidth, 240, window.screen.width);
+      let newHeight = clampInt(preferences.maxResolutionHeight, 240, window.screen.height);
       window.APP.store.update({
         preferences: { maxResolutionWidth: newWidth, maxResolutionHeight: newHeight }
       });
@@ -84,8 +92,8 @@ class FpsBalancer {
 
   changeResolution(ratio) {
     const preferences = window.APP.store.state.preferences;
-    let newWidth = Math.round(Math.min(Math.max((preferences.maxResolutionWidth * ratio) | window.screen.width, 240), window.screen.width));
-    let newHeight = Math.round(Math.min(Math.max((preferences.maxResolutionHeight * ratio) | window.screen.height, 240), window.screen.height));
+    let newWidth = clampInt((preferences.maxResolutionWidth * ratio) || window.screen.width, 240, window.screen.width);
+    let newHeight = clampInt((preferences.maxResolutionHeight * ratio) || window.screen.height, 240, window.screen.height);
     if (preferences.maxResolutionWidth !== newWidth || preferences.maxResolutionHeight !== newHeight) {
       preferences.maxResolutionWidth = newWidth;
       preferences.maxResolutionHeight = newHeight;
