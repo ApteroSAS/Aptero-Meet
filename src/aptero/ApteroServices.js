@@ -24,6 +24,7 @@ import {aptLogger} from "./service/log/Logger";
 import { minimumQualityService } from "./service/MinimumQualityService";
 import { notifySceneEntered, startSelfTest, testTick } from "./service/SelfTestService.loader";
 import { setlistenerEndShareVideo } from "./adapter/adapter-config";
+import { remoteControlServiceV2 } from "./service/RemoteControlServiceV2";
 
 //event handling for iframe #morgane
 window.focus();
@@ -86,6 +87,7 @@ export class ApteroServices {
       await gltfExtensionProcessorService.start();
       await this.thirdPersonService.start();
       await aptLogger.start();
+      await remoteControlServiceV2.start();
     });
   }
 

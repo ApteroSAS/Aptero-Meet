@@ -11,6 +11,20 @@ export class RemoteControlServiceV2 {
     lastY=0;
     lastSessionID = "";
 
+    async start(){
+        setInterval(()=>{
+            try {
+                //send all heart beat
+                Object.keys(this.remoteScreenSessionRfbMap).forEach(async sid => {
+                    await axios.get(propertiesService.PROTOCOL + propertiesService.REMOTE_VM_SERVICE.url + "/service/remote/orchestrator/heart/beat/"+sid);
+                });
+            }catch (e) {
+                console.warn(e);
+                /* do not throw error for heart beat log only*/
+            }
+        },5*60*1000);
+    }
+
     getNewRemoteSessionID() {
         return window.APP.store.credentialsAccountId?window.APP.store.credentialsAccountId:("anonymous"+Math.floor(Math.random()*10000000));
     }
