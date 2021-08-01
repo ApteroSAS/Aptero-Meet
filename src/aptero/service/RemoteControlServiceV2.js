@@ -55,36 +55,42 @@ export class RemoteControlServiceV2 {
             axios.post(propertiesService.PROTOCOL + propertiesService.REMOTE_VM_SERVICE.url + "/service/remote/orchestrator/create", data).then(async resp => {
                 resp=resp.data;
                 resp.url = "wss://" + propertiesService.REMOTE_VM_SERVICE.url+"/reverse/"+resp.ip+"/"+resp.port+"/websockify";
-                let RFB = (await import('@novnc/novnc/core/rfb')).default
-                let rfb = new RFB( screenElement.children[0], resp.url);
+                const rfb = await this.createRBF(screenElement.children[0],resp.url);
                 this.remoteScreenSessionRfbMap[data.remoteScreenSessionId] = rfb;
-                await new Promise((resolve, reject) => {
-                    let desktopName="ERROR";
-                    rfb.addEventListener("connect",  ()=>{
-                        console.log("Connected to " + desktopName)
-                        resolve(desktopName);
-                    });
-                    rfb.addEventListener("disconnect", (e) => {
-                        if (e.detail.clean) {
-                            console.log("Disconnected");
-                        } else {
-                            reject("Something went wrong");
-                            console.error("Something went wrong, connection is closed",e);
-                        }
-                    });
-                    rfb.addEventListener("credentialsrequired", (e) => {
-                        const password = prompt("Password Required:");
-                        rfb.sendCredentials({ password: password });
-                    });
-                    rfb.addEventListener("desktopname", (e) => {
-                        desktopName = e.detail.name;
-                    });
-                });
                 resolve(rfb);
             }).catch(reason => {
                 reject(reason);
             });
         })
+    }
+
+    async createRBF(el,url){
+        let RFB = (await import('@novnc/novnc/core/rfb')).default;
+        let rfb = new RFB(el, url);
+        await new Promise((resolve, reject) => {
+            let desktopName="ERROR";
+            rfb.addEventListener("connect",  ()=>{
+                console.log("Connected to " + desktopName);
+                resolve(desktopName);
+            });
+            rfb.addEventListener("disconnect", (e) => {
+                if (e.detail.clean) {
+                    console.log("Disconnected");
+                    //connection lost but url still here try to reconnect
+                } else {
+                    reject("Something went wrong");
+                    console.error("Something went wrong, connection is closed",e);
+                }
+            });
+            rfb.addEventListener("credentialsrequired", (e) => {
+                const password = prompt("Password Required:");
+                rfb.sendCredentials({ password: password });
+            });
+            rfb.addEventListener("desktopname", (e) => {
+                desktopName = e.detail.name;
+            });
+        });
+        return rfb;
     }
 
     registerEventOnElement(el) {
