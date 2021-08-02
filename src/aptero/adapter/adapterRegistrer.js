@@ -11,10 +11,16 @@ export async function lazyLoad(adapter){
   if (adapter==="dialog-io") {
     await import('./naf-dialog-io-adapter')
   }
+  if (adapter==="dialog-io-data-only") {
+    await import('./naf-dialog-io-data-only-adapter')
+  }
   if (adapter==="agora") {
     await import('./naf-agora-adapter')
   }
   if (adapter==="none") {
     await import('./naf-none-adapter')
+  }
+  if (adapter==="socketio") {
+    await import('./naf-socketio-adapter')
   }
 }

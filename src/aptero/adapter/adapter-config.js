@@ -8,6 +8,9 @@ let forceTurnGlobal = false;
 let forceTcpGlobal = false;
 let profile = null;
 
+//https://github.com/networked-aframe/networked-aframe
+const adapterList = ["wseasyrtc","easyrtc","janus","socketio","webrtc","Firebase","uWS","dialog","dialog-io","agora","twilio","none","dialog-io-data-only"];
+
 export async function choseAdapter() {
   let adapter = defaultAdapter;
   //compute right adapter
@@ -30,6 +33,9 @@ export async function choseAdapter() {
     configs.APP_CONFIG.adapterParams = profile;
   } catch (err) {
     console.error(err);
+  }
+  if(!adapterList.includes(adapter)){
+    console.error("invalid adapter selected :",{adapter,adapterList});
   }
   await lazyLoad(adapter);
   return adapter;

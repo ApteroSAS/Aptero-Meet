@@ -1408,6 +1408,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 name: meta.profile.displayName
               });
             }
+            NAF.connection.adapter.closePeer(sessionId);
           });
         });
       }

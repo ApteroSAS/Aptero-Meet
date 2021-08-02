@@ -1,4 +1,4 @@
-import { filterServer } from "../adapter/adapter-config";
+import { filterServer, getAdapterConfig } from "../adapter/adapter-config";
 
 function clampInt (value, min, max) {
   return Math.round(Math.min(Math.max(value, min), max));
@@ -182,6 +182,9 @@ class MinimumQualityService {
   }
 
   async checkTurnServer(iceServers, timeout) {
+      if(!["dialog-io-data-only","naf-socketio-adapter"].includes(getAdapterConfig().adapter)){
+        return true;
+      }
     return new Promise((resolve, reject) => {
       let promiseResolved = false;
       setTimeout(() => {

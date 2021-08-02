@@ -1,4 +1,5 @@
 import { LogMessageType } from "../react-components/room/ChatSidebar";
+import { getAdapterConfig } from "../aptero/adapter/adapter-config";
 
 let delayedReconnectTimeout = null;
 function performDelayedReconnect(gainNode) {
@@ -17,6 +18,9 @@ function performDelayedReconnect(gainNode) {
 }
 
 async function enableChromeAEC(gainNode) {
+  if(!["dialog-io-data-only","naf-socketio-adapter"].includes(getAdapterConfig().adapter)){
+    return true;
+  }
   /**
    *  workaround for: https://bugs.chromium.org/p/chromium/issues/detail?id=687574
    *  1. grab the GainNode from the scene's THREE.AudioListener
