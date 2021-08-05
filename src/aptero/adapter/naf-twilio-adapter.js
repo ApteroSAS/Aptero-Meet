@@ -1,7 +1,7 @@
 import * as mediasoupClient from "mediasoup-client";
 import protooClient from "protoo-client";
 import { debug as newDebug } from "debug";
-import { connectRoom, convertId } from "./twilio";
+import { connectRoom, convertId, unpublishGivenVideoTrack } from "./twilio";
 import EventEmitter from "eventemitter3";
 import { addIceServers, getAdapterConfig } from "./adapter-config";
 
@@ -304,7 +304,7 @@ export default class NafTwilioAdapter extends EventEmitter{
     urlWithParams.searchParams.append("roomId", this._roomId);
     urlWithParams.searchParams.append("peerId", this._clientId);
     this._twilioroom = await connectRoom(this._clientId,this._roomId);
-    this._twilioroom.on('participantConnected', participant => {
+    const onTwilioParticipant = participant => {
       console.log(`Participant connected: ${participant.identity}`);
       let onTrack = (track)=>{
         //RemoteAudioTrack
@@ -313,7 +313,6 @@ export default class NafTwilioAdapter extends EventEmitter{
         console.log(" Add consumer:",track);
         track.appData = {peerId};
         track.track = track.mediaStreamTrack;
-        this._consumers.set(peerId, track);
         this.resolvePendingMediaRequestForTrack(peerId, track.track);
 
         if (kind === "audio") {
@@ -331,19 +330,45 @@ export default class NafTwilioAdapter extends EventEmitter{
           const track = publication.track;
           onTrack(track);
         }
+        publication.on('subscribed', track => {
+          console.log(`publication subscribed`,track);
+        });
+        publication.on('unsubscribed', track => {
+          console.log(`publication unsubscribed`,track);
+        });
       });
 
       participant.on('trackSubscribed', track => {
         onTrack(track);
       });
+      participant.on('trackUnsubscribed', track => {
+        unpublishGivenVideoTrack(track);
+        console.log(`Participant trackUnsubscribed`,track);
+      });
+      participant.on('trackPublished', track => {
+        console.log(`Participant trackPublished`,track);
+      });
+      participant.on('trackUnpublished', track => {
+        console.log(`Participant trackUnpublished`,track);
+      });
+    };
+    this._twilioroom.participants.forEach(participant => {
+      onTwilioParticipant(participant);
     });
+    this._twilioroom.on('participantConnected',onTwilioParticipant);
 
     this._twilioroom.on('participantDisconnected', participant => {
       console.log(`Participant disconnected: ${participant.identity}`);
+      let peerId = convertId(participant.identity);
+      this._consumers.forEach(consumer => {
+        if (consumer.appData.peerId === peerId && "video" === consumer.track.kind) {
+          unpublishGivenVideoTrack(consumer);
+        }
+      });
     });
 
     let protooTransport;
-    if(getAdapterConfig().transport && getAdapterConfig().transport=="WebSocketTransport"){
+    if(getAdapterConfig().transport && getAdapterConfig().transport==="WebSocketTransport"){
       protooTransport = new protooClient.WebSocketTransport(urlWithParams.toString());
     }else {
       protooTransport = new protooClient.WebSocketIOTransport(urlWithParams.toString());

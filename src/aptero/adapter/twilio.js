@@ -18,18 +18,36 @@ export function convertId(twilioCLientId){
   return twilioCLientId.split("/")[0];
 }
 
-export async function unpublishVideoTrack() {
-  if(videoTrack) {
-    currentRoom.localParticipant?.unpublishTrack(videoTrack);
-    videoTrack.stop();
-    videoTrack = null;
+export async function unpublishGivenVideoTrack(track) {
+  if(track){
+    const video = track._dummyEl;
+    try {
+      track.stop();
+      track.detach();
+      currentRoom.localParticipant.unpublishTrack(track);
+    }catch (e) {/* happens in case of remote track*/}
+    if(video) {
+      video.pause();
+      video.removeAttribute('src'); // empty source
+      video.srcObject = null;
+      video.load();
+    }
+    track._dummyEl=null;
+    track = null;
   }
+}
+
+export async function unpublishVideoTrack() {
+  currentRoom.localParticipant.videoTracks.forEach(publication => {
+    unpublishGivenVideoTrack(publication.track);
+    publication.unpublish();
+  });
 }
 
 export async function createTwilioTrack(constraints) {
   let room = currentRoom;
-  let track;
   if (constraints.video) { //First check if constraint video because we can have an audio constraint in case of a share screen
+    await unpublishVideoTrack();
     if (constraints.video.mediaSource === "camera") {
       //https://www.twilio.com/docs/video/javascript-v1-getting-started#specify-constraints
       let localTracks = await Video.createLocalTracks(constraints);
@@ -37,8 +55,8 @@ export async function createTwilioTrack(constraints) {
       if (room) {
         room.localParticipant?.publishTrack(localTracks[0]);
       }
-      videoTrack = localTracks[0].mediaStreamTrack;
-      return new MediaStream([videoTrack]);
+      videoTrack = localTracks[0];
+      return new MediaStream([localTracks[0].mediaStreamTrack]);
     } else {
       //https://www.twilio.com/docs/video/javascript-v1-screen-capture-chrome
       let stream = await navigator.mediaDevices.getDisplayMedia(constraints);
@@ -47,8 +65,8 @@ export async function createTwilioTrack(constraints) {
       if (room) {
         room.localParticipant?.publishTrack(localTracks);
       }
-      videoTrack = localTracks.mediaStreamTrack;
-      return new MediaStream([videoTrack]);
+      videoTrack = localTracks;
+      return new MediaStream([localTracks.mediaStreamTrack]);
     }
   }else if (constraints.audio) {
     //https://www.twilio.com/docs/video/javascript-v1-getting-started#specify-constraints
@@ -59,7 +77,6 @@ export async function createTwilioTrack(constraints) {
     }
     return new MediaStream([localTracks[0].mediaStreamTrack]);
   }
-  return new MediaStream([track.getMediaStreamTrack()]);
 }
 
 export async function connectRoom(clientId,roomId){

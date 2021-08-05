@@ -138,6 +138,26 @@ export class CustomActionRegister {
     //}
   }
 
+  async waitForNetworkEl(el) {
+    const startMs = new Date().getTime();
+    return new Promise((resolve,reject) => {
+      if (NAF.utils.isMine(el) || NAF.utils.takeOwnership(el)) {
+        resolve();
+      } else {
+        if(new Date().getTime() > (startMs + 60*1000)){
+          reject("timeout 60s for waitForNetworkEl");
+          return;
+        }
+        setTimeout(async () => {
+          if (!NAF.utils.isMine(el) || NAF.utils.takeOwnership(el)) {
+            await this.waitForNetworkEl(el);
+            resolve();
+          }
+        }, 200);
+      }
+    });
+  }
+
   async spawnAttach(actionData, entry) {
     let mediaFrame = await this.findMediaFrameByName(actionData.action.mediaFrame);
     if (mediaFrame && mediaFrame.components["media-frame"]) {
@@ -149,9 +169,20 @@ export class CustomActionRegister {
         try {
           let {entity,orientation} = await this.handleEntry(entry,this.getMediaOptionSetting(actionData));
           entity.object3D.position.copy(mfvWorldPos);
+          setTimeout(()=>{
+            //NOTE: THIS is a hack. We have seen that in case there is a lot of lags the screen can be misplaced initialy. so we set the position again after some time as a fail safe
+            const worldQuat = new THREE.Quaternion();
+            if(mediaFrameComponent.object3D) {
+              entity.object3D.position.copy(mfvWorldPos);
+              mediaFrameComponent.object3D.getWorldQuaternion(worldQuat);
+              entity.object3D.setRotationFromQuaternion(worldQuat);
+              entity.object3D.updateWorldMatrix(true);
+            }
+          },1000);
           orientation.then(()=>{
             const worldQuat = new THREE.Quaternion();
             if(mediaFrameComponent.object3D) {//TODO is this a bug? in which case this is undefined?
+              entity.object3D.position.copy(mfvWorldPos);
               mediaFrameComponent.object3D.getWorldQuaternion(worldQuat);
               entity.object3D.setRotationFromQuaternion(worldQuat);
               entity.object3D.updateWorldMatrix(true);
@@ -182,7 +213,7 @@ export class CustomActionRegister {
           /*capturableEntity.object3D.scale.setScalar(
             scaleForAspectFit(this.data.bounds, capturableEntity.getObject3D("mesh").scale)
           );*/
-          await NAF.utils.takeOwnership(mediaFrameComponent.el);
+          await this.waitForNetworkEl(mediaFrameComponent.el);
           //NAF.entities.completeSync(NAF.clientId,true);
           mediaFrameComponent.capture(entity);
           if (actionData.action.pin) {

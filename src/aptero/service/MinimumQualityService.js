@@ -11,6 +11,7 @@ class FpsBalancer {
   fpsNumber = 1;
   average = 0;
   lastTestStart = performance.now();
+  minimumResolution = 720;
 
   startFPSTest() {
     this.lastCalledTime = 0;
@@ -61,11 +62,6 @@ class FpsBalancer {
         if (result.fps < 25 || result.fps >= 55) {
           this.changeResolution(1 + ratio);
         }
-        const preferences = window.APP.store.state.preferences;
-        if((preferences.maxResolutionWidth < 600 || preferences.maxResolutionHeight < 600) && preferences.materialQualitySetting!=="low"){
-          preferences.materialQualitySetting = "low";
-          console.log("switching to low resolution mode for next app start")
-        }
       }
     } catch (e) {
       console.error(e);
@@ -76,8 +72,8 @@ class FpsBalancer {
     this.balancing = true;
     const preferences = window.APP.store.state.preferences;
     if (preferences.maxResolutionWidth > window.screen.width || preferences.maxResolutionHeight > window.screen.height) {
-      let newWidth = clampInt(preferences.maxResolutionWidth, 240, window.screen.width);
-      let newHeight = clampInt(preferences.maxResolutionHeight, 240, window.screen.height);
+      let newWidth = clampInt(preferences.maxResolutionWidth, this.minimumResolution, window.screen.width);
+      let newHeight = clampInt(preferences.maxResolutionHeight, this.minimumResolution, window.screen.height);
       window.APP.store.update({
         preferences: { maxResolutionWidth: newWidth, maxResolutionHeight: newHeight }
       });
@@ -92,8 +88,8 @@ class FpsBalancer {
 
   changeResolution(ratio) {
     const preferences = window.APP.store.state.preferences;
-    let newWidth = clampInt((preferences.maxResolutionWidth * ratio) || window.screen.width, 240, window.screen.width);
-    let newHeight = clampInt((preferences.maxResolutionHeight * ratio) || window.screen.height, 240, window.screen.height);
+    let newWidth = clampInt((preferences.maxResolutionWidth * ratio) || window.screen.width, this.minimumResolution, window.screen.width);
+    let newHeight = clampInt((preferences.maxResolutionHeight * ratio) || window.screen.height, this.minimumResolution, window.screen.height);
     if (preferences.maxResolutionWidth !== newWidth || preferences.maxResolutionHeight !== newHeight) {
       preferences.maxResolutionWidth = newWidth;
       preferences.maxResolutionHeight = newHeight;

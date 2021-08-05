@@ -11,6 +11,38 @@ import { getMicrophonePresences } from "../../utils/microphone-presence";
 // [done] console error??
 // global status ok or not
 
+/**
+ *
+ */
+window.countActiveVideoTag= async ()=>{
+  let count = 0;
+  window.elementVideo.forEach(value => {
+    if(value.src || value.srcObject){
+      count++;
+    }
+  });
+  return count;
+};
+function createTagInspectorSetup(){
+  if(!window.elementVideo){
+    window.elementVideo=[];
+  }
+  const old = document.createElement;
+  document.createElement = (kind,args)=>{
+    const el = old(kind,args);
+    if(kind==="video") {
+      console.log("create :", kind);
+      window.elementVideo.push(el);
+    }
+    return el;
+  }
+}
+createTagInspectorSetup();
+
+/**
+ *
+ */
+
 export class SelfTestServiceModule {
   state = {
     clients: {},
