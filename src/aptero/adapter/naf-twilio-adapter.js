@@ -1,8 +1,7 @@
-import protooClient from "protoo-client";
 import { debug as newDebug } from "debug";
 import { connectRoom, convertId, unpublishGivenVideoTrack, unpublishVideoTrack } from "./twilio";
 import EventEmitter from "eventemitter3";
-import { getAdapterConfig } from "./adapter-config";
+import { ProtooHelper } from "./protoHelper";
 
 // NOTE this adapter does not properly fire the onOccupantsReceived events since those are only needed for
 // data channels, which are not yet supported. To fire that event, this class would need to keep a list of
@@ -138,9 +137,6 @@ export default class NafTwilioAdapter extends EventEmitter {
   }
 
   async connect() {
-    const urlWithParams = new URL(this._serverUrl);
-    urlWithParams.searchParams.append("roomId", this._roomId);
-    urlWithParams.searchParams.append("peerId", this._clientId);
     this._twilioroom = await connectRoom(this._clientId,this._roomId);
     const onTwilioParticipant = participant => {
       console.log(`Participant connected: ${participant.identity}`);
@@ -206,39 +202,18 @@ export default class NafTwilioAdapter extends EventEmitter {
       });
     });
 
-    let protooTransport;
-    if(getAdapterConfig().transport && getAdapterConfig().transport==="WebSocketTransport"){
-      protooTransport = new protooClient.WebSocketTransport(urlWithParams.toString());
-    }else {
-      protooTransport = new protooClient.WebSocketIOTransport(urlWithParams.toString());
-    }
-    this._protoo = new protooClient.Peer(protooTransport);
+    const urlWithParams = new URL(this._serverUrl);
+    urlWithParams.searchParams.append("roomId", this._roomId);
+    urlWithParams.searchParams.append("peerId", this._clientId);
 
-    await new Promise(res => {
-      this._protoo.on("open", async () => {
-        this.emitRTCEvent("info", "Signaling", () => `Open`);
-        this._closed = false;
-        await this._joinRoom();
-        res();
-      });
-    });
+    this.protooHelper = new ProtooHelper();
+    await this.protooHelper.init(urlWithParams);
+    this._protoo =this.protooHelper._protoo;
 
-    this._protoo.on("disconnected", () => {
-      this.emitRTCEvent("info", "Signaling", () => `Diconnected`);
-      setTimeout(() => {
-        this.disconnect();
-      }, 2000);
-    });
+    this._closed = false;
+    await this._joinRoom();
 
-    this._protoo.on("close", () => {
-      this.emitRTCEvent("info", "Signaling", () => `Close`);
-      this.disconnect();
-    });
-
-   
-    this._protoo.on("notification", notification => {
-      debug('proto "notification" event [method:%s, data:%o]', notification.method, notification.data);
-
+    this.protooHelper._protoo.on("notification", notification => {
       switch (notification.method) {
         case "newPeer": {
           const peer = notification.data;
@@ -434,16 +409,7 @@ export default class NafTwilioAdapter extends EventEmitter {
     debug("_joinRoom()");
 
     try {
-      const routerRtpCapabilities = await this._protoo.request("getRouterRtpCapabilities");
-
-      const { peers } = await this._protoo.request("join", {
-        displayName: this._clientId,
-        device: this._device,
-        rtpCapabilities: undefined,
-        sctpCapabilities: undefined,
-        token: this._joinToken
-      });
-
+      const { peers } = await this.protooHelper.join(this._clientId,this._device,this._joinToken);
       const audioConsumerPromises = [];
       this.occupants = {};
 
@@ -628,21 +594,21 @@ export default class NafTwilioAdapter extends EventEmitter {
   }
 
   kick(clientId, permsToken) {
-    return this._protoo.kick(clientId, permsToken,this.room)
+    return this.protooHelper.kick(clientId, permsToken,this.room)
       .then(() => {
         document.body.dispatchEvent(new CustomEvent("kicked", { detail: { clientId: clientId } }));
       });
   }
 
   block(clientId) {
-    return this._protoo.block(clientId).then(() => {
+    return this.protooHelper.block(clientId).then(() => {
       this._blockedClients.set(clientId, true);
       document.body.dispatchEvent(new CustomEvent("blocked", { detail: { clientId: clientId } }));
     });
   }
 
   unblock(clientId) {
-    return this._protoo.unblock(clientId).then(() => {
+    return this.protooHelper.unblock(clientId).then(() => {
       this._blockedClients.delete(clientId);
       document.body.dispatchEvent(new CustomEvent("unblocked", { detail: { clientId: clientId } }));
     });
