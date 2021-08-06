@@ -178,6 +178,7 @@ export default class NafTwilioAdapter extends EventEmitter {
       });
       participant.on("trackUnsubscribed", track => {
         unpublishGivenVideoTrack(track);
+        this._consumers.delete(track.name);
         console.log(`Participant trackUnsubscribed`, track);
       });
       participant.on("trackPublished", track => {
@@ -325,6 +326,7 @@ export default class NafTwilioAdapter extends EventEmitter {
   }
 
   getMediaStream(clientId, kind = "audio") {
+    console.log("getMedia stream :"+clientId);
     let track;
 
     if (this._clientId === clientId) {

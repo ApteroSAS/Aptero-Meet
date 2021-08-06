@@ -38,10 +38,14 @@ export async function unpublishGivenVideoTrack(track) {
 }
 
 export async function unpublishVideoTrack() {
-  currentRoom.localParticipant.videoTracks.forEach(publication => {
-    unpublishGivenVideoTrack(publication.track);
-    publication.unpublish();
-  });
+  for(let publication of currentRoom.localParticipant.videoTracks){
+    publication = publication[1];
+    //if(publication.track === videoTrack){
+      await unpublishGivenVideoTrack(publication.track);
+      publication.unpublish();
+      console.log('unpublish')
+    //}
+  }
 }
 
 export async function createTwilioTrack(constraints) {
