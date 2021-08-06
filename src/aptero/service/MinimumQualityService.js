@@ -13,6 +13,20 @@ class FpsBalancer {
   lastTestStart = performance.now();
   minimumResolution = 720;
 
+  computeMinResolution(){
+    if((screen.width / screen.height)>1){
+      return {
+          w: this.minimumResolution * (screen.width / screen.height),
+          h: this.minimumResolution
+      }
+    }else{
+      return {
+        w: this.minimumResolution,
+        h: this.minimumResolution / (screen.width / screen.height)
+      }
+    }
+  }
+
   startFPSTest() {
     this.lastCalledTime = 0;
     this.fps = -1;
@@ -59,7 +73,7 @@ class FpsBalancer {
         let result = this.stopFPSTest();
         const deltaFPS = result.fps - 30;//between -30 and 30
         const ratio = deltaFPS / 100;//between -30% and 30%
-        if (result.fps < 25 || result.fps >= 55) {
+        if (result.fps < 25 || result.fps >= 45) {
           this.changeResolution(1 + ratio);
         }
       }
@@ -72,8 +86,8 @@ class FpsBalancer {
     this.balancing = true;
     const preferences = window.APP.store.state.preferences;
     if (preferences.maxResolutionWidth > window.screen.width || preferences.maxResolutionHeight > window.screen.height) {
-      let newWidth = clampInt(preferences.maxResolutionWidth, this.minimumResolution, window.screen.width);
-      let newHeight = clampInt(preferences.maxResolutionHeight, this.minimumResolution, window.screen.height);
+      let newWidth = clampInt(preferences.maxResolutionWidth, this.computeMinResolution().w, window.screen.width);
+      let newHeight = clampInt(preferences.maxResolutionHeight, this.computeMinResolution().h, window.screen.height);
       window.APP.store.update({
         preferences: { maxResolutionWidth: newWidth, maxResolutionHeight: newHeight }
       });
@@ -88,8 +102,8 @@ class FpsBalancer {
 
   changeResolution(ratio) {
     const preferences = window.APP.store.state.preferences;
-    let newWidth = clampInt((preferences.maxResolutionWidth * ratio) || window.screen.width, this.minimumResolution, window.screen.width);
-    let newHeight = clampInt((preferences.maxResolutionHeight * ratio) || window.screen.height, this.minimumResolution, window.screen.height);
+    let newWidth = clampInt((preferences.maxResolutionWidth * ratio) || window.screen.width, this.computeMinResolution().w, window.screen.width);
+    let newHeight = clampInt((preferences.maxResolutionHeight * ratio) || window.screen.height, this.computeMinResolution().h, window.screen.height);
     if (preferences.maxResolutionWidth !== newWidth || preferences.maxResolutionHeight !== newHeight) {
       preferences.maxResolutionWidth = newWidth;
       preferences.maxResolutionHeight = newHeight;
@@ -132,7 +146,7 @@ class MinimumQualityService {
   }
 
   initialCheckFinished() {
-    this.fpsBalancer.startBalancing();
+    this.fpsBalancer.startBalancing();//TODO deactivate
   }
 
   getCheckStatus() {
