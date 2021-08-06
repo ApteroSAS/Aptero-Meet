@@ -482,7 +482,7 @@ export default class SceneEntryManager {
             // Work around BMO 1449832 by calculating the width. This will break for multi monitors if you share anything
             // other than your current monitor that has a different aspect ratio.
             //width: 720 * (screen.width / screen.height),
-            height: {ideal: 768},
+            height: {ideal: 900},
             frameRate: {ideal: 15},
           },
           audio: {
