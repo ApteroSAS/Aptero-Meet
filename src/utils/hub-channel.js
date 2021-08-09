@@ -28,15 +28,13 @@ const HUB_CREATOR_PERMISSIONS = [
 ];
 const VALID_PERMISSIONS = HUB_CREATOR_PERMISSIONS.concat([
   "tweet",
-  roomParameters.customPermission()+//aptero
   "spawn_camera",
   "spawn_drawing",
   "spawn_and_move_media",
   "pin_objects",
   "spawn_emoji",
   "fly"
-]);
-
+]).concat(roomParameters.customPermission());//APTERO
 export default class HubChannel extends EventTarget {
   constructor(store, hubId) {
     super();
