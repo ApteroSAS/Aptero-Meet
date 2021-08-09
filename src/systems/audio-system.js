@@ -1,5 +1,11 @@
 import { LogMessageType } from "../react-components/room/ChatSidebar";
 import { getAdapterConfig } from "../aptero/adapter/adapter-config";
+import { GAIN_TIME_CONST } from "../components/audio-params";
+
+export const MixerType = Object.freeze({
+  AVATAR: 0,
+  MEDIA: 1
+});
 
 let delayedReconnectTimeout = null;
 function performDelayedReconnect(gainNode) {
@@ -16,6 +22,8 @@ function performDelayedReconnect(gainNode) {
     enableChromeAEC(gainNode);
   }, 10000);
 }
+
+import * as sdpTransform from "sdp-transform";
 
 async function enableChromeAEC(gainNode) {
   if(!["dialog-io-data-only","naf-socketio-adapter"].includes(getAdapterConfig().adapter)){
@@ -96,6 +104,16 @@ async function enableChromeAEC(gainNode) {
     await inboundPeerConnection.setRemoteDescription(offer);
 
     const answer = await inboundPeerConnection.createAnswer();
+
+    // Rewrite SDP to be stereo and (variable) max bitrate
+    const parsedSdp = sdpTransform.parse(answer.sdp);
+    for (let i = 0; i < parsedSdp.media.length; i++) {
+      for (let j = 0; j < parsedSdp.media[i].fmtp.length; j++) {
+        parsedSdp.media[i].fmtp[j].config += `;stereo=1;cbr=0;maxaveragebitrate=510000;`;
+      }
+    }
+    answer.sdp = sdpTransform.write(parsedSdp);
+
     inboundPeerConnection.setLocalDescription(answer);
     outboundPeerConnection.setRemoteDescription(answer);
 
@@ -129,11 +147,21 @@ export class AudioSystem {
     this.outboundAnalyser.connect(this.mediaStreamDestinationNode);
     this.audioContextNeedsToBeResumed = false;
 
+    this.mixer = {
+      [MixerType.AVATAR]: this.audioContext.createGain(),
+      [MixerType.MEDIA]: this.audioContext.createGain()
+    };
+    this.mixer[MixerType.MEDIA].connect(this._sceneEl.audioListener.getInput());
+    this.mixer[MixerType.AVATAR].connect(this._sceneEl.audioListener.getInput());
+
     // Webkit Mobile fix
     this._safariMobileAudioInterruptionFix();
 
     document.body.addEventListener("touchend", this._resumeAudioContext, false);
     document.body.addEventListener("mouseup", this._resumeAudioContext, false);
+
+    this.onPrefsUpdated = this.updatePrefs.bind(this);
+    window.APP.store.addEventListener("statechanged", this.onPrefsUpdated);
   }
 
   addStreamToOutboundAudio(id, mediaStream) {
@@ -157,6 +185,25 @@ export class AudioSystem {
     }
   }
 
+  addAudio(mixerTrack, audioNode) {
+    this.removeAudio(audioNode);
+    audioNode.getOutput().connect(this.mixer[mixerTrack]);
+  }
+
+  removeAudio(audioNode) {
+    audioNode.getOutput().disconnect();
+    audioNode.sourceType !== "empty" && audioNode.disconnect();
+  }
+
+  updatePrefs() {
+    const { globalVoiceVolume, globalMediaVolume } = window.APP.store.state.preferences;
+    let newGain = (globalMediaVolume !== undefined ? globalMediaVolume : 100) / 100;
+    this.mixer[MixerType.MEDIA].gain.setTargetAtTime(newGain, this.audioContext.currentTime, GAIN_TIME_CONST);
+
+    newGain = (globalVoiceVolume !== undefined ? globalVoiceVolume : 100) / 100;
+    this.mixer[MixerType.AVATAR].gain.setTargetAtTime(newGain, this.audioContext.currentTime, GAIN_TIME_CONST);
+  }
+
   /**
    * Chrome and Safari will start Audio contexts in a "suspended" state.
    * A user interaction (touch/mouse event) is needed in order to resume the AudioContext.
@@ -166,7 +213,8 @@ export class AudioSystem {
 
     setTimeout(() => {
       if (this.audioContext.state === "running") {
-        if (!AFRAME.utils.device.isMobile() && /chrome/i.test(navigator.userAgent)) {
+        const disableAEC = window.APP.store.state.preferences.disableEchoCancellation;
+        if (!AFRAME.utils.device.isMobile() && /chrome/i.test(navigator.userAgent) && !disableAEC) {
           enableChromeAEC(this._sceneEl.audioListener.gain);
         }
 

@@ -53,11 +53,14 @@ export function PeopleMenuButton(props) {
       <ContentMenuButton {...props}>
         <PeopleIcon />
         <span>
-          <FormattedMessage id="content-menu.people-menu-button" defaultMessage="People" />
+        <FormattedMessage id="content-menu.people-menu-button" defaultMessage="People" />({`${props.presencecount}`})
         </span>
       </ContentMenuButton>
     );
 }
+PeopleMenuButton.propTypes = {
+  presencecount: PropTypes.number
+};
 
 export function ContentMenu({ children }) {
   return <div className={styles.contentMenu}>{joinChildren(children, () => <div className={styles.separator} />)}</div>;

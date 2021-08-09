@@ -148,7 +148,6 @@ class UIRoot extends Component {
     presences: PropTypes.object,
     sessionId: PropTypes.string,
     subscriptions: PropTypes.object,
-    initialIsSubscribed: PropTypes.bool,
     initialIsFavorited: PropTypes.bool,
     showSignInDialog: PropTypes.bool,
     signInMessage: PropTypes.string,
@@ -203,7 +202,8 @@ class UIRoot extends Component {
 
     objectInfo: null,
     objectSrc: "",
-    sidebarId: null
+    sidebarId: null,
+    presenceCount: 0
   };
 
   constructor(props) {
@@ -239,8 +239,22 @@ class UIRoot extends Component {
         window.setTimeout(() => {
           if (!this.props.isBotMode) {
             try {
-              this.props.scene.renderer.compileAndUploadMaterials(this.props.scene.object3D, this.props.scene.camera);
-            } catch {
+              this.props.scene.renderer.compile(this.props.scene.object3D, this.props.scene.camera);
+              this.props.scene.object3D.traverse(obj => {
+                if (!obj.material) {
+                  return;
+                }
+                const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
+                for (const material of materials) {
+                  for (const prop in material) {
+                    if (material[prop] && material[prop].isTexture) {
+                      this.props.scene.renderer.initTexture(material[prop]);
+                    }
+                  }
+                }
+              });
+            } catch (e) {
+              console.error(e);
               this.props.exitScene(ExitReason.sceneError); // https://github.com/mozilla/hubs/issues/1950
             }
           }
@@ -260,6 +274,10 @@ class UIRoot extends Component {
       } else {
         sceneEl.classList.remove(roomLayoutStyles.sceneSmFullScreen);
       }
+    }
+
+    if (this.state.presenceCount != this.occupantCount()) {
+      this.setState({ presenceCount: this.occupantCount() });
     }
   }
 
@@ -434,6 +452,7 @@ class UIRoot extends Component {
 
   onLoadingFinished = () => {
     this.setState({ noMoreLoadingUpdates: true });
+    this.props.scene.emit("loading_finished");
 
     if (this.props.onLoaded) {
       this.props.onLoaded();
@@ -457,7 +476,7 @@ class UIRoot extends Component {
   };
 
   toggleMute = () => {
-    this.props.scene.emit("action_mute");
+    APP.dialog.toggleMicrophone();
   };
 
   shareVideo = mediaSource => {
@@ -602,9 +621,6 @@ class UIRoot extends Component {
     clearHistoryState(this.props.history);
 
     const muteOnEntry = window.APP_CONFIG.adapterParams.adapter === "none" || this.props.store.state.preferences["muteMicOnEntry"] || false;
-    this.props.store.update({
-      settings: { micMuted: muteOnEntry }
-    });
     await this.props.enterScene(this.state.enterInVR, muteOnEntry);
 
     this.setState({ entered: true, entering: false, showShareDialog: false });
@@ -816,7 +832,7 @@ class UIRoot extends Component {
           }}
           showEnterOnDevice={!this.state.waitingOnAudio && !this.props.entryDisallowed && !isMobileVR}
           onEnterOnDevice={() => this.attemptLink()}
-          showSpectate={!this.state.waitingOnAudio && !this.props.entryDisallowed}
+          showSpectate={!this.state.waitingOnAudio}
           onSpectate={() => this.setState({ watching: true })}
           showOptions={this.props.hubChannel.canOrWillIfCreator("update_hub")}
           onOptions={() => {
@@ -1010,6 +1026,7 @@ class UIRoot extends Component {
     const watching = this.state.watching;
     const enteredOrWatching = entered || watching;
     const showRtcDebugPanel = this.props.store.state.preferences["showRtcDebugPanel"];
+    const showAudioDebugPanel = this.props.store.state.preferences["showAudioDebugPanel"];
     const displayNameOverride = this.props.hubIsBound
       ? getPresenceProfileForSession(this.props.presences, this.props.sessionId).displayName
       : null;
@@ -1382,6 +1399,7 @@ class UIRoot extends Component {
                         <PeopleMenuButton
                           active={this.state.sidebarId === "people"}
                           onClick={() => this.toggleSidebar("people")}
+                          presencecount={this.state.presenceCount}
                         />
                       </ContentMenu>
                     )}
@@ -1420,13 +1438,15 @@ class UIRoot extends Component {
                       scene={this.props.scene}
                       store={this.props.store}
                     />
-                    {showRtcDebugPanel && (
+                    {(showRtcDebugPanel || showAudioDebugPanel) && (
                       <RTCDebugPanel
                         history={this.props.history}
                         store={window.APP.store}
                         scene={this.props.scene}
                         presences={this.props.presences}
                         sessionId={this.props.sessionId}
+                        showRtcDebug={showRtcDebugPanel}
+                        showAudioDebug={showAudioDebugPanel}
                       />
                     )}
                   </>

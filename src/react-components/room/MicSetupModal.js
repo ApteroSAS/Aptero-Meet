@@ -117,19 +117,17 @@ export function MicSetupModal({
             large
           />
         </div>
-        {microphoneEnabled && (
-          <>
-            <SelectInputField value={selectedMicrophone} options={microphoneOptions} onChange={onChangeMicrophone} />
-            <ToggleInput
-              label={<FormattedMessage id="mic-setup-modal.mute-mic-toggle" defaultMessage="Mute My Microphone" />}
-              checked={microphoneMuted}
+        <>
+          <SelectInputField value={selectedMicrophone} options={microphoneOptions} onChange={onChangeMicrophone} />
+          <ToggleInput
+            label={<FormattedMessage id="mic-setup-modal.mute-mic-toggle" defaultMessage="Mute My Microphone" />}
+            checked={microphoneMuted}
               onChange={()=>{
                 onChangeMicrophoneMuted();
                 minimumQualityService.notifyMicChanged();
               }}
-            />
-          </>
-        )}
+          />
+        </>
 
         <Button preset="accept" onClick={onEnterRoom}>
           <FormattedMessage id="mic-setup-modal.enter-room-button" defaultMessage="Enter Room" />

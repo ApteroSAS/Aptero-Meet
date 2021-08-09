@@ -14,6 +14,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <title>Aptero</title>
     <script type="text/javascript" src="/properties.js"></script>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet"> 
     <!-- Google Analytics -->
     <!-- NOTE GA tracking is disabled by default. You'll need to set the GA_TRACKING_ID build variable to enable it. -->
@@ -215,7 +216,9 @@
 
                         <template data-name="Head">
                             <a-entity
-                                avatar-audio-source="rolloffFactor: 2.0;"
+                                avatar-audio-source
+                                audio-params
+                                audio-zone-source
                                 personal-space-invader="radius: 0.15; useMaterial: true;"
                                 bone-visibility
                                 body-helper="type: kinematic; collisionFilterGroup: 4; collisionFilterMask: 1;"
@@ -977,7 +980,8 @@
                     top: 64;
                     right: 66;
                     bottom: 66;
-                    opacity: 1.0;
+                    transparent: false;
+                    alphaTest: 0.1;
                     src: #button"
             ></a-mixin>
 
@@ -989,7 +993,8 @@
                     top: 64;
                     right: 66;
                     bottom: 66;
-                    opacity: 1.0;
+                    transparent: false;
+                    alphaTest: 0.1;
                     src: #button"
             ></a-mixin>
 
@@ -1001,7 +1006,8 @@
                     top: 64;
                     right: 66;
                     bottom: 66;
-                    opacity: 1.0;
+                    transparent: false;
+                    alphaTest: 0.1;
                     src: #action-button"
             ></a-mixin>
 
@@ -1013,7 +1019,8 @@
                     top: 64;
                     right: 66;
                     bottom: 66;
-                    opacity: 1.0;
+                    transparent: false;
+                    alphaTest: 0.1;
                     src: #action-button"
             ></a-mixin>
 
@@ -1031,7 +1038,8 @@
                     top: 64;
                     right: 66;
                     bottom: 66;
-                    opacity: 1.0;
+                    transparent: false;
+                    alphaTest: 0.1;
                     src: #button"
             ></a-mixin>
         </a-assets>
@@ -1250,6 +1258,7 @@
                 id="avatar-pov-node"
                 class="camera"
                 personal-space-bubble="radius: 0.4;"
+                audio-params="isLocal: true"
                 rotation
                 pitch-yaw-rotator
                 set-yxz-order

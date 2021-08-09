@@ -51,8 +51,7 @@ AFRAME.registerComponent("player-info", {
     this.handleModelError = this.handleModelError.bind(this);
     this.handleRemoteModelError = this.handleRemoteModelError.bind(this);
     this.update = this.update.bind(this);
-    this.localStateAdded = this.localStateAdded.bind(this);
-    this.localStateRemoved = this.localStateRemoved.bind(this);
+    this.onMicStateChanged = this.onMicStateChanged.bind(this);
 
     this.isLocalPlayerInfo = this.el.id === "avatar-rig";
     this.playerSessionId = null;
@@ -62,7 +61,7 @@ AFRAME.registerComponent("player-info", {
         this.playerSessionId = NAF.utils.getCreator(networkedEntity);
         const playerPresence = window.APP.hubChannel.presence.state[this.playerSessionId];
         if (playerPresence) {
-          this.updateDisplayNameFromPresenceMeta(playerPresence.metas[0]);
+          this.updateFromPresenceMeta(playerPresence.metas[0]);
         }
       });
     }
@@ -85,8 +84,7 @@ AFRAME.registerComponent("player-info", {
     this.el.sceneEl.addEventListener("stateremoved", this.update);
 
     if (this.isLocalPlayerInfo) {
-      this.el.sceneEl.addEventListener("stateadded", this.localStateAdded);
-      this.el.sceneEl.addEventListener("stateremoved", this.localStateRemoved);
+      APP.dialog.on("mic-state-changed", this.onMicStateChanged);
     }
   },
   pause() {
@@ -102,8 +100,7 @@ AFRAME.registerComponent("player-info", {
     window.APP.store.removeEventListener("statechanged", this.update);
 
     if (this.isLocalPlayerInfo) {
-      this.el.sceneEl.removeEventListener("stateadded", this.localStateAdded);
-      this.el.sceneEl.removeEventListener("stateremoved", this.localStateRemoved);
+      APP.dialog.off("mic-state-changed", this.onMicStateChanged);
     }
   },
 
@@ -117,14 +114,18 @@ AFRAME.registerComponent("player-info", {
     if (!this.playerSessionId) return;
     if (this.playerSessionId !== e.detail.sessionId) return;
 
-    this.updateDisplayNameFromPresenceMeta(e.detail);
+    this.updateFromPresenceMeta(e.detail);
   },
-  updateDisplayNameFromPresenceMeta(presenceMeta) {
+  updateFromPresenceMeta(presenceMeta) {
+    this.permissions = presenceMeta.permissions;
     this.displayName = presenceMeta.profile.displayName;
     this.identityName = presenceMeta.profile.identityName;
     this.isRecording = !!(presenceMeta.streaming || presenceMeta.recording);
     this.isOwner = !!(presenceMeta.roles && presenceMeta.roles.owner);
     this.applyDisplayName();
+  },
+  can(perm) {
+    return !!this.permissions && this.permissions[perm];
   },
   applyDisplayName() {
     const store = window.APP.store;
@@ -183,6 +184,7 @@ AFRAME.registerComponent("player-info", {
         el.setAttribute("emit-scene-event-on-remove", "event:action_end_video_sharing");
       }
     }
+    this.el.querySelector("[audio-params]")?.setAttribute("audio-params", { enabled: !this.data.muted });
   },
   handleModelError() {
     window.APP.store.resetToRandomDefaultAvatar();
@@ -191,14 +193,7 @@ AFRAME.registerComponent("player-info", {
     this.data.avatarSrc = defaultAvatar;
     this.applyProperties();
   },
-  localStateAdded(e) {
-    if (e.detail === "muted") {
-      this.el.setAttribute("player-info", { muted: true });
-    }
-  },
-  localStateRemoved(e) {
-    if (e.detail === "muted") {
-      this.el.setAttribute("player-info", { muted: false });
-    }
+  onMicStateChanged({ enabled }) {
+    this.el.setAttribute("player-info", { muted: !enabled });
   }
 });

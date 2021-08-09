@@ -99,13 +99,7 @@ class SceneUI extends Component {
       const _name = name || title || unknown;
       const _author = author || unknown;
 
-      if (url) {
-        if (url.includes("sketchfab.com")) {
-          source = "Sketchfab";
-        } else if (url.includes("poly.google.com")) {
-          source = "Google Poly";
-        }
-      }
+      source = url && url.includes("sketchfab.com") ? "Sketchfab" : "";
 
       if (remix) {
         <span className="remix">
@@ -118,6 +112,7 @@ class SceneUI extends Component {
               a: chunks =>
                 url ? (
                   <a href={url} target="_blank" rel="noopener noreferrer">
+                    {" "}
                     {chunks}
                   </a>
                 ) : (

@@ -31,6 +31,8 @@ import { apteroService } from "../aptero/ApteroServices";
 import { MediaFramesSystem } from "./media-frames";
 import { InspectYourselfSystem } from "./inspect-yourself-system";
 import { EmojiSystem } from "./emoji-system";
+import { AudioZonesSystem } from "./audio-zones-system";
+import { GainSystem } from "./audio-gain-system";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -74,6 +76,8 @@ AFRAME.registerSystem("hubs-systems", {
     this.apteroService = apteroService;
     this.apteroService.start(this.audioSettingsSystem);
     //END APTERO SERVICE
+    this.audioZonesSystem = new AudioZonesSystem();
+    this.gainSystem = new GainSystem();
   },
 
   tick(t, dt) {
@@ -118,6 +122,8 @@ AFRAME.registerSystem("hubs-systems", {
     this.uvScrollSystem.tick(dt);
     this.shadowSystem.tick();
     this.mediaFramesSystem.tick();
+    this.audioZonesSystem.tick(this.el);
+    this.gainSystem.tick();
 
     // We run this late in the frame so that its the last thing to have an opinion about the scale of an object
     this.boneVisibilitySystem.tick();

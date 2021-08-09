@@ -17,7 +17,6 @@ import { ReactComponent as ExternalLinkIcon } from "../icons/ExternalLink.svg";
 
 const PUBLISHER_FOR_ENTRY_TYPE = {
   sketchfab_model: "Sketchfab",
-  poly_model: "Google Poly",
   objects : "Objects",
   twitch_stream: "Twitch"
 };

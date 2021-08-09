@@ -56,12 +56,15 @@ export function disposeNode(node) {
 const IDENTITY = new THREE.Matrix4().identity();
 export function setMatrixWorld(object3D, m) {
   if (!object3D.matrixIsModified) {
-    object3D.applyMatrix(IDENTITY); // hack around our matrix optimizations
+    object3D.applyMatrix4(IDENTITY); // hack around our matrix optimizations
   }
   object3D.matrixWorld.copy(m);
   if (object3D.parent) {
     object3D.parent.updateMatrices();
-    object3D.matrix = object3D.matrix.getInverse(object3D.parent.matrixWorld).multiply(object3D.matrixWorld);
+    object3D.matrix = object3D.matrix
+      .copy(object3D.parent.matrixWorld)
+      .invert()
+      .multiply(object3D.matrixWorld);
   } else {
     object3D.matrix.copy(object3D.matrixWorld);
   }
@@ -166,6 +169,10 @@ export function cloneObject3D(source, preserveUUIDs) {
 
     if (sourceNode.isMesh && sourceNode.geometry.boundsTree) {
       clonedNode.geometry.boundsTree = sourceNode.geometry.boundsTree;
+    }
+
+    if ((clonedNode.isDirectionalLight || clonedNode.isSpotLight) && sourceNode.target) {
+      clonedNode.target = cloneLookup.get(sourceNode.target);
     }
 
     if (!sourceNode.isSkinnedMesh) return;
@@ -285,7 +292,10 @@ export const calculateCameraTransformForWaypoint = (function() {
   const detachFromWorldUp = new THREE.Matrix4();
   return function calculateCameraTransformForWaypoint(cameraTransform, waypointTransform, outMat4) {
     affixToWorldUp(cameraTransform, upAffixedCameraTransform);
-    detachFromWorldUp.getInverse(upAffixedCameraTransform).multiply(cameraTransform);
+    detachFromWorldUp
+      .copy(upAffixedCameraTransform)
+      .invert()
+      .multiply(cameraTransform);
     affixToWorldUp(waypointTransform, upAffixedWaypointTransform);
     outMat4.copy(upAffixedWaypointTransform).multiply(detachFromWorldUp);
   };
@@ -328,10 +338,10 @@ export const childMatch = (function() {
   // transform the parent such that its child matches the target
   return function childMatch(parent, child, target) {
     parent.updateMatrices();
-    inverseParentWorld.getInverse(parent.matrixWorld);
+    inverseParentWorld.copy(parent.matrixWorld).invert();
     child.updateMatrices();
     childRelativeToParent.multiplyMatrices(inverseParentWorld, child.matrixWorld);
-    childInverse.getInverse(childRelativeToParent);
+    childInverse.copy(childRelativeToParent).invert();
     newParentMatrix.multiplyMatrices(target, childInverse);
     setMatrixWorld(parent, newParentMatrix);
   };
@@ -354,4 +364,18 @@ export function traverseAnimationTargets(rootObject, animations, callback) {
       }
     }
   }
+}
+
+export function createPlaneBufferGeometry(width, height, widthSegments, heightSegments, flipY = true) {
+  const geometry = new THREE.PlaneBufferGeometry(width, height, widthSegments, heightSegments);
+  // Three.js seems to assume texture flipY is true for all its built in geometry
+  // but we turn this off on our texture loader since createImageBitmap in Firefox
+  // does not support flipping. Then we flip the uv for flipY = false texture.
+  if (flipY === false) {
+    const uv = geometry.getAttribute("uv");
+    for (let i = 0; i < uv.count; i++) {
+      uv.setY(i, 1.0 - uv.getY(i));
+    }
+  }
+  return geometry;
 }

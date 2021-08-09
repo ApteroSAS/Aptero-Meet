@@ -4,7 +4,7 @@ import { minimumQualityService } from "../../aptero/service/MinimumQualityServic
 
 export function useMicrophone(scene, updateRate = 50) {
   const movingAvgRef = useRef();
-  const [isMuted, setIsMuted] = useState(scene.is("muted"));
+  const [isMuted, setIsMuted] = useState(!APP.dialog.isMicEnabled);
   const [volume, setVolume] = useState(0);
 
   useEffect(
@@ -30,30 +30,23 @@ export function useMicrophone(scene, updateRate = 50) {
 
       updateMicVolume();
 
-      function onSceneStateChange(event) {
-        if (event.detail === "muted") {
-          setIsMuted(scene.is("muted"));
-        }
-      }
+      const onMicStateChanged = ({ enabled }) => {
+        setIsMuted(!enabled);
+      };
 
-      scene.addEventListener("stateadded", onSceneStateChange);
-      scene.addEventListener("stateremoved", onSceneStateChange);
+      APP.dialog.on("mic-state-changed", onMicStateChanged);
 
       return () => {
         clearTimeout(timeout);
-        scene.removeEventListener("stateadded", onSceneStateChange);
-        scene.removeEventListener("stateremoved", onSceneStateChange);
+        APP.dialog.off("mic-state-changed", onMicStateChanged);
       };
     },
     [setVolume, scene, updateRate]
   );
 
-  const toggleMute = useCallback(
-    () => {
-      scene.emit("action_mute");
-    },
-    [scene]
-  );
+  const toggleMute = useCallback(() => {
+    APP.dialog.toggleMicrophone();
+  }, []);
 
   return { isMuted, volume, toggleMute };
 }
