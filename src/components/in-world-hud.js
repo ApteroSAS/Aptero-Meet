@@ -6,7 +6,7 @@ import { video360Service } from "../aptero/service/Video360Service";
  * @component in-world-hud
  */
 AFRAME.registerComponent("in-world-hud", {
-  init() {
+  async init() {
 
     //TODO aptero make a service
     video360Service.eventEmitter.on("change",()=>{

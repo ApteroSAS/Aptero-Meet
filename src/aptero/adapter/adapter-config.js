@@ -1,6 +1,7 @@
 import configs from "../../utils/configs";
 import { lazyLoad } from "./adapterRegistrer";
 import { propertiesService } from "../properties/propertiesService";
+import EventEmitter from "eventemitter3";
 
 let defaultAdapter = configs.APP_CONFIG.adapterParams.adapter;
 
@@ -39,6 +40,12 @@ export async function choseAdapter() {
   }
   await lazyLoad(adapter);
   return adapter;
+}
+
+export async function adapterFactory(){
+  const adapter = await choseAdapter();
+  const module = await lazyLoad(adapter);
+  return new module.default();
 }
 
 export function getAdapterConfig() {

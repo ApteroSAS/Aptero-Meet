@@ -193,8 +193,20 @@ import MediaDevicesManager from "./utils/media-devices-manager";
 import { sleep } from "./utils/async-utils";
 import { platformUnsupported } from "./support";
 
+//aptero service
+import { microsoftService } from "./aptero/service/MicrosoftIntegration/MicrosoftService";
+import { apteroService } from "./aptero/ApteroServices";
+import { roomController } from "./aptero/service/api/RoomController";
+import { minimumQualityService } from "./aptero/service/MinimumQualityService";
+import {
+  createTrack,
+  fetchICEservers
+} from "./aptero/adapter/adapter-config";
+import { AdapterWarpper } from "./aptero/adapter/AdapterWrapper";
+//aptero service end
+
 window.APP = new App();
-window.APP.dialog = new DialogAdapter();
+window.APP.dialog = new AdapterWarpper();
 window.APP.RENDER_ORDER = {
   HUD_BACKGROUND: 1,
   HUD_ICONS: 2,
@@ -244,20 +256,15 @@ import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY, ONLY_SCREEN_AVAILABLE
 import detectConcurrentLoad from "./utils/concurrent-load-detector";
 
 import qsTruthy from "./utils/qs_truthy";
-//aptero service
-import { networkService } from "./aptero/service/NetworkService";
-import { microsoftService } from "./aptero/service/MicrosoftIntegration/MicrosoftService";
-import { staticObjectManipulator } from "./aptero/service/StaticObjectManipulator";
-import { apteroService } from "./aptero/ApteroServices";
 
 import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
 import { ExitReason } from "./react-components/room/ExitedRoomScreen";
 import { OAuthScreenContainer } from "./react-components/auth/OAuthScreenContainer";
 import { SignInMessages } from "./react-components/auth/SignInModal";
 import { ThemeProvider } from "./react-components/styles/theme";
-import { roomController } from "./aptero/service/api/RoomController";
-import { minimumQualityService } from "./aptero/service/MinimumQualityService";
-import { choseAdapter, configureTurn, createTrack, fetchICEservers } from "./aptero/adapter/adapter-config";
+import { wait } from "./aptero/util/AsyncWaiter";
+
+
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -685,8 +692,12 @@ async function runBotMode(scene, entryManager) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  let iceServer = await fetchICEservers();//APTERO
+  //APTERO
+  let iceServer = await fetchICEservers();
   await minimumQualityService.checkTurnServerAndSwitchToTCP(iceServer);
+  await wait(()=>{return APP.dialog.lasyLoadingFinished});
+  console.log("lazy loading finished")
+  //end APTERO
   document.getElementById("version").innerHTML = process.env.BUILD_VERSION;
   if (isOAuthModal) {
     return;

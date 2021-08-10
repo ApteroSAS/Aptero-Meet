@@ -25,6 +25,7 @@ import { minimumQualityService } from "./service/MinimumQualityService";
 import { notifySceneEntered, startSelfTest, testTick } from "./service/SelfTestService.loader";
 import { setlistenerEndShareVideo } from "./adapter/adapter-config";
 import { remoteControlServiceV2 } from "./service/RemoteControlServiceV2";
+import { wait } from "./util/AsyncWaiter";
 
 //event handling for iframe #morgane
 window.focus();
@@ -91,40 +92,8 @@ export class ApteroServices {
     });
   }
 
-  async waitAudioSettingsSystem() {
-    return new Promise((resolve) => {
-      if (this.audioSettingsSystem) {
-        resolve();
-      } else {
-        setTimeout(async () => {
-          if (!this.audioSettingsSystem) {
-            await this.waitAudioSettingsSystem();
-            resolve();
-          }
-        }, 200);
-      }
-    });
-  }
-
-  async waitAframeScene() {
-    return new Promise((resolve) => {
-      if (AFRAME && AFRAME.scenes && AFRAME.scenes[0]) {
-        resolve();
-      } else {
-        setTimeout(async () => {
-          if (!(AFRAME && AFRAME.scenes && AFRAME.scenes[0])) {
-            await this.waitAframeScene();
-            resolve();
-          }
-        }, 200);
-      }
-    });
-  }
-
-
-
   async onEnterRoom() {
-    await this.waitAframeScene();
+    await wait(()=>{return AFRAME && AFRAME.scenes && AFRAME.scenes[0]});
     await setlistenerEndShareVideo();
     await roomParameters.applyRoomParameters();
     aptLogger.setUserId(window.APP.store.credentialsAccountId);
@@ -136,7 +105,7 @@ export class ApteroServices {
       email:window.APP?.store?.state?.credentials?.email,
       name:window.APP?.store?.state?.profile?.displayName
     });
-    await this.waitAudioSettingsSystem();
+    await wait(()=>{return this.audioSettingsSystem});
     await roomParameters.applyDefaultAudioSettingsSystem(this.audioSettingsSystem);
   }
 
