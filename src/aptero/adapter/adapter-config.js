@@ -1,7 +1,6 @@
 import configs from "../../utils/configs";
 import { lazyLoad } from "./adapterRegistrer";
 import { propertiesService } from "../properties/propertiesService";
-import EventEmitter from "eventemitter3";
 
 let defaultAdapter = configs.APP_CONFIG.adapterParams.adapter;
 
@@ -67,12 +66,8 @@ export async function setlistenerEndShareVideo(){
 export async function createTrack(constraints, isDisplayDevice) {
   console.log("createTrack")
   const adapterParams = getAdapterConfig();
-  if (adapterParams.adapter === "twilio") {
-    let { createTwilioTrack:createTwilioTrack } = await import('./twilio');
-    return createTwilioTrack(constraints, isDisplayDevice);
-  } else if (adapterParams.adapter === "agora") {
-    let { createAgoraTrack:createAgoraTrack } = await import('./agora');
-    return createAgoraTrack(constraints, isDisplayDevice);
+  if (adapterParams.adapter === "twilio" || adapterParams.adapter === "agora") {
+    return window.APP.dialog.subAdapter.createTrack(constraints, isDisplayDevice);
   } else {
     if (isDisplayDevice) {
       return await navigator.mediaDevices.getDisplayMedia(constraints);

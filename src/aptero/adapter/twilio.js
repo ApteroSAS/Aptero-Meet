@@ -2,138 +2,194 @@ import configs from "../../utils/configs";
 import * as Video from "twilio-video";
 import { propertiesService } from "../properties/propertiesService";
 
+export class TwilioAdapter {
+  currentRoom = null;
+  videoTrack = null;
+  twilioMicEnable = false;
+  onTrack = () => {console.error("invalid")};
 
-
-//NOTE createLocalAudioTrack returns a LocalAudioTrack object that contains a MediaStreamTrack
-/*
-https://developer.mozilla.org/en-US/docs/Web/API/MediaStream
-The MediaStream interface represents a stream of media content. A stream
-consists of several tracks such as video or audio tracks. Each track is
-specified as an instance of MediaStreamTrack.You can obtain a MediaStream
-object either by using the constructor or by calling */
-
-export let currentRoom = null;
-export let videoTrack = null;
-
-export function convertId(twilioCLientId){
-  return twilioCLientId.split("/")[0];
-}
-
-export async function unpublishGivenVideoTrack(track) {
-  if(track){
-    const video = track._dummyEl;
-    try {
-      track.stop();
-      track.detach();
-      currentRoom.localParticipant.unpublishTrack(track);
-    }catch (e) {/* happens in case of remote track*/}
-    if(video) {
-      video.pause();
-      video.removeAttribute('src'); // empty source
-      video.srcObject = null;
-      video.load();
-    }
-    track._dummyEl=null;
-    track = null;
+  convertId(twilioCLientId) {
+    return twilioCLientId.split("/")[0];
   }
-}
 
-export async function unpublishVideoTrack() {
-  for(let publication of currentRoom.localParticipant.videoTracks){
-    publication = publication[1];
-    //if(publication.track === videoTrack){
-      await unpublishGivenVideoTrack(publication.track);
+  async unpublishGivenVideoTrack(track) {
+    if (track) {
+      const video = track._dummyEl;
+      try {
+        track.stop();
+        track.detach();
+        this.currentRoom.localParticipant.unpublishTrack(track);
+      } catch (e) {/* happens in case of remote track*/
+      }
+      if (video) {
+        video.pause();
+        video.removeAttribute('src'); // empty source
+        video.srcObject = null;
+        video.load();
+      }
+      track._dummyEl = null;
+      track = null;
+    }
+  }
+
+  async unpublishVideoTrack() {
+    for (let publication of this.currentRoom.localParticipant.videoTracks) {
+      publication = publication[1];
+      //if(publication.track === videoTrack){
+      await this.unpublishGivenVideoTrack(publication.track);
       publication.unpublish();
       console.log('unpublish')
-    //}
-  }
-  videoTrack = null
-}
-
-export let twilioMicEnable = false;
-export function enableMicrophone(enabled) {
-  if(currentRoom) {
-    if (enabled) {
-      currentRoom.localParticipant.audioTracks.forEach(publication => {
-        publication.track.enable();
-      });
-    } else {
-      currentRoom.localParticipant.audioTracks.forEach(publication => {
-        publication.track.disable();
-      });
+      //}
     }
+    this.videoTrack = null
   }
-  twilioMicEnable = enabled;
-}
 
-export function isMicEnabled() {
-  return twilioMicEnable;
-}
 
-export async function disableCamera() {
-  await unpublishVideoTrack();
-}
+  enableMicrophone(enabled) {
+    if (this.currentRoom) {
+      if (enabled) {
+        this.currentRoom.localParticipant.audioTracks.forEach(publication => {
+          publication.track.enable();
+        });
+      } else {
+        this.currentRoom.localParticipant.audioTracks.forEach(publication => {
+          publication.track.disable();
+        });
+      }
+    }
+    this.twilioMicEnable = enabled;
+  }
 
-export async function disableShare() {
-  await unpublishVideoTrack();
-}
+  isMicEnabled() {
+    return this.twilioMicEnable;
+  }
 
-export async function createTwilioTrack(constraints) {
-  console.log("createTwilioTrack");
-  let room = currentRoom;
-  if (constraints.video) { //First check if constraint video because we can have an audio constraint in case of a share screen
-    await unpublishVideoTrack();
-    if (constraints.video.mediaSource === "camera") {
+  async disableCamera() {
+    await this.unpublishVideoTrack();
+  }
+
+  async disableShare() {
+    await this.unpublishVideoTrack();
+  }
+
+  async createTrack(constraints) {
+    console.log("createTwilioTrack");
+    let room = this.currentRoom;
+    if (constraints.video) { //First check if constraint video because we can have an audio constraint in case of a share screen
+      await this.unpublishVideoTrack();
+      if (constraints.video.mediaSource === "camera") {
+        //https://www.twilio.com/docs/video/javascript-v1-getting-started#specify-constraints
+        let localTracks = await Video.createLocalTracks(constraints);
+        console.log("currentTracks updated: " + localTracks);
+        if (room) {
+          room.localParticipant?.publishTrack(localTracks[0]);
+        }
+        this.videoTrack = localTracks[0];
+        return new MediaStream([localTracks[0].mediaStreamTrack]);
+      } else {
+        //https://www.twilio.com/docs/video/javascript-v1-screen-capture-chrome
+        let stream = await navigator.mediaDevices.getDisplayMedia(constraints);
+        let localTracks = await Video.LocalVideoTrack(stream.getTracks()[0]);
+        console.log("currentTracks updated: " + localTracks);
+        if (room) {
+          room.localParticipant?.publishTrack(localTracks);
+        }
+        this.videoTrack = localTracks;
+        return new MediaStream([localTracks.mediaStreamTrack]);
+      }
+    } else if (constraints.audio) {
       //https://www.twilio.com/docs/video/javascript-v1-getting-started#specify-constraints
       let localTracks = await Video.createLocalTracks(constraints);
       console.log("currentTracks updated: " + localTracks);
       if (room) {
         room.localParticipant?.publishTrack(localTracks[0]);
       }
-      videoTrack = localTracks[0];
       return new MediaStream([localTracks[0].mediaStreamTrack]);
-    } else {
-      //https://www.twilio.com/docs/video/javascript-v1-screen-capture-chrome
-      let stream = await navigator.mediaDevices.getDisplayMedia(constraints);
-      let localTracks = await Video.LocalVideoTrack(stream.getTracks()[0]);
-      console.log("currentTracks updated: " + localTracks);
-      if (room) {
-        room.localParticipant?.publishTrack(localTracks);
-      }
-      videoTrack = localTracks;
-      return new MediaStream([localTracks.mediaStreamTrack]);
     }
-  }else if (constraints.audio) {
-    //https://www.twilio.com/docs/video/javascript-v1-getting-started#specify-constraints
-    let localTracks = await Video.createLocalTracks(constraints);
-    console.log("currentTracks updated: " + localTracks);
-    if (room) {
-      room.localParticipant?.publishTrack(localTracks[0]);
-    }
-    return new MediaStream([localTracks[0].mediaStreamTrack]);
   }
-}
 
-export async function connectRoom(clientId,roomId){
-  clientId = clientId+"/"+Math.ceil(Math.random()*10000);
-  console.log("Twilio Connect Room");
-  const { connect } = require('twilio-video');
-  // Join to the Room with the given AccessToken and ConnectOptions.
-  const roomName = roomId;
-  let apiUrl;
-  if(!configs.APP_CONFIG.adapterParams.url) {
-    const url = propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/room/adapter/twilio/profile";
-    const resp = await fetch(url);
-    const adapterParams = await resp.json();
-    apiUrl = adapterParams.url;
-  }else{
-    apiUrl = configs.APP_CONFIG.adapterParams.url;
+  async connectRoom(clientId, roomId) {
+    clientId = clientId + "/" + Math.ceil(Math.random() * 10000);
+    console.log("Twilio Connect Room");
+    const { connect } = require('twilio-video');
+    // Join to the Room with the given AccessToken and ConnectOptions.
+    const roomName = roomId;
+    let apiUrl;
+    if (!configs.APP_CONFIG.adapterParams.url) {
+      const url = propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/room/adapter/twilio/profile";
+      const resp = await fetch(url);
+      const adapterParams = await resp.json();
+      apiUrl = adapterParams.url;
+    } else {
+      apiUrl = configs.APP_CONFIG.adapterParams.url;
+    }
+    const response = await fetch(apiUrl + `?identity=${clientId}&roomName=${roomName}`);
+    // Extract the AccessToken from the Response.
+    const token = await response.text();
+    const room = await connect(token, { audio: false, video: false });
+    this.currentRoom = room;
+
+
+    const onTwilioParticipant = participant => {
+      console.log(`Participant connected: ${participant.identity}`);
+      participant.tracks.forEach(publication => {
+        if (publication.isSubscribed) {
+          const track = publication.track;
+          this.onTrack(track,participant);
+        }
+        publication.on("subscribed", track => {
+          console.log(`publication subscribed`, track);
+        });
+        publication.on("unsubscribed", track => {
+          console.log(`publication unsubscribed`, track);
+        });
+      });
+
+      participant.on("trackSubscribed", track => {
+        this.onTrack(track,participant);
+      });
+      participant.on("trackUnsubscribed", track => {
+        this.unpublishGivenVideoTrack(track);
+        this.onTrackRemoved(track.name);
+        console.log(`Participant trackUnsubscribed`, track);
+      });
+      participant.on("trackPublished", track => {
+        console.log(`Participant trackPublished`, track);
+      });
+      participant.on("trackUnpublished", track => {
+        console.log(`Participant trackUnpublished`, track);
+      });
+    };
+    this.currentRoom.participants.forEach(participant => {
+      onTwilioParticipant(participant);
+    });
+    this.currentRoom.on("participantConnected", onTwilioParticipant);
+
+    this.currentRoom.on("participantDisconnected", participant => {
+      console.log(`Participant disconnected: ${participant.identity}`);
+      let peerId = this.convertId(participant.identity);
+      this.onParticipantDisconnected(peerId);
+    });
   }
-  const response = await fetch(apiUrl+`?identity=${clientId}&roomName=${roomName}`);
-  // Extract the AccessToken from the Response.
-  const token = await response.text();
-  const room = await connect(token,{audio:false,video:false});
-  currentRoom = room;
-  return room;
+
+  setOnTrack(onTrack){
+    this.onTrack = onTrack;
+  }
+
+  setOnTrackRemoved(onTrackRemoved){
+    this.onTrackRemoved = onTrackRemoved;
+  }
+
+  setOnParticipantDisconnected(onParticipantDisconnected){
+    this.onParticipantDisconnected = onParticipantDisconnected;
+  }
+
+  disconnect(){
+    if(this.currentRoom) {
+      this.currentRoom.disconnect();
+    }
+  }
+
+
 }
 

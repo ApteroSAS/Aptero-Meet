@@ -1,12 +1,5 @@
 import { debug as newDebug } from "debug";
-import {
-  connectRoom,
-  convertId,
-  disableCamera,
-  disableShare,
-  enableMicrophone, isMicEnabled,
-  unpublishGivenVideoTrack
-} from "./twilio";
+import { TwilioAdapter } from "./twilio";
 import EventEmitter from "eventemitter3";
 import { ProtooHelper } from "./protoHelper";
 
@@ -55,9 +48,11 @@ export default class NafTwilioAdapter extends EventEmitter {
   async getServerStats() {
     return {};
   }
+  // eslint-disable-next-line no-unused-vars
   async iceRestart(transport) {
   }
 
+  // eslint-disable-next-line no-unused-vars
   async recreateSendTransport(iceServers) {
   }
 
@@ -72,9 +67,11 @@ export default class NafTwilioAdapter extends EventEmitter {
    * This is called by the Send Transport "connectionstatechange" event listener.
    * @param {boolean} connectionState The transport connnection state (ICE connection state)
    */
+  // eslint-disable-next-line no-unused-vars
   checkSendIceStatus(connectionState) {
   }
 
+  // eslint-disable-next-line no-unused-vars
   async recreateRecvTransport(iceServers) {
   }
 
@@ -90,6 +87,7 @@ export default class NafTwilioAdapter extends EventEmitter {
    * This is called by the Reeceive Transport "connectionstatechange" event listener.
    * @param {boolean} connectionState The transport connection state (ICE connection state)
    */
+  // eslint-disable-next-line no-unused-vars
   checkRecvIceStatus(connectionState) {
   }
   
@@ -115,62 +113,28 @@ export default class NafTwilioAdapter extends EventEmitter {
     this._forceTcp = forceTcp;
     this._forceTurn = forceTurn;
     this._iceTransportPolicy = iceTransportPolicy;
-    
-    this._twilioroom = await connectRoom(this._clientId,this._roomId);
-    let onTrack = (track,tparticipant)=>{
+
+    this.subAdapter = new TwilioAdapter();
+    this.subAdapter.setOnTrack((track, tparticipant)=>{
       //RemoteAudioTrack
-      let peerId = convertId(tparticipant.identity);
+      let peerId = this.subAdapter.convertId(tparticipant.identity);
       console.log(" Add consumer:",track);
       track.appData = {peerId};
       track.track = track.mediaStreamTrack;
       this._consumers.set(track.name, track);
       this.resolvePendingMediaRequestForTrack(peerId, track.track);
-    };
-    this._twilioroom.onTrack(onTrack);
-    const onTwilioParticipant = participant => {
-      console.log(`Participant connected: ${participant.identity}`);
-      participant.tracks.forEach(publication => {
-        if (publication.isSubscribed) {
-          const track = publication.track;
-          onTrack(track,participant);
-        }
-        publication.on("subscribed", track => {
-          console.log(`publication subscribed`, track);
-        });
-        publication.on("unsubscribed", track => {
-          console.log(`publication unsubscribed`, track);
-        });
-      });
-
-      participant.on("trackSubscribed", track => {
-        onTrack(track,participant);
-      });
-      participant.on("trackUnsubscribed", track => {
-        unpublishGivenVideoTrack(track);
-        this._consumers.delete(track.name);
-        console.log(`Participant trackUnsubscribed`, track);
-      });
-      participant.on("trackPublished", track => {
-        console.log(`Participant trackPublished`, track);
-      });
-      participant.on("trackUnpublished", track => {
-        console.log(`Participant trackUnpublished`, track);
-      });
-    };
-    this._twilioroom.participants.forEach(participant => {
-      onTwilioParticipant(participant);
     });
-    this._twilioroom.on("participantConnected", onTwilioParticipant);
-
-    this._twilioroom.on("participantDisconnected", participant => {
-      console.log(`Participant disconnected: ${participant.identity}`);
-      let peerId = convertId(participant.identity);
+    this.subAdapter.setOnTrackRemoved((trackId)=>{
+      this._consumers.delete(trackId);
+    });
+    this.subAdapter.setOnParticipantDisconnected((peerId)=>{
       this._consumers.forEach(consumer => {
         if (consumer.appData.peerId === peerId && "video" === consumer.track.kind) {
-          unpublishGivenVideoTrack(consumer);
+          this.subAdapter.unpublishGivenVideoTrack(consumer);
         }
       });
     });
+    await this.subAdapter.connectRoom(this._clientId,this._roomId);
 
     const urlWithParams = new URL(this._serverUrl);
     urlWithParams.searchParams.append("roomId", this._roomId);
@@ -328,6 +292,7 @@ export default class NafTwilioAdapter extends EventEmitter {
     }
   }
 
+  // eslint-disable-next-line no-unused-vars
   async createSendTransport(iceServers) {
     // Create mediasoup Transport for sending (unless we don't want to produce).
 
@@ -336,6 +301,7 @@ export default class NafTwilioAdapter extends EventEmitter {
   async closeSendTransport() {
   }
 
+  // eslint-disable-next-line no-unused-vars
   async createRecvTransport(iceServers) {
     // Create mediasoup Transport for sending (unless we don't want to consume).
 
@@ -412,7 +378,7 @@ export default class NafTwilioAdapter extends EventEmitter {
   async disableCamera() {
     if (!this._cameraProducer) return;
     this._cameraProducer = null;
-    return await disableCamera();
+    return await this.subAdapter.disableCamera();
   }
 
   async enableShare(track) {
@@ -422,7 +388,7 @@ export default class NafTwilioAdapter extends EventEmitter {
   async disableShare() {
     if (!this._shareProducer) return;
     this._shareProducer = null;
-    return await disableShare();
+    return await this.subAdapter.disableShare();
   }
 
   toggleMicrophone() {
@@ -434,13 +400,16 @@ export default class NafTwilioAdapter extends EventEmitter {
   }
 
   enableMicrophone(enabled) {
-    enableMicrophone(enabled);
+    this.subAdapter.enableMicrophone(enabled);
     this._micShouldBeEnabled = enabled;
     this.emit("mic-state-changed", { enabled: this.isMicEnabled });
   }
 
   get isMicEnabled() {
-    return isMicEnabled();
+    if(!this.subAdapter){
+      return false;
+    }
+    return this.subAdapter.isMicEnabled();
   }
 
   cleanUpLocalState() {
@@ -450,8 +419,8 @@ export default class NafTwilioAdapter extends EventEmitter {
   }
 
   disconnect() {
-    if(this._twilioroom) {
-      this._twilioroom.disconnect();
+    if(this.subAdapter) {
+      this.subAdapter.disconnect();
     }
     if (this._closed) return;
 
