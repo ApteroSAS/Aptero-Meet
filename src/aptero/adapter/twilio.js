@@ -11,6 +11,7 @@ The MediaStream interface represents a stream of media content. A stream
 consists of several tracks such as video or audio tracks. Each track is
 specified as an instance of MediaStreamTrack.You can obtain a MediaStream
 object either by using the constructor or by calling */
+
 export let currentRoom = null;
 export let videoTrack = null;
 
@@ -46,9 +47,39 @@ export async function unpublishVideoTrack() {
       console.log('unpublish')
     //}
   }
+  videoTrack = null
+}
+
+export let twilioMicEnable = false;
+export function enableMicrophone(enabled) {
+  if(currentRoom) {
+    if (enabled) {
+      currentRoom.localParticipant.audioTracks.forEach(publication => {
+        publication.track.enable();
+      });
+    } else {
+      currentRoom.localParticipant.audioTracks.forEach(publication => {
+        publication.track.disable();
+      });
+    }
+  }
+  twilioMicEnable = enabled;
+}
+
+export function isMicEnabled() {
+  return twilioMicEnable;
+}
+
+export async function disableCamera() {
+  await unpublishVideoTrack();
+}
+
+export async function disableShare() {
+  await unpublishVideoTrack();
 }
 
 export async function createTwilioTrack(constraints) {
+  console.log("createTwilioTrack");
   let room = currentRoom;
   if (constraints.video) { //First check if constraint video because we can have an audio constraint in case of a share screen
     await unpublishVideoTrack();
@@ -86,7 +117,7 @@ export async function createTwilioTrack(constraints) {
 export async function connectRoom(clientId,roomId){
   clientId = clientId+"/"+Math.ceil(Math.random()*10000);
   console.log("Twilio Connect Room");
-  const { connect, createLocalVideoTrack, Logger } = require('twilio-video');
+  const { connect } = require('twilio-video');
   // Join to the Room with the given AccessToken and ConnectOptions.
   const roomName = roomId;
   let apiUrl;

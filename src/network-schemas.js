@@ -115,7 +115,7 @@ function registerNetworkSchemas() {
       },
       "pinnable"
     ],
-    nonAuthorizedcomponents: [...getMediaVideoComponent(),
+    nonAuthorizedComponents: [...getMediaVideoComponent(),
       {
         component: "media-video",
         property: "time"
@@ -176,7 +176,7 @@ function registerNetworkSchemas() {
       }
     ],
     // TODO we probably want media frames to support permissioning of some form
-    nonAuthorizedcomponents: ["media-frame"]
+    nonAuthorizedComponents: ["media-frame"]
   });
 
   NAF.schemas.add({
@@ -189,7 +189,7 @@ function registerNetworkSchemas() {
         property: "time"
       }
     ],
-    nonAuthorizedcomponents: [...getMediaVideoComponent(),
+    nonAuthorizedComponents: [...getMediaVideoComponent(),
       {
         component: "media-video",
         property: "time"
@@ -215,7 +215,7 @@ function registerNetworkSchemas() {
         property: "index"
       }
     ],
-    nonAuthorizedcomponents: [...getMediaVideoComponent(),
+    nonAuthorizedComponents: [...getMediaVideoComponent(),
       {
         component: "media-video",
         property: "time"
@@ -287,7 +287,7 @@ function registerNetworkSchemas() {
       },
       "waypoint"
     ],
-    nonAuthorizedcomponents: [
+    nonAuthorizedComponents: [
       {
         component: "position",
         requiresNetworkUpdate: vectorRequiresUpdate(0.001)

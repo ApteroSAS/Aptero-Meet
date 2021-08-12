@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import MovingAverage from "moving-average";
-import { minimumQualityService } from "../../aptero/service/MinimumQualityService";
 
 export function useMicrophone(scene, updateRate = 50) {
   const movingAvgRef = useRef();

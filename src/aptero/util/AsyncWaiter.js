@@ -1,4 +1,4 @@
-export async function wait(validator) {
+export async function wait(validator, poolingIntervalMs = 200) {
   return new Promise((resolve) => {
     if (validator()) {
       resolve();
@@ -7,8 +7,10 @@ export async function wait(validator) {
         if (!validator()) {
           await wait(validator);
           resolve();
+        } else {
+          resolve();
         }
-      }, 200);
+      }, poolingIntervalMs);
     }
   });
 }

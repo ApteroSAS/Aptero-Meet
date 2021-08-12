@@ -4,6 +4,7 @@ import { handleExitTo2DInterstitial } from "../utils/vr-interstitial";
 import { changeHub } from "../change-hub";
 import { duplicateEntryModeOnSrc } from "../aptero/util/EntryMode";
 
+//aptero
 function isValidHttpUrl(string) {
   let url;
   try {

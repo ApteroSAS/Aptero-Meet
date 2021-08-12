@@ -294,8 +294,6 @@ export const Scenes = () => (
 
 export const AvatarListings = () => (
   <React.Fragment>
-    {createAvatarCustomTileV2()}
-    <div> AVATEST2 </div>
     <MediaBrowser
       searchPlaceholder="Search Avatars..."
       mediaSources={mediaSources}

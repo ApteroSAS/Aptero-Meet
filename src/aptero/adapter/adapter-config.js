@@ -65,10 +65,12 @@ export async function setlistenerEndShareVideo(){
 }
 
 export async function createTrack(constraints, isDisplayDevice) {
-  if (configs.APP_CONFIG.adapterParams.adapter === "twilio") {
+  console.log("createTrack")
+  const adapterParams = getAdapterConfig();
+  if (adapterParams.adapter === "twilio") {
     let { createTwilioTrack:createTwilioTrack } = await import('./twilio');
     return createTwilioTrack(constraints, isDisplayDevice);
-  } else if (configs.APP_CONFIG.adapterParams.adapter === "agora") {
+  } else if (adapterParams.adapter === "agora") {
     let { createAgoraTrack:createAgoraTrack } = await import('./agora');
     return createAgoraTrack(constraints, isDisplayDevice);
   } else {

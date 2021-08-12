@@ -2,7 +2,6 @@ import * as mediasoupClient from "mediasoup-client";
 import protooClient from "protoo-client";
 import { debug as newDebug } from "debug";
 import EventEmitter from "eventemitter3";
-import { addIceServers } from "./aptero/adapter/adapter-config";
 
 // Used for VP9 webcam video.
 //const VIDEO_KSVC_ENCODINGS = [{ scalabilityMode: "S3T3_KEY" }];
@@ -19,15 +18,10 @@ import { addIceServers } from "./aptero/adapter/adapter-config";
 
 // Based upon mediasoup-demo RoomClient
 
-let debug = console.log;
-let error = console.error;
-let info = console.log;
-if(newDebug){
-	debug = newDebug("naf-dialog-adapter:debug");
-	//const warn = newDebug("naf-dialog-adapter:warn");
-	error = newDebug("naf-dialog-adapter:error");
-	info = newDebug("naf-dialog-adapter:info");
-}
+const debug = newDebug("naf-dialog-adapter:debug");
+//const warn = newDebug("naf-dialog-adapter:warn");
+const error = newDebug("naf-dialog-adapter:error");
+const info = newDebug("naf-dialog-adapter:info");
 
 const PC_PROPRIETARY_CONSTRAINTS = {
   optional: [{ googDscp: true }]
@@ -73,7 +67,7 @@ export class DialogAdapter extends EventEmitter {
   }
 
   getIceServers(host, port, turn) {
-    let iceServers = [];
+    const iceServers = [];
 
     this._serverUrl = `wss://${host}:${port}`;
 
@@ -98,7 +92,7 @@ export class DialogAdapter extends EventEmitter {
     } else {
       iceServers.push({ urls: "stun:stun1.l.google.com:19302" }, { urls: "stun:stun2.l.google.com:19302" });
     }
-    iceServers = addIceServers(iceServers);
+
     return iceServers;
   }
 
@@ -106,7 +100,7 @@ export class DialogAdapter extends EventEmitter {
    * Gets transport/consumer/producer stats on the server side.
    */
   async getServerStats() {
-    if (this.getConnectStatus() === NAF.adapters.NOT_CONNECTED) {
+    if (!this._protoo.connected) {
       // Signaling channel not connected, no reason to get remote RTC stats.
       return;
     }
@@ -281,7 +275,6 @@ export class DialogAdapter extends EventEmitter {
 
     this._protoo.on("failed", attempt => {
       this.emitRTCEvent("error", "Signaling", () => `Failed: ${attempt}, retrying...`);
-      console.warn("protoo failed",attempt);
     });
 
     this._protoo.on("close", async () => {
@@ -363,7 +356,6 @@ export class DialogAdapter extends EventEmitter {
         }
 
         case "peerClosed": {
-          console.warn("peerClosed")
           const { peerId } = notification.data;
           this.closePeer(peerId);
 
@@ -371,7 +363,6 @@ export class DialogAdapter extends EventEmitter {
         }
 
         case "consumerClosed": {
-          console.warn("consumerClosed")
           const { consumerId } = notification.data;
           const consumer = this._consumers.get(consumerId);
 
@@ -387,7 +378,6 @@ export class DialogAdapter extends EventEmitter {
         }
 
         case "peerBlocked": {
-          console.warn("peerBlocked")
           const { peerId } = notification.data;
           document.body.dispatchEvent(new CustomEvent("blocked", { detail: { clientId: peerId } }));
 
@@ -395,7 +385,6 @@ export class DialogAdapter extends EventEmitter {
         }
 
         case "peerUnblocked": {
-          console.warn("peerUnblocked")
           const { peerId } = notification.data;
           document.body.dispatchEvent(new CustomEvent("unblocked", { detail: { clientId: peerId } }));
 
@@ -408,7 +397,6 @@ export class DialogAdapter extends EventEmitter {
         }
 
         case "consumerLayersChanged": {
-          console.warn("consumerLayersChanged")
           const { consumerId, spatialLayer, temporalLayer } = notification.data;
 
           const consumer = this._consumers.get(consumerId);
@@ -430,7 +418,6 @@ export class DialogAdapter extends EventEmitter {
         }
 
         case "consumerScore": {
-          console.warn("consumerScore")
           const { consumerId, score } = notification.data;
 
           const consumer = this._consumers.get(consumerId);

@@ -32,6 +32,7 @@ export function ObjectsMenuButton(props) {
   );
 }
 
+//aptero TODO put component in module
 export function CustomMenuButton(props) {
   if(customMenuService.isActivated()){
     const title = customMenuService.getButtonTitle();

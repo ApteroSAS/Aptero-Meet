@@ -20,7 +20,7 @@ AFRAME.registerComponent("video-pause-state", {
   onVideoLoaded() {
     this.videoComponent = this.el.components["media-video"];
     this.video = this.videoComponent.video;
-    if(this.video) {
+    if(this.video) {//aptero
       this.video.addEventListener("pause", this.onPauseStateChange);
     }
   },

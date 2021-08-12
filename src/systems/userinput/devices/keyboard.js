@@ -3,11 +3,11 @@ import { ArrayBackedSet } from "../array-backed-set";
 
 // TODO currently hardcoding these keys to be physical location based instead of character based. We likely want to make this part of the bindings themselves.
 const CODE_TO_KEY = {
-  KeyW: "z",
-  KeyA: "q",
+  KeyW: "w",
+  KeyA: "a",
   KeyS: "s",
   KeyD: "d",
-  KeyQ: "a",
+  KeyQ: "q",
   KeyE: "e"
 };
 

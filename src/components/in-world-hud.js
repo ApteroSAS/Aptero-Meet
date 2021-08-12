@@ -1,30 +1,17 @@
 import { SOUND_SPAWN_PEN } from "../systems/sound-effects-system";
-import { video360Service } from "../aptero/service/Video360Service";
 /**
  * HUD panel for muting, freezing, and other controls that don't necessarily have hardware buttons.
  * @namespace ui
  * @component in-world-hud
  */
 AFRAME.registerComponent("in-world-hud", {
-  async init() {
-
-    //TODO aptero make a service
-    video360Service.eventEmitter.on("change",()=>{
-      this.updateButtonStates();
-    });
-
+  init() {
     this.mic = this.el.querySelector(".mic");
     this.spawn = this.el.querySelector(".spawn");
     this.pen = this.el.querySelector(".penhud");
     //this.cameraBtn = this.el.querySelector(".camera-btn");
     this.inviteBtn = this.el.querySelector(".invite-btn");
     this.background = this.el.querySelector(".bg");
-
-    //APTERO
-    this.quitbtn = this.el.querySelector(".quitbtn");
-    this.playbtn = this.el.querySelector(".play");
-    this.pausebtn = this.el.querySelector(".pause");
-    this.restartbtn = this.el.querySelector(".restart");
 
     this.onMicStateChanged = () => {
       this.mic.setAttribute("mic-button", "active", APP.dialog.isMicEnabled);
@@ -41,11 +28,6 @@ AFRAME.registerComponent("in-world-hud", {
         this.pen.setAttribute("icon-button", "disabled", !window.APP.hubChannel.can("spawn_drawing"));
         //this.cameraBtn.setAttribute("icon-button", "disabled", !window.APP.hubChannel.can("spawn_camera"));
       }
-
-      const active = video360Service.isEnable();
-      this.playbtn.setAttribute("icon-button", "disabled", !active);
-      this.pausebtn.setAttribute("icon-button", "disabled", !active);
-      this.restartbtn.setAttribute("icon-button", "disabled", !active);
     };
 
     this.onStateChange = evt => {
@@ -80,22 +62,6 @@ AFRAME.registerComponent("in-world-hud", {
     this.onHubUpdated = e => {
       this.inviteBtn.object3D.visible = e.detail.hub.entry_mode !== "invite";
     };
-
-    this.onQuitClick = () => {
-      this.el.sceneEl.emit("leave_room_requested");
-    };
-
-    this.onPlayClick = () => {
-      video360Service.play();
-    };
-
-    this.onPauseClick = () => {
-      video360Service.pause();
-    };
-
-    this.onRestartClick = () => {
-      video360Service.setTime(0);
-    };
   },
 
   play() {
@@ -104,11 +70,6 @@ AFRAME.registerComponent("in-world-hud", {
     this.el.sceneEl.systems.permissions.onPermissionsUpdated(this.updateButtonStates);
     this.el.sceneEl.addEventListener("hub_updated", this.onHubUpdated);
     this.updateButtonStates();
-
-    this.playbtn.object3D.addEventListener("interact", this.onPlayClick);
-    this.pausebtn.object3D.addEventListener("interact", this.onPauseClick);
-    this.restartbtn.object3D.addEventListener("interact", this.onRestartClick);
-    this.quitbtn.object3D.addEventListener("interact", this.onQuitClick);
 
     this.mic.object3D.addEventListener("interact", this.onMicClick);
     this.spawn.object3D.addEventListener("interact", this.onSpawnClick);
@@ -122,12 +83,6 @@ AFRAME.registerComponent("in-world-hud", {
     this.el.sceneEl.removeEventListener("stateremoved", this.onStateChange);
     window.APP.hubChannel.removeEventListener("permissions_updated", this.updateButtonStates);
     this.el.sceneEl.removeEventListener("hub_updated", this.onHubUpdated);
-
-
-    this.playbtn.object3D.addEventListener("interact", this.onPlayClick);
-    this.pausebtn.object3D.addEventListener("interact", this.onPauseClick);
-    this.restartbtn.object3D.addEventListener("interact", this.onRestartClick);
-    this.quitbtn.object3D.removeEventListener("interact", this.onQuitClick);
 
     this.mic.object3D.removeEventListener("interact", this.onMicClick);
     this.spawn.object3D.removeEventListener("interact", this.onSpawnClick);

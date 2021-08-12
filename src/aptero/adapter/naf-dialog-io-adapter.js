@@ -106,7 +106,7 @@ export default class DialogAdapter extends EventEmitter {
    * Gets transport/consumer/producer stats on the server side.
    */
   async getServerStats() {
-    if (this.getConnectStatus() === NAF.adapters.NOT_CONNECTED) {
+    if (!this._protoo.connected) {
       // Signaling channel not connected, no reason to get remote RTC stats.
       return;
     }
@@ -370,7 +370,6 @@ export default class DialogAdapter extends EventEmitter {
         }
 
         case "peerClosed": {
-          console.warn("peerClosed")
           const { peerId } = notification.data;
           this.closePeer(peerId);
 
@@ -378,7 +377,6 @@ export default class DialogAdapter extends EventEmitter {
         }
 
         case "consumerClosed": {
-          console.warn("consumerClosed")
           const { consumerId } = notification.data;
           const consumer = this._consumers.get(consumerId);
 
@@ -394,7 +392,6 @@ export default class DialogAdapter extends EventEmitter {
         }
 
         case "peerBlocked": {
-          console.warn("peerBlocked")
           const { peerId } = notification.data;
           document.body.dispatchEvent(new CustomEvent("blocked", { detail: { clientId: peerId } }));
 
@@ -402,7 +399,6 @@ export default class DialogAdapter extends EventEmitter {
         }
 
         case "peerUnblocked": {
-          console.warn("peerUnblocked")
           const { peerId } = notification.data;
           document.body.dispatchEvent(new CustomEvent("unblocked", { detail: { clientId: peerId } }));
 
@@ -415,7 +411,6 @@ export default class DialogAdapter extends EventEmitter {
         }
 
         case "consumerLayersChanged": {
-          console.warn("consumerLayersChanged")
           const { consumerId, spatialLayer, temporalLayer } = notification.data;
 
           const consumer = this._consumers.get(consumerId);
@@ -437,7 +432,6 @@ export default class DialogAdapter extends EventEmitter {
         }
 
         case "consumerScore": {
-          console.warn("consumerScore")
           const { consumerId, score } = notification.data;
 
           const consumer = this._consumers.get(consumerId);

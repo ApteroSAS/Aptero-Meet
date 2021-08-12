@@ -61,7 +61,7 @@ export default class AuthChannel {
     this.store.update({ credentials: { token: null, email: null } });
     await this.store.resetToRandomDefaultAvatar();
     this._signedIn = false;
-    await microsoftService.logout();
+    await microsoftService.logout();//aptero
   };
 
   verifyAuthentication(authTopic, authToken, authPayload) {

@@ -696,8 +696,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   //APTERO
   let iceServer = await fetchICEservers();
   await minimumQualityService.checkTurnServerAndSwitchToTCP(iceServer);
+  console.log("lazy loading start");
   await wait(()=>{return APP.dialog.lasyLoadingFinished});
-  console.log("lazy loading finished")
+  console.log("lazy loading finished");
   //end APTERO
   document.getElementById("version").innerHTML = process.env.BUILD_VERSION;
   if (isOAuthModal) {
