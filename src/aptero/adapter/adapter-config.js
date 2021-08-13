@@ -52,9 +52,9 @@ export function getAdapterConfig() {
 }
 
 export async function unpublishVideoTrack() {
-  if (configs.APP_CONFIG.adapterParams.adapter === "twilio") {
-    let { unpublishVideoTrack:unpublishVideoTrack } = await import('./twilio');
-    await unpublishVideoTrack();
+  const adapterParams = getAdapterConfig();
+  if (adapterParams.adapter === "twilio" || adapterParams.adapter === "agora") {
+    await window.APP.dialog.subAdapter.unpublishVideoTrack();
   }
 }
 export async function setlistenerEndShareVideo(){

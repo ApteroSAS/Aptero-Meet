@@ -98,6 +98,7 @@ export class TwilioAdapter {
         return new MediaStream([localTracks.mediaStreamTrack]);
       }
     } else if (constraints.audio) {
+      await this.unpublishAudioTrack();
       //https://www.twilio.com/docs/video/javascript-v1-getting-started#specify-constraints
       let localTracks = await Video.createLocalTracks(constraints);
       console.log("currentTracks updated: " + localTracks);
@@ -135,7 +136,9 @@ export class TwilioAdapter {
       participant.tracks.forEach(publication => {
         if (publication.isSubscribed) {
           const track = publication.track;
-          this.onTrack(track,participant);
+          let peerId = this.convertId(participant.identity);
+          track.track = track.mediaStreamTrack;
+          this.onTrack(track,peerId,track.name);
         }
         publication.on("subscribed", track => {
           console.log(`publication subscribed`, track);
@@ -146,7 +149,9 @@ export class TwilioAdapter {
       });
 
       participant.on("trackSubscribed", track => {
-        this.onTrack(track,participant);
+        let peerId = this.convertId(participant.identity);
+        track.track = track.mediaStreamTrack;
+        this.onTrack(track,peerId,track.name);
       });
       participant.on("trackUnsubscribed", track => {
         this.unpublishGivenVideoTrack(track);
@@ -190,6 +195,16 @@ export class TwilioAdapter {
     }
   }
 
-
+  async unpublishAudioTrack() {
+    for (let publication of this.currentRoom.localParticipant.tracks) {
+      publication = publication[1];
+      if(publication.track.kind === "audio"){
+        publication.track.stop()
+        publication.unpublish();
+        console.log('unpublish audio')
+      }
+    }
+    this.videoTrack = null
+  }
 }
 

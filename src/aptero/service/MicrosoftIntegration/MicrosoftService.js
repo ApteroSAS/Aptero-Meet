@@ -201,7 +201,7 @@ export class MicrosoftService{
 
   async logout(){
     return new Promise((resolve, reject) => {
-      if(this.msalInstance.getAccount()) {
+      if(this.msalInstance && this.msalInstance.getAccount()) {
         this.msalInstance.logout().then(response => {
           resolve(response);
         }).catch(err => {
