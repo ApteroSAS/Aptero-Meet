@@ -80,7 +80,7 @@
     "animejs": "github:mozillareality/anime#883d028420c7eb8c2934290e5d10827be4640318",
     "axios": "^0.19.2",
     "buffer": "^5.6.0",
-    "buffered-interpolation": "github:infinitelee/buffered-interpolation#d8efb410a97ebbfa7ad4a710cf8b890f405e6819",
+    "buffered-interpolation": "github:infinitelee/buffered-interpolation#5bb18421ebf2bf11664645cdc7a15bd77ee2156b",
     "classnames": "^2.2.5",
     "color": "^3.1.2",
     "copy-to-clipboard": "^3.0.8",
