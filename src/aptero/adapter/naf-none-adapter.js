@@ -6,49 +6,22 @@ export default class NoneAdapter extends EventEmitter {
   constructor() {
     super();
   }
-  setApp() {
-  }
 
-  setRoom(roomId) {
-  }
-
-  setClientId(clientId) {
-  }
-
-  setServerConnectListeners(successListener, failureListener) {
-  }
-
-  setRoomOccupantListener(occupantListener) {
-  }
-
-  setDataChannelListeners(openListener, closedListener, messageListener) {
-  }
-
-  setServerUrl(url) {
-  }
-
-  setJoinToken(joinToken) {
-  }
-
-  setTurnConfig(forceTcp, forceTurn) {
-  }
-
-  setServerParams(params) {
-  }
-
-  setReconnectionListeners(reconnectingListener, reconnectedListener) {
-  }
-
-  setWebRtcOptions() {
-    // Not implemented
-  }
-
-  broadcastDataGuaranteed(dataType, data) {
-  }
-  broadcastData(dataType, data) {
+  async connect({
+                  serverUrl,
+                  roomId,
+                  joinToken,
+                  serverParams,
+                  scene,
+                  clientId,
+                  forceTcp,
+                  forceTurn,
+                  iceTransportPolicy
+                }) {
 
   }
-  async connect() {
+
+  toggleMicrophone() {
 
   }
 
@@ -60,9 +33,7 @@ export default class NoneAdapter extends EventEmitter {
 
   }
 
-  getServerTime() {
-    return Date.now();
+  disconnect() {
+
   }
 }
-
-NAF.adapters.register("none", NoneAdapter);
