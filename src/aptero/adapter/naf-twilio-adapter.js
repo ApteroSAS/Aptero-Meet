@@ -115,13 +115,11 @@ export default class NafTwilioAdapter extends EventEmitter {
     this._iceTransportPolicy = iceTransportPolicy;
 
     this.subAdapter = new TwilioAdapter();
-    this.subAdapter.setOnTrack((track, tparticipant)=>{
+    this.subAdapter.setOnTrack((track, peerId,trackid)=>{
       //RemoteAudioTrack
-      let peerId = this.subAdapter.convertId(tparticipant.identity);
       console.log(" Add consumer:",track);
       track.appData = {peerId};
-      track.track = track.mediaStreamTrack;
-      this._consumers.set(track.name, track);
+      this._consumers.set(trackid, track);
       this.resolvePendingMediaRequestForTrack(peerId, track.track);
     });
     this.subAdapter.setOnTrackRemoved((trackId)=>{

@@ -1,51 +1,28 @@
-import * as mediasoupClient from "mediasoup-client";
-import protooClient from "protoo-client";
 import { debug as newDebug } from "debug";
+import { AgoraAdapter } from "./agora";
 import EventEmitter from "eventemitter3";
-import { addIceServers, getAdapterConfig } from "./adapter-config";
-import { connectAgoraRoom, convertId } from "./agora";
+import { ProtooHelper } from "./protoHelper";
 
 // NOTE this adapter does not properly fire the onOccupantsReceived events since those are only needed for
 // data channels, which are not yet supported. To fire that event, this class would need to keep a list of
 // occupants around and manage it.
 //
 // Used for VP9 webcam video.
-//const VIDEO_KSVC_ENCODINGS = [{ scalabilityMode: "S3T3_KEY" }];
-
-// Used for VP9 desktop sharing.
-//const VIDEO_SVC_ENCODINGS = [{ scalabilityMode: "S3T3", dtx: true }];
-
-// TODO
-// - look into requestConsumerKeyframe
-// - look into applyNetworkThrottle
-// SFU todo
-// - remove active speaker stuff
-// - remove score stuff
-
-// Based upon mediasoup-demo RoomClient
 
 let debug = console.log;
 let error = console.error;
 let info = console.log;
-if (newDebug) {
-  debug = newDebug("agora-adapter:debug");
+if(newDebug){
+  debug = newDebug("twilio-adapter:debug");
   //const warn = newDebug("naf-dialog-adapter:warn");
-  error = newDebug("agora-adapter:error");
-  info = newDebug("agora-adapter:info");
+  error = newDebug("twilio-adapter:error");
+  info = newDebug("twilio-adapter:info");
 }
 
-const PC_PROPRIETARY_CONSTRAINTS = {
-  optional: [{ googDscp: true }]
-};
-
-const INITIAL_ROOM_RECONNECTION_INTERVAL = 2000;
-
-
-export default class NafAgoraAdapter extends EventEmitter {
+export const DIALOG_CONNECTION_ERROR_FATAL = "dialog-connection-error-fatal";
+export default class NafTwilioAdapter extends EventEmitter {
   constructor() {
     super();
-
-    this._micShouldBeEnabled = false;
     this._micProducer = null;
     this._cameraProducer = null;
     this._shareProducer = null;
@@ -65,124 +42,24 @@ export default class NafAgoraAdapter extends EventEmitter {
     return this._consumerStats;
   }
 
-  get downlinkBwe() {
-    return this._downlinkBwe;
-  }
-
-  getIceServers(host, port, turn) {
-    let iceServers = [];
-
-    this._serverUrl = `wss://${host}:${port}`;
-
-    if (turn && turn.enabled) {
-      turn.transports.forEach(ts => {
-        // Try both TURN DTLS and TCP/TLS
-        if (!this._forceTcp) {
-          iceServers.push({
-            urls: `turns:${host}:${ts.port}`,
-            username: turn.username,
-            credential: turn.credential
-          });
-        }
-
-        iceServers.push({
-          urls: `turns:${host}:${ts.port}?transport=tcp`,
-          username: turn.username,
-          credential: turn.credential
-        });
-      });
-      iceServers.push({ urls: "stun:stun1.l.google.com:19302" });
-    } else {
-      iceServers.push({ urls: "stun:stun1.l.google.com:19302" }, { urls: "stun:stun2.l.google.com:19302" });
-    }
-    iceServers = addIceServers(iceServers);
-    return iceServers;
-  }
-
   /**
    * Gets transport/consumer/producer stats on the server side.
    */
   async getServerStats() {
-    if (!this || (this.getConnectStatus() === NAF.adapters.NOT_CONNECTED)) {
-      // Signaling channel not connected, no reason to get remote RTC stats.
-      return;
-    }
-
-    const result = {};
-    try {
-      if (!this._sendTransport?._closed) {
-        const sendTransport = (result[this._sendTransport.id] = {});
-        sendTransport.name = "Send";
-        sendTransport.stats = await this._protoo.request("getTransportStats", {
-          transportId: this._sendTransport.id
-        });
-        result[this._sendTransport.id]["producers"] = {};
-        for (const producer of this._sendTransport._producers) {
-          const id = producer[0];
-          result[this._sendTransport.id]["producers"][id] = await this._protoo.request("getProducerStats", {
-            producerId: id
-          });
-        }
-      }
-      if (!this._recvTransport?._closed) {
-        const recvTransport = (result[this._recvTransport.id] = {});
-        recvTransport.name = "Receive";
-        recvTransport.stats = await this._protoo.request("getTransportStats", {
-          transportId: this._recvTransport.id
-        });
-        result[this._recvTransport.id]["consumers"] = {};
-        for (const consumer of this._recvTransport._consumers) {
-          const id = consumer[0];
-          result[this._recvTransport.id]["consumers"][id] = await this._protoo.request("getConsumerStats", {
-            consumerId: id
-          });
-        }
-      }
-      return result;
-    } catch (e) {
-      this.emitRTCEvent("error", "Adapter", () => `Error getting the server status: ${e}`);
-      return { error: `Error getting the server status: ${e}` };
-    }
+    return {};
   }
-
+  // eslint-disable-next-line no-unused-vars
   async iceRestart(transport) {
-    // Force an ICE restart to gather new candidates and trigger a reconnection
-    this.emitRTCEvent(
-        "log",
-        "RTC",
-        () => `Restarting ${transport.id === this._sendTransport.id ? "send" : "receive"} transport ICE`
-    );
-    const iceParameters = await this._protoo.request("restartIce", { transportId: transport.id });
-    await transport.restartIce({ iceParameters });
   }
 
+  // eslint-disable-next-line no-unused-vars
   async recreateSendTransport(iceServers) {
-    this.emitRTCEvent("log", "RTC", () => `Recreating send transport ICE`);
-    await this.closeSendTransport();
-    await this.createSendTransport(iceServers);
   }
 
   /**
    * Restart ICE in the underlying send peerconnection.
    */
   async restartSendICE() {
-    // Do not restart ICE if Signaling is disconnected. We are not in the meeting room if that's the case.
-    if (this._closed) {
-      return;
-    }
-
-    try {
-      if (!this._sendTransport?._closed) {
-        await this.iceRestart(this._sendTransport);
-      } else {
-        // If the transport is closed but the signaling is connected, we try to recreate
-        const { host, port, turn } = this._serverParams;
-        const iceServers = this.getIceServers(host, port, turn);
-        await this.recreateSendTransport(iceServers);
-      }
-    } catch (err) {
-      this.emitRTCEvent("error", "RTC", () => `Send transport [recreate] failed: ${err}`);
-    }
   }
 
   /**
@@ -190,18 +67,12 @@ export default class NafAgoraAdapter extends EventEmitter {
    * This is called by the Send Transport "connectionstatechange" event listener.
    * @param {boolean} connectionState The transport connnection state (ICE connection state)
    */
+  // eslint-disable-next-line no-unused-vars
   checkSendIceStatus(connectionState) {
-    // If the ICE connection state is failed, we force an ICE restart
-    if (connectionState === "failed") {
-      this.restartSendICE();
-    }
   }
 
+  // eslint-disable-next-line no-unused-vars
   async recreateRecvTransport(iceServers) {
-    this.emitRTCEvent("log", "RTC", () => `Recreating receive transport ICE`);
-    await this.closeRecvTransport();
-    await this.createRecvTransport(iceServers);
-    await this._protoo.request("refreshConsumers");
   }
 
   /**
@@ -209,47 +80,30 @@ export default class NafAgoraAdapter extends EventEmitter {
    * @param {boolean} force Forces the execution of the reconnect.
    */
   async restartRecvICE() {
-    if (!this._protoo || !this._protoo.connected) {
-      return;
-    }
-
-    try {
-      if (!this._recvTransport?._closed) {
-        await this.iceRestart(this._recvTransport);
-      } else {
-        // If the transport is closed but the signaling is connected, we try to recreate
-        const { host, port, turn } = this._serverParams;
-        const iceServers = this.getIceServers(host, port, turn);
-        await this.recreateRecvTransport(iceServers);
-      }
-    } catch (err) {
-      this.emitRTCEvent("error", "RTC", () => `Receive transport [recreate] failed: ${err}`);
-    }
   }
 
   /**
-   * Checks the Send Transport ICE status and restarts it in case is in failed or disconnected states.
-   * This is called by the Send Transport "connectionstatechange" event listener.
+   * Checks the ReeceiveReeceive Transport ICE status and restarts it in case is in failed state.
+   * This is called by the Reeceive Transport "connectionstatechange" event listener.
    * @param {boolean} connectionState The transport connection state (ICE connection state)
    */
+  // eslint-disable-next-line no-unused-vars
   checkRecvIceStatus(connectionState) {
-    // If the ICE connection state is failed, we force an ICE restart
-    if (connectionState === "failed") {
-      this.restartRecvICE();
-    }
   }
 
+
+
   async connect({
-    serverUrl,
-    roomId,
-    joinToken,
-    serverParams,
-    scene,
-    clientId,
-    forceTcp,
-    forceTurn,
-    iceTransportPolicy
-  }) {
+                  serverUrl,
+                  roomId,
+                  joinToken,
+                  serverParams,
+                  scene,
+                  clientId,
+                  forceTcp,
+                  forceTurn,
+                  iceTransportPolicy
+                }) {
     this._serverUrl = serverUrl;
     this._roomId = roomId;
     this._joinToken = joinToken;
@@ -260,178 +114,49 @@ export default class NafAgoraAdapter extends EventEmitter {
     this._forceTurn = forceTurn;
     this._iceTransportPolicy = iceTransportPolicy;
 
+    this.subAdapter = new AgoraAdapter();
+    this.subAdapter.setOnTrack((track, peerId,trackid)=>{
+      //RemoteAudioTrack
+      console.log(" Add consumer:",track);
+      track.appData = {peerId};
+      this._consumers.set(trackid, track);
+      this.resolvePendingMediaRequestForTrack(peerId, track.track);
+    });
+    this.subAdapter.setOnTrackRemoved((trackId)=>{
+      this._consumers.delete(trackId);
+    });
+    this.subAdapter.setOnParticipantDisconnected((peerId)=>{
+      this._consumers.forEach(consumer => {
+        if (consumer.appData.peerId === peerId && "video" === consumer.track.kind) {
+          this.subAdapter.unpublishGivenVideoTrack(consumer);
+        }
+      });
+    });
+    await this.subAdapter.connectRoom(this._clientId,this._roomId);
+
     const urlWithParams = new URL(this._serverUrl);
     urlWithParams.searchParams.append("roomId", this._roomId);
     urlWithParams.searchParams.append("peerId", this._clientId);
-    this._agoraRoom = await connectAgoraRoom(this._clientId, this._roomId);
-    let onTrack = (participant, track) => {
-      //RemoteAudioTrack
-      let peerId = convertId(participant.uid);
-      let kind = track.kind;
-      console.log(" Add consumer:", track);
-      track.appData = { peerId };
-      track.track = track.mediaStreamTrack;
-      this._consumers.set(peerId, track);
-      this.resolvePendingMediaRequestForTrack(peerId, track.track);
 
-      if (kind === "audio") {
-        const initialAudioResolver = this._initialAudioConsumerResolvers.get(peerId);
+    // TODO: Establishing connection could take a very long time.
+    //       Inform the user if we are stuck here.
+    this.protooHelper = new ProtooHelper();
+    await this.protooHelper.init(urlWithParams);
+    this._protoo =this.protooHelper._protoo;
 
-        if (initialAudioResolver) {
-          initialAudioResolver();
-          this._initialAudioConsumerResolvers.delete(peerId);
-        }
-      }
-      //document.getElementById('remote-media-div').appendChild(track.attach());
-    };
-    let onParticipant = async (participant, mediaType) => {
-      if (mediaType) {
-        await this._agoraRoom.subscribe(participant, mediaType);
-        if (participant.hasAudio && participant.audioTrack) {
-          onTrack(participant, participant.audioTrack);
-        }
-        if (participant.hasVideo && participant.videoTrack) {
-          onTrack(participant, participant.videoTrack);
-        }
-      }
-    };
-    this._agoraRoom.on("user-joined", (participant, mediaType) => {
-      //https://docs.agora.io/en/Voice/API%20Reference/web_ng/interfaces/iagorartcremoteuser.html
-      console.log(`Participant connected: ${participant.uid}`);
-      onParticipant(participant, mediaType);
-    });
-    this._agoraRoom.on("user-published", (participant, mediaType) => {
-      console.log(`Participant connected: ${participant.uid}`);
-      onParticipant(participant, mediaType);
-    });
-    this._agoraRoom.on("user-unpublished", participant => {
-      console.log(`Participant connected: ${participant.uid}`);
-    });
-    this._agoraRoom.on("user-left", participant => {
-      console.log(`Participant disconnected: ${participant.identity}`);
-    });
+    this._closed = false;
 
-    let protooTransport;
-    if (getAdapterConfig().transport && getAdapterConfig().transport === "WebSocketTransport") {
-      protooTransport = new protooClient.WebSocketTransport(urlWithParams.toString(), {
-        retry: { retries: 2 }
-      });
-    } else {
-      protooTransport = new protooClient.WebSocketIOTransport(urlWithParams.toString(), {
-        retry: { retries: 2 }
-      });
-    }
-    this._protoo = new protooClient.Peer(protooTransport);
-
-    this._protoo.on("disconnected", () => {
-      this.emitRTCEvent("info", "Signaling", () => `Disconnected`);
-      this.cleanUpLocalState();
-    });
-
-    this._protoo.on("failed", attempt => {
-      this.emitRTCEvent("error", "Signaling", () => `Failed: ${attempt}, retrying...`);
-      console.warn("protoo failed",attempt);
-    });
-
-    this._protoo.on("close", async () => {
-      // We explicitly disconnect event handlers when closing the socket ourselves,
-      // so if we get into here, we were not the ones closing the connection.
-      this.emitRTCEvent("error", "Signaling", () => `Closed`);
-      this._retryConnectWithNewHost();
-    });
-
-    // eslint-disable-next-line no-unused-vars
-    this._protoo.on("request", async (request, accept, reject) => {
-      this.emitRTCEvent("info", "Signaling", () => `Request [${request.method}]: ${request.data?.id}`);
-      debug('proto "request" event [method:%s, data:%o]', request.method, request.data?.id);
-
-      switch (request.method) {
-        case "newConsumer": {
-          const {
-            peerId,
-            producerId,
-            id,
-            kind,
-            rtpParameters,
-            /*type, */ appData /*, producerPaused */
-          } = request.data;
-
-          try {
-            const consumer = await this._recvTransport.consume({
-              id,
-              producerId,
-              kind,
-              rtpParameters,
-              appData: { ...appData, peerId } // Trick.
-            });
-
-            // Store in the map.
-            this._consumers.set(consumer.id, consumer);
-
-            consumer.on("transportclose", () => {
-              this.emitRTCEvent("error", "RTC", () => `Consumer transport closed`);
-              this.removeConsumer(consumer.id);
-            });
-
-            if (kind === "video") {
-              const { spatialLayers, temporalLayers } = mediasoupClient.parseScalabilityMode(
-                consumer.rtpParameters.encodings[0].scalabilityMode
-              );
-
-              this._consumerStats[consumer.id] = this._consumerStats[consumer.id] || {};
-              this._consumerStats[consumer.id]["spatialLayers"] = spatialLayers;
-              this._consumerStats[consumer.id]["temporalLayers"] = temporalLayers;
-            }
-
-            // We are ready. Answer the protoo request so the server will
-            // resume this Consumer (which was paused for now if video).
-            accept();
-
-            this.resolvePendingMediaRequestForTrack(peerId, consumer.track);
-
-            // Notify of an stream update event
-            this.emit("stream_updated", peerId, kind);
-          } catch (err) {
-            this.emitRTCEvent("error", "Adapter", () => `Error: ${err}`);
-            error('"newConsumer" request failed:%o', err);
-
-            throw err;
-          }
-
-          break;
-        }
-      }
-    });
-
-    this._protoo.on("notification", notification => {
-      debug('proto "notification" event [method:%s, data:%o]', notification.method, notification.data);
-
+    this.protooHelper._protoo.on("notification", notification => {
       switch (notification.method) {
         case "newPeer": {
+          const peer = notification.data;
+          this.newPeer(peer);
           break;
         }
 
         case "peerClosed": {
-          console.warn("peerClosed")
           const { peerId } = notification.data;
           this.closePeer(peerId);
-
-          break;
-        }
-
-        case "consumerClosed": {
-          console.warn("consumerClosed")
-          const { consumerId } = notification.data;
-          const consumer = this._consumers.get(consumerId);
-
-          if (!consumer) {
-            info(`consumerClosed event received without related consumer: ${consumerId}`);
-            break;
-          }
-
-          consumer.close();
-          this.removeConsumer(consumer.id);
-
           break;
         }
 
@@ -448,63 +173,16 @@ export default class NafAgoraAdapter extends EventEmitter {
 
           break;
         }
-
-        case "downlinkBwe": {
-          this._downlinkBwe = notification.data;
-          break;
-        }
-
-        case "consumerLayersChanged": {
-          console.warn("consumerLayersChanged")
-          const { consumerId, spatialLayer, temporalLayer } = notification.data;
-
-          const consumer = this._consumers.get(consumerId);
-
-          if (!consumer) {
-            info(`consumerLayersChanged event received without related consumer: ${consumerId}`);
-            break;
-          }
-
-          this._consumerStats[consumerId] = this._consumerStats[consumerId] || {};
-          this._consumerStats[consumerId]["spatialLayer"] = spatialLayer;
-          this._consumerStats[consumerId]["temporalLayer"] = temporalLayer;
-
-          // TODO: If spatialLayer/temporalLayer are null, that's probably because the current downlink
-          // it's not enough forany spatial layer bitrate. In that case the server has paused the consumer.
-          // At this point we it would be nice to give the user some visual cue that this stream is paused.
-          // ie. A grey overlay with some icon or replacing the video stream por a generic person image.
-          break;
-        }
-
-        case "consumerScore": {
-          console.warn("consumerScore")
-          const { consumerId, score } = notification.data;
-
-          const consumer = this._consumers.get(consumerId);
-
-          if (!consumer) {
-            info(`consumerScore event received without related consumer: ${consumerId}`);
-            break;
-          }
-
-          this._consumerStats[consumerId] = this._consumerStats[consumerId] || {};
-          this._consumerStats[consumerId]["score"] = score;
-        }
       }
     });
-
-    return new Promise((resolve, reject) => {
-      this._protoo.on("open", async () => {
-        this.emitRTCEvent("info", "Signaling", () => `Open`);
-
-        try {
-          await this._joinRoom();
-          resolve();
-        } catch (err) {
-          this.emitRTCEvent("warn", "Adapter", () => `Error during connect: ${error}`);
-          reject(err);
-        }
-      });
+    return new Promise(async (resolve, reject) => {
+      try {
+        await this._joinRoom();
+        resolve();
+      } catch (err) {
+        this.emitRTCEvent("warn", "Adapter", () => `Error during connect: ${error}`);
+        reject(err);
+      }
     });
   }
 
@@ -612,200 +290,28 @@ export default class NafAgoraAdapter extends EventEmitter {
     }
   }
 
+  // eslint-disable-next-line no-unused-vars
   async createSendTransport(iceServers) {
     // Create mediasoup Transport for sending (unless we don't want to produce).
-    const sendTransportInfo = await this._protoo.request("createWebRtcTransport", {
-      producing: true,
-      consuming: false,
-      sctpCapabilities: undefined
-    });
 
-    this._sendTransport = this._mediasoupDevice.createSendTransport({
-      id: sendTransportInfo.id,
-      iceParameters: sendTransportInfo.iceParameters,
-      iceCandidates: sendTransportInfo.iceCandidates,
-      dtlsParameters: sendTransportInfo.dtlsParameters,
-      sctpParameters: sendTransportInfo.sctpParameters,
-      iceServers,
-      iceTransportPolicy: this._iceTransportPolicy,
-      proprietaryConstraints: PC_PROPRIETARY_CONSTRAINTS
-    });
-
-    this._sendTransport.on("connect", (
-        { dtlsParameters },
-        callback,
-        errback // eslint-disable-line no-shadow
-    ) => {
-      this.emitRTCEvent("info", "RTC", () => `Send transport [connect]`);
-      this._sendTransport.observer.on("close", () => {
-        this.emitRTCEvent("info", "RTC", () => `Send transport [close]`);
-      });
-      this._sendTransport.observer.on("newproducer", producer => {
-        this.emitRTCEvent("info", "RTC", () => `Send transport [newproducer]: ${producer.id}`);
-      });
-      this._sendTransport.observer.on("newconsumer", consumer => {
-        this.emitRTCEvent("info", "RTC", () => `Send transport [newconsumer]: ${consumer.id}`);
-      });
-
-      this._protoo
-          .request("connectWebRtcTransport", {
-            transportId: this._sendTransport.id,
-            dtlsParameters
-          })
-          .then(callback)
-          .catch(errback);
-    });
-
-    this._sendTransport.on("connectionstatechange", connectionState => {
-      let level = "info";
-      if (connectionState === "failed" || connectionState === "disconnected") {
-        level = "error";
-      }
-      this.emitRTCEvent(level, "RTC", () => `Send transport [connectionstatechange]: ${connectionState}`);
-
-      this.checkSendIceStatus(connectionState);
-    });
-
-    this._sendTransport.on("produce", async ({ kind, rtpParameters, appData }, callback, errback) => {
-      this.emitRTCEvent("info", "RTC", () => `Send transport [produce]: ${kind}`);
-      try {
-        // eslint-disable-next-line no-shadow
-        const { id } = await this._protoo.request("produce", {
-          transportId: this._sendTransport.id,
-          kind,
-          rtpParameters,
-          appData
-        });
-
-        callback({ id });
-      } catch (error) {
-        this.emitRTCEvent("error", "Signaling", () => `[produce] error: ${error}`);
-        errback(error);
-      }
-    });
   }
 
   async closeSendTransport() {
-    if (this._micProducer) {
-      this._micProducer.close();
-      this._protoo?.connected && this._protoo?.request("closeProducer", { producerId: this._micProducer.id });
-      this._micProducer = null;
-    }
-
-    if (this._videoProducer) {
-      this._videoProducer.close();
-      this._protoo?.connected && this._protoo?.request("closeProducer", { producerId: this._videoProducer.id });
-      this._videoProducer = null;
-    }
-
-    // TODO: If _sendTransport is falsey then return
-    const transportId = this._sendTransport?.id;
-    if (this._sendTransport && !this._sendTransport._closed) {
-      this._sendTransport.close();
-      this._sendTransport = null;
-    }
-
-    if (this._protoo?.connected) {
-      try {
-        await this._protoo.request("closeWebRtcTransport", { transportId });
-      } catch (err) {
-        error(err);
-      }
-    }
   }
 
+  // eslint-disable-next-line no-unused-vars
   async createRecvTransport(iceServers) {
     // Create mediasoup Transport for sending (unless we don't want to consume).
-    const recvTransportInfo = await this._protoo.request("createWebRtcTransport", {
-      producing: false,
-      consuming: true,
-      sctpCapabilities: undefined
-    });
 
-    this._recvTransport = this._mediasoupDevice.createRecvTransport({
-      id: recvTransportInfo.id,
-      iceParameters: recvTransportInfo.iceParameters,
-      iceCandidates: recvTransportInfo.iceCandidates,
-      dtlsParameters: recvTransportInfo.dtlsParameters,
-      sctpParameters: recvTransportInfo.sctpParameters,
-      iceServers,
-      iceTransportPolicy: this._iceTransportPolicy
-    });
-
-    this._recvTransport.on("connect", (
-        { dtlsParameters },
-        callback,
-        errback // eslint-disable-line no-shadow
-    ) => {
-      this.emitRTCEvent("info", "RTC", () => `Receive transport [connect]`);
-      this._recvTransport.observer.on("close", () => {
-        this.emitRTCEvent("info", "RTC", () => `Receive transport [close]`);
-      });
-      this._recvTransport.observer.on("newproducer", producer => {
-        this.emitRTCEvent("info", "RTC", () => `Receive transport [newproducer]: ${producer.id}`);
-      });
-      this._recvTransport.observer.on("newconsumer", consumer => {
-        this.emitRTCEvent("info", "RTC", () => `Receive transport [newconsumer]: ${consumer.id}`);
-      });
-
-      this._protoo
-          .request("connectWebRtcTransport", {
-            transportId: this._recvTransport.id,
-            dtlsParameters
-          })
-          .then(callback)
-          .catch(errback);
-    });
-
-    this._recvTransport.on("connectionstatechange", connectionState => {
-      let level = "info";
-      if (connectionState === "failed" || connectionState === "disconnected") {
-        level = "error";
-      }
-      this.emitRTCEvent(level, "RTC", () => `Receive transport [connectionstatechange]: ${connectionState}`);
-
-      this.checkRecvIceStatus(connectionState);
-    });
   }
 
   async closeRecvTransport() {
-    const transportId = this._recvTransport?.id;
-    if (this._recvTransport && !this._recvTransport._closed) {
-      this._recvTransport.close();
-      this._recvTransport = null;
-    }
-    if (this._protoo?.connected) {
-      try {
-        await this._protoo.request("closeWebRtcTransport", { transportId });
-      } catch (err) {
-        error(err);
-      }
-    }
   }
 
   async _joinRoom() {
     debug("_joinRoom()");
 
-    this._mediasoupDevice = new mediasoupClient.Device({});
-
-    const routerRtpCapabilities = await this._protoo.request("getRouterRtpCapabilities");
-
-    await this._mediasoupDevice.load({ routerRtpCapabilities });
-
-    const { host, port, turn } = this._serverParams;
-    const iceServers = this.getIceServers(host, port, turn);
-
-    await this.createSendTransport(iceServers);
-    await this.createRecvTransport(iceServers);
-
-    await this._protoo.request("join", {
-      displayName: this._clientId,
-      device: this._device,
-      rtpCapabilities: this._mediasoupDevice.rtpCapabilities,
-      sctpCapabilities: this._useDataChannel ? this._mediasoupDevice.sctpCapabilities : undefined,
-      token: this._joinToken
-    });
-
+    await this.protooHelper.join(this._clientId,this._device,this._joinToken);
     if (this._localMediaStream) {
       // TODO: Refactor to be "Create producers"
       await this.setLocalMediaStream(this._localMediaStream);
@@ -813,10 +319,6 @@ export default class NafAgoraAdapter extends EventEmitter {
   }
 
   async setLocalMediaStream(stream) {
-    if (!this._sendTransport) {
-      console.error("Tried to setLocalMediaStream before a _sendTransport existed");
-      return;
-    }
     this.emitRTCEvent("info", "RTC", () => `Creating missing producers`);
     let sawAudio = false;
     let sawVideo = false;
@@ -830,23 +332,15 @@ export default class NafAgoraAdapter extends EventEmitter {
           if (this._micProducer) {
             if (this._micProducer.track !== track) {
               this._micProducer.track.stop();
-              this._micProducer.replaceTrack(track);
+              //this._micProducer.replaceTrack(track);
             }
           } else {
-            // stopTracks = false because otherwise the track will end during a temporary disconnect
-            this._micProducer = await this._sendTransport.produce({
-              paused: !this._micShouldBeEnabled,
-              track,
-              stopTracks: false,
-              codecOptions: { opusStereo: false, opusDtx: true },
-              zeroRtpOnPause: true,
-              disableTrackOnPause: true
-            });
+            if (!this._micEnabled) {
+              track.enabled = false;
+            }
 
-            this._micProducer.on("transportclose", () => {
-              this.emitRTCEvent("info", "RTC", () => `Mic transport closed`);
-              this._micProducer = null;
-            });
+            // stopTracks = false because otherwise the track will end during a temporary disconnect
+            this._micProducer = {track};
           }
         } else {
           sawVideo = true;
@@ -865,7 +359,6 @@ export default class NafAgoraAdapter extends EventEmitter {
     );
 
     if (!sawAudio && this._micProducer) {
-      this._protoo.request("closeProducer", { producerId: this._micProducer.id });
       this._micProducer.close();
       this._micProducer = null;
     }
@@ -877,80 +370,23 @@ export default class NafAgoraAdapter extends EventEmitter {
   }
 
   async enableCamera(track) {
-    // stopTracks = false because otherwise the track will end during a temporary disconnect
-    this._cameraProducer = await this._sendTransport.produce({
-      track,
-      stopTracks: false,
-      codecOptions: { videoGoogleStartBitrate: 1000 },
-      encodings: WEBCAM_SIMULCAST_ENCODINGS,
-      zeroRtpOnPause: true,
-      disableTrackOnPause: true
-    });
-
-    this._cameraProducer.on("transportclose", () => {
-      this.emitRTCEvent("info", "RTC", () => `Camera transport closed`);
-      this.disableCamera();
-    });
-    this._cameraProducer.observer.on("trackended", () => {
-      this.emitRTCEvent("info", "RTC", () => `Camera track ended`);
-      this.disableCamera();
-    });
+    this._cameraProducer = {track};
   }
 
   async disableCamera() {
     if (!this._cameraProducer) return;
-
-    this._cameraProducer.close();
-
-    try {
-      if (!this._sendTransport.closed) {
-        await this._protoo.request("closeProducer", { producerId: this._cameraProducer.id });
-      }
-    } catch (error) {
-      console.error(`disableCamera(): ${error}`);
-    }
-
     this._cameraProducer = null;
+    return await this.subAdapter.disableCamera();
   }
 
   async enableShare(track) {
-    // stopTracks = false because otherwise the track will end during a temporary disconnect
-    this._shareProducer = await this._sendTransport.produce({
-      track,
-      stopTracks: false,
-      codecOptions: { videoGoogleStartBitrate: 1000 },
-      encodings: SCREEN_SHARING_SIMULCAST_ENCODINGS,
-      zeroRtpOnPause: true,
-      disableTrackOnPause: true,
-      appData: {
-        share: true
-      }
-    });
-
-    this._shareProducer.on("transportclose", () => {
-      this.emitRTCEvent("info", "RTC", () => `Desktop Share transport closed`);
-      this.disableShare();
-    });
-    this._shareProducer.observer.on("trackended", () => {
-      this.emitRTCEvent("info", "RTC", () => `Desktop Share transport track ended`);
-      this.disableShare();
-    });
+    this._shareProducer = {track};
   }
 
   async disableShare() {
     if (!this._shareProducer) return;
-
-    this._shareProducer.close();
-
-    try {
-      if (!this._sendTransport.closed) {
-        await this._protoo.request("closeProducer", { producerId: this._shareProducer.id });
-      }
-    } catch (error) {
-      console.error(`disableShare(): ${error}`);
-    }
-
     this._shareProducer = null;
+    return await this.subAdapter.disableShare();
   }
 
   toggleMicrophone() {
@@ -962,48 +398,30 @@ export default class NafAgoraAdapter extends EventEmitter {
   }
 
   enableMicrophone(enabled) {
-    if (!this._micProducer) {
-      console.error("Tried to toggle mic but there's no producer.");
-      return;
-    }
-
-    if (this._agoraRoom && this._micProducer) {
-      if (enabled) {
-        this._micProducer.track.enabled = true;
-      } else {
-        this._micProducer.track.enabled = false;
-      }
-    }
-
-    if (enabled && !this.isMicEnabled) {
-      this._micProducer.resume();
-      this._protoo.request("resumeProducer", { producerId: this._micProducer.id });
-    } else if (!enabled && this.isMicEnabled) {
-      this._micProducer.pause();
-      this._protoo.request("pauseProducer", { producerId: this._micProducer.id });
-    }
+    this.subAdapter.enableMicrophone(enabled);
     this._micShouldBeEnabled = enabled;
     this.emit("mic-state-changed", { enabled: this.isMicEnabled });
   }
 
   get isMicEnabled() {
-    return this._micProducer && !this._micProducer.paused;
+    if(!this.subAdapter){
+      return false;
+    }
+    return this.subAdapter.isMicEnabled();
   }
 
   cleanUpLocalState() {
-    this._sendTransport && this._sendTransport.close();
-    this._sendTransport = null;
-    this._recvTransport && this._recvTransport.close();
-    this._recvTransport = null;
     this._micProducer = null;
     this._shareProducer = null;
     this._cameraProducer = null;
   }
 
   disconnect() {
-    if (this._agoraRoom) {
-      this._agoraRoom.leave();
+    if(this.subAdapter) {
+      this.subAdapter.disconnect();
     }
+    if (this._closed) return;
+
     debug("disconnect()");
     this.cleanUpLocalState();
     if (this._protoo) {
@@ -1016,26 +434,21 @@ export default class NafAgoraAdapter extends EventEmitter {
   }
 
   kick(clientId, permsToken) {
-    return this._protoo
-      .request("kick", {
-          room_id: this.room,
-          user_id: clientId,
-          token: permsToken
-        })
-        .then(() => {
-          document.body.dispatchEvent(new CustomEvent("kicked", { detail: { clientId: clientId } }));
-        });
+    return this.protooHelper.kick(clientId, permsToken,this.room)
+      .then(() => {
+        document.body.dispatchEvent(new CustomEvent("kicked", { detail: { clientId: clientId } }));
+      });
   }
 
   block(clientId) {
-    return this._protoo.request("block", { whom: clientId }).then(() => {
+    return this.protooHelper.block(clientId).then(() => {
       this._blockedClients.set(clientId, true);
       document.body.dispatchEvent(new CustomEvent("blocked", { detail: { clientId: clientId } }));
     });
   }
 
   unblock(clientId) {
-    return this._protoo.request("unblock", { whom: clientId }).then(() => {
+    return this.protooHelper.unblock(clientId).then(() => {
       this._blockedClients.delete(clientId);
       document.body.dispatchEvent(new CustomEvent("unblocked", { detail: { clientId: clientId } }));
     });

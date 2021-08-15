@@ -1,5 +1,7 @@
 import EventEmitter from "eventemitter3";
-import { adapterFactory } from "./adapter-config";
+import { adapterFactory, setlistenerEndShareVideo } from "./adapter-config";
+import { wait } from "../util/AsyncWaiter";
+import { roomParameters } from "../service/RoomParameters";
 
 export class AdapterWarpper {
   lasyLoadingFinished = false;
@@ -17,6 +19,10 @@ export class AdapterWarpper {
    }
 
    async internalInit(){
+     //wait for application ready
+     await wait(()=>{return AFRAME && AFRAME.scenes && AFRAME.scenes[0]});
+     //wait for room parameters retreived
+     await roomParameters.applyRoomParameters();
      let adapter = await adapterFactory();
 
      //events emitter
