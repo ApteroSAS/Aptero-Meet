@@ -17,7 +17,6 @@ import { promisifyWorker } from "../utils/promisify-worker.js";
 import pdfjs from "pdfjs-dist";
 import { applyPersistentSync } from "../utils/permissions-utils";
 import { refreshMediaMirror, getCurrentMirroredMedia } from "../utils/mirror-utils";
-import { changeVideoService } from "../aptero/service/ChangeVideoService";
 import { detect } from "detect-browser";
 import semver from "semver";
 import { createPlaneBufferGeometry } from "../utils/three-utils";
@@ -264,8 +263,8 @@ function getErrorTexture(src) {
 }
 
 //aptero microsoft feature
-function getErrorCacheItem(src){
-const errorCacheItem = { texture: errorTexture, ratio: 1 };
+function getErrorCacheItem(){
+  return { texture: errorTexture, ratio: 1 };
 }
 
 //aptero microsoft feature
@@ -322,7 +321,6 @@ AFRAME.registerComponent("media-video", {
     this.videoMutedAt = 0;
     this.localSnapCount = 0;
     this.isSnapping = false;
-    this.isChangingVideo = false; //aptero
     this.videoIsLive = null; // value null until we've determined if the video is live or not.
     this.onSnapImageLoaded = () => (this.isSnapping = false);
 
@@ -354,7 +352,6 @@ AFRAME.registerComponent("media-video", {
       this.seekForwardButton = this.el.querySelector(".video-seek-forward-button");
       this.seekBackButton = this.el.querySelector(".video-seek-back-button");
       this.snapButton = this.el.querySelector(".video-snap-button");
-      this.changeButton = this.el.querySelector(".video-change-button"); //aptero
       this.timeLabel = this.el.querySelector(".video-time-label");
       this.volumeLabel = this.el.querySelector(".video-volume-label");
       this.linkButton = this.el.querySelector(".video-link-button");
@@ -365,13 +362,6 @@ AFRAME.registerComponent("media-video", {
       this.volumeUpButton.object3D.addEventListener("interact", this.volumeUp);
       this.volumeDownButton.object3D.addEventListener("interact", this.volumeDown);
       this.snapButton.object3D.addEventListener("interact", this.snap);
-      //TODO aptero set as a service
-      this.changeVideo = () => {
-        NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
-          changeVideoService.changeVideo(NAF.utils.getNetworkId(networkedEl));
-        });
-      };
-      this.changeButton.object3D.addEventListener("interact", this.changeVideo);
 
       this.updateVolumeLabel();
       this.updateHoverMenu();
@@ -574,9 +564,6 @@ AFRAME.registerComponent("media-video", {
 
     const shouldUpdateSrc = this.data.src && this.data.src !== oldData.src;
     if (shouldUpdateSrc) {
-    //aptero
-      this.lastUpdate = 0;
-      this.videoIsLive = null; // value null until we've determined if the video is live or not.
       this.updateSrc(oldData);
       return;
     }
@@ -585,6 +572,7 @@ AFRAME.registerComponent("media-video", {
       !shouldUpdateSrc && this.mediaElementAudioSource && this.audio?.panner?.audioType !== this.data.audioType;
     if (shouldRecreateAudio) {
       this.setupAudio();
+      return;
     }
 
   },
@@ -677,7 +665,7 @@ AFRAME.registerComponent("media-video", {
 
       if (texture.hls) {
         const updateHLSLiveState = () => {
-          this.video.play();
+          this.video.play(); //Aptero
           if (texture.hls.currentLevel >= 0) {
             this.videoIsLive = texture.hls.levels[texture.hls.currentLevel].details.live;
             this.updateHoverMenu();
@@ -974,7 +962,6 @@ AFRAME.registerComponent("media-video", {
     this.playbackControls.object3D.visible = !this.data.hidePlaybackControls && !!this.video;
     this.timeLabel.object3D.visible = !this.data.hidePlaybackControls;
 
-    this.changeButton.object3D.visible = (window.APP.hubChannel.can("spawn_camera")||window.APP.hubChannel.can("change_screen")) && !this.videoIsLive;//aptero change object feature
     this.snapButton.object3D.visible =
       !!this.video && !this.data.contentType.startsWith("audio/") && window.APP.hubChannel.can("show_spawn_and_move_media");
     this.seekForwardButton.object3D.visible = !!this.video && !this.videoIsLive;
@@ -1052,6 +1039,8 @@ AFRAME.registerComponent("media-video", {
   remove() {
     this.cleanUp();
 
+    this.el.removeAttribute("audio-params");
+
     if (this.mesh) {
       this.el.removeObject3D("mesh");
     }
@@ -1087,7 +1076,7 @@ AFRAME.registerComponent("media-video", {
       this.volumeDownButton.object3D.removeEventListener("interact", this.volumeDown);
       this.seekForwardButton.object3D.removeEventListener("interact", this.seekForward);
       this.seekBackButton.object3D.removeEventListener("interact", this.seekBack);
-      this.changeButton.object3D.removeEventListener("interact", this.changeVideo);//aptero change object feature
+      this.snapButton.object3D.removeEventListener("interact", this.snap);
     }
 
     window.APP.store.removeEventListener("statechanged", this.onPreferenceChanged);

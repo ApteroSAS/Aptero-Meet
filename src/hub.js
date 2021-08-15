@@ -59,7 +59,7 @@ import "./phoenix-adapter";
 import nextTick from "./utils/next-tick";
 import { addAnimationComponents } from "./utils/animation";
 import Cookies from "js-cookie";
-import { DialogAdapter, DIALOG_CONNECTION_ERROR_FATAL } from "./naf-dialog-adapter";
+import { DIALOG_CONNECTION_ERROR_FATAL } from "./naf-dialog-adapter";
 import "./change-hub";
 
 import "./components/scene-components";

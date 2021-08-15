@@ -126,7 +126,7 @@ export function SharePopoverContainer({ scene, hubChannel }) {
       id: "camera",
       icon: VideoIcon,
       color: "accent5",
-      label: <FormattedMessage id="share-popover.source.camera" defaultMessage="Camera" />,
+      label: <FormattedMessage id="share-popover.source.camera" defaultMessage="Webcam" />,
       onSelect: toggleShareCamera,
       active: sharingSource === "camera"
     },

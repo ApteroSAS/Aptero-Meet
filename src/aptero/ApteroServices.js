@@ -1,5 +1,4 @@
 import { liveStream } from "./service/LiveStream";
-import { changeVideoService } from "./service/ChangeVideoService";
 import { networkService } from "./service/NetworkService";
 import { video360Service } from "./service/Video360Service";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
@@ -11,7 +10,6 @@ import "./component/media-limiter";
 import "./component/stop-share-screen-on-destroy";
 import "./component/release-media-frame-on-destroy";
 import { gltfExtensionProcessorService } from "./service/api/GLTFExtensionProcessorService";
-import { staticObjectManipulator } from "./service/StaticObjectManipulator";
 import { roomParameters } from "./service/RoomParameters";
 //import DistributedSoundSystem from "./service/DistributedSoundSystem";
 import SoundSystem from "./service/SoundSystem";
@@ -80,10 +78,8 @@ export class ApteroServices {
       await networkService.start();
       await new SoundSystem(networkService).start();
       //await new DistributedSoundSystem(networkService).start();
-      await changeVideoService.start();
       await liveStream.start();
-      //await microsoftService.start(); //TODO Warning produce lots of payload in hub-vendor
-      await staticObjectManipulator.start();
+      //await microsoftService.start(); //TODO Warning produce lots of payload in hub-vendor => lazy load this
       await video360Service.start();
       await gltfExtensionProcessorService.start();
       await this.thirdPersonService.start();
