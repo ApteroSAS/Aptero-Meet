@@ -26,8 +26,8 @@ function performDelayedReconnect(gainNode) {
 import * as sdpTransform from "sdp-transform";
 
 async function enableChromeAEC(gainNode) {
-  if(!["dialog-io-data-only","naf-socketio-adapter"].includes(getAdapterConfig().adapter)){
-    return true;
+  if(["dialog-io-data-only","naf-socketio-adapter"].includes(getAdapterConfig().adapter)){
+    return;//disabled aptero specific adapter
   }
   /**
    *  workaround for: https://bugs.chromium.org/p/chromium/issues/detail?id=687574
