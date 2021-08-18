@@ -16,6 +16,7 @@ import { EmojiPicker } from "./EmojiPicker";
 import styles from "./ChatSidebar.scss";
 import { formatMessageBody } from "../../utils/chat-message";
 import { FormattedMessage, useIntl, defineMessages, FormattedRelativeTime } from "react-intl";
+import { customFormatSystemMessage } from "../../aptero/react-components/ChatSidebarCustom";
 
 export function SpawnMessageButton(props) {
   return (
@@ -281,7 +282,8 @@ export function formatSystemMessage(entry, intl) {
     case "log":
       return intl.formatMessage(logMessages[entry.messageType], entry.props);
     default:
-      return null;
+      return customFormatSystemMessage(entry, intl)
+      //return null;
   }
 }
 

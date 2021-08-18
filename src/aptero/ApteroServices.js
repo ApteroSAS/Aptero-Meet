@@ -9,6 +9,7 @@ import "./component/rtmp-auto-refresh";
 import "./component/media-limiter";
 import "./component/stop-share-screen-on-destroy";
 import "./component/release-media-frame-on-destroy";
+import "./component/trigger";
 import { gltfExtensionProcessorService } from "./service/api/GLTFExtensionProcessorService";
 import { roomParameters } from "./service/RoomParameters";
 //import DistributedSoundSystem from "./service/DistributedSoundSystem";
