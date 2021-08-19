@@ -8,6 +8,10 @@ export class TwilioAdapter {
   twilioMicEnable = false;
   onTrack = () => {console.error("invalid")};
 
+  constructor(adapterUserListener) {
+    this.adapterUserListener = adapterUserListener;
+  }
+
   convertId(twilioCLientId) {
     return twilioCLientId.split("/")[0];
   }
@@ -43,7 +47,6 @@ export class TwilioAdapter {
     }
     this.videoTrack = null
   }
-
 
   enableMicrophone(enabled) {
     if (this.currentRoom) {
@@ -133,10 +136,11 @@ export class TwilioAdapter {
 
     const onTwilioParticipant = participant => {
       console.log(`Participant connected: ${participant.identity}`);
+      let peerId = this.convertId(participant.identity);
+      this.adapterUserListener.notifyUserEnter(peerId);
       participant.tracks.forEach(publication => {
         if (publication.isSubscribed) {
           const track = publication.track;
-          let peerId = this.convertId(participant.identity);
           track.track = track.mediaStreamTrack;
           this.onTrack(track,peerId,track.name);
         }
@@ -173,6 +177,7 @@ export class TwilioAdapter {
     this.currentRoom.on("participantDisconnected", participant => {
       console.log(`Participant disconnected: ${participant.identity}`);
       let peerId = this.convertId(participant.identity);
+      this.adapterUserListener.notifyUserLeave(peerId);
       this.onParticipantDisconnected(peerId);
     });
   }

@@ -2,6 +2,7 @@ import { debug as newDebug } from "debug";
 import { AgoraAdapter } from "./agora";
 import EventEmitter from "eventemitter3";
 import { ProtooHelper } from "./protoHelper";
+import AdapterUserListener from "./AdapterUserListener";
 
 // NOTE this adapter does not properly fire the onOccupantsReceived events since those are only needed for
 // data channels, which are not yet supported. To fire that event, this class would need to keep a list of
@@ -36,6 +37,7 @@ export default class NafTwilioAdapter extends EventEmitter {
     this.scene = null;
     this._serverParams = {};
     this._consumerStats = {};
+    this.adapterUserListener = new AdapterUserListener();
   }
 
   get consumerStats() {
@@ -114,7 +116,7 @@ export default class NafTwilioAdapter extends EventEmitter {
     this._forceTurn = forceTurn;
     this._iceTransportPolicy = iceTransportPolicy;
 
-    this.subAdapter = new AgoraAdapter();
+    this.subAdapter = new AgoraAdapter(this.adapterUserListener);
     this.subAdapter.setOnTrack((track, peerId,trackid)=>{
       //RemoteAudioTrack
       console.log(" Add consumer:",track);
@@ -431,6 +433,7 @@ export default class NafTwilioAdapter extends EventEmitter {
         this.emitRTCEvent("info", "Signaling", () => `[close]`);
       }
     }
+    this.adapterUserListener.disconnect();
   }
 
   kick(clientId, permsToken) {

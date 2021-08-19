@@ -588,7 +588,9 @@ class UIRoot extends Component {
 
   onRequestMicPermission = async () => {
     // TODO: Show an error state if getting the microphone permissions fails
-    await this.mediaDevicesManager.startLastUsedMicShare();
+    if (window.APP_CONFIG.adapterParams.adapter !== "none") {
+      await this.mediaDevicesManager.startLastUsedMicShare();
+    }
     this.beginOrSkipAudioSetup();
   };
 

@@ -46,6 +46,7 @@ AFRAME.registerComponent("avatar-audio-source", {
   createAudio: async function() {
     this.isCreatingAudio = true;
     const stream = await getMediaStream(this.el);
+    console.log("media stream obtained",stream,this.el)
     this.isCreatingAudio = false;
     const isRemoved = !this.el.parentNode;
     if (!stream || isRemoved) return;

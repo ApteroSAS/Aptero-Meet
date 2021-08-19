@@ -3,6 +3,7 @@ import protooClient from "protoo-client";
 import { debug as newDebug } from "debug";
 import EventEmitter from "eventemitter3";
 import { addIceServers,getAdapterConfig } from "./adapter-config";
+import AdapterUserListener from "./AdapterUserListener";
 
 // Used for VP9 webcam video.
 //const VIDEO_KSVC_ENCODINGS = [{ scalabilityMode: "S3T3_KEY" }];
@@ -62,6 +63,7 @@ export default class DialogAdapter extends EventEmitter {
     this.scene = null;
     this._serverParams = {};
     this._consumerStats = {};
+    this.adapterUserListener = new AdapterUserListener();
   }
 
   get consumerStats() {
@@ -355,7 +357,7 @@ export default class DialogAdapter extends EventEmitter {
 
             throw err;
           }
-
+          this.adapterUserListener.notifyUserEnter(peerId);
           break;
         }
       }
@@ -372,7 +374,7 @@ export default class DialogAdapter extends EventEmitter {
         case "peerClosed": {
           const { peerId } = notification.data;
           this.closePeer(peerId);
-
+          this.adapterUserListener.notifyUserLeave(peerId);
           break;
         }
 
@@ -956,6 +958,7 @@ export default class DialogAdapter extends EventEmitter {
         this.emitRTCEvent("info", "Signaling", () => `[close]`);
       }
     }
+    this.adapterUserListener.disconnect();
   }
 
   kick(clientId, permsToken) {

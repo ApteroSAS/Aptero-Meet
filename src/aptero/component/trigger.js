@@ -1,4 +1,4 @@
-import { changeAudioSubRoom } from "../service/change-audio-sub-room";
+import { changeAudioSubRoom, popAudioSubRoom, pushAudioSubRoom } from "../service/change-audio-sub-room";
 
 const sizeVec = new THREE.Vector3();
 const boundingBoxWorldPositionVec = new THREE.Vector3();
@@ -49,11 +49,9 @@ AFRAME.registerComponent("trigger", {
       const collidingLastFrame = this.collidingLastFrame[object3D.id];
 
       if (isColliding && !collidingLastFrame) {
-        console.log('entered',this.data.enterValue)
-        await changeAudioSubRoom(this.data.enterValue)
+        await pushAudioSubRoom(this.data.enterValue);
       } else if (!isColliding && collidingLastFrame) {
-        console.log('exited',this.data.leaveValue)
-        await changeAudioSubRoom(this.data.leaveValue)
+        await popAudioSubRoom();
       }
 
       this.collidingLastFrame[object3D.id] = isColliding;
