@@ -26,7 +26,7 @@ function performDelayedReconnect(gainNode) {
 import * as sdpTransform from "sdp-transform";
 
 async function enableChromeAEC(gainNode) {
-  if(["dialog-io-data-only","naf-socketio-adapter"].includes(getAdapterConfig().adapter)){
+  if(["dialog-io-data-only","naf-socketio-adapter","none"].includes(getAdapterConfig().adapter)){
     return;//disabled aptero specific adapter
   }
   /**
@@ -48,6 +48,7 @@ async function enableChromeAEC(gainNode) {
   const loopbackDestination = context.createMediaStreamDestination();
   const outboundPeerConnection = new RTCPeerConnection();
   const inboundPeerConnection = new RTCPeerConnection();
+  console.error("new peer connection")
 
   const onError = e => {
     console.error("enableChromeAEC: RTCPeerConnection loopback initialization error", e);
