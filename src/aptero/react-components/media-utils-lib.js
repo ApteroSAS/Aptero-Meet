@@ -47,7 +47,7 @@ export const remoteWebBrowser = async (screenElement,texture,mediaData) => {
     remoteScreenSessionId: remoteScreenSessionId,
     screenSizeX:metaData.width,
     screenSizeY:metaData.height,
-    startUrl:metaData.startUrl
+    metaData:metaData
   };
   let rfb = await remoteControlServiceV2.getScreen(screenElement,connexionInfo);
   remoteControlServiceV2.registerEventOnElement(screenElement);

@@ -43,9 +43,12 @@ export class RemoteControlServiceV2 {
             remoteScreenSessionId: remoteScreenSessionId,
             screenSizeX:width,
             screenSizeY:height,
-            startUrl:startUrl
+            metaData:metaData
         }*/
-
+        let password = null;
+        try {
+            password = data.metaData.imageParams.PASSWORD;
+        }catch (er){ /* ignore error */ }
         this.screenSize[data.remoteScreenSessionId]={
             width:data.screenSizeX,
             height:data.screenSizeY
@@ -55,7 +58,7 @@ export class RemoteControlServiceV2 {
             axios.post(propertiesService.PROTOCOL + propertiesService.REMOTE_VM_SERVICE.url + "/service/remote/orchestrator/create", data).then(async resp => {
                 resp=resp.data;
                 resp.url = "wss://" + propertiesService.REMOTE_VM_SERVICE.url+"/reverse/"+resp.ip+"/"+resp.port+"/websockify";
-                const rfb = await this.createRBF(screenElement.children[0],resp.url);
+                const rfb = await this.createRBF(screenElement.children[0],resp.url,{ credentials: { password: password } });
                 this.remoteScreenSessionRfbMap[data.remoteScreenSessionId] = rfb;
                 resolve(rfb);
             }).catch(reason => {
@@ -64,9 +67,9 @@ export class RemoteControlServiceV2 {
         })
     }
 
-    async createRBF(el,url){
+    async createRBF(el,url,options){
         let RFB = (await import('@novnc/novnc/core/rfb')).default;
-        let rfb = new RFB(el, url);
+        let rfb = new RFB(el, url,options);
         await new Promise((resolve, reject) => {
             let desktopName="ERROR";
             rfb.addEventListener("connect",  ()=>{

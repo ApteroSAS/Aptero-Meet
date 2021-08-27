@@ -46,16 +46,11 @@ AFRAME.registerComponent("avatar-audio-source", {
   createAudio: async function() {
     this.isCreatingAudio = true;
     const stream = await getMediaStream(this.el);
-    console.log("media stream obtained",stream,this.el)
     this.isCreatingAudio = false;
     const isRemoved = !this.el.parentNode;
     if (!stream || isRemoved) return;
 
     const audioListener = this.el.sceneEl.audioListener;
-    this.data.distanceModel= window.getPreferences("distanceModel") || "inverse";//Aptero patch for deactived spatial sound
-    this.data.refDistance= window.getPreferences("refDistance") || 1;//Aptero patch for deactived spatial sound
-    this.data.maxDistance = window.getPreferences("maxDistance") || 10000;//Aptero patch for deactived spatial sound
-    this.data.rolloffFactor = window.getPreferences("rolloffFactor") || 0.000001;//Aptero patch for deactived spatial sound
     const audio = new THREE.PositionalAudio(audioListener);
     this.el.components["audio-params"].setAudio(audio);
 

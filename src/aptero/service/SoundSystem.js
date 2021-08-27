@@ -32,22 +32,26 @@ export default class SoundSystem {
             head = element;
           }
         }
-        if (head) {
-          let audioComponent = head.components["avatar-audio-source"];
-          if (audioComponent) {
-            let config = {
-              rolloffFactor: body.rolloffFactor || audioComponent.data.rolloffFactor,
-              distanceModel: body.distanceModel || audioComponent.data.distanceModel,
-              maxDistance: body.maxDistance || audioComponent.data.maxDistance,
-              refDistance: body.refDistance || audioComponent.data.refDistance
-            };
-            head.setAttribute("avatar-audio-source", "rolloffFactor: " + config.rolloffFactor + ";" + "distanceModel: " + config.distanceModel + ";" + "maxDistance: " + config.maxDistance + ";" + "refDistance: " + config.refDistance + ";");
-            console.log(audioComponent);
-          }
-        }
+        this.updateAvatarAudioSourceSound(head,body)
 
       });
     });
 
+  }
+
+  updateAvatarAudioSourceSound(head,body){
+    if (head) {
+      let audioComponent = head.components["audio-params"];
+      if (audioComponent) {
+        let config = {
+          rolloffFactor: body.rolloffFactor || audioComponent.data.rolloffFactor,
+          distanceModel: body.distanceModel || audioComponent.data.distanceModel,
+          maxDistance: body.maxDistance || audioComponent.data.maxDistance,
+          refDistance: body.refDistance || audioComponent.data.refDistance
+        };
+        head.setAttribute("audio-params", "rolloffFactor: " + config.rolloffFactor + ";" + "distanceModel: " + config.distanceModel + ";" + "maxDistance: " + config.maxDistance + ";" + "refDistance: " + config.refDistance + ";");
+        console.log(audioComponent);
+      }
+    }
   }
 }
