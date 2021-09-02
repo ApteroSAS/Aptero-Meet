@@ -68,7 +68,7 @@
     "@microsoft/microsoft-graph-client": "^2.0.0",
     "@microsoft/teams-js": "^1.6.0",
     "@mozillareality/easing-functions": "^0.1.1",
-    "@mozillareality/three-batch-manager": "github:mozillareality/three-batch-manager#0696524807536840eba156e84feef78e83fb297a",
+    "@mozillareality/three-batch-manager": "github:mozillareality/three-batch-manager",
     "@novnc/novnc": "^1.2.0",
     "@popperjs/core": "^2.4.4",
     "aframe": "github:mozillareality/aframe#560c38311081fc5490931c369223f7e4da9f7f76",
