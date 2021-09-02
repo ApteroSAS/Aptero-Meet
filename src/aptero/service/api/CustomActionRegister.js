@@ -1,7 +1,6 @@
 import { networkService } from "../NetworkService";
 import {
   pinEntity,
-  spawnMediaInfrontOfPlayer,
   spawnMedia,
   unpinEntity
 } from "../../util/Media";
@@ -10,8 +9,6 @@ import { ActionAnimationController } from "./ActionAnimationController";
 import { roomController } from "./RoomController";
 import { mediaViewEventEmitter } from "../ChangeVideoService";
 import axios from "axios";
-import { applyPersistentSync } from "../../../utils/permissions-utils";
-import { removeNetworkedObject } from "../../../utils/removeNetworkedObject";
 
 export class CustomActionRegister {
   actions = {};

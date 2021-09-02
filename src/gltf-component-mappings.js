@@ -4,6 +4,7 @@ import { getSanitizedComponentMapping } from "./utils/component-mappings";
 import { TYPE, SHAPE, FIT } from "three-ammo/constants";
 const COLLISION_LAYERS = require("./constants").COLLISION_LAYERS;
 import { AudioType, SourceType } from "./components/audio-params";
+import { register, registerCustomGLTFModelPlusComponents } from "./aptero/component/GLTFModelPlusRegistrer";
 
 function registerRootSceneComponent(componentName) {
   AFRAME.GLTFModelPlus.registerComponent(componentName, componentName, (el, componentName, componentData) => {
@@ -509,3 +510,5 @@ AFRAME.GLTFModelPlus.registerComponent(
 AFRAME.GLTFModelPlus.registerComponent("audio-zone", "audio-zone", (el, componentName, componentData) => {
   el.setAttribute(componentName, { ...componentData });
 });
+
+registerCustomGLTFModelPlusComponents();

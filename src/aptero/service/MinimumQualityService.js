@@ -61,6 +61,9 @@ class FpsBalancer {
   }
 
   tick() {
+    if(window.APP.store.state.preferences.disableAutoPixelRatio){
+      return;
+    }
     try {
       if (!this.balancing) {
         return;

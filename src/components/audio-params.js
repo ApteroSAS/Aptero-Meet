@@ -25,7 +25,7 @@ export const DistanceModelType = {
 export const AvatarAudioDefaults = Object.freeze({
   AUDIO_TYPE: AudioType.PannerNode,
   DISTANCE_MODEL: DistanceModelType.Inverse,
-  ROLLOFF_FACTOR: 2,
+  ROLLOFF_FACTOR: 0.000001,
   REF_DISTANCE: 1,
   MAX_DISTANCE: 10000,
   INNER_ANGLE: 180,
@@ -122,13 +122,13 @@ AFRAME.registerComponent("audio-params", {
         positionZ: {
           value: 0
         },
-        distanceModel: AvatarAudioDefaults.DISTANCE_MODEL,
-        maxDistance: AvatarAudioDefaults.MAX_DISTANCE,
-        refDistance: AvatarAudioDefaults.REF_DISTANCE,
-        rolloffFactor: AvatarAudioDefaults.ROLLOFF_FACTOR,
-        coneInnerAngle: AvatarAudioDefaults.INNER_ANGLE,
-        coneOuterAngle: AvatarAudioDefaults.OUTER_ANGLE,
-        coneOuterGain: AvatarAudioDefaults.OUTER_GAIN
+        distanceModel: window.getPreferences("distanceModel") || AvatarAudioDefaults.DISTANCE_MODEL,
+        rolloffFactor: window.getPreferences("rolloffFactor") || AvatarAudioDefaults.ROLLOFF_FACTOR,
+        refDistance: window.getPreferences("refDistance") || AvatarAudioDefaults.REF_DISTANCE,
+        maxDistance: window.getPreferences("maxDistance") || AvatarAudioDefaults.MAX_DISTANCE,
+        coneInnerAngle: window.getPreferences("coneInnerAngle") || AvatarAudioDefaults.INNER_ANGLE,
+        coneOuterAngle: window.getPreferences("coneOuterAngle") || AvatarAudioDefaults.OUTER_ANGLE,
+        coneOuterGain: window.getPreferences("coneOuterGain") || AvatarAudioDefaults.OUTER_GAIN,
       }
     };
     this.avatarRigOrientation = new THREE.Vector3(0, 0, -1);

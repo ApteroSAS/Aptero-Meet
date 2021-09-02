@@ -11,18 +11,7 @@ let profile = null;
 //https://github.com/networked-aframe/networked-aframe
 const adapterList = ["wseasyrtc","easyrtc","janus","socketio","webrtc","Firebase","uWS","dialog","dialog-io","agora","twilio","none","dialog-io-data-only"];
 
-export async function choseAdapter() {
-  let adapter = defaultAdapter;
-  //compute right adapter
-  if (configs.APP_CONFIG.adapterParams.adapter) {
-    adapter = configs.APP_CONFIG.adapterParams.adapter;
-  }
-  if(new URL(window.location.href).searchParams.get("offline2")){
-    adapter="none";
-  }
-  if(adapter==="default"){
-    adapter = defaultAdapter;
-  }
+export async function choseAdapter(adapter) {
   configs.APP_CONFIG.adapterParams.adapter = adapter;
   //fetch profile
   try {
@@ -41,8 +30,24 @@ export async function choseAdapter() {
   return adapter;
 }
 
+export async function choseAdapterAuto() {
+  let adapter = defaultAdapter;
+  //compute right adapter
+  if (configs.APP_CONFIG.adapterParams.adapter) {
+    adapter = configs.APP_CONFIG.adapterParams.adapter;
+  }
+  if(new URL(window.location.href).searchParams.get("offline2")){
+    adapter="none";
+  }
+  if(adapter==="default"){
+    adapter = defaultAdapter;
+  }
+
+  return await choseAdapter(adapter);
+}
+
 export async function adapterFactory(){
-  const adapter = await choseAdapter();
+  const adapter = await choseAdapterAuto();
   const module = await lazyLoad(adapter);
   return new module.default();
 }

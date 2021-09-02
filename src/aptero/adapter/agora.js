@@ -5,6 +5,10 @@ export class AgoraAdapter {
 
   currentRoom = null;
 
+  constructor(adapterUserListener) {
+    this.adapterUserListener = adapterUserListener;
+  }
+
   convertId(clientid) {
     return clientid.split("/")[0];
   }
@@ -99,6 +103,8 @@ export class AgoraAdapter {
     this.currentRoom.on("user-joined", (participant, mediaType) => {
       //https://docs.agora.io/en/Voice/API%20Reference/web_ng/interfaces/iagorartcremoteuser.html
       console.log(`Participant connected: ${participant.uid}`);
+      let peerId = this.convertId(participant.uid);
+      this.adapterUserListener(peerId);
       onParticipant(participant, mediaType);
     });
     this.currentRoom.on("user-published", (participant, mediaType) => {
@@ -113,6 +119,7 @@ export class AgoraAdapter {
     this.currentRoom.on("user-left", participant => {
       console.log(`Participant disconnected: ${participant.identity}`);
       let peerId = this.convertId(participant.uid);
+      this.adapterUserListener(peerId);
       this.onParticipantDisconnected(peerId);
     });
   }
