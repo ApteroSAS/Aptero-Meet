@@ -48,7 +48,6 @@ async function enableChromeAEC(gainNode) {
   const loopbackDestination = context.createMediaStreamDestination();
   const outboundPeerConnection = new RTCPeerConnection();
   const inboundPeerConnection = new RTCPeerConnection();
-  console.error("new peer connection")
 
   const onError = e => {
     console.error("enableChromeAEC: RTCPeerConnection loopback initialization error", e);

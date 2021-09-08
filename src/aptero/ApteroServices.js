@@ -21,7 +21,7 @@ import "./adapter/adapter-config";
 import { ThirdPersonService } from "./service/ThirdPersonService";
 import {aptLogger} from "./service/log/Logger";
 import { minimumQualityService } from "./service/MinimumQualityService";
-import { notifySceneEntered, startSelfTest, testTick } from "./service/SelfTestService.loader";
+import { testServiceNotifySceneEntered, startSelfTest, testTick } from "./service/SelfTestService.loader";
 import { setlistenerEndShareVideo } from "./adapter/adapter-config";
 import { remoteControlServiceV2 } from "./service/RemoteControlServiceV2";
 import { wait } from "./util/AsyncWaiter";
@@ -117,7 +117,7 @@ export class ApteroServices {
 
   notifySceneEntered() {
     minimumQualityService.initialCheckFinished();
-    notifySceneEntered();
+    testServiceNotifySceneEntered();
     setTimeout(()=>{
       this.thirdPersonService.storeUpdated();
       sendIframeMessage("entered",{});
