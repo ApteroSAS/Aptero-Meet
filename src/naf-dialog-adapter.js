@@ -18,10 +18,10 @@ import EventEmitter from "eventemitter3";
 
 // Based upon mediasoup-demo RoomClient
 
-const debug = newDebug("naf-dialog-adapter:debug");
+//const debug = newDebug("naf-dialog-adapter:debug");
 //const warn = newDebug("naf-dialog-adapter:warn");
-const error = newDebug("naf-dialog-adapter:error");
-const info = newDebug("naf-dialog-adapter:info");
+//const error = newDebug("naf-dialog-adapter:error");
+//const info = newDebug("naf-dialog-adapter:info");
 
 const PC_PROPRIETARY_CONSTRAINTS = {
   optional: [{ googDscp: true }]

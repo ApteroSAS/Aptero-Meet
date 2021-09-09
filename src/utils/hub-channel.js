@@ -422,6 +422,7 @@ export default class HubChannel extends EventTarget {
     this.channel.push("block", { session_id: sessionId });
     this._blockedSessionIds.add(sessionId);
   };
+  
 
   unhide = sessionId => {
     if (!this._blockedSessionIds.has(sessionId)) return;
