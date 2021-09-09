@@ -7,12 +7,15 @@ import { Button } from "../input/Button";
 import { Column } from "../layout/Column";
 import styles from "./UserProfileSidebar.scss";
 import { FormattedMessage, useIntl } from "react-intl";
-
+import { fetchRandomDefaultAvatarId } from "../../utils/identity";
+import { rotateInPlaceAroundWorldUp, affixToWorldUp } from "../../utils/three-utils";
 export function UserProfileSidebar({
   className,
   displayName,
   identityName,
   avatarPreview,
+  avatarId,
+  userId,
   isSignedIn,
   canPromote,
   onPromote,
@@ -87,6 +90,32 @@ export function UserProfileSidebar({
             <FormattedMessage id="user-profile-sidebar.hide-button" defaultMessage="Hide" />
           )}
         </Button>
+        <Button type="button" preset="basic"  onClick={() => {
+          var a=NAF.connection.entities["entities"];
+          var entity1,entity2;
+          var userId2=NAF.clientId;
+        
+            for(var key in a)
+            {
+              var entity = a[key];
+              if(entity.components.networked.attrValue.creator!=null)
+              {
+                if(entity.components.networked.attrValue.creator.toString()==userId.toString())
+                {
+                  entity1=entity;
+                }
+                else if(entity.components.networked.attrValue.creator.toString()==userId2.toString())
+                {
+                  entity2=entity;
+                }
+              }
+
+            }
+            entity2.object3D.position.set(entity1.object3D.position.x,entity1.object3D.position.y,entity1.object3D.position.z-0.7);
+            useGoToSelectedAvatar();
+        }}>
+          <FormattedMessage id="avatar-teleport" defaultMessage="teleport" />
+        </Button>
         {canMute && (
           <Button preset="cancel" onClick={onMute}>
             <FormattedMessage id="user-profile-sidebar.mute-button" defaultMessage="Mute" />
@@ -107,6 +136,8 @@ UserProfileSidebar.propTypes = {
   displayName: PropTypes.string,
   identityName: PropTypes.string,
   avatarPreview: PropTypes.node,
+  avatarId:PropTypes.string,
+  userId:PropTypes.string,
   isSignedIn: PropTypes.bool,
   canPromote: PropTypes.bool,
   onPromote: PropTypes.func,
@@ -122,3 +153,21 @@ UserProfileSidebar.propTypes = {
   onBack: PropTypes.func,
   onClose: PropTypes.func
 };
+function useGoToSelectedAvatar() {
+  const targetMatrix = new THREE.Matrix4();
+  const translation = new THREE.Matrix4();
+  targetMatrix.copy(entity1.object3D.matrixWorld);
+  affixToWorldUp(targetMatrix, targetMatrix);
+  rotateInPlaceAroundWorldUp(targetMatrix, Math.PI, targetMatrix);
+
+  document.querySelector('a-scene').systems["hubs-systems"].characterController.enqueueWaypointTravelTo(targetMatrix, true, {
+    willDisableMotion: false,
+    willDisableTeleporting: false,
+    snapToNavMesh: false,
+    willMaintainInitialOrientation: false
+  });
+  
+
+
+
+}

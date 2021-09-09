@@ -105,8 +105,44 @@ export function usePinObject(hubChannel, scene, object) {
   return { canPin, isPinned, togglePinned, pinObject, unpinObject };
 }
 
+
 export function useGoToSelectedObject(scene, object) {
   const goToSelectedObject = useCallback(
+    () => {
+      const viewingCamera = document.getElementById("viewing-camera");
+      const targetMatrix = new THREE.Matrix4();
+      const translation = new THREE.Matrix4();
+      viewingCamera.object3DMap.camera.updateMatrices();
+      targetMatrix.copy(viewingCamera.object3DMap.camera.matrixWorld);
+      targetMatrix.copy(viewingCamera.object3DMap.camera.matrixWorld);
+      affixToWorldUp(targetMatrix, targetMatrix);
+      translation.makeTranslation(0, -1.6, 0.15);
+      targetMatrix.multiply(translation);
+      rotateInPlaceAroundWorldUp(targetMatrix, Math.PI, targetMatrix);
+
+      scene.systems["hubs-systems"].characterController.enqueueWaypointTravelTo(targetMatrix, true, {
+        willDisableMotion: false,
+        willDisableTeleporting: false,
+        snapToNavMesh: false,
+        willMaintainInitialOrientation: false
+      });
+      
+    },
+    
+    [scene]
+    
+  );
+
+  const uiRoot = useMemo(() => document.getElementById("ui-root"), []);
+  const isSpectating = uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("isGhost");
+  const canGoTo = !isSpectating && !isPlayer(object);
+ 
+  return { canGoTo, goToSelectedObject };
+}
+
+//export function useGoToSelectedAvatar(display) {
+  /*
+  const goToSelectedAvatar = useCallback(
     () => {
       const viewingCamera = document.getElementById("viewing-camera");
       const targetMatrix = new THREE.Matrix4();
@@ -128,13 +164,11 @@ export function useGoToSelectedObject(scene, object) {
     [scene]
   );
 
-  const uiRoot = useMemo(() => document.getElementById("ui-root"), []);
-  const isSpectating = uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("isGhost");
-  const canGoTo = !isSpectating && !isPlayer(object);
 
-  return { canGoTo, goToSelectedObject };
+return {  goToSelectedAvatar };
+console.log(display);
 }
-
+*/
 export function useRemoveObject(hubChannel, scene, object) {
   const removeObject = useCallback(
     () => {

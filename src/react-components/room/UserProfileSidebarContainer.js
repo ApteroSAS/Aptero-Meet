@@ -120,6 +120,8 @@ export function UserProfileSidebarContainer({
       displayName={displayName}
       identityName={identityName}
       avatarPreview={<img src={avatarThumbnailUrl} />}
+      avatarId={avatarId}
+      userId={userId}
       isSignedIn={isSignedIn}
       canPromote={mayAddOwner}
       onPromote={addOwner}
@@ -134,6 +136,7 @@ export function UserProfileSidebarContainer({
       showBackButton={showBackButton}
       onClose={onClose}
       onBack={onBack}
+      
     />
   );
 }

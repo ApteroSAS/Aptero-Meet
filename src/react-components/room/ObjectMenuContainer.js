@@ -88,8 +88,8 @@ function ObjectMenuItems({ hubChannel, scene, activeObject, deselectObject, onGo
         disabled={!canGoTo}
         onClick={() => {
           goToSelectedObject();
-          deselectObject();
-          onGoToObject();
+          //deselectObject();
+          //onGoToObject();
         }}
       >
         <GoToIcon />
