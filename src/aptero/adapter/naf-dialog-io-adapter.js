@@ -4,7 +4,6 @@ import { debug as newDebug } from "debug";
 import EventEmitter from "eventemitter3";
 import { addIceServers,getAdapterConfig } from "./adapter-config";
 import AdapterUserListener from "./AdapterUserListener";
-import { wait } from "../util/AsyncWaiter";
 
 // Used for VP9 webcam video.
 //const VIDEO_KSVC_ENCODINGS = [{ scalabilityMode: "S3T3_KEY" }];
@@ -318,7 +317,6 @@ export default class DialogAdapter extends EventEmitter {
           } = request.data;
 
           try {
-            await wait(()=>{this._recvTransport});
             const consumer = await this._recvTransport.consume({
               id,
               producerId,
