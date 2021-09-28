@@ -65,11 +65,13 @@ import {
   TextureLoader,
   TriangleFanDrawMode,
   TriangleStripDrawMode,
+  TrianglesDrawMode,
   VectorKeyframeTrack,
   VertexColors,
   sRGBEncoding
 } from "three";
 
+import { BufferGeometryUtils } from "three/examples/jsm/utils/BufferGeometryUtils";
 import { MaterialsUnlitLoaderExtension } from "./extensions/loader/MaterialsUnlitLoaderExtension";
 import { LightmapLoaderExtension } from "./extensions/loader/LightmapLoaderExtension";
 
@@ -1165,11 +1167,14 @@ class GLTFLoader {
       this.stats.vertices += stats.vertices;
 
       if (mesh.isMesh) {
+        //mesh.BufferGeometry = BufferGeometryUtils.toTrianglesDrawMode(mesh.BufferGeometry, TrianglesDrawMode);
+        mode = WEBGL_CONSTANTS.TRIANGLES;
+        /*
         if (primitive.mode === WEBGL_CONSTANTS.TRIANGLE_STRIP) {
           mesh.drawMode = TriangleStripDrawMode;
         } else if (primitive.mode === WEBGL_CONSTANTS.TRIANGLE_FAN) {
           mesh.drawMode = TriangleFanDrawMode;
-        }
+        }*/
       }
 
       if (mesh.isSkinnedMesh === true && !mesh.geometry.attributes.skinWeight.normalized) {
@@ -1256,7 +1261,7 @@ class GLTFLoader {
 
     const assignAttributeAccessor = (accessorIndex, attributeName) => {
       return this.getDependency("accessor", accessorIndex).then(function(accessor) {
-        geometry.addAttribute(attributeName, accessor);
+        geometry.setAttribute(attributeName, accessor);
       });
     };
 
@@ -1637,7 +1642,7 @@ class GLTFLoader {
     // workarounds for mesh and geometry
 
     if (material.aoMap && geometry.attributes.uv2 === undefined && geometry.attributes.uv !== undefined) {
-      geometry.addAttribute("uv2", new BufferAttribute(geometry.attributes.uv.array, 2));
+      geometry.setAttribute("uv2", new BufferAttribute(geometry.attributes.uv.array, 2));
     }
 
     mesh.material = material;

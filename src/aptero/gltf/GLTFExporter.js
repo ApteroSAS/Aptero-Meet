@@ -31,11 +31,14 @@ import {
   Scene,
   TriangleFanDrawMode,
   TriangleStripDrawMode,
+  TrianglesDrawMode,
   Vector3,
   Material,
   Texture,
   Object3D
 } from "three";
+
+import { BufferGeometryUtils } from "three/examples/jsm/utils/BufferGeometryUtils";
 
 import { LightmapExporterExtension } from "./extensions/exporter/LightmapExporterExtension";
 
@@ -898,6 +901,9 @@ class GLTFExporter {
         geometry = geometryTemp;
       }
 
+      //mesh.BufferGeometry = BufferGeometryUtils.toTrianglesDrawMode(mesh.BufferGeometry,TrianglesDrawMode);
+      mode = WEBGL_CONSTANTS.TRIANGLES;
+/*
       if (mesh.drawMode === TriangleFanDrawMode) {
         console.warn("GLTFExporter: TriangleFanDrawMode and wireframe incompatible.");
         mode = WEBGL_CONSTANTS.TRIANGLE_FAN;
@@ -906,6 +912,8 @@ class GLTFExporter {
       } else {
         mode = mesh.material.wireframe ? WEBGL_CONSTANTS.LINES : WEBGL_CONSTANTS.TRIANGLES;
       }
+*/
+
     }
 
     const gltfMesh = {};
@@ -928,7 +936,7 @@ class GLTFExporter {
     if (originalNormal !== undefined && !this.isNormalizedNormalAttribute(originalNormal)) {
       console.warn("THREE.GLTFExporter: Creating normalized normal attribute from the non-normalized one.");
 
-      geometry.addAttribute("normal", this.createNormalizedNormalAttribute(originalNormal));
+      geometry.setAttribute("normal", this.createNormalizedNormalAttribute(originalNormal));
     }
 
     // @QUESTION Detect if .vertexColors = THREE.VertexColors?
@@ -968,7 +976,7 @@ class GLTFExporter {
       }
     }
 
-    if (originalNormal !== undefined) geometry.addAttribute("normal", originalNormal);
+    if (originalNormal !== undefined) geometry.setAttribute("normal", originalNormal);
 
     // Skip if no exportable attributes found
     if (Object.keys(attributes).length === 0) {
