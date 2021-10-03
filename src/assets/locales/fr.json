@@ -563,5 +563,6 @@
   "webvr-unsupported-modal.message": "WebVR n'est pas compatible avec ce navigateur, merci d'utiliser Firefox pour vous connecter avec Oculus ou SteamVR.",
     "webvr-unsupported-modal.title": "Entrer en VR",
   "webvr-unsupported-modal.webvr-rocks-link": "Pour consulter la liste des navigateurs avec support expérimental VR, visitez la page <a>WebVR Rocks</a>.",
-    "whats-new-page.title": "Quoi de neuf"
+    "whats-new-page.title": "Quoi de neuf",
+   "avatar-teleport":"teleporter"
 }

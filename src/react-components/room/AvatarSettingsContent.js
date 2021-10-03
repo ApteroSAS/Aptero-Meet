@@ -39,6 +39,7 @@ export function AvatarSettingsContent({
         <Button type="button" preset="basic" onClick={onChangeAvatar}>
           <FormattedMessage id="avatar-settings-content.change-avatar-button" defaultMessage="Change Avatar" />
         </Button>
+    
       </div>
       <AcceptButton preset="accept" type="submit" />
     </Column>

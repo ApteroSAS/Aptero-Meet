@@ -10,7 +10,7 @@ export async function startSelfTest() {
   }
 }
 
-export async function notifySceneEntered() {
+export async function testServiceNotifySceneEntered() {
   if (testMode) {
     const selfTestService = (await import("../service/SelfTestService.module"));
     selfTestService.selfTestService.notifySceneEntered();

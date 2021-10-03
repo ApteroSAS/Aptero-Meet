@@ -51,7 +51,8 @@ export async function getAvatarThumbnailUrl(avatarId) {
     case AVATAR_TYPES.SKINNABLE:
       return fetchAvatar(avatarId).then(avatar => avatar.files.thumbnail);
     default:
-      return configs.PROTOCOL+configs.RETICULUM_SERVER+"/bots/avatar_unavailable.png";
+      return null
+      //return configs.PROTOCOL+configs.RETICULUM_SERVER+"/bots/avatar_unavailable.png";
   }
 }
 

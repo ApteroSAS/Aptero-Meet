@@ -8,7 +8,7 @@ export class LiveStreamService {
   constructor(){}
 
   async start(){
-    //if no stream create one 360 and one 2d
+    /*//if no stream create one 360 and one 2d
     {
       try {
         let retData = await this.listStream(true);
@@ -30,7 +30,7 @@ export class LiveStreamService {
         //ignore this error
         //401 can happens in case the user is not logged
       }
-    }
+    }*/
   }
 
   secureUrl(url,data){
