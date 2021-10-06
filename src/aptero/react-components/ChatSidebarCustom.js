@@ -12,6 +12,14 @@ export function customFormatSystemMessage(entry, intl) {
         />
       );
     }
+    case "performance_impact_detected": {
+      return (
+        <FormattedMessage
+          id="chat-sidebar-custom.system-message.performance_impact_detected"
+          defaultMessage="slt"
+        ><h1>Blue</h1></FormattedMessage>
+      );
+    }
     default:
       return null;
   }

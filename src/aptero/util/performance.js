@@ -3,7 +3,7 @@ import { PointLight, DirectionalLight, SpotLight, Texture } from "three";
 import { forEachMaterial } from "../../utils/material-utils";
 import { bytesToSize } from "./spoke-utils";
 
-function calculateUncompressedMipmapedTextureSize(width, height) {
+export function calculateUncompressedMipmapedTextureSize(width, height) {
   if (width === 1 && height === 1) {
     return 4;
   }
@@ -23,7 +23,7 @@ function isLight(components) {
   return components && (components["directional-light"] || components["point-light"] || components["spot-light"]);
 }
 
-function isLargeImage(width, height) {
+export function isLargeImage(width, height) {
   return width * height > 2048 * 2048;
 }
 
