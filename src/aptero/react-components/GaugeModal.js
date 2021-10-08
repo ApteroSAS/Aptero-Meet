@@ -1,13 +1,11 @@
-import React, { Component } from "react";
-import cloneObject3D from "../util/cloneObject3D";
-import {
-  calculateGLTFPerformanceScores,
-  calculateUncompressedMipmapedTextureSize,
-  isLargeImage
-} from "../util/performance";
-import EventEmitter from "eventemitter3";
-import { GLTFExporter } from "../gltf/GLTFExporter";
-import MessageDispatch from "../../message-dispatch";
+import React, { Component, useContext } from "react";
+import { calculateUncompressedMipmapedTextureSize, isLargeImage } from "../util/performance";
+import { Modal } from "./../../react-components/modal/Modal";
+import { Center } from "./../../react-components/layout/Center";
+import { CloseButton } from "../../react-components/input/CloseButton";
+import styles from "./GaugeModal.scss";
+import styled, { ThemeContext } from "styled-components";
+import PropTypes from "prop-types";
 
 function calculateImageVRAM(image) {
   if (!image) {
@@ -41,10 +39,7 @@ function calcPerformance(sceneEl) {
     lights = null,
     lightsScore = null,
     uniqueMaterials = null,
-    materialsScore = null,
-    fileSize = null,
-    fileSizeScore = null,
-    clonedscene = null;
+    materialsScore = null;
 
   const jsonscene = sceneEl.object3D.toJSON();
 
@@ -55,7 +50,7 @@ function calcPerformance(sceneEl) {
   console.dir(sceneEl.renderer.state);
 */
 
-  clonedscene = cloneObject3D(sceneEl.object3D, true);
+  //clonedscene = cloneObject3D(sceneEl.object3D, true);
   //console.log(clonedscene);
 
   // Calculate Scores
@@ -155,37 +150,232 @@ function calcPerformance(sceneEl) {
   };
 }
 
+const ColoredText = styled.span`
+  color: ${props => props.color};
+`;
+
+const PerformanceItemContainer = styled.li`
+  display: flex;
+  min-height: 100px;
+  background-color: ${props => props.theme.toolbar};
+  border: 1px solid ${props => props.theme.panel};
+  border-radius: 4px;
+  margin: 4px;
+  color: white;
+  max-width: 560px;
+
+  & > :first-child {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100px;
+  }
+
+  & > :last-child {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 12px;
+    border-left: 1px solid ${props => props.theme.panel2};
+  }
+
+  h5 {
+    font-size: 20px;
+  }
+
+  h6 {
+    font-size: 16px;
+  }
+
+  a {
+    white-space: nowrap;
+    color: ${props => props.theme.blue};
+  }
+
+  p {
+    margin: 0;
+  }
+`;
+
+function PerformanceCheckItem({ scoreTxt, scoreColor, title, description, learnMoreUrl, children }) {
+  return (
+    <PerformanceItemContainer>
+      <div>
+        <ColoredText as="h5" color={scoreColor}>
+          {scoreTxt}
+        </ColoredText>
+      </div>
+      <div>
+        <h6>
+          {title}: {children}
+        </h6>
+        <p>
+          {description}{" "}
+          <a rel="noopener noreferrer" target="_blank" href={learnMoreUrl}>
+            Learn More
+          </a>
+        </p>
+      </div>
+    </PerformanceItemContainer>
+  );
+}
+
+PerformanceCheckItem.propTypes = {
+  score: PropTypes.string.isRequired,
+  scoreColor: PropTypes.string.isRequired,
+  title: PropTypes.string.isRequired,
+  children: PropTypes.node,
+  description: PropTypes.string.isRequired,
+  learnMoreUrl: PropTypes.string.isRequired
+};
+
+export function getStyle(){
+
+  let theme = useContext(ThemeContext);
+
+  return  {
+    Low: theme.green,
+    Medium: theme.yellow,
+    High: theme.red
+  }
+}
+
 export default class GaugeModal extends Component {
-  em = new EventEmitter();
   state = {
-    visible: false
+    visible: false,
+    performance: null,
+    scoreToColor: null
   };
+
   async scanForPerf(e) {
-    //console.log(e);
+    console.log(e);
 
     const performance = calcPerformance(this.sceneEl);
-/*
-    console.log(APP);
-    console.dir(this);
-    console.log(APP.messageDispatch);
-    console.dir(e.target);*/
-    APP.messageDispatch.receive({type:"performance_impact_detected"});
 
-    /*
+    console.log(performance);
 
-    audio_sub_room_changed
+    let worstScore = "Low";
+    let worstDomain = "None";
+    const scores = ["Low", "Medium", "High"];
 
-    await phxChannel.push("message", {body: room.preferencesOverride, type: "chat_events:sound_db_updated"});
-    await phxChannel.push("message", {body: "Sound Preferences Updated", type: "chat"});
+    //for each object property
+    for (const domain in performance) {
+      if (Object.hasOwnProperty.call(performance, domain)) {
+        const element = performance[domain];
 
-    */
+        //If the score is Higher, then the new score is the higher one
+        if (scores.indexOf(element.score) > scores.indexOf(worstScore)) {
+          worstScore = element.score;
+          worstDomain = domain;
+        }
+
+        //in the exception of textures, there is a second factor to look for
+        if (domain == "textures") {
+          if (scores.indexOf(element.largeTexturesScore) > scores.indexOf(worstScore)) {
+            worstScore = element.score;
+            worstDomain = domain;
+          }
+        }
+      }
+    }
+
+    console.log(worstScore, worstDomain);
+
+    //If there is something to worry about
+    if (worstScore != "Low") {
+      APP.messageDispatch.receive({
+        type: "performance_impact_detected",
+        data: performance,
+        worstDomain: worstDomain,
+        worstScore: worstScore
+      });
+    }
+
+    return Promise.resolve(performance);
   }
 
   componentDidMount() {
     this.sceneEl = AFRAME.scenes[0];
-    this.sceneEl.addEventListener("object_spawned", this.scanForPerf);
+
+    this.sceneEl.addEventListener("entered", e =>
+      this.sceneEl.addEventListener("media-loaded", f => {
+        this.scanForPerf().then(perf => this.setState({ performance: perf }));
+      })
+    );
+
+    this.sceneEl.addEventListener("show_perf_pannel", e => this.setState({ visible: true }));
+    this.sceneEl.addEventListener("hide_perf_pannel", e => this.setState({ visible: false }));
+
+    this.setState({
+      scoreToColor: getStyle()
+    });
   }
+
   render() {
-    return null;
+    if (!this.state.visible) {
+      return <></>;
+    }
+    console.log(this.state);
+    return (
+      <Center>
+        <Modal
+          title="Performance Pannel"
+          beforeTitle={<CloseButton onClick={a => this.setState({ visible: false })} />}
+          className={styles.gaugeUi}
+        >
+          <ul>
+            <PerformanceCheckItem
+              title="Polygon Count"
+              description="We recommend your scene use no more than 50,000 triangles for mobile devices."
+              learnMoreUrl="https://hubs.mozilla.com/docs/spoke-optimization.html"
+              scoreTxt={this.state.performance.polygons.score}
+              scoreColor={this.state.scoreToColor[this.state.performance.polygons.score]}
+            >
+              <ColoredText color={this.state.scoreToColor[this.state.performance.polygons.score]}>
+                {this.state.performance.polygons.value.toLocaleString()} Triangles
+              </ColoredText>
+            </PerformanceCheckItem>
+            <PerformanceCheckItem
+              title="Materials"
+              description="We recommend using no more than 25 unique materials in your scene to reduce draw calls on mobile devices."
+              learnMoreUrl="https://hubs.mozilla.com/docs/spoke-optimization.html"
+              scoreTxt={this.state.performance.materials.score}
+              scoreColor={this.state.scoreToColor[this.state.performance.materials.score]}
+            >
+              <ColoredText color={this.state.scoreToColor[this.state.performance.materials.score]}>
+                {this.state.performance.materials.value} Unique Materials
+              </ColoredText>
+            </PerformanceCheckItem>
+            <PerformanceCheckItem
+              title="Textures"
+              description="We recommend your textures use no more than 256MB of video RAM for mobile devices. We also recommend against using textures larger than 2048 x 2048."
+              learnMoreUrl="https://hubs.mozilla.com/docs/spoke-optimization.html"
+              scoreTxt={texturesScore}
+              scoreColor={this.state.scoreToColor[texturesScore]}
+            >
+              <ColoredText color={this.state.scoreToColor[this.state.performance.textures.score]}>
+                ~{bytesToSize(this.state.performance.textures.value)} Video RAM
+              </ColoredText>
+              ,{" "}
+              <ColoredText color={this.state.scoreToColor[this.state.performance.textures.largeTexturesScore]}>
+                {this.state.performance.textures.largeTexturesValue} Large Textures
+              </ColoredText>
+            </PerformanceCheckItem>
+            <PerformanceCheckItem
+              title="Lights"
+              description="While dynamic lights are not enabled on mobile devices, we recommend using no more than 3 lights in your scene (excluding ambient and hemisphere lights) for your scene to run on low end PCs."
+              learnMoreUrl="https://hubs.mozilla.com/docs/spoke-optimization.html"
+              scoreTxt={this.state.performance.lights.score}
+              scoreColor={scoreToColor[this.state.performance.lights.score]}
+            >
+              <ColoredText color={scoreToColor[this.state.performance.lights.score]}>
+                {this.state.performance.lights.value} Lights
+              </ColoredText>
+            </PerformanceCheckItem>
+          </ul>
+        </Modal>
+      </Center>
+    );
   }
 }

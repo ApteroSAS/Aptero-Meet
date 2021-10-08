@@ -1,0 +1,5 @@
+@use "../../react-components/styles/theme.scss";
+
+:local(.gauge-ui) {
+    pointer-events: all;
+}
