@@ -4,8 +4,9 @@ import { Modal } from "./../../react-components/modal/Modal";
 import { Center } from "./../../react-components/layout/Center";
 import { CloseButton } from "../../react-components/input/CloseButton";
 import styles from "./GaugeModal.scss";
-import styled, { ThemeContext } from "styled-components";
+import styled from "styled-components";
 import PropTypes from "prop-types";
+import { bytesToSize } from "../util/spoke-utils";
 
 function calculateImageVRAM(image) {
   if (!image) {
@@ -150,18 +151,13 @@ function calcPerformance(sceneEl) {
   };
 }
 
-const ColoredText = styled.span`
-  color: ${props => props.color};
-`;
-
 const PerformanceItemContainer = styled.li`
   display: flex;
   min-height: 100px;
-  background-color: ${props => props.theme.toolbar};
   border: 1px solid ${props => props.theme.panel};
   border-radius: 4px;
   margin: 4px;
-  color: white;
+  color: black;
   max-width: 560px;
 
   & > :first-child {
@@ -201,10 +197,8 @@ const PerformanceItemContainer = styled.li`
 function PerformanceCheckItem({ scoreTxt, scoreColor, title, description, learnMoreUrl, children }) {
   return (
     <PerformanceItemContainer>
-      <div>
-        <ColoredText as="h5" color={scoreColor}>
-          {scoreTxt}
-        </ColoredText>
+      <div className={styles[scoreColor]}>
+        <h5>{scoreTxt}</h5>
       </div>
       <div>
         <h6>
@@ -222,7 +216,7 @@ function PerformanceCheckItem({ scoreTxt, scoreColor, title, description, learnM
 }
 
 PerformanceCheckItem.propTypes = {
-  score: PropTypes.string.isRequired,
+  scoreTxt: PropTypes.string.isRequired,
   scoreColor: PropTypes.string.isRequired,
   title: PropTypes.string.isRequired,
   children: PropTypes.node,
@@ -230,22 +224,15 @@ PerformanceCheckItem.propTypes = {
   learnMoreUrl: PropTypes.string.isRequired
 };
 
-export function getStyle(){
-
-  let theme = useContext(ThemeContext);
-
-  return  {
-    Low: theme.green,
-    Medium: theme.yellow,
-    High: theme.red
-  }
-}
-
 export default class GaugeModal extends Component {
   state = {
     visible: false,
     performance: null,
-    scoreToColor: null
+    scoreToValue: {
+      Low: 0,
+      Medium: 1,
+      High: 2
+    }
   };
 
   async scanForPerf(e) {
@@ -306,10 +293,6 @@ export default class GaugeModal extends Component {
 
     this.sceneEl.addEventListener("show_perf_pannel", e => this.setState({ visible: true }));
     this.sceneEl.addEventListener("hide_perf_pannel", e => this.setState({ visible: false }));
-
-    this.setState({
-      scoreToColor: getStyle()
-    });
   }
 
   render() {
@@ -330,48 +313,58 @@ export default class GaugeModal extends Component {
               description="We recommend your scene use no more than 50,000 triangles for mobile devices."
               learnMoreUrl="https://hubs.mozilla.com/docs/spoke-optimization.html"
               scoreTxt={this.state.performance.polygons.score}
-              scoreColor={this.state.scoreToColor[this.state.performance.polygons.score]}
+              scoreColor={this.state.performance.polygons.score}
             >
-              <ColoredText color={this.state.scoreToColor[this.state.performance.polygons.score]}>
+              <span className={this.state.performance.polygons.score}>
                 {this.state.performance.polygons.value.toLocaleString()} Triangles
-              </ColoredText>
+              </span>
             </PerformanceCheckItem>
             <PerformanceCheckItem
               title="Materials"
               description="We recommend using no more than 25 unique materials in your scene to reduce draw calls on mobile devices."
               learnMoreUrl="https://hubs.mozilla.com/docs/spoke-optimization.html"
               scoreTxt={this.state.performance.materials.score}
-              scoreColor={this.state.scoreToColor[this.state.performance.materials.score]}
+              scoreColor={this.state.performance.materials.score}
             >
-              <ColoredText color={this.state.scoreToColor[this.state.performance.materials.score]}>
+              <span className={this.state.performance.materials.score}>
                 {this.state.performance.materials.value} Unique Materials
-              </ColoredText>
+              </span>
             </PerformanceCheckItem>
             <PerformanceCheckItem
               title="Textures"
               description="We recommend your textures use no more than 256MB of video RAM for mobile devices. We also recommend against using textures larger than 2048 x 2048."
               learnMoreUrl="https://hubs.mozilla.com/docs/spoke-optimization.html"
-              scoreTxt={texturesScore}
-              scoreColor={this.state.scoreToColor[texturesScore]}
+              scoreTxt={
+                this.state.scoreToValue[this.state.performance.textures.largeTexturesScore] >
+                this.state.scoreToValue[this.state.performance.textures.score]
+                  ? this.state.performance.textures.largeTexturesScore
+                  : this.state.performance.textures.score
+              }
+              scoreColor={
+                this.state.scoreToValue[this.state.performance.textures.largeTexturesScore] >
+                this.state.scoreToValue[this.state.performance.textures.score]
+                  ? this.state.performance.textures.largeTexturesScore
+                  : this.state.performance.textures.score
+              }
             >
-              <ColoredText color={this.state.scoreToColor[this.state.performance.textures.score]}>
+              <span className={this.state.performance.textures.score}>
                 ~{bytesToSize(this.state.performance.textures.value)} Video RAM
-              </ColoredText>
+              </span>
               ,{" "}
-              <ColoredText color={this.state.scoreToColor[this.state.performance.textures.largeTexturesScore]}>
+              <span className={this.state.performance.textures.largeTexturesScore}>
                 {this.state.performance.textures.largeTexturesValue} Large Textures
-              </ColoredText>
+              </span>
             </PerformanceCheckItem>
             <PerformanceCheckItem
               title="Lights"
               description="While dynamic lights are not enabled on mobile devices, we recommend using no more than 3 lights in your scene (excluding ambient and hemisphere lights) for your scene to run on low end PCs."
               learnMoreUrl="https://hubs.mozilla.com/docs/spoke-optimization.html"
               scoreTxt={this.state.performance.lights.score}
-              scoreColor={scoreToColor[this.state.performance.lights.score]}
+              scoreColor={this.state.performance.lights.score}
             >
-              <ColoredText color={scoreToColor[this.state.performance.lights.score]}>
+              <span className={this.state.performance.lights.score}>
                 {this.state.performance.lights.value} Lights
-              </ColoredText>
+              </span>
             </PerformanceCheckItem>
           </ul>
         </Modal>

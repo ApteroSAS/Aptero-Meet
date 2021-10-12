@@ -3,3 +3,14 @@
 :local(.gauge-ui) {
     pointer-events: all;
 }
+
+
+:local(.Low) {
+    background-color: theme.$green;
+}
+:local(.Medium) {
+    background-color: theme.$orange;
+}
+:local(.High) {
+    background-color: theme.$red;
+}
