@@ -153,12 +153,10 @@ function calcPerformance(sceneEl) {
 
 const PerformanceItemContainer = styled.li`
   display: flex;
-  min-height: 100px;
-  border: 1px solid ${props => props.theme.panel};
   border-radius: 4px;
   margin: 4px;
-  color: black;
   max-width: 560px;
+  align-items: center;
 
   & > :first-child {
     display: flex;
@@ -166,6 +164,10 @@ const PerformanceItemContainer = styled.li`
     justify-content: center;
     align-items: center;
     width: 100px;
+    height: 100px;
+    border-style: solid;
+    border-radius: 100px;
+    margin: 0.5em;
   }
 
   & > :last-child {
@@ -173,11 +175,10 @@ const PerformanceItemContainer = styled.li`
     flex-direction: column;
     flex: 1;
     padding: 12px;
-    border-left: 1px solid ${props => props.theme.panel2};
   }
 
   h5 {
-    font-size: 20px;
+    font-size: 19px;
   }
 
   h6 {
@@ -191,6 +192,7 @@ const PerformanceItemContainer = styled.li`
 
   p {
     margin: 0;
+    font-size: 0.9em;
   }
 `;
 
@@ -201,7 +203,7 @@ function PerformanceCheckItem({ scoreTxt, scoreColor, title, description, learnM
         <h5>{scoreTxt}</h5>
       </div>
       <div>
-        <h6>
+        <h6 className={styles[scoreColor + "Title"]}>
           {title}: {children}
         </h6>
         <p>
@@ -315,7 +317,7 @@ export default class GaugeModal extends Component {
               scoreTxt={this.state.performance.polygons.score}
               scoreColor={this.state.performance.polygons.score}
             >
-              <span className={this.state.performance.polygons.score}>
+              <span className={this.state.performance.polygons.score }>
                 {this.state.performance.polygons.value.toLocaleString()} Triangles
               </span>
             </PerformanceCheckItem>

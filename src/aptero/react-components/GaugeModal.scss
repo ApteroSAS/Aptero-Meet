@@ -2,15 +2,32 @@
 
 :local(.gauge-ui) {
     pointer-events: all;
+    max-width: 570px;
 }
 
 
 :local(.Low) {
-    background-color: theme.$green;
+    border-color: theme.$green;
+    color: theme.$green;
+    border-width: 4px;
 }
+:local(.LowTitle) {
+    color: theme.$green;
+}
+
 :local(.Medium) {
-    background-color: theme.$orange;
+    border-color: theme.$orange;
+    color: theme.$orange;
+    border-width: 8px;
+}
+:local(.MediumTitle) {
+    color: theme.$orange;
 }
 :local(.High) {
-    background-color: theme.$red;
+    border-color: theme.$red;
+    color: theme.$red;
+    border-width: 14px;
+}
+:local(.HighTitle) {
+    color: theme.$red;
 }
