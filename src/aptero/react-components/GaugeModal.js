@@ -8,6 +8,9 @@ import styled from "styled-components";
 import PropTypes from "prop-types";
 import { bytesToSize } from "../util/spoke-utils";
 
+const supTriangle = 2400;
+const supMaterial = 41;
+
 function calculateImageVRAM(image) {
   if (!image) {
     return 0;
@@ -59,9 +62,9 @@ function calcPerformance(sceneEl) {
   // let polygonsScore
   polygons = sceneEl.renderer.info.render.triangles;
 
-  if (polygons <= 50000) {
+  if (polygons <= 50000 + supTriangle) {
     polygonsScore = "Low";
-  } else if (polygons <= 75000) {
+  } else if (polygons <= 75000 + supTriangle) {
     polygonsScore = "Medium";
   } else {
     polygonsScore = "High";
@@ -79,7 +82,7 @@ function calcPerformance(sceneEl) {
   }
 
   // let texturesScore;
-
+/*
   let image = new Image();
   jsonscene.images.forEach(element => {
     image.src = element.url;
@@ -95,7 +98,7 @@ function calcPerformance(sceneEl) {
     texturesScore = "High";
   }
   largeTexturesScore = largeTextures > 0 ? "High" : "Low";
-
+*/
   // let materialsScore;
 
   let matlist = new Array();
@@ -104,9 +107,9 @@ function calcPerformance(sceneEl) {
   });
   uniqueMaterials = matlist.length;
 
-  if (uniqueMaterials <= 25) {
+  if (uniqueMaterials <= 25 + supMaterial) {
     materialsScore = "Low";
-  } else if (uniqueMaterials <= 50) {
+  } else if (uniqueMaterials <= 50 + supMaterial) {
     materialsScore = "Medium";
   } else {
     materialsScore = "High";
@@ -126,13 +129,13 @@ function calcPerformance(sceneEl) {
     polygons: {
       value: polygons,
       score: polygonsScore
-    },
+    },/*
     textures: {
       value: totalVRAM,
       score: texturesScore,
       largeTexturesValue: largeTextures,
       largeTexturesScore
-    },
+    },*/
     lights: {
       value: lights,
       score: lightsScore
@@ -208,9 +211,10 @@ function PerformanceCheckItem({ scoreTxt, scoreColor, title, description, learnM
         </h6>
         <p>
           {description}{" "}
+          {/*
           <a rel="noopener noreferrer" target="_blank" href={learnMoreUrl}>
             Learn More
-          </a>
+          </a>*/}
         </p>
       </div>
     </PerformanceItemContainer>
@@ -239,7 +243,6 @@ export default class GaugeModal extends Component {
 
   async scanForPerf(e) {
     console.log(e);
-
     const performance = calcPerformance(this.sceneEl);
 
     console.log(performance);
@@ -272,13 +275,15 @@ export default class GaugeModal extends Component {
     console.log(worstScore, worstDomain);
 
     //If there is something to worry about
-    if (worstScore != "Low") {
-      APP.messageDispatch.receive({
+    if (worstScore == "High") {
+      const msg = {
         type: "performance_impact_detected",
         data: performance,
         worstDomain: worstDomain,
         worstScore: worstScore
-      });
+      };
+      console.log(msg);
+      setTimeout(a => APP.messageDispatch.receive(msg), 100);
     }
 
     return Promise.resolve(performance);
@@ -312,7 +317,7 @@ export default class GaugeModal extends Component {
           <ul>
             <PerformanceCheckItem
               title="Polygon Count"
-              description="We recommend your scene use no more than 50,000 triangles for mobile devices."
+              description={"We recommend your scene use no more than " + (50000 + supTriangle) +" triangles for mobile devices."}
               learnMoreUrl="https://hubs.mozilla.com/docs/spoke-optimization.html"
               scoreTxt={this.state.performance.polygons.score}
               scoreColor={this.state.performance.polygons.score}
@@ -323,7 +328,7 @@ export default class GaugeModal extends Component {
             </PerformanceCheckItem>
             <PerformanceCheckItem
               title="Materials"
-              description="We recommend using no more than 25 unique materials in your scene to reduce draw calls on mobile devices."
+              description={"We recommend using no more than " + ( 25+ supMaterial ) + "unique materials in your scene to reduce draw calls on mobile devices."}
               learnMoreUrl="https://hubs.mozilla.com/docs/spoke-optimization.html"
               scoreTxt={this.state.performance.materials.score}
               scoreColor={this.state.performance.materials.score}
@@ -331,7 +336,7 @@ export default class GaugeModal extends Component {
               <span className={this.state.performance.materials.score}>
                 {this.state.performance.materials.value} Unique Materials
               </span>
-            </PerformanceCheckItem>
+            </PerformanceCheckItem>{/*
             <PerformanceCheckItem
               title="Textures"
               description="We recommend your textures use no more than 256MB of video RAM for mobile devices. We also recommend against using textures larger than 2048 x 2048."
@@ -356,7 +361,7 @@ export default class GaugeModal extends Component {
               <span className={this.state.performance.textures.largeTexturesScore}>
                 {this.state.performance.textures.largeTexturesValue} Large Textures
               </span>
-            </PerformanceCheckItem>
+            </PerformanceCheckItem> */}
             <PerformanceCheckItem
               title="Lights"
               description="While dynamic lights are not enabled on mobile devices, we recommend using no more than 3 lights in your scene (excluding ambient and hemisphere lights) for your scene to run on low end PCs."
