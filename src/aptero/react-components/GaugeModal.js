@@ -248,10 +248,7 @@ export default class GaugeModal extends Component {
   };
 
   async scanForPerf(e) {
-    console.log(e);
     const performance = calcPerformance(this.sceneEl);
-
-    console.log(performance);
 
     let worstScore = "Low";
     let worstDomain = "None";
@@ -284,11 +281,10 @@ export default class GaugeModal extends Component {
     if (worstScore == "High") {
       const msg = {
         type: "performance_impact_detected",
-        data: performance,
+        data: performance,   
         worstDomain: worstDomain,
         worstScore: worstScore
       };
-      console.log(msg);
       setTimeout(a => APP.messageDispatch.receive(msg), 100);
     }
 
@@ -299,7 +295,7 @@ export default class GaugeModal extends Component {
     this.sceneEl = AFRAME.scenes[0];
 
     this.sceneEl.addEventListener("entered", e =>
-      this.sceneEl.addEventListener("media-loaded", f => {
+      this.sceneEl.addEventListener("pinned", f => {
         this.scanForPerf().then(perf => this.setState({ performance: perf }));
       })
     );
