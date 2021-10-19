@@ -8,8 +8,14 @@ import styled from "styled-components";
 import PropTypes from "prop-types";
 import { bytesToSize } from "../util/spoke-utils";
 
-const supTriangle = 2400;
-const supMaterial = 41;
+const supTriangle = 24000;
+const lowTriangle = 50000;
+const MediumTriangle = 50000 * 100;
+
+const supMaterial = 4100;
+const lowMaterial = 25;
+const MediumMaterial = 25 * 100;
+
 
 function calculateImageVRAM(image) {
   if (!image) {
@@ -62,9 +68,9 @@ function calcPerformance(sceneEl) {
   // let polygonsScore
   polygons = sceneEl.renderer.info.render.triangles;
 
-  if (polygons <= 50000 + supTriangle) {
+  if (polygons <= lowTriangle + supTriangle) {
     polygonsScore = "Low";
-  } else if (polygons <= 75000 + supTriangle) {
+  } else if (polygons <= MediumTriangle + supTriangle) {
     polygonsScore = "Medium";
   } else {
     polygonsScore = "High";
@@ -107,9 +113,9 @@ function calcPerformance(sceneEl) {
   });
   uniqueMaterials = matlist.length;
 
-  if (uniqueMaterials <= 25 + supMaterial) {
+  if (uniqueMaterials <= lowMaterial + supMaterial) {
     materialsScore = "Low";
-  } else if (uniqueMaterials <= 50 + supMaterial) {
+  } else if (uniqueMaterials <= MediumMaterial + supMaterial) {
     materialsScore = "Medium";
   } else {
     materialsScore = "High";
@@ -317,7 +323,7 @@ export default class GaugeModal extends Component {
           <ul>
             <PerformanceCheckItem
               title="Polygon Count"
-              description={"We recommend your scene use no more than " + (50000 + supTriangle) +" triangles for mobile devices."}
+              description={"We recommend your scene use no more than " + (lowTriangle + supTriangle) +" triangles for mobile devices."}
               learnMoreUrl="https://hubs.mozilla.com/docs/spoke-optimization.html"
               scoreTxt={this.state.performance.polygons.score}
               scoreColor={this.state.performance.polygons.score}
@@ -328,7 +334,7 @@ export default class GaugeModal extends Component {
             </PerformanceCheckItem>
             <PerformanceCheckItem
               title="Materials"
-              description={"We recommend using no more than " + ( 25+ supMaterial ) + "unique materials in your scene to reduce draw calls on mobile devices."}
+              description={"We recommend using no more than " + ( lowMaterial + supMaterial ) + "unique materials in your scene to reduce draw calls on mobile devices."}
               learnMoreUrl="https://hubs.mozilla.com/docs/spoke-optimization.html"
               scoreTxt={this.state.performance.materials.score}
               scoreColor={this.state.performance.materials.score}

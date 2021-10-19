@@ -24,7 +24,6 @@ export function willRequireUserGesture() {
 export async function showFullScreenIfAvailable() {
   if (shouldShowFullScreen()) {
     hasEnteredFullScreenThisSession = true;
-    console.log(screenfull);
     try{
       await screenfull.request();
     }catch(e) {

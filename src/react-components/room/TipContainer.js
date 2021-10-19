@@ -13,7 +13,8 @@ let turnRightKey = "E";
 
 // TODO The API to map from physical key to character is experimental. Depending on prospects of this getting wider
 // implimentation we may want to cook up our own polyfill based on observing key inputs
-if (window.navigator.keyboard !== undefined && window.navigator.keyboard.getLayoutMap) {
+// edit : added iframe testing before asking for keyboard in order to fix "getLayoutMap() must be called from a top-level browsing context." error
+if (( window.location == window.parent.location ) && window.navigator.keyboard !== undefined && window.navigator.keyboard.getLayoutMap) {
   window.navigator.keyboard.getLayoutMap().then(function(map) {
     moveKeys = `${map.get("KeyW") || "W"} ${map.get("KeyA") || "A"} ${map.get("KeyS") || "S"} ${map.get("KeyD") ||
       "D"}`.toUpperCase();
