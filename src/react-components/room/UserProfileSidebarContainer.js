@@ -13,7 +13,8 @@ export function UserProfileSidebarContainer({
   onBack,
   onClose,
   onCloseDialog,
-  showNonHistoriedDialog
+  showNonHistoriedDialog,
+  toggleChatSidebar
 }) {
   const [avatarThumbnailUrl, setAvatarThumbnailUrl] = useState();
 
@@ -136,6 +137,7 @@ export function UserProfileSidebarContainer({
       showBackButton={showBackButton}
       onClose={onClose}
       onBack={onBack}
+      toggleChatSidebar={toggleChatSidebar}
       
     />
   );
@@ -149,5 +151,6 @@ UserProfileSidebarContainer.propTypes = {
   onBack: PropTypes.func,
   onClose: PropTypes.func,
   onCloseDialog: PropTypes.func.isRequired,
-  showNonHistoriedDialog: PropTypes.func
+  showNonHistoriedDialog: PropTypes.func,
+  toggleChatSidebar : PropTypes.func
 };

@@ -4,14 +4,15 @@ import { PeopleSidebar } from "./PeopleSidebar";
 import { getMicrophonePresences } from "../../utils/microphone-presence";
 import ProfileEntryPanel from "../profile-entry-panel";
 import { UserProfileSidebarContainer } from "./UserProfileSidebarContainer";
-
+var selectedId;
+var selectedName;
 export function userFromPresence(sessionId, presence, micPresences, mySessionId) {
   const meta = presence.metas[presence.metas.length - 1];
   const micPresence = micPresences.get(sessionId);
   return { id: sessionId, isMe: mySessionId === sessionId, micPresence, ...meta };
 }
 
-function usePeopleList(presences, mySessionId, micUpdateFrequency = 500) {
+ function usePeopleList(presences, mySessionId, micUpdateFrequency = 500) {
   let [people, setPeople] = useState([]);
 
   useEffect(
@@ -38,6 +39,7 @@ function usePeopleList(presences, mySessionId, micUpdateFrequency = 500) {
     },
     [presences, micUpdateFrequency, setPeople, mySessionId]
   );
+  
   //aptero state cleanup
   people = people.filter(value => {
     return presences[value.id];
@@ -66,6 +68,7 @@ function PeopleListContainer({ hubChannel, people, onSelectPerson, onClose }) {
       showMuteAll={hubChannel.can("mute_users")}
     />
   );
+ 
 }
 
 PeopleListContainer.propTypes = {
@@ -85,18 +88,25 @@ export function PeopleSidebarContainer({
   performConditionalSignIn,
   onCloseDialog,
   showNonHistoriedDialog,
-  onClose
-}) {
+  onClose,
+  toggleChatSidebar
+})
+ {
   const people = usePeopleList(presences, mySessionId);
   const [selectedPersonId, setSelectedPersonId] = useState(null);
   const selectedPerson = people.find(person => person.id === selectedPersonId);
+  if(selectedPerson!=null)
+  {
+    selectedId=selectedPerson.id;
+    selectedName=selectedPerson.profile.displayName;
+  }
+
   const setSelectedPerson = useCallback(
     person => {
       setSelectedPersonId(person.id);
     },
     [setSelectedPersonId]
   );
-
   if (selectedPerson) {
     if (selectedPerson.id === mySessionId) {
       return (
@@ -115,6 +125,7 @@ export function PeopleSidebarContainer({
       return (
         <UserProfileSidebarContainer
           user={selectedPerson}
+          toggleChatSidebar={toggleChatSidebar}
           hubChannel={hubChannel}
           performConditionalSignIn={performConditionalSignIn}
           showBackButton
@@ -130,6 +141,13 @@ export function PeopleSidebarContainer({
     <PeopleListContainer onSelectPerson={setSelectedPerson} onClose={onClose} hubChannel={hubChannel} people={people} />
   );
 }
+export function getSelectedPersonId()
+{
+  return selectedId;
+}
+export function getSelectedPersonName(){
+  return selectedName;
+}
 
 PeopleSidebarContainer.propTypes = {
   displayNameOverride: PropTypes.string,
@@ -142,5 +160,6 @@ PeopleSidebarContainer.propTypes = {
   presences: PropTypes.object.isRequired,
   performConditionalSignIn: PropTypes.func.isRequired,
   onCloseDialog: PropTypes.func.isRequired,
-  showNonHistoriedDialog: PropTypes.func.isRequired
+  showNonHistoriedDialog: PropTypes.func.isRequired,
+  toggleChatSidebar: PropTypes.func
 };

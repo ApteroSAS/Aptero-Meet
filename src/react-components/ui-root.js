@@ -77,6 +77,7 @@ import { ObjectMenuContainer } from "./room/ObjectMenuContainer";
 import { useCssBreakpoints } from "react-use-css-breakpoints";
 import { PlacePopoverContainer } from "./room/PlacePopoverContainer";
 import { SharePopoverContainer } from "./room/SharePopoverContainer";
+import { DropDownChatList} from "./room/DropDownChatList";
 import { VoiceButtonContainer } from "./room/VoiceButtonContainer";
 import { ReactionPopoverContainer } from "./room/ReactionPopoverContainer";
 import { SafariMicModal } from "./room/SafariMicModal";
@@ -99,7 +100,7 @@ import { apteroService } from "../aptero/ApteroServices";
 import { CustomSidebarContainer } from "../aptero/react-components/CustomSidebarContainer";
 import { customMenuService } from "../aptero/service/CustomMenuService";
 import AptRoot from "../aptero/react-components/AptRoot";
-
+import {getSelectedPersonId,getSelectedPersonName} from "./room/PeopleSidebarContainer"
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
 const IN_ROOM_MODAL_ROUTER_PATHS = ["/media"];
@@ -120,7 +121,7 @@ const AUTO_EXIT_TIMER_SECONDS = 10;
 
 const aptGuiVisible = !(new URL(window.location.href).searchParams.get("hideui"));//aptero
 
-class UIRoot extends Component {
+export class UIRoot extends Component {
   willCompileAndUploadMaterials = false;
 
   static propTypes = {
@@ -203,6 +204,7 @@ class UIRoot extends Component {
     objectInfo: null,
     objectSrc: "",
     sidebarId: null,
+    userId:null,
     presenceCount: 0
   };
 
@@ -763,7 +765,15 @@ class UIRoot extends Component {
     this.setState({ sidebarId, selectedUserId: null, ...otherState });
   }
 
-  toggleSidebar(sidebarId, otherState) {
+   toggleSidebar(sidebarId, otherState) {
+     if(sidebarId=="chat")
+     {
+       this.setState({userId:otherState});
+       
+      
+     }
+    
+    
     this.setState(({ sidebarId: curSidebarId }) => {
       const nextSidebarId = curSidebarId === sidebarId ? null : sidebarId;
 
@@ -953,7 +963,13 @@ class UIRoot extends Component {
     const selectedUserId = this.state.selectedUserId;
     const presence = this.props.presences[selectedUserId];
     const micPresences = getMicrophonePresences();
+    console.log(selectedUserId);
     return userFromPresence(selectedUserId, presence, micPresences, this.props.sessionId);
+  }
+  getSelectedId()
+  {
+    const selectedUserId = this.state.selectedUserId;
+    return selectedUserId;
   }
 
   render() {
@@ -1418,7 +1434,7 @@ class UIRoot extends Component {
                         }}
                       />
                     )}
-                    {this.state.sidebarId !== "chat" &&
+                    {(this.state.sidebarId !== "chat" ) &&
                       this.props.hub && (
                         <PresenceLog
                           inRoom={true}
@@ -1461,14 +1477,19 @@ class UIRoot extends Component {
                           onClose={() => this.setSidebar(null)}
                         />
                       )}
+                      
                       {this.state.sidebarId === "chat" && (
-                        <ChatSidebarContainer
+                         <ChatSidebarContainer
+                          userId={this.state.userId}
+                          userName={getSelectedPersonName()}
                           presences={this.props.presences}
                           occupantCount={this.occupantCount()}
                           canSpawnMessages={entered && this.props.hubChannel.can("spawn_and_move_media")}
                           scene={this.props.scene}
                           onClose={() => this.setSidebar(null)}
-                        />
+                          toggleChatSidebar={(type,userid) => this.toggleSidebar(type,userid)}
+                          />
+                       
                       )}
                       {this.state.sidebarId === "objects" && (
                         <ObjectsSidebarContainer
@@ -1489,7 +1510,10 @@ class UIRoot extends Component {
                           onCloseDialog={() => this.closeDialog()}
                           showNonHistoriedDialog={this.showNonHistoriedDialog}
                           performConditionalSignIn={this.props.performConditionalSignIn}
+                          toggleChatSidebar={(type,userid) => this.toggleSidebar(type,userid)}
+                          
                         />
+                        
                       )}
                       {this.state.sidebarId === "profile" && (
                         <ProfileEntryPanel
@@ -1597,7 +1621,7 @@ class UIRoot extends Component {
                         {this.props.hubChannel.can("spawn_emoji") && <ReactionPopoverContainer />}
                       </>
                     )}
-                    <ChatToolbarButtonContainer onClick={() => this.toggleSidebar("chat")} />
+                     <ChatToolbarButtonContainer onClick={() => this.toggleSidebar("chat","everyone")} />
                     {entered &&
                       isMobileVR && (
                         <ToolbarButton
@@ -1672,7 +1696,7 @@ function UIRootHooksWrapper(props) {
     },
     [props.scene]
   );
-
+   
   return (
     <ChatContextProvider messageDispatch={props.messageDispatch}>
       <ObjectListProvider scene={props.scene}>

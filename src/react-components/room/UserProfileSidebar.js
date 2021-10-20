@@ -1,5 +1,5 @@
 import React from "react";
-import PropTypes from "prop-types";
+import PropTypes, { number } from "prop-types";
 import { Sidebar } from "../sidebar/Sidebar";
 import { CloseButton } from "../input/CloseButton";
 import { BackButton } from "../input/BackButton";
@@ -8,7 +8,20 @@ import { Column } from "../layout/Column";
 import styles from "./UserProfileSidebar.scss";
 import { FormattedMessage, useIntl } from "react-intl";
 import { fetchRandomDefaultAvatarId } from "../../utils/identity";
+import {
+  getCurrentHubId
+} from "../../utils/hub-utils";
+import { createBrowserHistory, createMemoryHistory } from "history";
+import MessageDispatch from "../../message-dispatch";
+import HubChannel from "../../utils/hub-channel";
+import AuthChannel from "../../utils/auth-channel";
+import SceneEntryManager from "../../scene-entry-manager";
+import toggleSidebar, { UIRoot } from "../ui-root";
 import { rotateInPlaceAroundWorldUp, affixToWorldUp } from "../../utils/three-utils";
+export function remountUI(props){
+  uiProps = { ...uiProps, ...props };
+  mountUI(uiProps);
+}
 export function UserProfileSidebar({
   className,
   displayName,
@@ -30,10 +43,11 @@ export function UserProfileSidebar({
   showBackButton,
   onBack,
   onClose,
+  toggleChatSidebar,
   ...rest
 }) {
   const intl = useIntl();
-
+ 
   return (
     <Sidebar
       title={identityName ? `${displayName} (${identityName})` : displayName}
@@ -42,7 +56,6 @@ export function UserProfileSidebar({
       {...rest}
     >
       <Column center padding>
-        <div className={styles.avatarPreviewContainer}>{avatarPreview || <div />}</div>
         {canPromote && (
           <Button
             preset="accept"
@@ -91,10 +104,11 @@ export function UserProfileSidebar({
           )}
         </Button>
         <Button type="button" preset="basic"  onClick={() => {
+          
           var a=NAF.connection.entities["entities"];
           var entity1,entity2;
           var userId2=NAF.clientId;
-        
+          
             for(var key in a)
             {
               var entity = a[key];
@@ -126,11 +140,17 @@ export function UserProfileSidebar({
             <FormattedMessage id="user-profile-sidebar.kick-button" defaultMessage="Kick" />
           </Button>
         )}
+          <Button preset="basic" onClick={()=>toggleChatSidebar("chat",userId)}>
+            <FormattedMessage id="user-profile-sidebar.chat-button" defaultMessage="Chat" />
+          </Button>
       </Column>
     </Sidebar>
   );
 }
-
+export function getSelected()
+{
+  return userId;
+}
 UserProfileSidebar.propTypes = {
   className: PropTypes.string,
   displayName: PropTypes.string,
@@ -151,8 +171,11 @@ UserProfileSidebar.propTypes = {
   onKick: PropTypes.func,
   showBackButton: PropTypes.bool,
   onBack: PropTypes.func,
-  onClose: PropTypes.func
-};
+  onClose: PropTypes.func,
+  toggleChatSidebar: PropTypes.func
+
+}
+
 function useGoToSelectedAvatar() {
   const targetMatrix = new THREE.Matrix4();
   const translation = new THREE.Matrix4();
@@ -166,8 +189,6 @@ function useGoToSelectedAvatar() {
     snapToNavMesh: false,
     willMaintainInitialOrientation: false
   });
-  
-
-
 
 }
+

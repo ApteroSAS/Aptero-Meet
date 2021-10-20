@@ -313,6 +313,7 @@ class AvatarPreview extends Component {
       </div>
     );
   }
+  
 }
 
 export default injectIntl(AvatarPreview, { withRef: true });

@@ -38,7 +38,7 @@ class PresenceLog extends Component {
     const isBot = !!presenceContext.discord;
 
     switch (e.type) {
-      case "chat":
+      case "chat" :
         return (
           <ChatMessage
             key={e.key}

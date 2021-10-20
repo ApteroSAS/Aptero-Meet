@@ -1290,7 +1290,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.error(res);
     });
 
-  hubPhxChannel.on("message", ({ session_id, type, body, from }) => {
+  hubPhxChannel.on("message", ({ session_id, type, body,receiverClientId,type_chat, from }) => {
     const getAuthor = () => {
       const userInfo = hubChannel.presence.state[session_id];
       if (from) {
@@ -1304,12 +1304,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const name = getAuthor();
     const maySpawn = scene.is("entered");
-
     const incomingMessage = {
       name,
       type,
       body,
       maySpawn,
+      receiverClientId,
+      type_chat,
       sessionId: session_id,
       sent: session_id === socket.params().session_id
     };

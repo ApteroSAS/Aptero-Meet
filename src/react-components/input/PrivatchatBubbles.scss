@@ -1,0 +1,16 @@
+.bubbles-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    margin: 0 1em;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+.bubbles{
+    margin: 0.4em;
+}
+.test{
+    height: 30px;
+    width: 30px;
+}
