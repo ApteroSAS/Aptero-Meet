@@ -2,6 +2,7 @@ import TestPanelLazy from "../service/SelfTestService.loader";
 import React, { Component } from "react";
 import { ShareScreenModal } from "./ShareScreenModal";
 import AudioChangeHelper from "./AudioChangeHelper";
+import GaugeModal from "./GaugeModal";
 
 export default class AptRoot extends Component {
   render() {
@@ -10,6 +11,7 @@ export default class AptRoot extends Component {
         <ShareScreenModal onBack={() => {
         }}/>
         <AudioChangeHelper/>
+        <GaugeModal/>
       </>
     );
   }

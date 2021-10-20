@@ -4,6 +4,7 @@
     [
       "@babel/env",
       {
+        "loose": true,
         "exclude": [
           "transform-regenerator"
         ],

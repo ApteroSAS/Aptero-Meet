@@ -800,14 +800,15 @@ class UIRoot extends Component {
     this.setState({ entering: false });
   };
 
-  first = false;//aptero
+  //first = false;//aptero
   renderEntryStartPanel = () => {
     const { hasAcceptedProfile, hasChangedName } = this.props.store.state.activity;
     let promptForNameAndAvatarBeforeEntry = this.props.hubIsBound ? !hasAcceptedProfile : !hasChangedName;
-    if(!this.first && (this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now"))){
+    /*if(!this.first && (this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now"))){
       this.first = true;
+      console.log(this);
       setTimeout(() => this.handleForceEntry(), 500);
-    }
+    }*/
     // TODO: What does onEnteringCanceled do?
     return (aptGuiVisible &&
       <>
@@ -1188,7 +1189,7 @@ class UIRoot extends Component {
             onClick: () => this.setSidebar("room-info")
           },
           (this.props.breakpoint === "sm" || this.props.breakpoint === "md") &&
-            (this.props.hub.entry_mode !== "invite" || this.props.hubChannel.can("update_hub")) && {
+            this.props.hub && (this.props.hub.entry_mode !== "invite" || this.props.hubChannel.can("update_hub")) && {
               id: "invite",
               label: <FormattedMessage id="more-menu.invite" defaultMessage="Invite" />,
               icon: InviteIcon,
