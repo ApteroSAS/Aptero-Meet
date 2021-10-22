@@ -597,6 +597,8 @@ class UIRoot extends Component {
   beginOrSkipAudioSetup = () => {
     const skipAudioSetup = this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now");
 
+    console.log("beginOrSkipAudioSetup");
+    AFRAME.scenes[0].audioListener.gain.gain.setTargetAtTime(1, AFRAME.scenes[0].audioListener.context.currentTime, 0.2);
     if (skipAudioSetup || window.APP_CONFIG.adapterParams.adapter === "none") {
       this.onAudioReadyButton();
     } else {
