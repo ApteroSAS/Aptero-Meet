@@ -128,6 +128,8 @@ export class AudioSystem {
   constructor(sceneEl) {
     this._sceneEl = sceneEl;
     this._sceneEl.audioListener = this._sceneEl.audioListener || new THREE.AudioListener();
+    console.log("audioSystem", this._sceneEl.audioListener)
+    this._sceneEl.audioListener.gain.gain.value = 0;
     if (this._sceneEl.camera) {
       this._sceneEl.camera.add(this._sceneEl.audioListener);
     }
@@ -209,19 +211,22 @@ export class AudioSystem {
    * A user interaction (touch/mouse event) is needed in order to resume the AudioContext.
    */
   _resumeAudioContext = () => {
+    console.log(this, this.audioContext.state);
     this.audioContext.resume();
 
+    console.log(this.audioContext.state + " " + !AFRAME.utils.device.isMobile() + " " + /chrome/i.test(navigator.userAgent) + " " + !window.APP.store.state.preferences.disableEchoCancellation)
     setTimeout(() => {
       if (this.audioContext.state === "running") {
         const disableAEC = window.APP.store.state.preferences.disableEchoCancellation;
         if (!AFRAME.utils.device.isMobile() && /chrome/i.test(navigator.userAgent) && !disableAEC) {
+          console.log("enableChromeAEC audioListener")
           enableChromeAEC(this._sceneEl.audioListener.gain);
         }
 
         document.body.removeEventListener("touchend", this._resumeAudioContext, false);
         document.body.removeEventListener("mouseup", this._resumeAudioContext, false);
       }
-    }, 0);
+    }, 100);
   };
 
   // Webkit mobile fix
