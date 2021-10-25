@@ -30,7 +30,7 @@ function useDarkMode() {
 
   useEffect(() => {
     const darkmodeQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    if(darkmodeQuery) {
+    if(darkmodeQuery && darkmodeQuery.addEventListener) {
       setDarkMode(darkmodeQuery.matches);
 
       darkmodeQuery.addEventListener("change", event => {
