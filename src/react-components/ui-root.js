@@ -597,7 +597,6 @@ class UIRoot extends Component {
   beginOrSkipAudioSetup = () => {
     const skipAudioSetup = this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now");
 
-    console.log("beginOrSkipAudioSetup");
     AFRAME.scenes[0].audioListener.gain.gain.setTargetAtTime(1, AFRAME.scenes[0].audioListener.context.currentTime, 0.2);
     if (skipAudioSetup || window.APP_CONFIG.adapterParams.adapter === "none") {
       this.onAudioReadyButton();
@@ -838,7 +837,10 @@ class UIRoot extends Component {
           showEnterOnDevice={!this.state.waitingOnAudio && !this.props.entryDisallowed && !isMobileVR}
           onEnterOnDevice={() => this.attemptLink()}
           showSpectate={!this.state.waitingOnAudio}
-          onSpectate={() => this.setState({ watching: true })}
+          onSpectate={() => {
+            AFRAME.scenes[0].audioListener.gain.gain.setTargetAtTime(1, AFRAME.scenes[0].audioListener.context.currentTime, 0.2);
+            this.setState({ watching: true })
+          }}
           showOptions={this.props.hubChannel.canOrWillIfCreator("update_hub")}
           onOptions={() => {
             this.props.performConditionalSignIn(
