@@ -3,6 +3,7 @@ import React, { Component } from "react";
 import { ShareScreenModal } from "./ShareScreenModal";
 import AudioChangeHelper from "./AudioChangeHelper";
 import GaugeModal from "./GaugeModal";
+import UnderPage from "./UnderPage";
 
 export default class AptRoot extends Component {
   render() {
@@ -12,6 +13,7 @@ export default class AptRoot extends Component {
         }}/>
         <AudioChangeHelper/>
         <GaugeModal/>
+        <UnderPage/>
       </>
     );
   }
