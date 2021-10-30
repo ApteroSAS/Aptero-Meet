@@ -1,10 +1,15 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { ImageBackground, useCallback, useEffect, useState } from "react";
 import className from "classnames";
 import PropTypes from "prop-types";
 import { ToolbarButton } from "./ToolbarButton";
-import styles from "./PrivatchatBubbles.scss";
-export function PrivatechatBubbles({ onClick }) {
-  return <ToolbarButton className="test" onClick={onClick} preset="accent4" />;
+import "./PrivatchatBubbles.scss";
+export function PrivatechatBubbles({ receivedMessageNumber, onClick, imgUrl }) {
+  return (
+    <button onClick={onClick} class="button">
+      <img class="img" src={imgUrl} height="30px" width="30px" />
+      <span class="icon-button-badge">{receivedMessageNumber}</span>
+    </button>
+  );
 }
 
 export default PrivatechatBubbles;

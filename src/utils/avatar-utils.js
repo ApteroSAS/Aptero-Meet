@@ -16,6 +16,7 @@ export function getAvatarType(avatarId) {
 
 async function fetchSkinnableAvatar(avatarId) {
   const resp = await fetchReticulumAuthenticated(`/api/v1/avatars/${avatarId}`);
+  console.log(resp);
   return resp && resp.avatars && resp.avatars[0];
 }
 
@@ -31,7 +32,7 @@ export async function fetchAvatar(avatarId) {
   }
 }
 
-async function fetchAvatarGltfUrl(avatarId) {
+export async function fetchAvatarGltfUrl(avatarId) {
   return fetchAvatar(avatarId).then(avatar => avatar && avatar.gltf_url);
 }
 
@@ -51,8 +52,8 @@ export async function getAvatarThumbnailUrl(avatarId) {
     case AVATAR_TYPES.SKINNABLE:
       return fetchAvatar(avatarId).then(avatar => avatar.files.thumbnail);
     default:
-      return null
-      //return configs.PROTOCOL+configs.RETICULUM_SERVER+"/bots/avatar_unavailable.png";
+      return null;
+    //return configs.PROTOCOL+configs.RETICULUM_SERVER+"/bots/avatar_unavailable.png";
   }
 }
 

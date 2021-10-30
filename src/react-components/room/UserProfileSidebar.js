@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import PropTypes, { number } from "prop-types";
 import { Sidebar } from "../sidebar/Sidebar";
 import { CloseButton } from "../input/CloseButton";
@@ -8,9 +8,7 @@ import { Column } from "../layout/Column";
 import styles from "./UserProfileSidebar.scss";
 import { FormattedMessage, useIntl } from "react-intl";
 import { fetchRandomDefaultAvatarId } from "../../utils/identity";
-import {
-  getCurrentHubId
-} from "../../utils/hub-utils";
+import { getCurrentHubId } from "../../utils/hub-utils";
 import { createBrowserHistory, createMemoryHistory } from "history";
 import MessageDispatch from "../../message-dispatch";
 import HubChannel from "../../utils/hub-channel";
@@ -18,7 +16,8 @@ import AuthChannel from "../../utils/auth-channel";
 import SceneEntryManager from "../../scene-entry-manager";
 import toggleSidebar, { UIRoot } from "../ui-root";
 import { rotateInPlaceAroundWorldUp, affixToWorldUp } from "../../utils/three-utils";
-export function remountUI(props){
+import cons from "consolidate";
+export function remountUI(props) {
   uiProps = { ...uiProps, ...props };
   mountUI(uiProps);
 }
@@ -28,6 +27,7 @@ export function UserProfileSidebar({
   identityName,
   avatarPreview,
   avatarId,
+  imgUrl,
   userId,
   isSignedIn,
   canPromote,
@@ -47,7 +47,18 @@ export function UserProfileSidebar({
   ...rest
 }) {
   const intl = useIntl();
- 
+  //const [imgUrl, setImg] = useState("");
+  let str = "";
+  if (imgUrl.length != 0) {
+    imgUrl.map(e => {
+      if (e.id == userId) {
+        str = e.url;
+        str = str.replace('"', "");
+        str = str.replace('"', "");
+      }
+    });
+  }
+
   return (
     <Sidebar
       title={identityName ? `${displayName} (${identityName})` : displayName}
@@ -56,6 +67,8 @@ export function UserProfileSidebar({
       {...rest}
     >
       <Column center padding>
+        <div className={styles.avatarPreviewContainer}>{<img src={str} /> || <div />}</div>
+
         {canPromote && (
           <Button
             preset="accept"
@@ -103,31 +116,32 @@ export function UserProfileSidebar({
             <FormattedMessage id="user-profile-sidebar.hide-button" defaultMessage="Hide" />
           )}
         </Button>
-        <Button type="button" preset="basic"  onClick={() => {
-          
-          var a=NAF.connection.entities["entities"];
-          var entity1,entity2;
-          var userId2=NAF.clientId;
-          
-            for(var key in a)
-            {
+        <Button
+          type="button"
+          preset="basic"
+          onClick={() => {
+            var a = NAF.connection.entities["entities"];
+            var entity1, entity2;
+            var userId2 = NAF.clientId;
+
+            for (var key in a) {
               var entity = a[key];
-              if(entity.components.networked.attrValue.creator!=null)
-              {
-                if(entity.components.networked.attrValue.creator.toString()==userId.toString())
-                {
-                  entity1=entity;
-                }
-                else if(entity.components.networked.attrValue.creator.toString()==userId2.toString())
-                {
-                  entity2=entity;
+              if (entity.components.networked.attrValue.creator != null) {
+                if (entity.components.networked.attrValue.creator.toString() == userId.toString()) {
+                  entity1 = entity;
+                } else if (entity.components.networked.attrValue.creator.toString() == userId2.toString()) {
+                  entity2 = entity;
                 }
               }
-
             }
-            entity2.object3D.position.set(entity1.object3D.position.x,entity1.object3D.position.y,entity1.object3D.position.z-0.7);
+            entity2.object3D.position.set(
+              entity1.object3D.position.x,
+              entity1.object3D.position.y,
+              entity1.object3D.position.z - 0.7
+            );
             useGoToSelectedAvatar();
-        }}>
+          }}
+        >
           <FormattedMessage id="avatar-teleport" defaultMessage="teleport" />
         </Button>
         {canMute && (
@@ -140,15 +154,14 @@ export function UserProfileSidebar({
             <FormattedMessage id="user-profile-sidebar.kick-button" defaultMessage="Kick" />
           </Button>
         )}
-          <Button preset="basic" onClick={()=>toggleChatSidebar("chat",userId)}>
-            <FormattedMessage id="user-profile-sidebar.chat-button" defaultMessage="Chat" />
-          </Button>
+        <Button preset="basic" onClick={() => toggleChatSidebar("chat", userId)}>
+          <FormattedMessage id="user-profile-sidebar.chat-button" defaultMessage="Chat" />
+        </Button>
       </Column>
     </Sidebar>
   );
 }
-export function getSelected()
-{
+export function getSelected() {
   return userId;
 }
 UserProfileSidebar.propTypes = {
@@ -156,8 +169,9 @@ UserProfileSidebar.propTypes = {
   displayName: PropTypes.string,
   identityName: PropTypes.string,
   avatarPreview: PropTypes.node,
-  avatarId:PropTypes.string,
-  userId:PropTypes.string,
+  avatarId: PropTypes.string,
+  imgUrl: PropTypes.array,
+  userId: PropTypes.string,
   isSignedIn: PropTypes.bool,
   canPromote: PropTypes.bool,
   onPromote: PropTypes.func,
@@ -173,8 +187,7 @@ UserProfileSidebar.propTypes = {
   onBack: PropTypes.func,
   onClose: PropTypes.func,
   toggleChatSidebar: PropTypes.func
-
-}
+};
 
 function useGoToSelectedAvatar() {
   const targetMatrix = new THREE.Matrix4();
@@ -183,12 +196,19 @@ function useGoToSelectedAvatar() {
   affixToWorldUp(targetMatrix, targetMatrix);
   rotateInPlaceAroundWorldUp(targetMatrix, Math.PI, targetMatrix);
 
-  document.querySelector('a-scene').systems["hubs-systems"].characterController.enqueueWaypointTravelTo(targetMatrix, true, {
-    willDisableMotion: false,
-    willDisableTeleporting: false,
-    snapToNavMesh: false,
-    willMaintainInitialOrientation: false
-  });
-
+  document
+    .querySelector("a-scene")
+    .systems["hubs-systems"].characterController.enqueueWaypointTravelTo(targetMatrix, true, {
+      willDisableMotion: false,
+      willDisableTeleporting: false,
+      snapToNavMesh: false,
+      willMaintainInitialOrientation: false
+    });
 }
 
+/*
+async function main() {
+  let urlImg = await getUrl();
+  //console.log(urlImg);
+  return urlImg;
+}*/

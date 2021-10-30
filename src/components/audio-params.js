@@ -128,7 +128,7 @@ AFRAME.registerComponent("audio-params", {
         maxDistance: window.getPreferences("maxDistance") || AvatarAudioDefaults.MAX_DISTANCE,
         coneInnerAngle: window.getPreferences("coneInnerAngle") || AvatarAudioDefaults.INNER_ANGLE,
         coneOuterAngle: window.getPreferences("coneOuterAngle") || AvatarAudioDefaults.OUTER_ANGLE,
-        coneOuterGain: window.getPreferences("coneOuterGain") || AvatarAudioDefaults.OUTER_GAIN,
+        coneOuterGain: window.getPreferences("coneOuterGain") || AvatarAudioDefaults.OUTER_GAIN
       }
     };
     this.avatarRigOrientation = new THREE.Vector3(0, 0, -1);

@@ -21,10 +21,14 @@ import { discordBridgesForPresences } from "../../utils/phoenix-utils";
 import { useIntl } from "react-intl";
 import { MAX_MESSAGE_LENGTH } from "../../utils/chat-message";
 import { PrivatechatBubbles } from "../input/PrivatechatBubbles";
-import styles from "../input/PrivatchatBubbles.scss";
-
+import { getAvatarPreview } from "./../ui-root";
 const ChatContext = createContext({ messageGroups: [], privateMessages: [], sendMessage: () => {} });
 let uniqueMessageId = 0;
+const everyone_value = {
+  id: "everyone",
+  receivedMessageNumber: 0
+};
+const bulles_list = [everyone_value];
 
 const NEW_MESSAGE_GROUP_TIMEOUT = 1000 * 60;
 
@@ -111,6 +115,15 @@ export function ChatContextProvider({ messageDispatch, children }) {
   useEffect(() => {
     function onReceiveMessage(event) {
       const newMessage = event.detail;
+      console.log(newMessage);
+
+      if (newMessage.type == "chat" && newMessage.sessionId != NAF.clientId) {
+        bulles_list.map(option => {
+          if (option.id == "everyone") {
+            option.receivedMessageNumber = 1;
+          }
+        });
+      }
 
       setMessageGroups(messages => updateMessageGroups(messages, newMessage));
 
@@ -125,6 +138,13 @@ export function ChatContextProvider({ messageDispatch, children }) {
     }
     function onReceivePrivateMessage(event) {
       const newMessage = event.detail;
+      if (newMessage.receiverClientId == NAF.clientId) {
+        bulles_list.map(option => {
+          if (option.id == newMessage.sessionId) {
+            option.receivedMessageNumber = 1;
+          }
+        });
+      }
 
       setPrivateMessage(messages => updateMessageGroups(messages, newMessage));
 
@@ -189,7 +209,6 @@ export function ChatSidebarContainer({
   const [onScrollList, listRef, scrolledToBottom] = useMaintainScrollPosition(messageGroups);
   const [message, setMessage] = useState("");
   const intl = useIntl();
-
   const onKeyDown = useCallback(
     e => {
       if (e.key === "Enter" && !e.shiftKey) {
@@ -204,7 +223,7 @@ export function ChatSidebarContainer({
         }
       }
     },
-    [sendMessage, setMessage]
+    [sendMessage, setMessage, userId]
   );
 
   const onSendMessage = useCallback(() => {
@@ -278,13 +297,9 @@ export function ChatSidebarContainer({
 
   const isMobile = AFRAME.utils.device.isMobile();
   const isOverMaxLength = message.length > MAX_MESSAGE_LENGTH;
-
-  //const [users,setUsers_list]=useState([]);
   const users = [];
   const users_private = [];
-  const bulles_list = ["everyone"];
   var i = 1;
-  //const users_temp=[];
   const person = getPresences();
   var name = "Chat";
   if (userId == "everyone") {
@@ -292,8 +307,6 @@ export function ChatSidebarContainer({
   } else {
     name = userName;
   }
-  console.log(messageGroups);
-  console.log(privateMessages);
   return (
     <ChatSidebar onClose={onClose} userName={name}>
       <ChatMessageList ref={listRef} onScroll={onScrollList}>
@@ -316,14 +329,9 @@ export function ChatSidebarContainer({
               const user = option;
               user.messages = message_list;
               users.push(user);
-              //setUsers_list(users => [...users,user]);
               public_chat = false;
             }
             if (i == messageGroups.length) {
-              //if (option.systemMessage) {
-              //return <SystemMessage key={id} {...rest} />;
-              //}
-              //else {
               if (userId == "everyone") {
                 return users.map(({ id, ...rest }) => <ChatMessageGroup key={id} {...rest} />);
               }
@@ -337,7 +345,6 @@ export function ChatSidebarContainer({
         {privateMessages.map(option => {
           const message_list = [];
           const message_list_private = [];
-
           if (userId != "everyone") {
             var private_chat = false;
             option.messages.map(msg => {
@@ -346,23 +353,28 @@ export function ChatSidebarContainer({
                   (msg.receiverClientId == NAF.clientId && option.senderSessionId == userId) ||
                   (msg.receiverClientId == userId && option.senderSessionId == NAF.clientId)
                 ) {
-                  console.log("jj");
                   private_chat = true;
                   message_list_private.push(msg);
                 }
                 if (msg.receiverClientId == NAF.clientId || option.senderSessionId == NAF.clientId) {
                   if (msg.receiverClientId == NAF.clientId) {
-                    const found = bulles_list.find(element => element == option.senderSessionId);
+                    const found = bulles_list.find(element => element.id == option.senderSessionId);
                     if (found == null) {
-                      bulles_list.push(option.senderSessionId);
+                      const element = {
+                        id: option.senderSessionId,
+                        receivedMessageNumber: 0
+                      };
+                      bulles_list.push(element);
                     }
-                    console.log(bulles_list);
                   } else {
-                    const found = bulles_list.find(element => element == msg.receiverClientId);
+                    const found = bulles_list.find(element => element.id == msg.receiverClientId);
                     if (found == null) {
-                      bulles_list.push(msg.receiverClientId);
+                      const element = {
+                        id: msg.receiverClientId,
+                        receivedMessageNumber: 0
+                      };
+                      bulles_list.push(element);
                     }
-                    console.log(bulles_list);
                   }
                 }
               }
@@ -371,19 +383,13 @@ export function ChatSidebarContainer({
               const user = option;
               user.messages = message_list_private;
               users_private.push(user);
-              //setUsers_list(users => [...users,user]);
               private_chat = false;
             }
 
             if (i == privateMessages.length) {
-              //if (option.systemMessage) {
-              //return <SystemMessage key={id} {...rest} />;
-              //} else {
               if (userId != "everyone") {
-                console.log(users_private);
                 return users_private.map(({ id, ...rest }) => <ChatMessageGroup key={id} {...rest} />);
               }
-              //}
             }
             i = i + 1;
           } else {
@@ -391,33 +397,62 @@ export function ChatSidebarContainer({
               if (msg.receiverClientId != null) {
                 if (msg.receiverClientId == NAF.clientId || option.senderSessionId == NAF.clientId) {
                   if (msg.receiverClientId == NAF.clientId) {
-                    const found = bulles_list.find(element => element == option.senderSessionId);
+                    const found = bulles_list.find(element => element.id == option.senderSessionId);
                     if (found == null) {
-                      bulles_list.push(option.senderSessionId);
+                      const element = {
+                        id: option.senderSessionId,
+                        receivedMessageNumber: 0
+                      };
+                      bulles_list.push(element);
                     }
                   } else {
-                    const found = bulles_list.find(element => element == msg.receiverClientId);
+                    const found = bulles_list.find(element => element.id == msg.receiverClientId);
                     if (found == null) {
-                      bulles_list.push(msg.receiverClientId);
+                      const element = {
+                        id: msg.receiverClientId,
+                        receivedMessageNumber: 0
+                      };
+                      bulles_list.push(element);
                     }
                   }
                 }
               }
             });
           }
-          ///rest.messages=message;
         })}
       </ChatMessageList>
 
       <ul className="bubbles-container">
         {bulles_list.map(bulles => {
-          console.log(bulles_list);
+          const a = 0;
+          const tab = getAvatarPreview();
+          let str = "";
+          if (bulles.id == "everyone") {
+            str = "";
+          } else {
+            if (tab.length != 0) {
+              tab.map(element => {
+                console.log(element);
+                console.log(bulles.id);
+                if (element.id == bulles.id) {
+                  str = element.url;
+                  str = str.replace('"', "");
+                  str = str.replace('"', "");
+                }
+              });
+            }
+          }
+
+          //const [receivedMessage, setReceivedMessage] = useState(0);
           return (
             <li className="bubbles">
               <PrivatechatBubbles
+                receivedMessageNumber={bulles.receivedMessageNumber}
+                imgUrl={str}
                 onClick={e => {
+                  bulles.receivedMessageNumber = 0;
                   onClose();
-                  toggleChatSidebar("chat", bulles);
+                  toggleChatSidebar("chat", bulles.id);
                 }}
               />
             </li>

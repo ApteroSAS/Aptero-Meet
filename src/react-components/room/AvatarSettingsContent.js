@@ -16,6 +16,7 @@ export function AvatarSettingsContent({
   onChangeAvatar,
   ...rest
 }) {
+  console.log(avatarPreview);
   return (
     <Column as="form" className={styles.content} {...rest}>
       <TextInputField
@@ -39,7 +40,6 @@ export function AvatarSettingsContent({
         <Button type="button" preset="basic" onClick={onChangeAvatar}>
           <FormattedMessage id="avatar-settings-content.change-avatar-button" defaultMessage="Change Avatar" />
         </Button>
-    
       </div>
       <AcceptButton preset="accept" type="submit" />
     </Column>
