@@ -47,6 +47,10 @@ class UnderPage extends Component {
         return data.underPage;
       });
     });
+
+    
+    let vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
   }
 
   render() {
@@ -60,6 +64,7 @@ class UnderPage extends Component {
           position: "relative",
           //height: this.state.height,
           marginTop: "100vh",
+          marginTop: "calc(var(--vh, 1vh) * 100)",
           width: "1px",
           minWidth: "100%",
         }}
