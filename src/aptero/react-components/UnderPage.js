@@ -42,16 +42,18 @@ class UnderPage extends Component {
   }
 
   componentDidMount() {
-    roomParameters.getRoomParameters().then(data => {
-      if(data.underPage)
-      this.setState((state, props) => {
-        return data.underPage;
+    try {
+      roomParameters.getRoomParameters().then(data => {
+        if (data.underPage)
+          this.setState((state, props) => {
+            return data.underPage;
+          });
       });
-    });
+    } catch (err) {//no params to expect in some scenarios
+    }
 
-    
     let vh = window.innerHeight * 0.01;
-    document.documentElement.style.setProperty('--vh', `${vh}px`);
+    document.documentElement.style.setProperty("--vh", `${vh}px`);
   }
 
   render() {
@@ -67,7 +69,7 @@ class UnderPage extends Component {
           marginTop: "100vh",
           marginTop: "calc(var(--vh, 1vh) * 100)",
           width: "1px",
-          minWidth: "100%",
+          minWidth: "100%"
         }}
       >
         <a
@@ -76,7 +78,7 @@ class UnderPage extends Component {
             position: "absolute",
             top: "calc(-" + bottomIcon.bottom + " - " + bottomIcon.height + ")",
             right: bottomIcon.right,
-            pointerEvents: "auto",
+            pointerEvents: "auto"
           }}
         >
           <img id="fleche" width={bottomIcon.width} height={bottomIcon.height} src={bottomIcon.imgUrl} alt="fleche" />
@@ -106,7 +108,7 @@ function UnderPageHooksWrapper() {
   useEffect(() => {
     if (!loading) {
       document.children[0].classList.add(styles.scrollable);
-      setTimeout(e => console.dir(document.querySelector("#underPage")), 100);
+      // setTimeout(e => console.dir(document.querySelector("#underPage")), 100);
     }
   }, [loading]);
 

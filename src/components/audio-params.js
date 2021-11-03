@@ -100,6 +100,7 @@ AFRAME.registerComponent("audio-params", {
   },
 
   init() {
+    console.log("init audio-params", this)
     this.audioRef = null;
     this.avatarRigPosition = new THREE.Vector3();
     this.avatarAudio = {
@@ -182,6 +183,7 @@ AFRAME.registerComponent("audio-params", {
   },
 
   update() {
+    console.log("update audio-params", this)
     if (this.audioRef) {
       if (this.data.audioType === AudioType.PannerNode) {
         this.audioRef.setDistanceModel(this.data.distanceModel);
@@ -220,6 +222,7 @@ AFRAME.registerComponent("audio-params", {
     }
 
     if (this.normalizer !== null) {
+      console.log("normalizer.apply audio-params", this)
       this.normalizer.apply();
     } else {
       // We one only enable the Normalizer for avatar-audio-source components
@@ -230,6 +233,7 @@ AFRAME.registerComponent("audio-params", {
   },
 
   getAudio: (function() {
+    console.log("getAudio audio-params", this)
     const worldQuat = new THREE.Quaternion();
 
     return function() {
@@ -288,6 +292,8 @@ AFRAME.registerComponent("audio-params", {
   },
 
   enableNormalizer() {
+    
+    console.log("enableNormalizer audio-params", this)
     const audio = this.getAudio();
     if (audio) {
       const avatarAudioSource = this.el.components["avatar-audio-source"];
@@ -323,6 +329,7 @@ AFRAME.registerComponent("audio-params", {
   },
 
   clipGain(gain) {
+    console.log("clipGain audio-params", this)
     if (!this.data.isClipped) {
       this.el.setAttribute("audio-params", {
         isClipped: true,
@@ -333,6 +340,7 @@ AFRAME.registerComponent("audio-params", {
   },
 
   unclipGain() {
+    console.log("unclipGain audio-params", this)
     if (this.data.isClipped) {
       this.el.setAttribute("audio-params", {
         isClipped: false,
