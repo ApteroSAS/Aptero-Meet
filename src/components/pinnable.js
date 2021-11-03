@@ -28,16 +28,11 @@ AFRAME.registerComponent("pinnable", {
     const isMine = NAF.utils.isMine(this.el);
 
     // Avoid firing events during initialization by checking if the pin state has changed before doing so.
-    let pinStateChanged;
-    if(oldData.pinned !== undefined) {
-      pinStateChanged = !!oldData.pinned !== this.data.pinned;
-    }else{
-      //case (pinned == undefined) happens when we call this function withou t changing the pin state
-      pinStateChanged = false;
-    }
+    const pinStateChanged = !!oldData.pinned !== this.data.pinned;
 
     if (this.data.pinned) {
-      if (pinStateChanged || force) {
+      // Aptero add a check for user being signed in
+      if ((pinStateChanged && window.APP.hubChannel.signedIn) || force) {
         this.el.emit("pinned", { el: this.el });
       }
 
