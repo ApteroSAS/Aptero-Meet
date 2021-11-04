@@ -564,7 +564,6 @@ AFRAME.registerComponent("media-video", {
 
     const shouldUpdateSrc = this.data.src && this.data.src !== oldData.src;
     if (shouldUpdateSrc) {
-      console.log(this.data.src + " " +  oldData.src)
       this.updateSrc(oldData);
       return;
     }
@@ -600,9 +599,6 @@ AFRAME.registerComponent("media-video", {
 
     this.audio.setNodeSource(this.mediaElementAudioSource);
     this.el.setObject3D("sound", this.audio);
-
-    console.trace("setAudio media-view", this);
-
     this.el.components["audio-params"].setAudio(this.audio);
 
     // Make sure that the audio is initialized to the right place.
