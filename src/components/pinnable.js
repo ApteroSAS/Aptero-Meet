@@ -31,7 +31,8 @@ AFRAME.registerComponent("pinnable", {
     const pinStateChanged = !!oldData.pinned !== this.data.pinned;
 
     if (this.data.pinned) {
-      if (pinStateChanged || force) {
+      // Aptero add a check for user being signed in
+      if ((pinStateChanged && window.APP.hubChannel.signedIn) || force) {
         this.el.emit("pinned", { el: this.el });
       }
 
