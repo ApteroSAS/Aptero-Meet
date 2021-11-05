@@ -44,7 +44,7 @@ class UnderPage extends Component {
   componentDidMount() {
     try {
       roomParameters.getRoomParameters().then(data => {
-        if (data.underPage)
+        if (data && data.underPage)
           this.setState((state, props) => {
             return data.underPage;
           });
