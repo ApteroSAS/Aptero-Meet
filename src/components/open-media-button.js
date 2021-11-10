@@ -3,6 +3,7 @@ import { guessContentType } from "../utils/media-url-utils";
 import { handleExitTo2DInterstitial } from "../utils/vr-interstitial";
 import { changeHub } from "../change-hub";
 import { duplicateEntryModeOnSrc } from "../aptero/util/EntryMode";
+import {setupIframeButton} from "../aptero/react-components/openIframe";
 
 //aptero
 function isValidHttpUrl(string) {
@@ -49,6 +50,11 @@ AFRAME.registerComponent("open-media-button", {
           }
         }
         this.label.setAttribute("text", "value", label);
+
+        //Aptero
+        if (!this.data.onlyOpenLink) {
+          setupIframeButton(this);
+        };
       }
     };
 
