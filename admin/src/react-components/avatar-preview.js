@@ -292,7 +292,6 @@ class AvatarPreview extends Component {
   };
 
   render() {
-    console.log(avatarGltfUrl);
     return (
       <div className={classNames(styles.preview, this.props.className)}>
         {(!this.props.avatarGltfUrl || (this.state.loading && !this.state.error)) && (
@@ -316,7 +315,6 @@ class AvatarPreview extends Component {
   }
 }
 export function getAvatarPreview() {
-  console.log(this.props.AvatarPreview);
   return this.props.avatarGltfUrl;
 }
 

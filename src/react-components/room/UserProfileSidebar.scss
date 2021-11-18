@@ -5,13 +5,25 @@
   flex-direction: column;
   position: relative;
   align-items: center;
+  overflow: hidden;
+  width: 160px;
+  height: 299px;
+  border-radius: 8px;
 
   /* TODO: This styling into AvatarPreview */
   & > :first-child {
-    width: 168px;
-    height: 300px;
+    max-width: none;
+    width: 350px;
+    /* height: 329px; */
     min-height: 300px;
+    /* overflow: hidden; */
     border-radius: 8px;
-    background-color: theme.$tile-bg-color;
+    background-color: var(--tile-bg-color);
   }
+
+}
+.div_spinner{
+  display: flex;
+  justify-content: center;
+  padding-top: 50%;
 }

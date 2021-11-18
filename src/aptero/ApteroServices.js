@@ -23,7 +23,6 @@ import { notifySceneEntered, startSelfTest, testTick } from "./service/SelfTestS
 import { setlistenerEndShareVideo } from "./adapter/adapter-config";
 import { remoteControlServiceV2 } from "./service/RemoteControlServiceV2";
 import { wait } from "./util/AsyncWaiter";
-import { userFromPresence, usePeopleList } from "./../react-components/room/PeopleSidebarContainer";
 //event handling for iframe #morgane
 window.focus();
 window.addEventListener(

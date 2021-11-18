@@ -10,33 +10,34 @@
 .bubbles{
     margin: 0.4em;
 }
+.img{
+    border-radius: 50%;
+}
 .button {
-    background-color: #12a4ed;
-    border: none;
-    color: white;
-    //padding: 20px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    margin: 4px 2px;
-    height: 30px;
+    position:relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 30px;
+    height: 30px;
+    color: #333333;
+    background: #dddddd;
+    border: none;
+    outline: none;
     border-radius: 50%;
   }
-  .img{
-      border-radius: 50%;
-  }
+
   .icon-button-badge{
-      margin-top: -20px;
-      width: 20px;
-      height: 20px;
-      color:red;
-      padding-left: 27px;
-      padding-bottom: 30px;
-      font-size: 150%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      border-radius: 50%;
+    position:absolute;
+    top: -7px;
+    right: -6px;
+    width: 18px;
+    height: 18px;
+    background: red;
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
   }
+

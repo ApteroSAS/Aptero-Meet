@@ -62,35 +62,17 @@ export default class MessageDispatch extends EventTarget {
     }, 20000);
     */
   }
-  /* 
-  receive(message) {    
-    //if(message.receiverClientId==NAF.clientId||message.senderClientId==NAF.clientId)
-   //{
-     //console.log(message);
-      //this.presenceLogEntries.push(message);
-      
-      this.addToPresenceLog(message);
-      ///this.dispatchEvent(new CustomEvent("message", { detail: message }));
-      console.log(this.presenceLogEntries);
-    //}   
-  }
-  */
 
   receive(message) {
-    console.log(this.presenceLogEntries);
-    console.log(this.presenceLogEntriesPrivate);
     if (message.receiverClientId == null) {
       this.addToPresenceLog(message);
       this.dispatchEvent(new CustomEvent("message", { detail: message }));
     } else {
       if (message.receiverClientId == NAF.clientId || message.sessionId == NAF.clientId) {
-        console.log("k");
         this.addToPresenceLogPrivate(message);
         this.dispatchEvent(new CustomEvent("private", { detail: message }));
       }
     }
-
-    //console.log(message);
   }
 
   log = (messageType, props) => {

@@ -306,8 +306,6 @@ export class UIRoot extends Component {
   componentDidMount() {
     this.props.scene.addEventListener("join", e => {
       this.setState({ people: usePeopleList(this.props.presences, this.props.sessionId) });
-      console.log(this.state.people);
-      console.log(this.props.presences);
       const useFetch = async avatarId => {
         var data;
         const fetchData = async () => {
@@ -859,34 +857,6 @@ export class UIRoot extends Component {
             roomName={this.props.hub.name}
             showJoinRoom={!this.state.waitingOnAudio && !this.props.entryDisallowed}
             onJoinRoom={() => {
-              const people = usePeopleList(this.props.presences, this.props.sessionId);
-              const useFetch = async avatarId => {
-                var data;
-                const fetchData = async () => {
-                  data = await getUrl(avatarId);
-                };
-                await fetchData();
-                return data;
-              };
-              const tab = [];
-              const tab2 = [];
-              var i = 0;
-              people.map(person => {
-                tab.push(useFetch(person.profile.avatarId));
-              });
-              Promise.all(tab).then(urls => {
-                this.setState({ imgTab: urls });
-                people.map(person => {
-                  const user = {
-                    id: person.id,
-                    url: urls[i]
-                  };
-                  i++;
-                  tab2.push(user);
-                  tab.push(useFetch(person.profile.avatarId));
-                });
-                ImageList = tab2;
-              });
               //aptero
               if (!(this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now"))) {
                 this.setState({ entering: true });

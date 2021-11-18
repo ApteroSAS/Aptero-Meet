@@ -16,7 +16,6 @@ export function AvatarSettingsContent({
   onChangeAvatar,
   ...rest
 }) {
-  console.log(avatarPreview);
   return (
     <Column as="form" className={styles.content} {...rest}>
       <TextInputField

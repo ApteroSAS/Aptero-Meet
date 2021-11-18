@@ -59,21 +59,10 @@ export function UserProfileSidebarContainer({
     const [status, setStatus] = useState("idle");
     const [data, setData] = useState("");
     useEffect(() => {
-      //if (!query) return;
-
       const fetchData = async () => {
         setStatus("fetching");
         const data = await getUrl(avatarId);
         setData(data);
-        /*
-        if ("caches" in window) {
-          // Opening given cache and putting our data into it
-          caches.open(cacheName).then(cache => {
-            cache.put(data, data);
-            console.log("h");
-          });
-        }
-        */
         setStatus("fetched");
       };
 

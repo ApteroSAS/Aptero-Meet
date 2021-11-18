@@ -16,7 +16,7 @@ import AuthChannel from "../../utils/auth-channel";
 import SceneEntryManager from "../../scene-entry-manager";
 import toggleSidebar, { UIRoot } from "../ui-root";
 import { rotateInPlaceAroundWorldUp, affixToWorldUp } from "../../utils/three-utils";
-import cons from "consolidate";
+import { Spinner } from "../misc/Spinner";
 export function remountUI(props) {
   uiProps = { ...uiProps, ...props };
   mountUI(uiProps);
@@ -47,7 +47,6 @@ export function UserProfileSidebar({
   ...rest
 }) {
   const intl = useIntl();
-  //const [imgUrl, setImg] = useState("");
   let str = "";
   if (imgUrl.length != 0) {
     imgUrl.map(e => {
@@ -67,7 +66,16 @@ export function UserProfileSidebar({
       {...rest}
     >
       <Column center padding>
-        <div className={styles.avatarPreviewContainer}>{<img src={str} /> || <div />}</div>
+        {str == "" && (
+          <div className={styles.avatarPreviewContainer}>
+            {
+              <div className="div_spinner">
+                <Spinner />
+              </div>
+            }
+          </div>
+        )}
+        {str != "" && <div className={styles.avatarPreviewContainer}>{<img src={str} />}</div>}
 
         {canPromote && (
           <Button
@@ -205,10 +213,3 @@ function useGoToSelectedAvatar() {
       willMaintainInitialOrientation: false
     });
 }
-
-/*
-async function main() {
-  let urlImg = await getUrl();
-  //console.log(urlImg);
-  return urlImg;
-}*/

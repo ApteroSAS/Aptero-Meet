@@ -1171,7 +1171,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       streaming: meta.streaming,
       recording: meta.recording
     });
-    //scene.emit("join");
   });
   events.on(`hub:join`, ({ key, meta }) => {
     if (

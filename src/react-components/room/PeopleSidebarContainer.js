@@ -53,7 +53,6 @@ function PeopleListContainer({ hubChannel, people, onSelectPerson, onClose }) {
       }
     }
   }, [people, hubChannel]);
-  console.log(imageList);
   return (
     <PeopleSidebar
       people={people}
