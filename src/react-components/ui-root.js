@@ -1753,7 +1753,10 @@ export function getAvatarPreview() {
 function UIRootHooksWrapper(props) {
   useAccessibleOutlineStyle();
   const breakpoint = useCssBreakpoints();
-
+  var people = [];
+  if (props.presences != null && props.sessionId != null) {
+    people = usePeopleList(props.presences, props.sessionId);
+  }
   useEffect(() => {
     const el = document.getElementById("preload-overlay");
     el.classList.add("loaded");
@@ -1773,7 +1776,12 @@ function UIRootHooksWrapper(props) {
     };
   }, [props.scene]);
   return (
-    <ChatContextProvider messageDispatch={props.messageDispatch}>
+    <ChatContextProvider
+      messageDispatch={props.messageDispatch}
+      presences={props.presences}
+      sessionId={props.sessionId}
+      people={people}
+    >
       <ObjectListProvider scene={props.scene}>
         <UIRoot breakpoint={breakpoint} {...props} />
         <AptRoot />

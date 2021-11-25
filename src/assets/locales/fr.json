@@ -56,6 +56,7 @@
   "chat-sidebar-container.input-placeholder.empty-room": "Il n'y a personne pour le moment...",
     "chat-sidebar-container.input-placeholder.empty-room-bot": "Envoyer le message vers {discordChannels}",
     "chat-sidebar-container.input-placeholder.occupants": "{occupantCount, plural, one {Envoyer un message à un autre...} other {Envoyer un message aux {occupantCount} autres...} }",
+    "chat-sidebar-container.input-placeholder.private-user":"Envoyer un message   à {userName}",
     "chat-sidebar-container.input-placeholder.occupants-and-bot": "{occupantCount, plural, one {Envoyer un message à un autre et {discordChannels}...} other {Envoyer un message aux {occupantCount} autres et {discordChannels}...} }",
     "chat-sidebar.input.placeholder": "Message...",
     "chat-sidebar.log-message.audio-normalization-disabled": "l'audioNormalization est désactivée.",

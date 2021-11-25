@@ -23,6 +23,7 @@ import { MAX_MESSAGE_LENGTH } from "../../utils/chat-message";
 import { PrivatechatBubbles } from "../input/PrivatechatBubbles";
 import { getAvatarPreview } from "./../ui-root";
 import { usePeopleList } from "./PeopleSidebarContainer";
+import { Prop } from "../debug-panel/Prop";
 const ChatContext = createContext({ messageGroups: [], privateMessages: [], sendMessage: () => {} });
 let uniqueMessageId = 0;
 const everyone_value = {
@@ -30,7 +31,6 @@ const everyone_value = {
   receivedMessageNumber: 0
 };
 var bulles_list = [everyone_value];
-
 const NEW_MESSAGE_GROUP_TIMEOUT = 1000 * 60;
 
 function shouldCreateNewMessageGroup(messageGroups, newMessage, now) {
@@ -179,7 +179,7 @@ function updateprivateMessageGroups(privateMessages, newMessage) {
   }
 }
 
-export function ChatContextProvider({ messageDispatch, children }) {
+export function ChatContextProvider({ messageDispatch, children, people }) {
   const [messageGroups, setMessageGroups] = useState([]);
   const [privateMessages, setPrivateMessage] = useState([]);
   const [unreadMessages, setUnreadMessages] = useState(false);
@@ -289,7 +289,10 @@ export function ChatContextProvider({ messageDispatch, children }) {
 
 ChatContextProvider.propTypes = {
   children: PropTypes.node,
-  messageDispatch: PropTypes.object
+  messageDispatch: PropTypes.object,
+  presences: PropTypes.object,
+  sessionId: PropTypes.string,
+  people: PropTypes.array
 };
 
 export function ChatSidebarContainer({
@@ -316,7 +319,6 @@ export function ChatSidebarContainer({
   const intl = useIntl();
   var name;
   const people = usePeopleList(presences, NAF.clientId);
-  //const test = cleanBulle_list(bulles_list, people);
   bulles_list = bulles_list_chat;
   if (userId != "everyone") {
     people.map(person => {
@@ -399,14 +401,24 @@ export function ChatSidebarContainer({
     }
   } else {
     if (discordBridges.length === 0) {
-      placeholder = intl.formatMessage(
-        {
-          id: "chat-sidebar-container.input-placeholder.occupants",
-          defaultMessage:
-            "{occupantCount, plural, one {Send message to one other...} other {Send message to {occupantCount} others...} }"
-        },
-        { discordChannels: discordSnippet, occupantCount: occupantCount - 1 }
-      );
+      if (userId == "everyone") {
+        placeholder = intl.formatMessage(
+          {
+            id: "chat-sidebar-container.input-placeholder.occupants",
+            defaultMessage:
+              "{occupantCount, plural, one {Send message  to one other...} other {Send message  to {occupantCount} others...} }"
+          },
+          { discordChannels: discordSnippet, occupantCount: occupantCount - 1 }
+        );
+      } else {
+        placeholder = intl.formatMessage(
+          {
+            id: "chat-sidebar-container.input-placeholder.private-user",
+            defaultMessage: "Send message  to {userName}"
+          },
+          { userName: name }
+        );
+      }
     } else {
       placeholder = intl.formatMessage(
         {
@@ -545,8 +557,10 @@ export function ChatSidebarContainer({
                 tab.map(element => {
                   if (element.id == bulles.id) {
                     str = element.url;
-                    str = str.replace('"', "");
-                    str = str.replace('"', "");
+                    if (str != null) {
+                      str = str.replace('"', "");
+                      str = str.replace('"', "");
+                    }
                   }
                 });
               }
@@ -619,7 +633,8 @@ export function ChatToolbarButtonContainer(props) {
 }
 export function cleanBulle_list(bulles_list, people) {
   var found = false;
-  var test = bulles_list;
+  const test = [];
+  test.push(bulles_list[0]);
   bulles_list.map(item => {
     if (item.id != "everyone") {
       people.map(person => {
@@ -627,10 +642,8 @@ export function cleanBulle_list(bulles_list, people) {
           found = true;
         }
       });
-      if (!found) {
-        test = test.filter(function(el) {
-          return el.id !== item.id;
-        });
+      if (found) {
+        test.push(item);
       }
       found = false;
     }
