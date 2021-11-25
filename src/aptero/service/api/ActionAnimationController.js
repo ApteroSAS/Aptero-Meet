@@ -1,5 +1,6 @@
 import { networkService } from "../NetworkService";
 import { customActionRegister } from "./CustomActionRegister";
+import { findAncestorWithComponent } from "../../../utils/scene-graph";
 
 export class ActionAnimationController{
 
@@ -14,8 +15,8 @@ export class ActionAnimationController{
     }
 
     setup(htmlElement,action,actionid){
-
-        let mixer = htmlElement.components["animation-mixer"].mixer;
+        const mixerEl = findAncestorWithComponent(htmlElement, "animation-mixer");
+        let mixer = mixerEl && mixerEl.components["animation-mixer"].mixer;
         let actionAnimation = mixer.clipAction(action.data);
         if (actionAnimation) {
             customActionRegister.actions[actionid] =

@@ -48,7 +48,6 @@ async function enableChromeAEC(gainNode) {
   const loopbackDestination = context.createMediaStreamDestination();
   const outboundPeerConnection = new RTCPeerConnection();
   const inboundPeerConnection = new RTCPeerConnection();
-  console.error("new peer connection")
 
   const onError = e => {
     console.error("enableChromeAEC: RTCPeerConnection loopback initialization error", e);
@@ -129,6 +128,7 @@ export class AudioSystem {
   constructor(sceneEl) {
     this._sceneEl = sceneEl;
     this._sceneEl.audioListener = this._sceneEl.audioListener || new THREE.AudioListener();
+    this._sceneEl.audioListener.gain.gain.value = 0;
     if (this._sceneEl.camera) {
       this._sceneEl.camera.add(this._sceneEl.audioListener);
     }
@@ -222,7 +222,7 @@ export class AudioSystem {
         document.body.removeEventListener("touchend", this._resumeAudioContext, false);
         document.body.removeEventListener("mouseup", this._resumeAudioContext, false);
       }
-    }, 0);
+    }, 100);
   };
 
   // Webkit mobile fix

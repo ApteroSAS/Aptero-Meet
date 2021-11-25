@@ -629,6 +629,7 @@ export class UIRoot extends Component {
   beginOrSkipAudioSetup = () => {
     const skipAudioSetup = this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now");
 
+    AFRAME.scenes[0].audioListener.gain.gain.setTargetAtTime(1, AFRAME.scenes[0].audioListener.context.currentTime, 0.2);
     if (skipAudioSetup || window.APP_CONFIG.adapterParams.adapter === "none") {
       this.onAudioReadyButton();
     } else {
@@ -839,14 +840,15 @@ export class UIRoot extends Component {
     this.setState({ entering: false });
   };
 
-  first = false; //aptero
+  //first = false;//aptero
   renderEntryStartPanel = () => {
     const { hasAcceptedProfile, hasChangedName } = this.props.store.state.activity;
     let promptForNameAndAvatarBeforeEntry = this.props.hubIsBound ? !hasAcceptedProfile : !hasChangedName;
-    if (!this.first && this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now")) {
+    /*if(!this.first && (this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now"))){
       this.first = true;
+      console.log(this);
       setTimeout(() => this.handleForceEntry(), 500);
-    }
+    }*/
     // TODO: What does onEnteringCanceled do?
     return (
       aptGuiVisible && (
@@ -871,19 +873,31 @@ export class UIRoot extends Component {
               } else {
                 this.handleForceEntry();
               }
-            }}
-            showEnterOnDevice={!this.state.waitingOnAudio && !this.props.entryDisallowed && !isMobileVR}
-            onEnterOnDevice={() => this.attemptLink()}
-            showSpectate={!this.state.waitingOnAudio}
-            onSpectate={() => this.setState({ watching: true })}
-            showOptions={this.props.hubChannel.canOrWillIfCreator("update_hub")}
-            onOptions={() => {
-              this.props.performConditionalSignIn(
-                () => this.props.hubChannel.can("update_hub"),
-                () => this.setSidebar("room-settings"),
-                SignInMessages.roomSettings
-              );
-            }}
+            } else {
+              this.handleForceEntry();
+            }
+          }}
+          showEnterOnDevice={!this.state.waitingOnAudio && !this.props.entryDisallowed && !isMobileVR}
+          onEnterOnDevice={() => this.attemptLink()}
+          showSpectate={!this.state.waitingOnAudio}
+          onSpectate={() => {
+            AFRAME.scenes[0].audioListener.gain.gain.setTargetAtTime(1, AFRAME.scenes[0].audioListener.context.currentTime, 0.2);
+            this.setState({ watching: true })
+          }}
+          showOptions={this.props.hubChannel.canOrWillIfCreator("update_hub")}
+          onOptions={() => {
+            this.props.performConditionalSignIn(
+              () => this.props.hubChannel.can("update_hub"),
+              () => this.setSidebar("room-settings"),
+              SignInMessages.roomSettings
+            );
+          }}
+        />
+        {!this.state.waitingOnAudio && (
+          <EntryStartPanel
+            hubChannel={this.props.hubChannel}
+            entering={this.state.entering}
+            onEnteringCanceled={this.onEnteringCanceled}
           />
           {!this.state.waitingOnAudio && (
             <EntryStartPanel
@@ -1237,7 +1251,7 @@ export class UIRoot extends Component {
             onClick: () => this.setSidebar("room-info")
           },
           (this.props.breakpoint === "sm" || this.props.breakpoint === "md") &&
-            (this.props.hub.entry_mode !== "invite" || this.props.hubChannel.can("update_hub")) && {
+            this.props.hub && (this.props.hub.entry_mode !== "invite" || this.props.hubChannel.can("update_hub")) && {
               id: "invite",
               label: <FormattedMessage id="more-menu.invite" defaultMessage="Invite" />,
               icon: InviteIcon,

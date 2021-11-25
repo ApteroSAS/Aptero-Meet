@@ -7,6 +7,9 @@ export class ActionController {
   }
 
   process(jsonData, id, sceneuuid, meshuuid, meshName, masterindex) {
+    if(!jsonData){
+      return;
+    }
     //apt.action.controller
     /*let example = [{
       triggers: [{
@@ -24,8 +27,10 @@ export class ActionController {
     if (typeof jsonData === "string" && jsonData.startsWith("\"") && jsonData.endsWith("\"")) {
       jsonData = jsonData.substring(1, jsonData.length - 1);
     }
-    if (typeof jsonData === "string") {
-      jsonData = jsonData.replaceAll("\\\"","\"");
+    if (typeof jsonData === "string" ) {
+      if(jsonData.replaceAll) {
+        jsonData = jsonData.replaceAll("\\\"", "\"");
+      }
       jsonData = JSON.parse(jsonData);
     }
     jsonData.forEach(async (entry, index) => {

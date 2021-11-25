@@ -91,13 +91,14 @@ export class SelfTestServiceModule {
 
   updateAllFromPresence() {
     const state = window.APP.hubChannel.presence.state;
-    Object.keys(window.APP.hubChannel.presence.state).forEach(clientID => {
-      if (clientID !== NAF.clientId &&
-        state[clientID].metas[0].profile.displayName &&
-        state[clientID].metas[0].profile.displayName.startsWith("TEST_BOT_")) {
-        this.createClient(clientID);
-        this.state.clients[clientID].displayName = state[clientID].metas[0].profile.displayName;
-        this.state.clients[clientID].identityName = state[clientID].metas[0].profile.identityName;
+    Object.keys(state).forEach(clientID => {
+      if (clientID !== NAF.clientId) {
+        const profile = state[clientID].metas[0].profile;
+        if (profile.displayName && profile.displayName.startsWith("TEST_BOT_")) {
+          this.createClient(clientID);
+          this.state.clients[clientID].displayName = profile.displayName;
+          this.state.clients[clientID].identityName = profile.identityName;
+        }
       }
     });
     this.notifyUpdate();
@@ -109,6 +110,9 @@ export class SelfTestServiceModule {
 
   notifySceneEntered() {
     if (this.testMode) {
+      setInterval(()=>{
+        this.updateAllFromPresence();
+      },1000);
       AFRAME.scenes[0].addEventListener("presence_updated", (e) => {
         this.updateAllFromPresence();
         //special part to be sure to have the name

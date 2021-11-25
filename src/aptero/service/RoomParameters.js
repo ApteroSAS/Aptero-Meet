@@ -11,7 +11,8 @@ export class RoomParameters {
             axios.get(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/room/room/" + roomSID).then(resp => {
                 resolve(resp.data);
             }).catch(reason => {
-                reject(reason);
+                resolve({});
+                console.error(reason);
             });
         });
     }

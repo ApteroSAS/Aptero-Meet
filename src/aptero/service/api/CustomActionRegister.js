@@ -193,7 +193,7 @@ export class CustomActionRegister {
         }
       });
 
-      if (entity.components["media-video"].data.src.startsWith("hubs://")) {
+      if (entity.components["media-video"] && entity.components["media-video"].data.src.startsWith("hubs://")) {
         entity.setAttribute("stop-share-screen-on-destroy", { target: NAF.clientId });
       }
       entity.setAttribute("release-media-frame-on-destroy", { target: actionData.action.mediaFrame });
@@ -244,7 +244,7 @@ export class CustomActionRegister {
         if (capturedEl) {
           //1.1 stop sharing
           const scene = capturedEl.sceneEl;
-          if (capturedEl.components["media-video"].data.src.startsWith("hubs://")) {
+          if (capturedEl.components["media-video"] && capturedEl.components["media-video"].data.src.startsWith("hubs://")) {
             //hubs:// is the protocole for sharescreen and webcam media
             scene.emit("action_end_video_sharing");
           }

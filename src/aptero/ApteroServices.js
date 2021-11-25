@@ -19,7 +19,7 @@ import "./adapter/adapter-config";
 import { ThirdPersonService } from "./service/ThirdPersonService";
 import { aptLogger } from "./service/log/Logger";
 import { minimumQualityService } from "./service/MinimumQualityService";
-import { notifySceneEntered, startSelfTest, testTick } from "./service/SelfTestService.loader";
+import { testServiceNotifySceneEntered, startSelfTest, testTick } from "./service/SelfTestService.loader";
 import { setlistenerEndShareVideo } from "./adapter/adapter-config";
 import { remoteControlServiceV2 } from "./service/RemoteControlServiceV2";
 import { wait } from "./util/AsyncWaiter";
@@ -98,9 +98,7 @@ export class ApteroServices {
   }
 
   async onEnterRoom() {
-    await wait(() => {
-      return AFRAME && AFRAME.scenes && AFRAME.scenes[0];
-    });
+    await wait(()=>{return AFRAME && AFRAME.scenes && AFRAME.scenes[0] && AFRAME.scenes[0].systems});
     await setlistenerEndShareVideo();
     await roomParameters.applyRoomParameters();
     aptLogger.setUserId(window.APP.store.credentialsAccountId);
@@ -129,7 +127,7 @@ export class ApteroServices {
 
   notifySceneEntered() {
     minimumQualityService.initialCheckFinished();
-    notifySceneEntered();
+    testServiceNotifySceneEntered();
     setTimeout(() => {
       this.thirdPersonService.storeUpdated();
       sendIframeMessage("entered", {});

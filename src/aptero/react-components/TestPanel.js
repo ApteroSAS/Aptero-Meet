@@ -40,7 +40,7 @@ export default class TestPanel extends Component {
             <div>throw error <span id="test-throw-error-state">{this.state.errorDetected?"true":"false"}</span></div>
             <div>console error <span id="test-console-error-state">{this.state.consoleErrorDetected?"true":"false"}</span></div>
             <div>mic error <span id="test-mic-error-state">{this.state.micErrorDetected?"true":"false"}</span></div>
-            <div>mic error <span id="test-clients-number">{this.state.clients?Object.keys(this.state.clients).size:0}</span></div>
+            <div>total client seen <span id="test-clients-number">{this.state.clients?Object.keys(this.state.clients).length:0}</span></div>
             <div id="test-clients-list">
             {this.state.clients && Object.keys(this.state.clients).map(x => {
               return <div className="test-client" key={x}>{JSON.stringify(this.state.clients[x])}</div>

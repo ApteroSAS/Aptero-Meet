@@ -285,6 +285,8 @@ AFRAME.registerComponent("audio-params", {
 
   setAudio(audio) {
     this.audioRef = audio;
+    //Aptero
+    this.update();
   },
 
   enableNormalizer() {

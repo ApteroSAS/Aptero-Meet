@@ -949,9 +949,13 @@ export default class DialogAdapter extends EventEmitter {
   }
 
   cleanUpLocalState() {
-    this._sendTransport && this._sendTransport.close();
+    try {
+      this._sendTransport && this._sendTransport.close();
+      this._recvTransport && this._recvTransport.close();
+    }catch (e) {
+      /* ignore cleanup error */
+    }
     this._sendTransport = null;
-    this._recvTransport && this._recvTransport.close();
     this._recvTransport = null;
     this._micProducer = null;
     this._shareProducer = null;
