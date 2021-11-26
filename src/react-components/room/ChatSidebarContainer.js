@@ -1,5 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import PropTypes from "prop-types";
+import DropDownChatList, { getPersonName } from "./DropDownChatList";
+import { getPresences } from "./DropDownChatList";
 import {
   ChatSidebar,
   ChatMessageGroup,
@@ -18,11 +20,17 @@ import { spawnChatMessage } from "../chat-message";
 import { discordBridgesForPresences } from "../../utils/phoenix-utils";
 import { useIntl } from "react-intl";
 import { MAX_MESSAGE_LENGTH } from "../../utils/chat-message";
-
-const ChatContext = createContext({ messageGroups: [], sendMessage: () => {} });
-
+import { PrivatechatBubbles } from "../input/PrivatechatBubbles";
+import { getAvatarPreview } from "./../ui-root";
+import { usePeopleList } from "./PeopleSidebarContainer";
+import { Prop } from "../debug-panel/Prop";
+const ChatContext = createContext({ messageGroups: [], privateMessages: [], sendMessage: () => {} });
 let uniqueMessageId = 0;
-
+const everyone_value = {
+  id: "everyone",
+  receivedMessageNumber: 0
+};
+var bulles_list = [everyone_value];
 const NEW_MESSAGE_GROUP_TIMEOUT = 1000 * 60;
 
 function shouldCreateNewMessageGroup(messageGroups, newMessage, now) {
@@ -33,6 +41,24 @@ function shouldCreateNewMessageGroup(messageGroups, newMessage, now) {
   const lastMessageGroup = messageGroups[messageGroups.length - 1];
 
   if (lastMessageGroup.senderSessionId !== newMessage.sessionId) {
+    return true;
+  }
+
+  const lastMessage = lastMessageGroup.messages[lastMessageGroup.messages.length - 1];
+
+  return now - lastMessage.timestamp > NEW_MESSAGE_GROUP_TIMEOUT;
+}
+function shouldCreateNewPrivateMessageGroup(privateMessages, newMessage, now) {
+  if (privateMessages.length === 0) {
+    return true;
+  }
+
+  const lastMessageGroup = privateMessages[privateMessages.length - 1];
+
+  if (
+    lastMessageGroup.senderSessionId !== newMessage.sessionId ||
+    lastMessageGroup.userReceiverId !== newMessage.receiverClientId
+  ) {
     return true;
   }
 
@@ -67,6 +93,32 @@ function processChatMessage(messageGroups, newMessage) {
 
   return [...messageGroups, { ...lastMessageGroup }];
 }
+function processPrivateChatMessage(privateMessage, newMessage) {
+  const now = Date.now();
+  const { name, sent, sessionId, receiverClientId, ...messageProps } = newMessage;
+  if (shouldCreateNewPrivateMessageGroup(privateMessage, newMessage, now)) {
+    return [
+      ...privateMessage,
+      {
+        id: uniqueMessageId++,
+        timestamp: now,
+        sent,
+        sender: name,
+        senderSessionId: sessionId,
+        userReceiverId: receiverClientId,
+        messages: [{ id: uniqueMessageId++, timestamp: now, ...messageProps }]
+      }
+    ];
+  }
+
+  const lastMessageGroup = privateMessage.pop();
+  lastMessageGroup.messages = [
+    ...lastMessageGroup.messages,
+    { id: uniqueMessageId++, timestamp: now, ...messageProps }
+  ];
+
+  return [...privateMessage, { ...lastMessageGroup }];
+}
 
 // Returns the new message groups array when we receive a message.
 // If the message is ignored, we return the original message group array.
@@ -98,39 +150,111 @@ function updateMessageGroups(messageGroups, newMessage) {
       return messageGroups;
   }
 }
+function updateprivateMessageGroups(privateMessages, newMessage) {
+  switch (newMessage.type) {
+    case "join":
+    case "entered":
+    case "leave":
+    case "display_name_changed":
+    case "scene_changed":
+    case "hub_name_changed":
+    case "hub_changed":
+    case "log":
+      return [
+        ...privateMessages,
+        {
+          id: uniqueMessageId++,
+          systemMessage: true,
+          timestamp: Date.now(),
+          ...newMessage
+        }
+      ];
+    case "chat":
+    case "image":
+    case "photo":
+    case "video":
+      return processPrivateChatMessage(privateMessages, newMessage);
+    default:
+      return privateMessages;
+  }
+}
 
-export function ChatContextProvider({ messageDispatch, children }) {
+export function ChatContextProvider({ messageDispatch, children, people }) {
   const [messageGroups, setMessageGroups] = useState([]);
+  const [privateMessages, setPrivateMessage] = useState([]);
   const [unreadMessages, setUnreadMessages] = useState(false);
+  const [test_messages, settestmessage] = useState([]);
+  const [test_messages_public, settestmessagepublic] = useState([]);
+  var bulles_list_chat = bulles_list;
+  //getPeople();
+  useEffect(() => {
+    function onReceiveMessage(event) {
+      const newMessage = event.detail;
 
-  useEffect(
-    () => {
-      function onReceiveMessage(event) {
-        const newMessage = event.detail;
-        setMessageGroups(messages => updateMessageGroups(messages, newMessage));
+      if (newMessage.type == "chat" && newMessage.sessionId != NAF.clientId) {
+        bulles_list.map(option => {
+          if (option.id == "everyone") {
+            option.receivedMessageNumber = 1;
+          }
+        });
+      }
+      settestmessagepublic(test_messages_public => [...test_messages_public, newMessage]);
+      setMessageGroups(messages => updateMessageGroups(messages, newMessage));
 
-        if (
-          newMessage.type === "chat" ||
-          newMessage.type === "image" ||
-          newMessage.type === "photo" ||
-          newMessage.type === "video"
-        ) {
-          setUnreadMessages(true);
+      if (
+        newMessage.type === "chat" ||
+        newMessage.type === "image" ||
+        newMessage.type === "photo" ||
+        newMessage.type === "video"
+      ) {
+        setUnreadMessages(true);
+      }
+    }
+    function onReceivePrivateMessage(event) {
+      const newMessage = event.detail;
+
+      if (newMessage.receiverClientId == NAF.clientId) {
+        const found = bulles_list_chat.find(element => element.id == newMessage.sessionId);
+        if (found == null) {
+          const element = {
+            id: newMessage.sessionId,
+            receivedMessageNumber: 1
+          };
+          bulles_list_chat.push(element);
+        } else {
+          bulles_list_chat.map(option => {
+            if (option.id == newMessage.sessionId) {
+              option.receivedMessageNumber = 1;
+            }
+          });
         }
       }
 
+      settestmessage(test_messages => [...test_messages, newMessage]);
+      setPrivateMessage(messages => updateprivateMessageGroups(messages, newMessage));
+
+      if (
+        newMessage.type === "chat" ||
+        newMessage.type === "image" ||
+        newMessage.type === "photo" ||
+        newMessage.type === "video"
+      ) {
+        setUnreadMessages(true);
+      }
+    }
+
+    if (messageDispatch) {
+      messageDispatch.addEventListener("message", onReceiveMessage);
+      messageDispatch.addEventListener("private", onReceivePrivateMessage);
+    }
+
+    return () => {
       if (messageDispatch) {
-        messageDispatch.addEventListener("message", onReceiveMessage);
+        messageDispatch.removeEventListener("message", onReceiveMessage);
+        messageDispatch.removeEventListener("private", onReceivePrivateMessage);
       }
-
-      return () => {
-        if (messageDispatch) {
-          messageDispatch.removeEventListener("message", onReceiveMessage);
-        }
-      };
-    },
-    [messageDispatch, setMessageGroups, setUnreadMessages]
-  );
+    };
+  }, [messageDispatch, setMessageGroups, setPrivateMessage, setUnreadMessages]);
 
   const sendMessage = useCallback(
     message => {
@@ -141,15 +265,23 @@ export function ChatContextProvider({ messageDispatch, children }) {
     [messageDispatch]
   );
 
-  const setMessagesRead = useCallback(
-    () => {
-      setUnreadMessages(false);
-    },
-    [setUnreadMessages]
-  );
+  const setMessagesRead = useCallback(() => {
+    setUnreadMessages(false);
+  }, [setUnreadMessages]);
 
   return (
-    <ChatContext.Provider value={{ messageGroups, unreadMessages, sendMessage, setMessagesRead }}>
+    <ChatContext.Provider
+      value={{
+        messageGroups,
+        privateMessages,
+        test_messages,
+        test_messages_public,
+        unreadMessages,
+        sendMessage,
+        setMessagesRead,
+        bulles_list_chat
+      }}
+    >
       {children}
     </ChatContext.Provider>
   );
@@ -157,35 +289,73 @@ export function ChatContextProvider({ messageDispatch, children }) {
 
 ChatContextProvider.propTypes = {
   children: PropTypes.node,
-  messageDispatch: PropTypes.object
+  messageDispatch: PropTypes.object,
+  presences: PropTypes.object,
+  sessionId: PropTypes.string,
+  people: PropTypes.array
 };
 
-export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occupantCount, onClose }) {
-  const { messageGroups, sendMessage, setMessagesRead } = useContext(ChatContext);
+export function ChatSidebarContainer({
+  scene,
+  userId,
+  userName,
+  canSpawnMessages,
+  presences,
+  occupantCount,
+  onClose,
+  toggleChatSidebar
+}) {
+  const {
+    messageGroups,
+    privateMessages,
+    test_messages,
+    test_messages_public,
+    sendMessage,
+    setMessagesRead,
+    bulles_list_chat
+  } = useContext(ChatContext);
   const [onScrollList, listRef, scrolledToBottom] = useMaintainScrollPosition(messageGroups);
   const [message, setMessage] = useState("");
   const intl = useIntl();
-
+  var name;
+  const people = usePeopleList(presences, NAF.clientId);
+  bulles_list = bulles_list_chat;
+  if (userId != "everyone") {
+    people.map(person => {
+      if (person.id == userId) {
+        name = person.profile.displayName;
+      }
+    });
+  } else {
+    name = "Chat";
+  }
   const onKeyDown = useCallback(
     e => {
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
         if (e.target.value.length <= MAX_MESSAGE_LENGTH) {
-          sendMessage(e.target.value);
+          if (userId == "everyone") {
+            sendMessage(e.target.value);
+            name = "Chat";
+          } else {
+            NAF.connection.adapter.hubChannel.receivePrivateClientId(userId, e.target.value);
+          }
           setMessage("");
         }
       }
     },
-    [sendMessage, setMessage]
+    [sendMessage, setMessage, userId]
   );
 
-  const onSendMessage = useCallback(
-    () => {
+  const onSendMessage = useCallback(() => {
+    if (userId == "everyone") {
       sendMessage(message.substring(0, MAX_MESSAGE_LENGTH));
-      setMessage("");
-    },
-    [message, sendMessage, setMessage]
-  );
+    } else {
+      NAF.connection.adapter.hubChannel.receivePrivateClientId(userId, message.substring(0, MAX_MESSAGE_LENGTH));
+    }
+
+    setMessage("");
+  }, [message, sendMessage, setMessage]);
 
   const onSpawnMessage = () => {
     spawnChatMessage(message);
@@ -204,14 +374,11 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
     [scene]
   );
 
-  useEffect(
-    () => {
-      if (scrolledToBottom) {
-        setMessagesRead();
-      }
-    },
-    [messageGroups, scrolledToBottom, setMessagesRead]
-  );
+  useEffect(() => {
+    if (scrolledToBottom) {
+      setMessagesRead();
+    }
+  }, [messageGroups, scrolledToBottom, setMessagesRead]);
 
   const discordBridges = discordBridgesForPresences(presences);
   const discordSnippet = discordBridges.map(ch => "#" + ch).join(", ");
@@ -234,14 +401,24 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
     }
   } else {
     if (discordBridges.length === 0) {
-      placeholder = intl.formatMessage(
-        {
-          id: "chat-sidebar-container.input-placeholder.occupants",
-          defaultMessage:
-            "{occupantCount, plural, one {Send message to one other...} other {Send message to {occupantCount} others...} }"
-        },
-        { discordChannels: discordSnippet, occupantCount: occupantCount - 1 }
-      );
+      if (userId == "everyone") {
+        placeholder = intl.formatMessage(
+          {
+            id: "chat-sidebar-container.input-placeholder.occupants",
+            defaultMessage:
+              "{occupantCount, plural, one {Send message  to one other...} other {Send message  to {occupantCount} others...} }"
+          },
+          { discordChannels: discordSnippet, occupantCount: occupantCount - 1 }
+        );
+      } else {
+        placeholder = intl.formatMessage(
+          {
+            id: "chat-sidebar-container.input-placeholder.private-user",
+            defaultMessage: "Send message  to {userName}"
+          },
+          { userName: name }
+        );
+      }
     } else {
       placeholder = intl.formatMessage(
         {
@@ -256,17 +433,155 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
 
   const isMobile = AFRAME.utils.device.isMobile();
   const isOverMaxLength = message.length > MAX_MESSAGE_LENGTH;
+  const users = [];
+  const users_private = [];
+  var i = 1;
   return (
-    <ChatSidebar onClose={onClose}>
+    <ChatSidebar onClose={onClose} userName={name}>
       <ChatMessageList ref={listRef} onScroll={onScrollList}>
-        {messageGroups.map(({ id, systemMessage, ...rest }) => {
-          if (systemMessage) {
-            return <SystemMessage key={id} {...rest} />;
+        {messageGroups.map(option => {
+          const message_list = [];
+          const message_list_private = [];
+
+          if (userId == "everyone") {
+            var public_chat = false;
+
+            if (option.messages != null) {
+              option.messages.map(msg => {
+                if (msg.receiverClientId == null) {
+                  public_chat = true;
+                  message_list.push(msg);
+                }
+              });
+            }
+            if (public_chat) {
+              const user = option;
+              user.messages = message_list;
+              users.push(user);
+              public_chat = false;
+            }
+            if (i == messageGroups.length) {
+              if (userId == "everyone") {
+                return users.map(({ id, ...rest }) => <ChatMessageGroup key={id} {...rest} />);
+              }
+              //}
+            }
+            i = i + 1;
+          }
+
+          ///rest.messages=message;
+        })}
+        {privateMessages.map(option => {
+          const message_list = [];
+          const message_list_private = [];
+          if (userId != "everyone") {
+            var private_chat = false;
+            if (option.userReceiverId == NAF.clientId || option.senderSessionId == NAF.clientId) {
+              if (option.userReceiverId == NAF.clientId) {
+                const found = bulles_list.find(element => element.id == option.senderSessionId);
+                if (found == null) {
+                  const element = {
+                    id: option.senderSessionId,
+                    receivedMessageNumber: 0
+                  };
+                  bulles_list.push(element);
+                }
+              } else {
+                const found = bulles_list.find(element => element.id == option.userReceiverId);
+                if (found == null) {
+                  const element = {
+                    id: option.userReceiverId,
+                    receivedMessageNumber: 0
+                  };
+                  bulles_list.push(element);
+                }
+              }
+            }
+            if (
+              (option.userReceiverId == userId && option.senderSessionId == NAF.clientId) ||
+              (option.userReceiverId == NAF.clientId && userId == option.senderSessionId)
+            ) {
+              option.messages.map(msg => {
+                private_chat = true;
+                message_list_private.push(msg);
+              });
+            }
+            if (private_chat) {
+              const user = option;
+              user.messages = message_list_private;
+              users_private.push(user);
+              private_chat = false;
+            }
+
+            if (i == privateMessages.length) {
+              if (userId != "everyone") {
+                return users_private.map(({ id, ...rest }) => <ChatMessageGroup key={id} {...rest} />);
+              }
+            }
+            i = i + 1;
           } else {
-            return <ChatMessageGroup key={id} {...rest} />;
+            if (option.userReceiverId == NAF.clientId || option.senderSessionId == NAF.clientId) {
+              if (option.userReceiverId == NAF.clientId) {
+                const found = bulles_list.find(element => element.id == option.senderSessionId);
+                if (found == null) {
+                  const element = {
+                    id: option.senderSessionId,
+                    receivedMessageNumber: 0
+                  };
+                  bulles_list.push(element);
+                }
+              } else {
+                const found = bulles_list.find(element => element.id == option.userReceiverId);
+                if (found == null) {
+                  const element = {
+                    id: option.userReceiverId,
+                    receivedMessageNumber: 0
+                  };
+                  bulles_list.push(element);
+                }
+              }
+            }
           }
         })}
       </ChatMessageList>
+      <div>
+        <ul className="bubbles-container">
+          {bulles_list.map(bulles => {
+            const a = 0;
+            const tab = getAvatarPreview();
+            let str = "";
+            if (bulles.id == "everyone") {
+              str = "";
+            } else {
+              if (tab.length != 0) {
+                tab.map(element => {
+                  if (element.id == bulles.id) {
+                    str = element.url;
+                    if (str != null) {
+                      str = str.replace('"', "");
+                      str = str.replace('"', "");
+                    }
+                  }
+                });
+              }
+            }
+            return (
+              <li className="bubbles">
+                <PrivatechatBubbles
+                  receivedMessageNumber={bulles.receivedMessageNumber}
+                  imgUrl={str}
+                  bulle_id={bulles.id}
+                  onClick={e => {
+                    bulles.receivedMessageNumber = 0;
+                    onClose();
+                    toggleChatSidebar("chat", bulles.id);
+                  }}
+                />
+              </li>
+            );
+          })}
+        </ul>
+      </div>
       <ChatInput
         id="chat-input"
         onKeyDown={onKeyDown}
@@ -303,13 +618,35 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
 
 ChatSidebarContainer.propTypes = {
   canSpawnMessages: PropTypes.bool,
+  userId: PropTypes.string,
+  userName: PropTypes.string,
   presences: PropTypes.object.isRequired,
   occupantCount: PropTypes.number.isRequired,
   scene: PropTypes.object.isRequired,
-  onClose: PropTypes.func.isRequired
+  onClose: PropTypes.func.isRequired,
+  toggleChatSidebar: PropTypes.func.isRequired
 };
 
 export function ChatToolbarButtonContainer(props) {
   const { unreadMessages } = useContext(ChatContext);
   return <ChatToolbarButton {...props} statusColor={unreadMessages ? "unread" : undefined} />;
+}
+export function cleanBulle_list(bulles_list, people) {
+  var found = false;
+  const test = [];
+  test.push(bulles_list[0]);
+  bulles_list.map(item => {
+    if (item.id != "everyone") {
+      people.map(person => {
+        if (item.id == person.id) {
+          found = true;
+        }
+      });
+      if (found) {
+        test.push(item);
+      }
+      found = false;
+    }
+  });
+  return test;
 }

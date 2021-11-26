@@ -198,10 +198,7 @@ import { microsoftService } from "./aptero/service/MicrosoftIntegration/Microsof
 import { apteroService } from "./aptero/ApteroServices";
 import { roomController } from "./aptero/service/api/RoomController";
 import { minimumQualityService } from "./aptero/service/MinimumQualityService";
-import {
-  createTrack,
-  fetchICEservers
-} from "./aptero/adapter/adapter-config";
+import { createTrack, fetchICEservers } from "./aptero/adapter/adapter-config";
 import { AdapterWarpper } from "./aptero/adapter/AdapterWrapper";
 //aptero service end
 
@@ -264,8 +261,6 @@ import { SignInMessages } from "./react-components/auth/SignInModal";
 import { ThemeProvider } from "./react-components/styles/theme";
 import { wait } from "./aptero/util/AsyncWaiter";
 import { networkService } from "./aptero/service/NetworkService";
-
-
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -500,7 +495,7 @@ export async function updateEnvironmentForHub(hub, entryManager) {
 }
 
 export async function updateUIForHub(hub, hubChannel) {
-  roomController.setRoom(hub,hubChannel);//Aptero
+  roomController.setRoom(hub, hubChannel); //Aptero
   remountUI({ hub, entryDisallowed: !hubChannel.canEnterRoom(hub) });
 }
 
@@ -541,8 +536,8 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data,
   }
 
   const hub = data.hubs[0];
-  if(qs.has("offline")){
-    hub.port=666;
+  if (qs.has("offline")) {
+    hub.port = 666;
   }
   let embedToken = hub.embed_token;
 
@@ -562,7 +557,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data,
     onLoaded: () => store.executeOnLoadActions(scene),
     //aptero modification
     onMediaSearchResultEntrySelected: (entry, selectAction) => {
-      scene.emit("action_selected_media_result_entry", { entry, selectAction })
+      scene.emit("action_selected_media_result_entry", { entry, selectAction });
     },
     onMediaSearchCancelled: entry => scene.emit("action_media_search_cancelled", entry),
     onAvatarSaved: entry => scene.emit("action_avatar_saved", entry),
@@ -580,7 +575,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data,
 
   // Handle request for user gesture
   scene.addEventListener("2d-interstitial-gesture-required", () => {
-  //aptero modification remove anoying messages in oculus quest
+    //aptero modification remove anoying messages in oculus quest
     /*remountUI({
       showInterstitialPrompt: true,
       onInterstitialPromptClicked: () => {
@@ -607,10 +602,9 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data,
     { once: true }
   );
 
-
   scene.setAttribute("networked-scene", {
     room: hub.hub_id,
-      serverURL: hub.port==443?`wss://${hub.host}`:`wss://${hub.host}:${hub.port}`,
+    serverURL: hub.port == 443 ? `wss://${hub.host}` : `wss://${hub.host}:${hub.port}`,
     debug: !!isDebug,
     adapter: "phoenix" //TODO aptero check that let adapter = await choseAdapter();
   });
@@ -657,7 +651,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data,
     updateUIForHub(hub, hubChannel);
     scene.emit("hub_updated", { hub });
 
-    if (!isEmbed || (new URL(window.location.href).searchParams.get("hideui"))) {
+    if (!isEmbed || new URL(window.location.href).searchParams.get("hideui")) {
       loadEnvironmentAndConnect();
     } else {
       remountUI({
@@ -670,8 +664,8 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data,
     }
   })().then(() => {
     //TODO migrate in aptero notify service
-    if(new URL(window.location.href).searchParams.get("offline2")) {
-      console.log("load finished => disconect from server")
+    if (new URL(window.location.href).searchParams.get("offline2")) {
+      console.log("load finished => disconect from server");
       hubChannel.channel.socket.teardown();
     }
   });
@@ -697,7 +691,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   let iceServer = await fetchICEservers();
   await minimumQualityService.checkTurnServerAndSwitchToTCP(iceServer);
   console.log("lazy loading start");
-  await wait(()=>{return APP.dialog.lasyLoadingFinished});
+  await wait(() => {
+    return APP.dialog.lasyLoadingFinished;
+  });
   console.log("lazy loading finished");
   //end APTERO
   document.getElementById("version").innerHTML = process.env.BUILD_VERSION;
@@ -840,7 +836,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   remountUI({
     performConditionalSignIn,
     embed: isEmbed,
-    showPreload: isEmbed && !(new URL(window.location.href).searchParams.get("hideui"))
+    showPreload: isEmbed && !new URL(window.location.href).searchParams.get("hideui")
   });
   entryManager.performConditionalSignIn = performConditionalSignIn;
   entryManager.init();
@@ -1159,7 +1155,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     Cookies.remove(OAUTH_FLOW_PERMS_TOKEN_KEY);
   }
   const hubPhxChannel = socket.channel(`hub:${hubId}`, APP.hubChannelParamsForPermsToken(oauthFlowPermsToken));
-  networkService.setPhoenixChannel(hubPhxChannel);//Aptero integration
+  networkService.setPhoenixChannel(hubPhxChannel); //Aptero integration
   hubChannel.channel = hubPhxChannel;
   hubChannel.presence = new Presence(hubPhxChannel);
   const { rawOnJoin, rawOnLeave } = denoisePresence(presenceEventsForHub(events));
@@ -1192,6 +1188,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       presence: meta.presence,
       name: meta.profile.displayName
     });
+    //scene.emit("join", { presences:});
   });
 
   events.on(`hub:leave`, ({ meta }) => {
@@ -1293,7 +1290,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.error(res);
     });
 
-  hubPhxChannel.on("message", ({ session_id, type, body, from }) => {
+  hubPhxChannel.on("message", ({ session_id, type, body, receiverClientId, type_chat, from }) => {
     const getAuthor = () => {
       const userInfo = hubChannel.presence.state[session_id];
       if (from) {
@@ -1307,12 +1304,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const name = getAuthor();
     const maySpawn = scene.is("entered");
-
     const incomingMessage = {
       name,
       type,
       body,
       maySpawn,
+      receiverClientId,
+      type_chat,
       sessionId: session_id,
       sent: session_id === socket.params().session_id
     };

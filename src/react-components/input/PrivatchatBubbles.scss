@@ -1,0 +1,43 @@
+.bubbles-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    margin: 0 1em;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+.bubbles{
+    margin: 0.4em;
+}
+.img{
+    border-radius: 50%;
+}
+.button {
+    position:relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    color: #333333;
+    background: #dddddd;
+    border: none;
+    outline: none;
+    border-radius: 50%;
+  }
+
+  .icon-button-badge{
+    position:absolute;
+    top: -7px;
+    right: -6px;
+    width: 18px;
+    height: 18px;
+    background: red;
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+  }
+

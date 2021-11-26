@@ -18,11 +18,10 @@ export default class MessageDispatch extends EventTarget {
     this.remountUI = remountUI;
     this.mediaSearchStore = mediaSearchStore;
     this.presenceLogEntries = [];
+    this.presenceLogEntriesPrivate = [];
   }
-
   addToPresenceLog(entry) {
     entry.key = Date.now().toString();
-
     this.presenceLogEntries.push(entry);
     this.remountUI({ presenceLogEntries: this.presenceLogEntries });
     if (entry.type === "chat" && this.scene.is("loaded")) {
@@ -30,6 +29,7 @@ export default class MessageDispatch extends EventTarget {
     }
 
     // Fade out and then remove
+    /*
     setTimeout(() => {
       entry.expired = true;
       this.remountUI({ presenceLogEntries: this.presenceLogEntries });
@@ -39,11 +39,40 @@ export default class MessageDispatch extends EventTarget {
         this.remountUI({ presenceLogEntries: this.presenceLogEntries });
       }, 5000);
     }, 20000);
+    */
+  }
+  addToPresenceLogPrivate(entry) {
+    entry.key = Date.now().toString();
+    this.presenceLogEntriesPrivate.push(entry);
+    this.remountUI({ presenceLogEntries: this.presenceLogEntries });
+    if (entry.type === "chat" && this.scene.is("loaded")) {
+      this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_CHAT_MESSAGE);
+    }
+
+    // Fade out and then remove
+    /*
+    setTimeout(() => {
+      entry.expired = true;
+      this.remountUI({ presenceLogEntries: this.presenceLogEntries });
+
+      setTimeout(() => {
+        this.presenceLogEntries.splice(this.presenceLogEntries.indexOf(entry), 1);
+        this.remountUI({ presenceLogEntries: this.presenceLogEntries });
+      }, 5000);
+    }, 20000);
+    */
   }
 
   receive(message) {
-    this.addToPresenceLog(message);
-    this.dispatchEvent(new CustomEvent("message", { detail: message }));
+    if (message.receiverClientId == null) {
+      this.addToPresenceLog(message);
+      this.dispatchEvent(new CustomEvent("message", { detail: message }));
+    } else {
+      if (message.receiverClientId == NAF.clientId || message.sessionId == NAF.clientId) {
+        this.addToPresenceLogPrivate(message);
+        this.dispatchEvent(new CustomEvent("private", { detail: message }));
+      }
+    }
   }
 
   log = (messageType, props) => {
@@ -65,7 +94,7 @@ export default class MessageDispatch extends EventTarget {
     uiRoot = uiRoot || document.getElementById("ui-root");
     const isGhost = !entered && uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("isGhost");
 
-    if (!entered && (!isGhost)) {
+    if (!entered && !isGhost) {
       this.log(LogMessageType.roomEntryRequired);
       return;
     }

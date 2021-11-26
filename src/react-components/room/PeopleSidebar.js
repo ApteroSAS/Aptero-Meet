@@ -116,7 +116,6 @@ export function PeopleSidebar({ people, onSelectPerson, onClose, showMuteAll, on
         {people.map(person => {
           const DeviceIcon = getDeviceIconComponent(person.context);
           const VoiceIcon = getVoiceIconComponent(person.micPresence);
-
           return (
             <ButtonListItem
               className={styles.person}

@@ -1,4 +1,4 @@
-import React, { Component, useEffect } from "react";
+import React, { Component, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import copy from "copy-to-clipboard";
@@ -77,6 +77,7 @@ import { ObjectMenuContainer } from "./room/ObjectMenuContainer";
 import { useCssBreakpoints } from "react-use-css-breakpoints";
 import { PlacePopoverContainer } from "./room/PlacePopoverContainer";
 import { SharePopoverContainer } from "./room/SharePopoverContainer";
+import { DropDownChatList } from "./room/DropDownChatList";
 import { VoiceButtonContainer } from "./room/VoiceButtonContainer";
 import { ReactionPopoverContainer } from "./room/ReactionPopoverContainer";
 import { SafariMicModal } from "./room/SafariMicModal";
@@ -99,16 +100,15 @@ import { apteroService } from "../aptero/ApteroServices";
 import { CustomSidebarContainer } from "../aptero/react-components/CustomSidebarContainer";
 import { customMenuService } from "../aptero/service/CustomMenuService";
 import AptRoot from "../aptero/react-components/AptRoot";
-
+import { getSelectedPersonId, getSelectedPersonName } from "./room/PeopleSidebarContainer";
+import { Promise } from "core-js";
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
-
 const IN_ROOM_MODAL_ROUTER_PATHS = ["/media"];
 const IN_ROOM_MODAL_QUERY_VARS = ["media_source"];
 
 const LOBBY_MODAL_ROUTER_PATHS = ["/media/scenes", "/media/avatars", "/media/favorites"];
 const LOBBY_MODAL_QUERY_VARS = ["media_source"];
 const LOBBY_MODAL_QUERY_VALUES = ["scenes", "avatars", "favorites"];
-
 async function grantedMicLabels() {
   const mediaDevices = await navigator.mediaDevices.enumerateDevices();
   return mediaDevices.filter(d => d.label && d.kind === "audioinput").map(d => d.label);
@@ -118,9 +118,9 @@ const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
 const AUTO_EXIT_TIMER_SECONDS = 10;
 
-const aptGuiVisible = !(new URL(window.location.href).searchParams.get("hideui"));//aptero
-
-class UIRoot extends Component {
+const aptGuiVisible = !new URL(window.location.href).searchParams.get("hideui"); //aptero
+var ImageList = [];
+export class UIRoot extends Component {
   willCompileAndUploadMaterials = false;
 
   static propTypes = {
@@ -180,14 +180,14 @@ class UIRoot extends Component {
     linkCode: null,
     linkCodeCancel: null,
     miniInviteActivated: false,
-
+    people: [],
     didConnectToNetworkedScene: false,
     noMoreLoadingUpdates: false,
     hideLoader: false,
     showPrefs: false,
     watching: false,
     isStreaming: false,
-
+    imgTab: [],
     waitingOnAudio: false,
     audioTrackClone: null,
 
@@ -203,6 +203,7 @@ class UIRoot extends Component {
     objectInfo: null,
     objectSrc: "",
     sidebarId: null,
+    userId: null,
     presenceCount: 0
   };
 
@@ -303,6 +304,37 @@ class UIRoot extends Component {
   };
 
   componentDidMount() {
+    this.props.scene.addEventListener("join", e => {
+      this.setState({ people: usePeopleList(this.props.presences, this.props.sessionId) });
+      const useFetch = async avatarId => {
+        var data;
+        const fetchData = async () => {
+          data = await getUrl(avatarId);
+        };
+        await fetchData();
+        return data;
+      };
+      const tab = [];
+      const tab2 = [];
+      var i = 0;
+      this.state.people.map(person => {
+        tab.push(useFetch(person.profile.avatarId));
+      });
+      Promise.all(tab).then(urls => {
+        this.setState({ imgTab: urls });
+        this.state.people.map(person => {
+          const user = {
+            id: person.id,
+            url: urls[i]
+          };
+          i++;
+          tab2.push(user);
+          tab.push(useFetch(person.profile.avatarId));
+        });
+        ImageList = tab2;
+      });
+    });
+
     window.addEventListener("concurrentload", this.onConcurrentLoad);
     window.addEventListener("idle_detected", this.onIdleDetected);
     window.addEventListener("activity_detected", this.onActivityDetected);
@@ -602,7 +634,11 @@ class UIRoot extends Component {
   beginOrSkipAudioSetup = () => {
     const skipAudioSetup = this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now");
 
-    AFRAME.scenes[0].audioListener.gain.gain.setTargetAtTime(1, AFRAME.scenes[0].audioListener.context.currentTime, 0.2);
+    AFRAME.scenes[0].audioListener.gain.gain.setTargetAtTime(
+      1,
+      AFRAME.scenes[0].audioListener.context.currentTime,
+      0.2
+    );
     if (skipAudioSetup || window.APP_CONFIG.adapterParams.adapter === "none") {
       this.onAudioReadyButton();
     } else {
@@ -628,7 +664,10 @@ class UIRoot extends Component {
     // Push the new history state before going into VR, otherwise menu button will take us back
     clearHistoryState(this.props.history);
 
-    const muteOnEntry = window.APP_CONFIG.adapterParams.adapter === "none" || this.props.store.state.preferences["muteMicOnEntry"] || false;
+    const muteOnEntry =
+      window.APP_CONFIG.adapterParams.adapter === "none" ||
+      this.props.store.state.preferences["muteMicOnEntry"] ||
+      false;
     await this.props.enterScene(this.state.enterInVR, muteOnEntry);
 
     this.setState({ entered: true, entering: false, showShareDialog: false });
@@ -770,6 +809,10 @@ class UIRoot extends Component {
   }
 
   toggleSidebar(sidebarId, otherState) {
+    if (sidebarId == "chat") {
+      this.setState({ userId: otherState });
+    }
+
     this.setState(({ sidebarId: curSidebarId }) => {
       const nextSidebarId = curSidebarId === sidebarId ? null : sidebarId;
 
@@ -816,56 +859,59 @@ class UIRoot extends Component {
       setTimeout(() => this.handleForceEntry(), 500);
     }*/
     // TODO: What does onEnteringCanceled do?
-    return (aptGuiVisible &&
-      <>
-        <RoomEntryModal
-          appName={configs.translation("app-name")}
-          logoSrc={configs.image("logo")}
-          roomName={this.props.hub.name}
-          showJoinRoom={!this.state.waitingOnAudio && !this.props.entryDisallowed}
-          onJoinRoom={() => {
-             //aptero
-            if (!(this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now"))) {
-              this.setState({ entering: true });
-              this.props.hubChannel.sendEnteringEvent();
+    return (
+      aptGuiVisible && (
+        <>
+          <RoomEntryModal
+            appName={configs.translation("app-name")}
+            logoSrc={configs.image("logo")}
+            roomName={this.props.hub.name}
+            showJoinRoom={!this.state.waitingOnAudio && !this.props.entryDisallowed}
+            onJoinRoom={() => {
+              //aptero
+              if (!(this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now"))) {
+                this.setState({ entering: true });
+                this.props.hubChannel.sendEnteringEvent();
 
-              if (promptForNameAndAvatarBeforeEntry) {
-                this.pushHistoryState("entry_step", "profile");
-              } else {
-                this.onRequestMicPermission();
-                this.pushHistoryState("entry_step", "mic_grant");
+                if (promptForNameAndAvatarBeforeEntry) {
+                  this.pushHistoryState("entry_step", "profile");
+                } else {
+                  this.onRequestMicPermission();
+                  this.pushHistoryState("entry_step", "mic_grant");
+                }
               }
-            } else {
-              this.handleForceEntry();
-            }
-          }}
-          showEnterOnDevice={!this.state.waitingOnAudio && !this.props.entryDisallowed && !isMobileVR}
-          onEnterOnDevice={() => this.attemptLink()}
-          showSpectate={!this.state.waitingOnAudio}
-          onSpectate={() => {
-            AFRAME.scenes[0].audioListener.gain.gain.setTargetAtTime(1, AFRAME.scenes[0].audioListener.context.currentTime, 0.2);
-            this.setState({ watching: true })
-          }}
-          showOptions={this.props.hubChannel.canOrWillIfCreator("update_hub")}
-          onOptions={() => {
-            this.props.performConditionalSignIn(
-              () => this.props.hubChannel.can("update_hub"),
-              () => this.setSidebar("room-settings"),
-              SignInMessages.roomSettings
-            );
-          }}
-        />
-        {!this.state.waitingOnAudio && (
-          <EntryStartPanel
-            hubChannel={this.props.hubChannel}
-            entering={this.state.entering}
-            onEnteringCanceled={this.onEnteringCanceled}
+            }}
+            showEnterOnDevice={!this.state.waitingOnAudio && !this.props.entryDisallowed && !isMobileVR}
+            onEnterOnDevice={() => this.attemptLink()}
+            showSpectate={!this.state.waitingOnAudio}
+            onSpectate={() => {
+              AFRAME.scenes[0].audioListener.gain.gain.setTargetAtTime(
+                1,
+                AFRAME.scenes[0].audioListener.context.currentTime,
+                0.2
+              );
+              this.setState({ watching: true });
+            }}
+            showOptions={this.props.hubChannel.canOrWillIfCreator("update_hub")}
+            onOptions={() => {
+              this.props.performConditionalSignIn(
+                () => this.props.hubChannel.can("update_hub"),
+                () => this.setSidebar("room-settings"),
+                SignInMessages.roomSettings
+              );
+            }}
           />
-        )}
-      </>
+          {!this.state.waitingOnAudio && (
+            <EntryStartPanel
+              hubChannel={this.props.hubChannel}
+              entering={this.state.entering}
+              onEnteringCanceled={this.onEnteringCanceled}
+            />
+          )}
+        </>
+      )
     );
   };
-
   renderDevicePanel = () => {
     return (
       <EnterOnDeviceModal
@@ -913,13 +959,12 @@ class UIRoot extends Component {
         microphoneMuted={muteOnEntry}
         onChangeMicrophoneMuted={() => this.props.store.update({ preferences: { muteMicOnEntry: !muteOnEntry } })}
         onEnterRoom={() => {
-            if (minimumQualityService.getErrorDetected()) {
-              this.pushHistoryState("entry_step", "fallback");
-            } else {
-              this.onAudioReadyButton()
-            }
+          if (minimumQualityService.getErrorDetected()) {
+            this.pushHistoryState("entry_step", "fallback");
+          } else {
+            this.onAudioReadyButton();
           }
-        }
+        }}
         onBack={() => this.props.history.goBack()}
       />
     );
@@ -965,10 +1010,14 @@ class UIRoot extends Component {
     const micPresences = getMicrophonePresences();
     return userFromPresence(selectedUserId, presence, micPresences, this.props.sessionId);
   }
+  getSelectedId() {
+    const selectedUserId = this.state.selectedUserId;
+    return selectedUserId;
+  }
 
   render() {
     const isGhost =
-      configs.feature("enable_lobby_ghosts") && (this.state.watching || (this.state.hide || this.props.hide));
+      configs.feature("enable_lobby_ghosts") && (this.state.watching || this.state.hide || this.props.hide);
     const hide = this.state.hide || this.props.hide;
 
     const rootStyles = {
@@ -1068,7 +1117,12 @@ class UIRoot extends Component {
           </StateRoute>
           <StateRoute stateKey="entry_step" stateValue="fallback" history={this.props.history}>
             {/*aptero*/}
-            <FallbackModal onBack={() => this.props.history.goBack()} onEnterRoom={()=> {this.onAudioReadyButton()} }/>
+            <FallbackModal
+              onBack={() => this.props.history.goBack()}
+              onEnterRoom={() => {
+                this.onAudioReadyButton();
+              }}
+            />
           </StateRoute>
           <StateRoute stateKey="entry_step" stateValue="audio" history={this.props.history}>
             {this.renderAudioSetupPanel()}
@@ -1198,7 +1252,8 @@ class UIRoot extends Component {
             onClick: () => this.setSidebar("room-info")
           },
           (this.props.breakpoint === "sm" || this.props.breakpoint === "md") &&
-            this.props.hub && (this.props.hub.entry_mode !== "invite" || this.props.hubChannel.can("update_hub")) && {
+            this.props.hub &&
+            (this.props.hub.entry_mode !== "invite" || this.props.hubChannel.can("update_hub")) && {
               id: "invite",
               label: <FormattedMessage id="more-menu.invite" defaultMessage="Invite" />,
               icon: InviteIcon,
@@ -1282,7 +1337,7 @@ class UIRoot extends Component {
             icon: SupportIcon,
             onClick: () => {
               window.open("https://vimeo.com/524816064");
-              this.props.scene.systems.tips.resetTips()
+              this.props.scene.systems.tips.resetTips();
             }
           },
           configs.feature("show_docs_link") && {
@@ -1322,15 +1377,14 @@ class UIRoot extends Component {
       <MoreMenuContextProvider>
         <ReactAudioContext.Provider value={this.state.audioContext}>
           <div className={classNames(rootStyles)}>
-            {preload &&
-              this.props.hub && (
-                <PreloadOverlay
-                  hubName={this.props.hub.name}
-                  hubScene={this.props.hub.scene}
-                  baseUrl={hubUrl(this.props.hub.hub_id).href}
-                  onLoadClicked={this.props.onPreloadLoadClicked}
-                />
-              )}
+            {preload && this.props.hub && (
+              <PreloadOverlay
+                hubName={this.props.hub.name}
+                hubScene={this.props.hub.scene}
+                baseUrl={hubUrl(this.props.hub.hub_id).href}
+                onLoadClicked={this.props.onPreloadLoadClicked}
+              />
+            )}
             {!this.state.dialog && (
               <StateRoute
                 stateKey="overlay"
@@ -1361,28 +1415,27 @@ class UIRoot extends Component {
                 )}
               />
             )}
-            {!this.state.dialog &&
-              showMediaBrowser && (
-                <MediaBrowserContainer
-                  history={this.props.history}
-                  mediaSearchStore={this.props.mediaSearchStore}
-                  hubChannel={this.props.hubChannel}
-                  onMediaSearchResultEntrySelected={(entry, selectAction) => {
-                    if (entry.type === "room") {
-                      this.showNonHistoriedDialog(LeaveRoomModal, {
-                        destinationUrl: entry.url,
-                        reason: LeaveReason.joinRoom
-                      });
-                    } else {
-                      this.props.onMediaSearchResultEntrySelected(entry, selectAction);
-                    }
-                  }}
-                  performConditionalSignIn={this.props.performConditionalSignIn}
-                  showNonHistoriedDialog={this.showNonHistoriedDialog}
-                  store={this.props.store}
-                  scene={this.props.scene}
-                />
-              )}
+            {!this.state.dialog && showMediaBrowser && (
+              <MediaBrowserContainer
+                history={this.props.history}
+                mediaSearchStore={this.props.mediaSearchStore}
+                hubChannel={this.props.hubChannel}
+                onMediaSearchResultEntrySelected={(entry, selectAction) => {
+                  if (entry.type === "room") {
+                    this.showNonHistoriedDialog(LeaveRoomModal, {
+                      destinationUrl: entry.url,
+                      reason: LeaveReason.joinRoom
+                    });
+                  } else {
+                    this.props.onMediaSearchResultEntrySelected(entry, selectAction);
+                  }
+                }}
+                performConditionalSignIn={this.props.performConditionalSignIn}
+                showNonHistoriedDialog={this.showNonHistoriedDialog}
+                store={this.props.store}
+                scene={this.props.scene}
+              />
+            )}
             {this.props.hub && (
               <RoomLayoutContainer
                 scene={this.props.scene}
@@ -1393,28 +1446,29 @@ class UIRoot extends Component {
                   <>
                     {!this.state.dialog && renderEntryFlow ? entryDialog : undefined}
                     {!this.props.selectedObject && <CompactMoreMenuButton />}
-                    {(aptGuiVisible && (
-                      !this.props.selectedObject ||
-                      (this.props.breakpoint !== "sm" && this.props.breakpoint !== "md"))) && (
-                      <ContentMenu>
-                        {customMenuService.isActivated() &&
-                        <CustomMenuButton
-                          active={this.state.sidebarId === "custom"}
-                          onClick={() => this.toggleSidebar("custom")}
-                        />}
-                        {showObjectList && (
-                          <ObjectsMenuButton
-                            active={this.state.sidebarId === "objects"}
-                            onClick={() => this.toggleSidebar("objects")}
+                    {aptGuiVisible &&
+                      (!this.props.selectedObject ||
+                        (this.props.breakpoint !== "sm" && this.props.breakpoint !== "md")) && (
+                        <ContentMenu>
+                          {customMenuService.isActivated() && (
+                            <CustomMenuButton
+                              active={this.state.sidebarId === "custom"}
+                              onClick={() => this.toggleSidebar("custom")}
+                            />
+                          )}
+                          {showObjectList && (
+                            <ObjectsMenuButton
+                              active={this.state.sidebarId === "objects"}
+                              onClick={() => this.toggleSidebar("objects")}
+                            />
+                          )}
+                          <PeopleMenuButton
+                            active={this.state.sidebarId === "people"}
+                            onClick={() => this.toggleSidebar("people")}
+                            presencecount={this.state.presenceCount}
                           />
-                        )}
-                        <PeopleMenuButton
-                          active={this.state.sidebarId === "people"}
-                          onClick={() => this.toggleSidebar("people")}
-                          presencecount={this.state.presenceCount}
-                        />
-                      </ContentMenu>
-                    )}
+                        </ContentMenu>
+                      )}
                     {!entered && !streaming && !isMobile && streamerName && <SpectatingLabel name={streamerName} />}
                     {this.props.activeObject && (
                       <ObjectMenuContainer
@@ -1428,17 +1482,16 @@ class UIRoot extends Component {
                         }}
                       />
                     )}
-                    {this.state.sidebarId !== "chat" &&
-                      this.props.hub && (
-                        <PresenceLog
-                          inRoom={true}
-                          presences={this.props.presences}
-                          entries={presenceLogEntries}
-                          hubId={this.props.hub.hub_id}
-                          history={this.props.history}
-                          onViewProfile={sessionId => this.setSidebar("user", { selectedUserId: sessionId })}
-                        />
-                      )}
+                    {this.state.sidebarId !== "chat" && this.props.hub && (
+                      <PresenceLog
+                        inRoom={true}
+                        presences={this.props.presences}
+                        entries={presenceLogEntries}
+                        hubId={this.props.hub.hub_id}
+                        history={this.props.history}
+                        onViewProfile={sessionId => this.setSidebar("user", { selectedUserId: sessionId })}
+                      />
+                    )}
                     <TipContainer
                       hide={this.props.activeObject || !aptGuiVisible}
                       inLobby={watching}
@@ -1467,17 +1520,19 @@ class UIRoot extends Component {
                   this.state.sidebarId ? (
                     <>
                       {this.state.sidebarId === "custom" && (
-                        <CustomSidebarContainer
-                          onClose={() => this.setSidebar(null)}
-                        />
+                        <CustomSidebarContainer onClose={() => this.setSidebar(null)} />
                       )}
+
                       {this.state.sidebarId === "chat" && (
                         <ChatSidebarContainer
+                          userId={this.state.userId}
+                          userName={getSelectedPersonName()}
                           presences={this.props.presences}
                           occupantCount={this.occupantCount()}
                           canSpawnMessages={entered && this.props.hubChannel.can("spawn_and_move_media")}
                           scene={this.props.scene}
                           onClose={() => this.setSidebar(null)}
+                          toggleChatSidebar={(type, userid) => this.toggleSidebar(type, userid)}
                         />
                       )}
                       {this.state.sidebarId === "objects" && (
@@ -1499,6 +1554,7 @@ class UIRoot extends Component {
                           onCloseDialog={() => this.closeDialog()}
                           showNonHistoriedDialog={this.showNonHistoriedDialog}
                           performConditionalSignIn={this.props.performConditionalSignIn}
+                          toggleChatSidebar={(type, userid) => this.toggleSidebar(type, userid)}
                         />
                       )}
                       {this.state.sidebarId === "profile" && (
@@ -1515,6 +1571,7 @@ class UIRoot extends Component {
                       {this.state.sidebarId === "user" && (
                         <UserProfileSidebarContainer
                           user={this.getSelectedUser()}
+                          imgTab={this.state.imgTab}
                           hubChannel={this.props.hubChannel}
                           performConditionalSignIn={this.props.performConditionalSignIn}
                           onClose={() => this.setSidebar(null)}
@@ -1562,54 +1619,56 @@ class UIRoot extends Component {
                   )
                 }
                 modal={this.state.dialog}
-                toolbarLeft={!aptGuiVisible?null:
-                  <InvitePopoverContainer
-                    hub={this.props.hub}
-                    hubChannel={this.props.hubChannel}
-                    scene={this.props.scene}
-                  />
+                toolbarLeft={
+                  !aptGuiVisible ? null : (
+                    <InvitePopoverContainer
+                      hub={this.props.hub}
+                      hubChannel={this.props.hubChannel}
+                      scene={this.props.scene}
+                    />
+                  )
                 }
-                toolbarCenter={ !aptGuiVisible?null:
-                  <>
-                    {watching && (
-                      <>
-                        <ToolbarButton
-                          icon={<EnterIcon />}
-                          label={<FormattedMessage id="toolbar.join-room-button" defaultMessage="Join Room" />}
-                          preset="accept"
-                          onClick={() => this.setState({ watching: false })}
-                        />
-                        {enableSpectateVRButton && (
+                toolbarCenter={
+                  !aptGuiVisible ? null : (
+                    <>
+                      {watching && (
+                        <>
                           <ToolbarButton
-                            icon={<VRIcon />}
-                            preset="accent5"
-                            label={
-                              <FormattedMessage id="toolbar.spectate-in-vr-button" defaultMessage="Spectate in VR" />
-                            }
-                            onClick={() => this.props.scene.enterVR()}
+                            icon={<EnterIcon />}
+                            label={<FormattedMessage id="toolbar.join-room-button" defaultMessage="Join Room" />}
+                            preset="accept"
+                            onClick={() => this.setState({ watching: false })}
                           />
-                        )}
-                      </>
-                    )}
-                    {entered && (
-                      <>
-                        <VoiceButtonContainer
-                          scene={this.props.scene}
-                          microphoneEnabled={this.mediaDevicesManager.isMicShared}
-                        />
-                        <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel} />
-                        <PlacePopoverContainer
-                          scene={this.props.scene}
-                          hubChannel={this.props.hubChannel}
-                          mediaSearchStore={this.props.mediaSearchStore}
-                          showNonHistoriedDialog={this.showNonHistoriedDialog}
-                        />
-                        {this.props.hubChannel.can("spawn_emoji") && <ReactionPopoverContainer />}
-                      </>
-                    )}
-                    <ChatToolbarButtonContainer onClick={() => this.toggleSidebar("chat")} />
-                    {entered &&
-                      isMobileVR && (
+                          {enableSpectateVRButton && (
+                            <ToolbarButton
+                              icon={<VRIcon />}
+                              preset="accent5"
+                              label={
+                                <FormattedMessage id="toolbar.spectate-in-vr-button" defaultMessage="Spectate in VR" />
+                              }
+                              onClick={() => this.props.scene.enterVR()}
+                            />
+                          )}
+                        </>
+                      )}
+                      {entered && (
+                        <>
+                          <VoiceButtonContainer
+                            scene={this.props.scene}
+                            microphoneEnabled={this.mediaDevicesManager.isMicShared}
+                          />
+                          <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel} />
+                          <PlacePopoverContainer
+                            scene={this.props.scene}
+                            hubChannel={this.props.hubChannel}
+                            mediaSearchStore={this.props.mediaSearchStore}
+                            showNonHistoriedDialog={this.showNonHistoriedDialog}
+                          />
+                          {this.props.hubChannel.can("spawn_emoji") && <ReactionPopoverContainer />}
+                        </>
+                      )}
+                      <ChatToolbarButtonContainer onClick={() => this.toggleSidebar("chat", "everyone")} />
+                      {entered && isMobileVR && (
                         <ToolbarButton
                           className={styleUtils.hideLg}
                           icon={<VRIcon />}
@@ -1618,12 +1677,13 @@ class UIRoot extends Component {
                           onClick={() => exit2DInterstitialAndEnterVR(true)}
                         />
                       )}
-                  </>
+                    </>
+                  )
                 }
-                toolbarRight={!aptGuiVisible?null:
-                  <>
-                    {entered &&
-                      isMobileVR && (
+                toolbarRight={
+                  !aptGuiVisible ? null : (
+                    <>
+                      {entered && isMobileVR && (
                         <ToolbarButton
                           icon={<VRIcon />}
                           preset="accept"
@@ -1631,7 +1691,7 @@ class UIRoot extends Component {
                           onClick={() => exit2DInterstitialAndEnterVR(true)}
                         />
                       )}
-                    {/*APTERO
+                      {/*APTERO
                     {entered && (
                       <ToolbarButton
                         icon={<LeaveIcon />}
@@ -1645,8 +1705,9 @@ class UIRoot extends Component {
                         }}
                       />
                     )}*/}
-                    <MoreMenuPopoverButton menu={moreMenu} />
-                  </>
+                      <MoreMenuPopoverButton menu={moreMenu} />
+                    </>
+                  )
                 }
               />
             )}
@@ -1656,43 +1717,94 @@ class UIRoot extends Component {
     );
   }
 }
+function usePeopleList(presences, mySessionId, micUpdateFrequency = 500) {
+  let people;
 
+  //useEffect(
+  //() => {
+  let timeout;
+
+  function updateMicrophoneState() {
+    const micPresences = getMicrophonePresences();
+
+    people = Object.entries(presences).map(([id, presence]) => {
+      return userFromPresence(id, presence, micPresences, mySessionId);
+    });
+
+    timeout = setTimeout(updateMicrophoneState, micUpdateFrequency);
+  }
+
+  updateMicrophoneState();
+
+  //aptero state cleanup
+  people = people.filter(value => {
+    return presences[value.id];
+  });
+  return people;
+}
+function getUrl(avatarGlb) {
+  return new Promise(function(resolve, reject) {
+    const params = {
+      model: avatarGlb,
+      scene: "halfbody-portrait-v1",
+      armature: "ArmatureTargetMale",
+      blendShapes: {}
+    };
+    const http = new XMLHttpRequest();
+    http.open("POST", "https://render.readyplayer.me/render");
+    http.setRequestHeader("Content-type", "application/json");
+    http.send(JSON.stringify(params));
+    http.onload = function() {
+      // Do whatever with response
+      let str = http.responseText;
+      str = str.replace('{"renders":[', "");
+      str = str.replace("]}", "");
+      resolve(str);
+    };
+  });
+}
+export function getAvatarPreview() {
+  return ImageList;
+}
 function UIRootHooksWrapper(props) {
   useAccessibleOutlineStyle();
   const breakpoint = useCssBreakpoints();
+  var people = [];
+  if (props.presences != null && props.sessionId != null) {
+    people = usePeopleList(props.presences, props.sessionId);
+  }
+  useEffect(() => {
+    const el = document.getElementById("preload-overlay");
+    el.classList.add("loaded");
 
-  useEffect(
-    () => {
-      const el = document.getElementById("preload-overlay");
-      el.classList.add("loaded");
+    const sceneEl = props.scene;
 
-      const sceneEl = props.scene;
+    sceneEl.classList.add(roomLayoutStyles.scene);
 
-      sceneEl.classList.add(roomLayoutStyles.scene);
+    // Remove the preload overlay after the animation has finished.
+    const timeout = setTimeout(() => {
+      el.remove();
+    }, 500);
 
-      // Remove the preload overlay after the animation has finished.
-      const timeout = setTimeout(() => {
-        el.remove();
-      }, 500);
-
-      return () => {
-        clearTimeout(timeout);
-        sceneEl.classList.remove(roomLayoutStyles.scene);
-      };
-    },
-    [props.scene]
-  );
-
+    return () => {
+      clearTimeout(timeout);
+      sceneEl.classList.remove(roomLayoutStyles.scene);
+    };
+  }, [props.scene]);
   return (
-    <ChatContextProvider messageDispatch={props.messageDispatch}>
+    <ChatContextProvider
+      messageDispatch={props.messageDispatch}
+      presences={props.presences}
+      sessionId={props.sessionId}
+      people={people}
+    >
       <ObjectListProvider scene={props.scene}>
         <UIRoot breakpoint={breakpoint} {...props} />
-        <AptRoot/>
+        <AptRoot />
       </ObjectListProvider>
     </ChatContextProvider>
   );
 }
-
 UIRootHooksWrapper.propTypes = {
   scene: PropTypes.object.isRequired,
   messageDispatch: PropTypes.object,

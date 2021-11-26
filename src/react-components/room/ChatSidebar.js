@@ -17,7 +17,9 @@ import styles from "./ChatSidebar.scss";
 import { formatMessageBody } from "../../utils/chat-message";
 import { FormattedMessage, useIntl, defineMessages, FormattedRelativeTime } from "react-intl";
 import { customFormatSystemMessage } from "../../aptero/react-components/ChatSidebarCustom";
-
+import {DropDownChatList} from "./DropDownChatList";
+import { useState } from "react";
+import {getPresences} from "./DropDownChatList";
 export function SpawnMessageButton(props) {
   return (
     <IconButton className={styles.chatInputIcon} {...props}>
@@ -95,7 +97,7 @@ ChatLengthWarning.propTypes = {
 
 export function ChatInput({ warning, isOverMaxLength, ...props }) {
   const intl = useIntl();
-
+  const [selected, setSelected] = useState("Choose One");
   return (
     <div className={styles.chatInputContainer}>
       <TextAreaInput
@@ -105,6 +107,7 @@ export function ChatInput({ warning, isOverMaxLength, ...props }) {
         {...props}
       />
       {warning}
+      
     </div>
   );
 }
@@ -366,7 +369,9 @@ export function ChatMessageGroup({ sent, sender, timestamp, messages }) {
       <ul className={styles.messageGroupMessages}>{messages.map(message => getMessageComponent(message))}</ul>
     </li>
   );
+
 }
+
 
 ChatMessageGroup.propTypes = {
   sent: PropTypes.bool,
@@ -385,15 +390,18 @@ ChatMessageList.propTypes = {
   children: PropTypes.node
 };
 
-export function ChatSidebar({ onClose, children, ...rest }) {
+export function ChatSidebar({ onClose,userName, children, ...rest }) {
+  
   return (
     <Sidebar
-      title={<FormattedMessage id="chat-sidebar.title" defaultMessage="Chat" />}
+      title={userName}
       beforeTitle={<CloseButton onClick={onClose} />}
       contentClassName={styles.content}
       disableOverflowScroll
       {...rest}
+      
     >
+      
       {children}
     </Sidebar>
   );
@@ -403,7 +411,8 @@ ChatSidebar.propTypes = {
   onClose: PropTypes.func,
   onScrollList: PropTypes.func,
   children: PropTypes.node,
-  listRef: PropTypes.func
+  listRef: PropTypes.func,
+  userName:PropTypes.string
 };
 
 export function ChatToolbarButton(props) {

@@ -299,7 +299,7 @@ class AvatarPreview extends Component {
             <div className="loader-center" />
           </div>
         )}
-        {this.props.avatarGltfUrl && (this.state.error && !this.state.loading) && (
+        {this.props.avatarGltfUrl && this.state.error && !this.state.loading && (
           <div className="error">
             <img
               src="hubs/src/assets/images/warning_icon.png"
@@ -313,6 +313,9 @@ class AvatarPreview extends Component {
       </div>
     );
   }
+}
+export function getAvatarPreview() {
+  return this.props.avatarGltfUrl;
 }
 
 export default injectIntl(AvatarPreview, { withRef: true });

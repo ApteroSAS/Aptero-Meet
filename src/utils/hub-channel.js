@@ -34,7 +34,7 @@ const VALID_PERMISSIONS = HUB_CREATOR_PERMISSIONS.concat([
   "pin_objects",
   "spawn_emoji",
   "fly"
-]).concat(roomParameters.customPermission());//APTERO
+]).concat(roomParameters.customPermission()); //APTERO
 export default class HubChannel extends EventTarget {
   constructor(store, hubId) {
     super();
@@ -145,8 +145,8 @@ export default class HubChannel extends EventTarget {
 
     configs.setIsAdmin(this._permissions.postgrest_role === "ret_admin");
     //aptero delayed permission set
-    ( async () => {
-      this._permissions = await roomParameters.applyPermissionAsync(this._permissions,configs.isAdmin());
+    (async () => {
+      this._permissions = await roomParameters.applyPermissionAsync(this._permissions, configs.isAdmin());
       this.dispatchEvent(new CustomEvent("permissions_updated"));
     })();
 
@@ -297,9 +297,24 @@ export default class HubChannel extends EventTarget {
     return new Promise(resolve => this.channel.push("unsubscribe", { subscription }).receive("ok", resolve));
   };
 
+  receivePrivateClientId(privateData, text_message) {
+    this.sendPrivateMessage(privateData, text_message, "chat");
+  }
+
   sendMessage = (body, type = "chat") => {
-    if (!body) return;
+    //const receiverClientId = userId;
+    if (!body) {
+      return;
+    }
+
     this.channel.push("message", { body, type });
+  };
+
+  sendPrivateMessage = (receiverClientId, body, type = "chat") => {
+    if (!body) {
+      return;
+    }
+    this.channel.push("message", { receiverClientId, body, type });
   };
 
   _getCreatorAssignmentToken = () => {
@@ -422,7 +437,6 @@ export default class HubChannel extends EventTarget {
     this.channel.push("block", { session_id: sessionId });
     this._blockedSessionIds.add(sessionId);
   };
-  
 
   unhide = sessionId => {
     if (!this._blockedSessionIds.has(sessionId)) return;
