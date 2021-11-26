@@ -1,3 +1,6 @@
+import { setTimeout } from "core-js";
+import UIRoot from "../../react-components/ui-root";
+
 AFRAME.registerComponent("open-iframe-button", {
 
   init() {
@@ -7,13 +10,21 @@ AFRAME.registerComponent("open-iframe-button", {
   },
 
   pause() {
-    this.el.object3D.qremoveEventListener("interact", this.click);
+    this.el.object3D.removeEventListener("interact", this.click);
   },
 
   click() {
-    console.log("render iframe");
+    console.log("render iframe", this.el.previousElementSibling.components["open-media-button"]);//action_toggle_custom_sidebar
     const target = this.el.previousElementSibling.components["open-media-button"].src;
-    console.log(target);
+    const obj = {
+      url : target,
+      mode : "sidebar_iframe",
+      type : "url",
+      title:"viewer",
+    }
+    console.log(obj);
+    this.el.sceneEl.emit("action_toggle_custom_sidebar");
+    setTimeout(()=>{this.el.sceneEl.emit("action_toggle_custom_sidebar_info",obj)},0);
     
   }
 });

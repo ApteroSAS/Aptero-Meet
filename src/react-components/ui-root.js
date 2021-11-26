@@ -330,6 +330,8 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("devicechange", () => {
       this.forceUpdate();
     });
+    //Aptero
+    this.props.scene.addEventListener("action_toggle_custom_sidebar", ()=>{this.toggleSidebar("custom")});
 
     const scene = this.props.scene;
 
@@ -395,6 +397,9 @@ class UIRoot extends Component {
     window.removeEventListener("concurrentload", this.onConcurrentLoad);
     window.removeEventListener("idle_detected", this.onIdleDetected);
     window.removeEventListener("activity_detected", this.onActivityDetected);
+    
+    //Aptero
+    this.props.scene.removeEventListener("action_toggle_custom_sidebar", ()=>{this.toggleSidebar("custom")});
   }
 
   storeUpdated = () => {

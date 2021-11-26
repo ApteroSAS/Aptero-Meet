@@ -334,6 +334,10 @@ export class CustomActionRegister {
             console.error(reason);
           });
           break;
+        case "sidebar_iframe": 
+          this.el.sceneEl.emit("action_toggle_custom_sidebar");
+          setTimeout(()=>{this.el.sceneEl.emit("action_toggle_custom_sidebar_info",actionData.action)},0);
+          break;
         default:
           window.open(actionData.action.url, "_blank");
       }
