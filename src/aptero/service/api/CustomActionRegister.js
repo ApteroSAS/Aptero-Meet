@@ -40,6 +40,9 @@ export class CustomActionRegister {
           console.log("entry mode set to ", actionData.action.entry_mode);
           roomController.setEntryMode(actionData.action.entry_mode);
         }
+      } else if(actionData.action.type === "sidebar_iframe" ){
+        AFRAME.scenes[0].emit("action_toggle_custom_sidebar");
+        setTimeout(()=>{AFRAME.scenes[0].emit("action_toggle_custom_sidebar_info",actionData.action)},0);
       }
     }
   }
@@ -334,14 +337,10 @@ export class CustomActionRegister {
             console.error(reason);
           });
           break;
-        case "sidebar_iframe": 
-          this.el.sceneEl.emit("action_toggle_custom_sidebar");
-          setTimeout(()=>{this.el.sceneEl.emit("action_toggle_custom_sidebar_info",actionData.action)},0);
-          break;
         default:
           window.open(actionData.action.url, "_blank");
       }
-    } else {
+    } else {q
       //default new_page
       window.open(actionData.action.url, "_blank");
     }

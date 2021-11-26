@@ -18,9 +18,8 @@ AFRAME.registerComponent("open-iframe-button", {
     const target = this.el.previousElementSibling.components["open-media-button"].src;
     const obj = {
       url : target,
-      mode : "sidebar_iframe",
-      type : "url",
-      title:"viewer",
+      type : "sidebar_iframe",
+      title:"viewer"
     }
     console.log(obj);
     this.el.sceneEl.emit("action_toggle_custom_sidebar");
