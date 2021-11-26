@@ -10,13 +10,11 @@ export function CustomSidebarContainer({ onClose }) {
   const [currentUrl, setCurrentUrl] = useState(0);
 
   const handleChangeOfSideBar = (event) => {
-    console.log(event,event.detail.title);
     setcurrentButtonTitle(event.detail.title? event.detail.title :  "viewer");
     setCurrentUrl(event.detail.url);
   }
 
   useEffect(() => {
-    console.log("useEffect");
     setcurrentButtonTitle(customMenuService.getButtonTitle());
     setCurrentUrl(customMenuService.getIframeContentURL());
 

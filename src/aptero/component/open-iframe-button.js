@@ -14,7 +14,6 @@ AFRAME.registerComponent("open-iframe-button", {
   },
 
   click() {
-    console.log("render iframe", this.el.previousElementSibling.components["open-media-button"]);//action_toggle_custom_sidebar
     const target = this.el.previousElementSibling.components["open-media-button"].src;
     const obj = {
       url : target,
