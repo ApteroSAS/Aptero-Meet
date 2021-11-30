@@ -809,7 +809,7 @@ export class UIRoot extends Component {
   }
 
   toggleSidebar(sidebarId, otherState) {
-    if (sidebarId == "chat") {
+    if (sidebarId === "chat") {
       this.setState({ userId: otherState });
     }
 
