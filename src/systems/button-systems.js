@@ -2,14 +2,19 @@ import { CAMERA_MODE_INSPECT } from "./camera-system";
 
 export class SingleActionButtonSystem {
   lastClicked = false;
-  constructor(){
-    if(AFRAME.utils.device.isMobile()) {
-      document.addEventListener("click", () => {
-        this.lastClicked = true;
-      });
+  initialized = false;
+  trySetup(){
+    if(!this.initialized) {
+      if (AFRAME.utils.device.isMobile()) {
+        AFRAME.scenes[0].canvas.addEventListener("click", () => {
+          this.lastClicked = true;
+        });
+      }
+      this.initialized = true
     }
   }
   tick() {
+    this.trySetup();
     this.didInteractThisFrame = false;
     const interaction = AFRAME.scenes[0].systems.interaction;
     const userinput = AFRAME.scenes[0].systems.userinput;

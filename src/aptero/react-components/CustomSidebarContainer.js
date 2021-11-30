@@ -4,7 +4,6 @@ import { customMenuService } from "../service/CustomMenuService";
 import { Sidebar } from "../../react-components/sidebar/Sidebar";
 import { CloseButton } from "../../react-components/input/CloseButton";
 
-var toggled = false;
 export function CustomSidebarContainer({ onClose }) {
   const [currentButtonTitle, setcurrentButtonTitle] = useState(0);
   const [currentUrl, setCurrentUrl] = useState(0);
@@ -30,7 +29,8 @@ export function CustomSidebarContainer({ onClose }) {
       title={currentButtonTitle}
       beforeTitle={<CloseButton onClick={onClose} />}
     >
-        <iframe src={currentUrl} width="100%" height="100%"></iframe>
+        {/* https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Feature-Policy#directives */}
+        <iframe src={currentUrl} width="100%" height="100%" allow="camera; fullscreen; vr; xr; xr-spatial-tracking;"></iframe>
     </Sidebar>
   );
 }
