@@ -150,7 +150,7 @@ export function UserProfileSidebar({
             useGoToSelectedAvatar();
           }}
         >
-          <FormattedMessage id="avatar-teleport" defaultMessage="teleport" />
+          <FormattedMessage id="avatar-teleport" defaultMessage="Go to" />
         </Button>
         {canMute && (
           <Button preset="cancel" onClick={onMute}>
