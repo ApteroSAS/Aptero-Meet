@@ -1,4 +1,5 @@
-
+/*
+//This code is commented for now
 export function setupIframeButton(t){
   console.dir(t.el.parentEl.children.length);
   if(t.el.parentEl.children.length > 1) return;//prevent adding buttons that already exist
@@ -12,4 +13,4 @@ export function setupIframeButton(t){
   iframeButton.setAttribute("open-iframe-button","");
   iframeButton.innerHTML = '<a-entity text="value:Open here; width:1.5; align:center;" text-raycast-hack="" position="0 0 0.02"></a-entity>';
   t.el.parentEl.appendChild(iframeButton);
-}
+}/* */
