@@ -199,7 +199,7 @@ AFRAME.registerComponent("audio-params", {
   tick() {
     const audio = this.getAudio();
     if (audio) {
-      if (audio.panner) {
+      if (audio.panner && audio.panner.positionX && audio.panner.orientationX) {
         this.data.position = new THREE.Vector3(
           audio.panner.positionX.value,
           audio.panner.positionY.value,
