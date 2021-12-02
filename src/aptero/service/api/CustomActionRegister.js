@@ -340,7 +340,7 @@ export class CustomActionRegister {
         default:
           window.open(actionData.action.url, "_blank");
       }
-    } else {q
+    } else {
       //default new_page
       window.open(actionData.action.url, "_blank");
     }
