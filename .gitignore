@@ -68,3 +68,5 @@ results/
 src/assets/locales/extracted-messages.json
 /.idea
 /docker/www
+
+package-lock.json

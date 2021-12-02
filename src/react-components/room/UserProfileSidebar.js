@@ -142,12 +142,16 @@ export function UserProfileSidebar({
                 }
               }
             }
+            /*
             entity2.object3D.position.set(
               entity1.object3D.position.x,
               entity1.object3D.position.y,
               entity1.object3D.position.z - 0.7
             );
-            useGoToSelectedAvatar();
+            */
+           
+            useGoToSelectedAvatar(entity1);
+            
           }}
         >
           <FormattedMessage id="avatar-teleport" defaultMessage="Go to" />
@@ -197,10 +201,13 @@ UserProfileSidebar.propTypes = {
   toggleChatSidebar: PropTypes.func
 };
 
-function useGoToSelectedAvatar() {
+function useGoToSelectedAvatar(entity) {
   const targetMatrix = new THREE.Matrix4();
   const translation = new THREE.Matrix4();
-  targetMatrix.copy(entity1.object3D.matrixWorld);
+  //entity.object3D.translateZ(1);
+  targetMatrix.copy(entity.object3D.matrixWorld);
+  translation.makeTranslation(0, 0, 0.75);
+  targetMatrix.multiply(translation);
   affixToWorldUp(targetMatrix, targetMatrix);
   rotateInPlaceAroundWorldUp(targetMatrix, Math.PI, targetMatrix);
 
