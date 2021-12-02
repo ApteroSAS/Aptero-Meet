@@ -6,6 +6,7 @@ import { waitForDOMContentLoaded } from "../utils/async-utils";
 import "./component/custom-controller-button";
 import "./component/rtmp-auto-refresh";
 import "./component/media-limiter";
+import "./component/open-iframe-button";
 import "./component/stop-share-screen-on-destroy";
 import "./component/release-media-frame-on-destroy";
 import "./component/trigger";

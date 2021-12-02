@@ -40,6 +40,9 @@ export class CustomActionRegister {
           console.log("entry mode set to ", actionData.action.entry_mode);
           roomController.setEntryMode(actionData.action.entry_mode);
         }
+      } else if(actionData.action.type === "sidebar_iframe" ){
+        AFRAME.scenes[0].emit("action_toggle_custom_sidebar");
+        setTimeout(()=>{AFRAME.scenes[0].emit("action_toggle_custom_sidebar_info",actionData.action)},0);
       }
     }
   }
