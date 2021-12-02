@@ -10,7 +10,8 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 const TOML = require("@iarna/toml");
 const fetch = require("node-fetch");
-const packageLock = require("./package-lock.json");
+const packageLock = require("./webpack-package-lock-info.json");
+const versionJson = require("./version.json");
 const request = require("request");
 const internalIp = require("internal-ip");
 
@@ -276,7 +277,7 @@ module.exports = async (env, argv) => {
     },
     output: {
       filename: "assets/js/[name]-[chunkhash].js",
-      publicPath: process.env.BASE_ASSETS_PATH || ""
+      publicPath: process.env.BASE_ASSETS_PATH || "/"
     },
     devtool: argv.mode === "production" ? "source-map" : "inline-source-map",
     devServer: {
@@ -673,7 +674,7 @@ module.exports = async (env, argv) => {
           THUMBNAIL_SERVER: process.env.THUMBNAIL_SERVER,
           CORS_PROXY_SERVER: process.env.CORS_PROXY_SERVER,
           NON_CORS_PROXY_DOMAINS: process.env.NON_CORS_PROXY_DOMAINS,*/
-          BUILD_VERSION: process.env.BUILD_VERSION,
+          BUILD_VERSION: versionJson.version,
           /*SENTRY_DSN: process.env.SENTRY_DSN,
           GA_TRACKING_ID: process.env.GA_TRACKING_ID,
           POSTGREST_SERVER: process.env.POSTGREST_SERVER,
