@@ -6,6 +6,7 @@ import { SOUND_SPAWN_PEN } from "../systems/sound-effects-system";
  */
 AFRAME.registerComponent("in-world-hud", {
   init() {
+    this.quitbtn = this.el.querySelector(".quitbtn");
     this.mic = this.el.querySelector(".mic");
     this.spawn = this.el.querySelector(".spawn");
     this.pen = this.el.querySelector(".penhud");
@@ -59,6 +60,9 @@ AFRAME.registerComponent("in-world-hud", {
       this.el.emit("action_invite");
     };
 
+    this.onQuitClick = () => {
+      window.location = window.location.origin;
+    };
     this.onHubUpdated = e => {
       this.inviteBtn.object3D.visible = e.detail.hub.entry_mode !== "invite";
     };
@@ -71,6 +75,8 @@ AFRAME.registerComponent("in-world-hud", {
     this.el.sceneEl.addEventListener("hub_updated", this.onHubUpdated);
     this.updateButtonStates();
 
+
+    this.quitbtn.object3D.addEventListener("interact", this.onQuitClick);
     this.mic.object3D.addEventListener("interact", this.onMicClick);
     this.spawn.object3D.addEventListener("interact", this.onSpawnClick);
     this.pen.object3D.addEventListener("interact", this.onPenClick);
@@ -83,6 +89,8 @@ AFRAME.registerComponent("in-world-hud", {
     this.el.sceneEl.removeEventListener("stateremoved", this.onStateChange);
     window.APP.hubChannel.removeEventListener("permissions_updated", this.updateButtonStates);
     this.el.sceneEl.removeEventListener("hub_updated", this.onHubUpdated);
+
+    this.quitbtn.object3D.removeEventListener("interact", this.onQuitClick);
 
     this.mic.object3D.removeEventListener("interact", this.onMicClick);
     this.spawn.object3D.removeEventListener("interact", this.onSpawnClick);
