@@ -234,7 +234,9 @@ export class AudioSystem {
         // When you unplug the headphone or when the bluetooth headset disconnects on
         // iOS Safari or Chrome, the state changes to suspended.
         // Chrome Android doesn't go in suspended state for this case.
-        document.getElementById("avatar-rig").messageDispatch.log(LogMessageType.audioSuspended);
+        if(document.getElementById("avatar-rig") && document.getElementById("avatar-rig").messageDispatch) {
+          document.getElementById("avatar-rig").messageDispatch.log(LogMessageType.audioSuspended);
+        }
         document.body.addEventListener("touchend", this._resumeAudioContext, false);
         document.body.addEventListener("mouseup", this._resumeAudioContext, false);
         this.audioContextNeedsToBeResumed = true;
