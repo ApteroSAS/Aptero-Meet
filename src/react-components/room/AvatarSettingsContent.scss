@@ -16,8 +16,8 @@
   /* TODO: This styling into AvatarPreview */
   & > :first-child {
     width: 168px;
-    height: 300px;
-    min-height: 300px;
+    min-height: 200px;
+    max-height: 300px;
     border-radius: 8px;
     background-color: theme.$tile-bg-color;
   }

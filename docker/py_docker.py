@@ -24,7 +24,7 @@ elif(sys.argv[1] == "publish"):
             if data['version']:
                 version = data['version']
             else:
-                raise "no version found in file"
+                raise Exception("no version found in file")
         except:
             f = open('package.json',)
             data = json.load(f)
