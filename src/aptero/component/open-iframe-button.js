@@ -20,9 +20,8 @@ AFRAME.registerComponent("open-iframe-button", {
       type : "sidebar_iframe",
       title:"viewer"
     }
-    console.log(obj);
     this.el.sceneEl.emit("action_toggle_custom_sidebar");
-    setTimeout(()=>{this.el.sceneEl.emit("action_toggle_custom_sidebar_info",obj)},0);
+    setTimeout(()=>{this.el.sceneEl.emit("action_toggle_custom_sidebar_info",obj)},10);
     
   }
 });

@@ -42,10 +42,6 @@ function createHTTPSConfig() {
                 type: 2,
                 value: "localhost"
               },
-              {
-                type: 2,
-                value: "hubs.local"
-              }
             ]
           }
         ]
@@ -186,7 +182,7 @@ async function fetchAppConfigAndEnvironmentVars() {
   process.env.SHORTLINK_DOMAIN = shortlink_domain;
   process.env.CORS_PROXY_SERVER = `${localIp}:8080/cors-proxy`;
   process.env.THUMBNAIL_SERVER = thumbnail_server;
-  process.env.NON_CORS_PROXY_DOMAINS = `${localIp},hubs.local,localhost`;
+  process.env.NON_CORS_PROXY_DOMAINS = `${localIp},localhost`;
 
   return appConfig;
 }
@@ -223,12 +219,12 @@ module.exports = async (env, argv) => {
     if (env.localDev) {
       // Local Dev Environment (npm run local)
       Object.assign(process.env, {
-        HOST: "hubs.local",
-        RETICULUM_SOCKET_SERVER: "hubs.local",
+        HOST: "localhost",
+        RETICULUM_SOCKET_SERVER: "localhost",
         CORS_PROXY_SERVER: "hubs-proxy.local:4000",
-        NON_CORS_PROXY_DOMAINS: "hubs.local,dev.reticulum.io",
-        BASE_ASSETS_PATH: "https://hubs.local:8080/",
-        RETICULUM_SERVER: "hubs.local:4000",
+        NON_CORS_PROXY_DOMAINS: "localhost,dev.reticulum.io",
+        BASE_ASSETS_PATH: "https://localhost:8080/",
+        RETICULUM_SERVER: "localhost:4000",
         POSTGREST_SERVER: "",
         ITA_SERVER: ""
       });
@@ -238,7 +234,7 @@ module.exports = async (env, argv) => {
   // In production, the environment variables are defined in CI or loaded from ita and
   // the app config is injected into the head of the page by Reticulum.
 
-  const host = process.env.HOST_IP || env.localDev || env.remoteDev ? "hubs.local" : "localhost";
+  const host = process.env.HOST_IP || env.localDev || env.remoteDev ? "localhost" : "localhost";
 
   const liveReload = !!process.env.LIVE_RELOAD || false;
 
@@ -279,13 +275,13 @@ module.exports = async (env, argv) => {
       filename: "assets/js/[name]-[chunkhash].js",
       publicPath: process.env.BASE_ASSETS_PATH || "/"
     },
-    devtool: argv.mode === "production" ? "source-map" : "inline-source-map",
+    devtool: argv.mode === "production" ? "source-map" : "source-map",
     devServer: {
       https: createHTTPSConfig(),
       host: "0.0.0.0",
       public: `${host}:8080`,
       useLocalIp: true,
-      allowedHosts: [host, "hubs.local"],
+      allowedHosts: [host, "localhost"],
       headers: {
         "Access-Control-Allow-Origin": "*"
       },
