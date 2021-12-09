@@ -47,6 +47,11 @@ export const SCHEMA = {
       properties: {
         displayName: { type: "string", pattern: "^[A-Za-z0-9_~ -]{3,32}$" },
         avatarId: { type: "string" },
+        //aptero
+        companyName: { type: "string" },
+        jobTitleName: { type: "string" },
+        phoneNumber: { type: "string" },
+        description: { type: "string" },
         // personalAvatarId is obsolete, but we need it here for backwards compatibility.
         personalAvatarId: { type: "string" }
       }
@@ -133,7 +138,7 @@ export const SCHEMA = {
         enableAudioClipping: { type: "bool" },
         audioClippingThreshold: { type: "number" },
         theme: { type: "string" },
-        thirdPersonMode: { type: "bool" },
+        thirdPersonMode: { type: "bool" }
       }
     },
 
@@ -235,7 +240,7 @@ export default class Store extends EventTarget {
       activity: {},
       settings: {},
       credentials: {},
-      profile: {},
+      profile: { companyName: "aptero" },
       confirmedDiscordRooms: [],
       confirmedBroadcastedRooms: [],
       uploadPromotionTokens: [],
@@ -248,6 +253,7 @@ export default class Store extends EventTarget {
     this._shouldResetAvatarOnInit = false;
 
     const oauthFlowCredentials = Cookies.getJSON(OAUTH_FLOW_CREDENTIALS_KEY);
+
     if (oauthFlowCredentials) {
       this.update({ credentials: oauthFlowCredentials });
       this._shouldResetAvatarOnInit = true;
@@ -277,7 +283,9 @@ export default class Store extends EventTarget {
 
     // Regenerate name to encourage users to change it.
     if (!this.state.activity.hasChangedName) {
-      this.update({ profile: { displayName: microsoftService.getName() || generateRandomName() } });
+      this.update({
+        profile: { displayName: microsoftService.getName() || generateRandomName() }
+      });
     }
   };
 
@@ -354,7 +362,7 @@ export default class Store extends EventTarget {
     if (!valid) {
       // Intentionally not including details about the state or validation result here, since we don't want to leak
       // sensitive data in the error message.
-      console.log(`Write to store failed schema validation.`)
+      console.log(`Write to store failed schema validation.`);
       //throw new Error(`Write to store failed schema validation.`);
     }
 

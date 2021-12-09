@@ -6,6 +6,7 @@ import { replaceHistoryState } from "../utils/history";
 import { AvatarSettingsSidebar } from "./room/AvatarSettingsSidebar";
 import { AvatarSetupModal } from "./room/AvatarSetupModal";
 import AvatarPreview from "./avatar-preview";
+import axios from "axios";
 
 export default class ProfileEntryPanel extends Component {
   static propTypes = {
@@ -29,12 +30,18 @@ export default class ProfileEntryPanel extends Component {
   state = {
     avatarId: null,
     displayName: null,
+    companyName:null,
+    jobTitle:null,
+    email:null,
+    phoneNumber:null,
+    descriptionUser:null,
     avatar: null
   };
 
   constructor(props) {
     super(props);
     this.state = this.getStateFromProfile();
+    this.getUserProfile();
     if (props.avatarId) {
       this.state.avatarId = props.avatarId;
     }
@@ -43,16 +50,17 @@ export default class ProfileEntryPanel extends Component {
   }
 
   getStateFromProfile = () => {
-    const { displayName, avatarId } = this.props.store.state.profile;
-    return { displayName, avatarId };
+    const { displayName, avatarId ,companyName,jobTitle,email,phoneNumber,descriptionUser} = this.props.store.state.profile;
+    return { displayName, avatarId,companyName ,jobTitle,email,phoneNumber,descriptionUser};
   };
 
   storeUpdated = () => this.setState(this.getStateFromProfile());
 
   saveStateAndFinish = e => {
     e && e.preventDefault();
-
+   
     const { displayName } = this.props.store.state.profile;
+    const { companyName } = this.props.store.state.profile;
     const { hasChangedName } = this.props.store.state.activity;
 
     const hasChangedNowOrPreviously = hasChangedName || this.state.displayName !== displayName;
@@ -63,13 +71,62 @@ export default class ProfileEntryPanel extends Component {
       },
       profile: {
         displayName: this.state.displayName,
-        avatarId: this.state.avatarId
+        avatarId: this.state.avatarId,
+        companyName:this.state.companyName,
+        jobTitle:this.state.jobTitle,
+        email:this.props.store.state.credentials.email,
+        phoneNumber:this.state.phoneNumber,
+        descriptionUser:this.state.descriptionUser,
       }
     });
     this.props.finished();
     this.scene.emit("avatar_updated");
   };
+  
+  async updateUserProfile() {
+    return await new Promise((resolve, reject) => {
+      const profile = {
+        displayName:this.state.displayName,
+        phoneNumber: this.state.phoneNumber,
+        companyName: this.state.companyName,
+        jobTitle: this.state.jobTitle,
+        bio:this.state.descriptionUser
+      };
+      const json = JSON.stringify({ mail: this.state.email, profile: profile });
 
+      axios.post("http://127.0.0.1:8086/update/user", json, {
+        headers: {
+          // Overwrite Axios's automatically set Content-Type
+          "Content-Type": "application/json"
+        }
+      });
+    });
+  }
+
+async getUserProfile() {
+  const mail=this.props.store.state.credentials.email;
+ 
+  return axios.get("http://127.0.0.1:8086/get/user/"+mail).then(resp => {
+    let data=resp.data;
+    this.setState({displayName:data.displayName});
+    this.setState({jobTitle:data.jobTitle});
+    this.setState({companyName:data.companyName});
+    this.setState({phoneNumber:data.phoneNumber});
+    this.props.store.update({
+      profile: {
+        displayName:data.displayName,
+        avatarId: this.state.avatarId,
+        companyName:this.state.companyName,
+        jobTitle:data.jobTitle,
+        email:this.props.store.state.credentials.email,
+        phoneNumber:data.phoneNumber,
+      }
+    });
+
+  }).catch(reason => {
+    console.error(reason);
+  });
+}
   stopPropagation = e => {
     e.stopPropagation();
   };
@@ -85,6 +142,7 @@ export default class ProfileEntryPanel extends Component {
   };
 
   componentDidMount() {
+    //this.getUserProfile();
     if (this.nameInput) {
       // stop propagation so that avatar doesn't move when wasd'ing during text input.
       this.nameInput.addEventListener("keydown", this.stopPropagation);
@@ -105,6 +163,7 @@ export default class ProfileEntryPanel extends Component {
   }
 
   componentWillUnmount() {
+   
     this.props.store.removeEventListener("statechanged", this.storeUpdated);
     if (this.nameInput) {
       this.nameInput.removeEventListener("keydown", this.stopPropagation);
@@ -122,12 +181,24 @@ export default class ProfileEntryPanel extends Component {
   };
 
   render() {
+    //this.getUserProfile();
+    //this.updateUserProfile()
     const avatarSettingsProps = {
       displayNameInputRef: inp => (this.nameInput = inp),
       disableDisplayNameInput: !!this.props.displayNameOverride,
       displayName: this.props.displayNameOverride ? this.props.displayNameOverride : this.state.displayName,
+      companyName:this.state.companyName,
+      jobTitle:this.state.jobTitle,
+      email:this.state.email,
+      phoneNumber:this.state.phoneNumber,
+      descriptionUser:this.state.descriptionUser,
       displayNamePattern: SCHEMA.definitions.profile.properties.displayName.pattern,
       onChangeDisplayName: e => this.setState({ displayName: e.target.value }),
+      onChangeCompanyName: e => this.setState({ companyName: e.target.value }),
+      onChangeJobTitle: e => this.setState({ jobTitle: e.target.value }),
+      onChangeEmail: e => this.setState({ email: e.target.value }),
+      onChangePhoneNumber: e => this.setState({ phoneNumber: e.target.value }),
+      onChangeUserBio: e => this.setState({ descriptionUser: e.target.value }),
       avatarPreview: <AvatarPreview avatarGltfUrl={this.state.avatar && this.state.avatar.gltf_url} />,
       onChangeAvatar: e => {
         e.preventDefault();

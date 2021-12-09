@@ -13,7 +13,6 @@ registerTelemetry("/home", "Hubs Home Page");
 
 const store = new Store();
 window.APP = { store };
-
 function Root() {
   document.getElementById("version").innerHTML = process.env.BUILD_VERSION;
   return (

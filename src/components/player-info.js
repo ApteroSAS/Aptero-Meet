@@ -129,7 +129,6 @@ AFRAME.registerComponent("player-info", {
   },
   applyDisplayName() {
     const store = window.APP.store;
-
     const infoShouldBeHidden =
       this.isLocalPlayerInfo || (window.getPreferences("onlyShowNametagsInFreeze") && !this.el.sceneEl.is("frozen"));
 

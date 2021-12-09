@@ -100,6 +100,7 @@ export function PeopleSidebarContainer({
   );
   if (selectedPerson) {
     if (selectedPerson.id === mySessionId) {
+      console.log("le store est ", store);
       return (
         <ProfileEntryPanel
           containerType="sidebar"

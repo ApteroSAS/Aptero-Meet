@@ -30,7 +30,7 @@ import { SystemEditor } from "./react-components/system-editor";
 import { ServiceEditor, AppConfigEditor } from "./react-components/service-editor";
 import { ServerAccess } from "./react-components/server-access";
 import { ContentCDN } from "./react-components/content-cdn";
-import {ApteroSystem} from "./aptero/aptero-system";
+import { ApteroSystem } from "./aptero/aptero-system";
 import { ImportContent } from "./react-components/import-content";
 import { AutoEndSessionDialog } from "./react-components/auto-end-session-dialog";
 import Store from "hubs/src/storage/store";
