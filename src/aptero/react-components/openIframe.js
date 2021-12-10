@@ -1,5 +1,4 @@
-//This code is commented for now
-export function setupIframeButton(t) {
+export async function setupIframeButton(t) {
   console.dir(t.src);
   const link = document.createElement('a');
   link.href = t.src;
@@ -15,6 +14,11 @@ export function setupIframeButton(t) {
   }
   //test if url is allowed host
   if (allowedSRC) return;
+  
+  //doc : https://iframeable.com
+  const fetchResponse = await fetch("https://iframeable.com/api/v1/?url=" + t.src);
+  const json = await fetchResponse.json();
+  if(!json.iframeable) return;
   
   if (t.el.parentEl.children.length > 1) return;//prevent adding buttons that already exist
   t.el.object3D.position.set(0, 0.12, 0.001);
