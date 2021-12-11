@@ -83,15 +83,77 @@ export default class ProfileEntryPanel extends Component {
     this.scene.emit("avatar_updated");
   };
   
-  async updateUserProfile() {
+  async updateUserDisplayName(displayName) {
+    console.log("hello to change displayName");
+    return await new Promise((resolve, reject) => {
+      this.setState({ displayName: displayName });
+      const profile = {
+        displayName:displayName,
+        phoneNumber: this.state.phoneNumber,
+        companyName: this.state.companyName,
+        jobTitle: this.state.jobTitle,
+        bio:this.state.descriptionUser
+      };   
+      const json = JSON.stringify({ mail: this.state.email, profile: profile });
+
+      axios.post("http://127.0.0.1:8086/update/user", json, {
+        headers: {
+          // Overwrite Axios's automatically set Content-Type
+          "Content-Type": "application/json"
+        }
+      });
+    });
+  }
+  async updateUserJobTitle(jobTitle) {
     return await new Promise((resolve, reject) => {
       const profile = {
         displayName:this.state.displayName,
         phoneNumber: this.state.phoneNumber,
         companyName: this.state.companyName,
+        jobTitle: jobTitle,
+        bio:this.state.descriptionUser
+      };
+      this.setState({ jobTitle: jobTitle });
+      const json = JSON.stringify({ mail: this.state.email, profile: profile });
+
+      axios.post("http://127.0.0.1:8086/update/user", json, {
+        headers: {
+          // Overwrite Axios's automatically set Content-Type
+          "Content-Type": "application/json"
+        }
+      });
+    });
+  }
+  async updateUserCompanyName(companyName) {
+    return await new Promise((resolve, reject) => {
+      const profile = {
+        displayName:this.state.displayName,
+        phoneNumber: this.state.phoneNumber,
+        companyName: companyName,
         jobTitle: this.state.jobTitle,
         bio:this.state.descriptionUser
       };
+      this.setState({ companyName: companyName });
+      const json = JSON.stringify({ mail: this.state.email, profile: profile });
+
+      axios.post("http://127.0.0.1:8086/update/user", json, {
+        headers: {
+          // Overwrite Axios's automatically set Content-Type
+          "Content-Type": "application/json"
+        }
+      });
+    });
+  }
+  async updateUserPhoneNumber(phoneNumber) {
+    return await new Promise((resolve, reject) => {
+      const profile = {
+        displayName:this.state.displayName,
+        phoneNumber: phoneNumber,
+        companyName: this.state.companyName,
+        jobTitle: this.state.jobTitle,
+        bio:this.state.descriptionUser
+      };
+      this.setState({ phoneNumber: phoneNumber });
       const json = JSON.stringify({ mail: this.state.email, profile: profile });
 
       axios.post("http://127.0.0.1:8086/update/user", json, {
@@ -105,7 +167,6 @@ export default class ProfileEntryPanel extends Component {
 
 async getUserProfile() {
   const mail=this.props.store.state.credentials.email;
- 
   return axios.get("http://127.0.0.1:8086/get/user/"+mail).then(resp => {
     let data=resp.data;
     this.setState({displayName:data.displayName});
@@ -127,6 +188,7 @@ async getUserProfile() {
     console.error(reason);
   });
 }
+
   stopPropagation = e => {
     e.stopPropagation();
   };
@@ -182,7 +244,7 @@ async getUserProfile() {
 
   render() {
     //this.getUserProfile();
-    //this.updateUserProfile()
+    //.updateUserProfile()
     const avatarSettingsProps = {
       displayNameInputRef: inp => (this.nameInput = inp),
       disableDisplayNameInput: !!this.props.displayNameOverride,
@@ -193,18 +255,17 @@ async getUserProfile() {
       phoneNumber:this.state.phoneNumber,
       descriptionUser:this.state.descriptionUser,
       displayNamePattern: SCHEMA.definitions.profile.properties.displayName.pattern,
-      onChangeDisplayName: e => this.setState({ displayName: e.target.value }),
-      onChangeCompanyName: e => this.setState({ companyName: e.target.value }),
-      onChangeJobTitle: e => this.setState({ jobTitle: e.target.value }),
-      onChangeEmail: e => this.setState({ email: e.target.value }),
-      onChangePhoneNumber: e => this.setState({ phoneNumber: e.target.value }),
-      onChangeUserBio: e => this.setState({ descriptionUser: e.target.value }),
+      onChangeDisplayName: e => this.updateUserDisplayName(e.target.value),
+      onChangeCompanyName: e => this.updateUserCompanyName(e.target.value ),
+      onChangeJobTitle: e => this.updateUserJobTitle(e.target.value),
+      onChangePhoneNumber: e => this.updateUserPhoneNumber(e.target.value),
+      //onChangeUserBio: e => ,
       avatarPreview: <AvatarPreview avatarGltfUrl={this.state.avatar && this.state.avatar.gltf_url} />,
       onChangeAvatar: e => {
         e.preventDefault();
         this.props.mediaSearchStore.sourceNavigateWithNoNav("avatars", "use");
       },
-      onSubmit: this.saveStateAndFinish,
+      onSubmit: this.saveStateAndFinish ,
       onClose: this.props.onClose,
       onBack: this.props.onBack
     };

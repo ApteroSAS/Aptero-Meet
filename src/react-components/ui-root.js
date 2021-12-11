@@ -102,6 +102,10 @@ import { customMenuService } from "../aptero/service/CustomMenuService";
 import AptRoot from "../aptero/react-components/AptRoot";
 import { getSelectedPersonId, getSelectedPersonName } from "./room/PeopleSidebarContainer";
 import { Promise } from "core-js";
+import { CheckUserInfoButton } from "./input/CheckUserInfoButton";
+import { UserProfileVisitCard } from "./room/UserProfileVisitCard";
+import { UserProfileVisitCardContainer } from "./room/UserProfileVisitCardContainer";
+import axios from "axios";
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 const IN_ROOM_MODAL_ROUTER_PATHS = ["/media"];
 const IN_ROOM_MODAL_QUERY_VARS = ["media_source"];
@@ -120,6 +124,8 @@ const AUTO_EXIT_TIMER_SECONDS = 10;
 
 const aptGuiVisible = !new URL(window.location.href).searchParams.get("hideui"); //aptero
 var ImageList = [];
+const profileList=[];
+
 export class UIRoot extends Component {
   willCompileAndUploadMaterials = false;
 
@@ -190,7 +196,13 @@ export class UIRoot extends Component {
     imgTab: [],
     waitingOnAudio: false,
     audioTrackClone: null,
-
+    displayName:null,
+    identityName:null,
+    //email:null,
+    //jobTitle:null,
+    //companyName:null,
+    onBack:null,
+    onClose:null,
     autoExitTimerStartedAt: null,
     autoExitTimerInterval: null,
     autoExitReason: null,
@@ -306,6 +318,7 @@ export class UIRoot extends Component {
   componentDidMount() {
     this.props.scene.addEventListener("join", e => {
       this.setState({ people: usePeopleList(this.props.presences, this.props.sessionId) });
+      getAllUsersMail(this.props.presences,this.props.sessionId);
       const useFetch = async avatarId => {
         var data;
         const fetchData = async () => {
@@ -811,6 +824,9 @@ export class UIRoot extends Component {
   toggleSidebar(sidebarId, otherState) {
     if (sidebarId === "chat") {
       this.setState({ userId: otherState });
+    }
+    if(sidebarId==="cardVisit"){
+        this.setState({ userId: otherState });
     }
 
     this.setState(({ sidebarId: curSidebarId }) => {
@@ -1554,7 +1570,7 @@ export class UIRoot extends Component {
                           onCloseDialog={() => this.closeDialog()}
                           showNonHistoriedDialog={this.showNonHistoriedDialog}
                           performConditionalSignIn={this.props.performConditionalSignIn}
-                          toggleChatSidebar={(type, userid) => this.toggleSidebar(type, userid)}
+                          toggleChatSidebar={(type, userid,onBack) => this.toggleSidebar(type, userid,onBack)}
                         />
                       )}
                       {this.state.sidebarId === "profile" && (
@@ -1576,7 +1592,17 @@ export class UIRoot extends Component {
                           performConditionalSignIn={this.props.performConditionalSignIn}
                           onClose={() => this.setSidebar(null)}
                           onCloseDialog={() => this.closeDialog()}
+                          toggleSidebar={(type)=>this.toggleSidebar(type)}
                           showNonHistoriedDialog={this.showNonHistoriedDialog}
+                        />
+                      )}
+                         {this.state.sidebarId === "cardVisit" && (
+                        <UserProfileVisitCardContainer
+                          muSessionId={this.props.sessionId}
+                          presences={this.props.presences}
+                          userId={this.state.userId}
+                          store={this.props.store}
+                          onClose={() => this.setSidebar(null)}
                         />
                       )}
                       {this.state.sidebarId === "room-info" && (
@@ -1765,6 +1791,46 @@ function getUrl(avatarGlb) {
 }
 export function getAvatarPreview() {
   return ImageList;
+}
+export function getProfileList()
+{
+  return profileList;
+}
+export async function getAllUsersMail(presences,sessionId)
+{
+  if(presences!=null && sessionId!=null)
+  {
+    const people=usePeopleList(presences,sessionId);
+    people.map((person)=>{
+      if(person.profile.email!=null)
+      {
+        const email=person.profile.email;
+        const userId=person.id;
+        getUserProfile(email,userId);
+      }
+    });
+  }
+
+  
+}
+export async function  getUserProfile(mail,userId) {
+  try {
+      const resp = await axios.get("http://127.0.0.1:8086/get/user/" + mail);
+      let data = resp.data;
+      const profile={
+        email :mail,
+        displayName :data.displayName,
+        jobTitle:data.jobTitle,
+        companyName:data.companyName,
+        phoneNumber:data.phoneNumber,
+        userId:userId
+        
+      }
+      profileList.push(profile);
+     
+  } catch (reason) {
+      console.error(reason);
+  }
 }
 function UIRootHooksWrapper(props) {
   useAccessibleOutlineStyle();

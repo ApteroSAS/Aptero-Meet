@@ -85,6 +85,7 @@ export function PeopleSidebarContainer({
   toggleChatSidebar
 }) {
   const people = usePeopleList(presences, mySessionId);
+
   const [selectedPersonId, setSelectedPersonId] = useState(null);
   const selectedPerson = people.find(person => person.id === selectedPersonId);
   if (selectedPerson != null) {
@@ -100,7 +101,6 @@ export function PeopleSidebarContainer({
   );
   if (selectedPerson) {
     if (selectedPerson.id === mySessionId) {
-      console.log("le store est ", store);
       return (
         <ProfileEntryPanel
           containerType="sidebar"

@@ -14,9 +14,9 @@ import MessageDispatch from "../../message-dispatch";
 import HubChannel from "../../utils/hub-channel";
 import AuthChannel from "../../utils/auth-channel";
 import SceneEntryManager from "../../scene-entry-manager";
-import toggleSidebar, { UIRoot } from "../ui-root";
 import { rotateInPlaceAroundWorldUp, affixToWorldUp } from "../../utils/three-utils";
 import { Spinner } from "../misc/Spinner";
+import { CheckUserInfoButton } from "../input/CheckUserInfoButton";
 export function remountUI(props) {
   uiProps = { ...uiProps, ...props };
   mountUI(uiProps);
@@ -166,8 +166,11 @@ export function UserProfileSidebar({
             <FormattedMessage id="user-profile-sidebar.kick-button" defaultMessage="Kick" />
           </Button>
         )}
-        <Button preset="basic" onClick={() => toggleChatSidebar("chat", userId)}>
+        <Button preset="basic" onClick={() => toggleChatSidebar("chat", userId,null)}>
           <FormattedMessage id="user-profile-sidebar.chat-button" defaultMessage="Chat" />
+        </Button>
+        <Button preset="basic" onClick={() => toggleChatSidebar("cardVisit", userId,onBack)}>
+        <FormattedMessage id="user-profile-sidebar.check-other-user-info-button" defaultMessage="User Information" />
         </Button>
       </Column>
     </Sidebar>
@@ -198,7 +201,7 @@ UserProfileSidebar.propTypes = {
   showBackButton: PropTypes.bool,
   onBack: PropTypes.func,
   onClose: PropTypes.func,
-  toggleChatSidebar: PropTypes.func
+  toggleChatSidebar: PropTypes.func,
 };
 
 function useGoToSelectedAvatar(entity) {

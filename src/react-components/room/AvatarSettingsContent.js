@@ -18,9 +18,7 @@ export function AvatarSettingsContent({
   onChangeDisplayName,
   onChangeCompanyName,
   onChangeJobTitle,
-  onChangeEmail,
   onChangePhoneNumber,
-  onChangeUserBio,
   avatarPreview,
   displayNamePattern,
   onChangeAvatar,
@@ -91,7 +89,6 @@ export function AvatarSettingsContent({
             //pattern={displayNamePattern}
             spellCheck="false"
             ///required
-            onChange={onChangeEmail}
             //ref={displayNameInputRef}
           />
           <TextInputField
@@ -105,17 +102,7 @@ export function AvatarSettingsContent({
             onChange={onChangePhoneNumber}
             //ref={displayNameInputRef}
           />
-          <TextInputField
-            className={styles.test}
-            //disabled={disableDisplayNameInput}
-            label={<FormattedMessage id="avatar-settings-content.bio-label" defaultMessage="Description" />}
-            value={descriptionUser}
-            //pattern={displayNamePattern}
-            spellCheck="false"
-            //required
-            onChange={onChangeUserBio}
-            ///ref={displayNameInputRef}
-          />
+     
         </div>
       </div>
       <AcceptButton preset="accept" type="submit" />
@@ -137,9 +124,7 @@ AvatarSettingsContent.propTypes = {
   onChangeDisplayName: PropTypes.func,
   onChangeCompanyName: PropTypes.func,
   onChangeJobTitle:PropTypes.func,
-  onChangeEmail:PropTypes.func,
   onChangePhoneNumber:PropTypes.func,
-  onChangeUserBio:PropTypes.func,
   avatarPreview: PropTypes.node,
   onChangeAvatar: PropTypes.func
 };
