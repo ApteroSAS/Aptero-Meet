@@ -293,15 +293,18 @@ export default class GaugeModal extends Component {
 
   componentDidMount() {
     this.sceneEl = AFRAME.scenes[0];
+    /* NOTE : feature disabled for the moment due to reported lag by clients */
+    let activated=false;
+    if(activated) {
+      this.sceneEl.addEventListener("entered", e =>
+          this.sceneEl.addEventListener("pinned", f => {
+            this.scanForPerf().then(perf => this.setState({performance: perf}));
+          })
+      );
 
-    this.sceneEl.addEventListener("entered", e =>
-      this.sceneEl.addEventListener("pinned", f => {
-        this.scanForPerf().then(perf => this.setState({ performance: perf }));
-      })
-    );
-
-    this.sceneEl.addEventListener("show_perf_pannel", e => this.setState({ visible: true }));
-    this.sceneEl.addEventListener("hide_perf_pannel", e => this.setState({ visible: false }));
+      this.sceneEl.addEventListener("show_perf_pannel", e => this.setState({visible: true}));
+      this.sceneEl.addEventListener("hide_perf_pannel", e => this.setState({visible: false}));
+    }
   }
 
   render() {
