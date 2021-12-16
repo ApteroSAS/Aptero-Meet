@@ -5,6 +5,7 @@ import { getMicrophonePresences } from "../../utils/microphone-presence";
 import ProfileEntryPanel from "../profile-entry-panel";
 import { UserProfileSidebarContainer } from "./UserProfileSidebarContainer";
 import { getAvatarPreview } from "./../ui-root";
+import { media } from "@microsoft/teams-js";
 var selectedId;
 var selectedName;
 var imageList = getAvatarPreview();
@@ -45,7 +46,7 @@ export function usePeopleList(presences, mySessionId, micUpdateFrequency = 500) 
   });
   return people;
 }
-function PeopleListContainer({ hubChannel, people, onSelectPerson, onClose }) {
+export function PeopleListContainer({ hubChannel, people, onSelectPerson, onClose }) {
   const onMuteAll = useCallback(() => {
     for (const person of people) {
       if (person.presence === "room" && person.permissions && !person.permissions.mute_users) {
@@ -116,14 +117,20 @@ export function PeopleSidebarContainer({
     } else {
       return (
         <UserProfileSidebarContainer
+          mySessionId={mySessionId}
           user={selectedPerson}
           toggleChatSidebar={toggleChatSidebar}
           hubChannel={hubChannel}
+          presences={presences}
           performConditionalSignIn={performConditionalSignIn}
           showBackButton
           onBack={() => setSelectedPersonId(null)}
+          onSelectPerson={setSelectedPerson}
+          onClose={onClose}
           onCloseDialog={onCloseDialog}
           showNonHistoriedDialog={showNonHistoriedDialog}
+          store={store}
+          mediaSearchStore={mediaSearchStore}
         />
       );
     }

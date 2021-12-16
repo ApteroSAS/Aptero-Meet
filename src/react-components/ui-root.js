@@ -1588,7 +1588,6 @@ export class UIRoot extends Component {
                         <UserProfileSidebarContainer
                           user={this.getSelectedUser()}
                           imgTab={this.state.imgTab}
-                          hubChannel={this.props.hubChannel}
                           performConditionalSignIn={this.props.performConditionalSignIn}
                           onClose={() => this.setSidebar(null)}
                           onCloseDialog={() => this.closeDialog()}
@@ -1598,11 +1597,17 @@ export class UIRoot extends Component {
                       )}
                          {this.state.sidebarId === "cardVisit" && (
                         <UserProfileVisitCardContainer
-                          muSessionId={this.props.sessionId}
+                          mySessionId={this.props.sessionId}
                           presences={this.props.presences}
                           userId={this.state.userId}
                           store={this.props.store}
+                          hubChannel={this.props.hubChannel}
+                          presences={this.props.presences}
+                          performConditionalSignIn={this.props.performConditionalSignIn}
                           onClose={() => this.setSidebar(null)}
+                          onCloseDialog={() => this.closeDialog()}
+                          toggleSidebar={(type)=>this.toggleSidebar(type)}
+                          showNonHistoriedDialog={this.showNonHistoriedDialog}
                         />
                       )}
                       {this.state.sidebarId === "room-info" && (

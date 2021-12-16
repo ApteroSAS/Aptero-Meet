@@ -22,6 +22,7 @@ export function AvatarSettingsContent({
   avatarPreview,
   displayNamePattern,
   onChangeAvatar,
+  test,
   ...rest
 }) {
   const mail = "azouziichaymae@gmail.com";
@@ -105,7 +106,7 @@ export function AvatarSettingsContent({
      
         </div>
       </div>
-      <AcceptButton preset="accept" type="submit" />
+      <AcceptButton preset="accept" type="submit" onClick={test} />
     </Column>
   );
 }
@@ -126,5 +127,6 @@ AvatarSettingsContent.propTypes = {
   onChangeJobTitle:PropTypes.func,
   onChangePhoneNumber:PropTypes.func,
   avatarPreview: PropTypes.node,
-  onChangeAvatar: PropTypes.func
+  onChangeAvatar: PropTypes.func,
+  test:PropTypes.func
 };

@@ -17,11 +17,16 @@ import SceneEntryManager from "../../scene-entry-manager";
 import { rotateInPlaceAroundWorldUp, affixToWorldUp } from "../../utils/three-utils";
 import { Spinner } from "../misc/Spinner";
 import { CheckUserInfoButton } from "../input/CheckUserInfoButton";
+import {usePeopleList,PeopleListContainer} from "./PeopleSidebarContainer";
+import { Prop } from "../debug-panel/Prop";
+import {UserProfileVisitCardContainer} from "./UserProfileVisitCardContainer";
+import {PeopleSidebarContainer} from "./PeopleSidebarContainer";
 export function remountUI(props) {
   uiProps = { ...uiProps, ...props };
   mountUI(uiProps);
 }
 export function UserProfileSidebar({
+  mySessionId,
   className,
   displayName,
   identityName,
@@ -44,10 +49,22 @@ export function UserProfileSidebar({
   onBack,
   onClose,
   toggleChatSidebar,
+  hubChannel,
+  presences,
+  performConditionalSignIn,
+  onCloseDialog,
+  showNonHistoriedDialog,
+  onSelectPerson,
+  store,
+  mediaSearchStore,
   ...rest
 }) {
   const intl = useIntl();
   let str = "";
+  const [goToUserInformation,setgoToUserInformation]=useState(null);
+  const [goBack,setgoBack]=useState("goBack");
+  const micUpdateFrequency = 500;
+  const people = usePeopleList(presences, mySessionId, micUpdateFrequency);
   if (imgUrl.length != 0) {
     imgUrl.map(e => {
       if (e.id == userId) {
@@ -57,11 +74,35 @@ export function UserProfileSidebar({
       }
     });
   }
+if(goBack==null)
+{
+  //setgoBack("goBack");
+  return (
+    <PeopleSidebarContainer
+    hubChannel={hubChannel}
+    presences={presences}
+    mySessionId={mySessionId}
+    displayNameOverride={displayName}
+    store={store}
+    mediaSearchStore={mediaSearchStore}
+    performConditionalSignIn={performConditionalSignIn}
+    onCloseDialog={onCloseDialog}
+    showNonHistoriedDialog={showNonHistoriedDialog}
+    onClose={onClose}
+    toggleChatSidebar={toggleChatSidebar}
 
+    />
+ );
+}
+else{
+  
+  if(goToUserInformation==null)
+{
   return (
     <Sidebar
       title={identityName ? `${displayName} (${identityName})` : displayName}
-      beforeTitle={showBackButton ? <BackButton onClick={onBack} /> : <CloseButton onClick={onClose} />}
+      beforeTitle={showBackButton ? <BackButton onClick={onBack}
+      /> : <BackButton onClick={()=>setgoBack(null)} />}
       className={className}
       {...rest}
     >
@@ -169,17 +210,51 @@ export function UserProfileSidebar({
         <Button preset="basic" onClick={() => toggleChatSidebar("chat", userId,null)}>
           <FormattedMessage id="user-profile-sidebar.chat-button" defaultMessage="Chat" />
         </Button>
-        <Button preset="basic" onClick={() => toggleChatSidebar("cardVisit", userId,onBack)}>
+        <Button preset="basic" onClick={()=>setgoToUserInformation("go") }>
         <FormattedMessage id="user-profile-sidebar.check-other-user-info-button" defaultMessage="User Information" />
         </Button>
       </Column>
     </Sidebar>
   );
 }
+else{
+  //setgoToUserInformation(null);
+  return (
+    <UserProfileVisitCardContainer
+    mySessionId={mySessionId}
+    userId={userId}
+    toggleChatSidebar={toggleChatSidebar}
+    hubChannel={hubChannel}
+    presences={presences}
+    performConditionalSignIn={performConditionalSignIn}
+    showBackButton
+    onBack={onBack}
+    onClose={onClose}
+    onCloseDialog={onCloseDialog}
+    showNonHistoriedDialog={showNonHistoriedDialog}
+    onSelectPerson={onSelectPerson}
+    store={store}
+    mediaSearchStore={mediaSearchStore}
+  />
+  );
+}
+}
+
+
+
+/*
+else{
+  return (
+    <PeopleListContainer onSelectPerson={null} onClose={onClose} hubChannel={hubChannel} people={people} />
+ );
+}*/
+
+}
 export function getSelected() {
   return userId;
 }
 UserProfileSidebar.propTypes = {
+  mySessionId:PropTypes.string,
   className: PropTypes.string,
   displayName: PropTypes.string,
   identityName: PropTypes.string,
@@ -202,6 +277,14 @@ UserProfileSidebar.propTypes = {
   onBack: PropTypes.func,
   onClose: PropTypes.func,
   toggleChatSidebar: PropTypes.func,
+  hubChannel:PropTypes.object,
+  presences:PropTypes.object,
+  performConditionalSignIn:PropTypes.func,
+  onCloseDialog:PropTypes.func,
+  showNonHistoriedDialog:PropTypes.func,
+  onSelectPerson: PropTypes.func,
+  store: PropTypes.object.isRequired,
+  mediaSearchStore: PropTypes.object.isRequired
 };
 
 function useGoToSelectedAvatar(entity) {

@@ -566,5 +566,6 @@
   "webvr-unsupported-modal.webvr-rocks-link": "Pour consulter la liste des navigateurs avec support expérimental VR, visitez la page <a>WebVR Rocks</a>.",
     "whats-new-page.title": "Quoi de neuf",
    "avatar-teleport":"Téléporter",
-   "user-profile-sidebar.chat-button":"Discuter"
+   "user-profile-sidebar.chat-button":"Discuter",
+   "user-profile-sidebar.check-other-user-info-button":"Voir les informations"
 }

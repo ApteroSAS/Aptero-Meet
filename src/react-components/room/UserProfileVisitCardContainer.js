@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import UserProfileVisitCard from "./UserProfileVisitCard";
 import axios from "axios";
 import { getProfileList ,getAvatarPreview} from "./../ui-root";
-
 // get the profile of the selected user
 var profileList=[];
 var displayName="";
@@ -13,14 +12,23 @@ var companyName="";
 var phoneNumber="";
 export function UserProfileVisitCardContainer({
   mySessionId,
+  presences,
   userId,
+  //user,
+  //imgTab,
+  hubChannel,
+  performConditionalSignIn,
+  onClose,
+  onCloseDialog,
+  toggleChatSidebar,
+  showNonHistoriedDialog,
+  onSelectPerson,
   store,
-  onclose,
-  onBack,
+  mediaSearchStore
   
 }) {
+
     profileList=getProfileList();
-    console.log(getProfileList());
     var selectedPersonProfile=null;
     profileList.map((profile)=>{
         if(profile.userId==userId)
@@ -49,8 +57,17 @@ export function UserProfileVisitCardContainer({
       companyName={companyName}
       imgUrl={getAvatarPreview()}
       userId={userId}
-      onclose={onclose}
-      onBack={onBack}
+      mySessionId={mySessionId}
+      presences={presences}
+      hubChannel={hubChannel}
+      performConditionalSignIn={performConditionalSignIn}
+      onClose={onClose}
+      onCloseDialog={onCloseDialog}
+      toggleChatSidebar={toggleChatSidebar}
+      showNonHistoriedDialog={showNonHistoriedDialog}
+      onSelectPerson={onSelectPerson}
+      store={store}
+      mediaSearchStore={mediaSearchStore}
       //identityName={identityName}
       /*
       avatarPreview={<img src={avatarThumbnailUrl} />}
@@ -68,9 +85,19 @@ export function UserProfileVisitCardContainer({
 }
 
 UserProfileVisitCardContainer.propTypes = {
+  presences:PropTypes.object,
   mySessionId:PropTypes.string,
   userId: PropTypes.string,
   store:PropTypes.object,
-  onclose:PropTypes.func,
-  onBack:PropTypes.func,
+  hubChannel: PropTypes.object,
+  performConditionalSignIn: PropTypes.func,
+  showBackButton: PropTypes.bool,
+  onBack: PropTypes.func,
+  onClose: PropTypes.func,
+  onCloseDialog: PropTypes.func,
+  showNonHistoriedDialog: PropTypes.func,
+  toggleChatSidebar: PropTypes.func,
+  onSelectPerson: PropTypes.func,
+  mediaSearchStore: PropTypes.object.isRequired
+  
 };

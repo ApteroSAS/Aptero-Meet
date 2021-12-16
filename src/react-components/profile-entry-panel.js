@@ -255,10 +255,16 @@ async getUserProfile() {
       phoneNumber:this.state.phoneNumber,
       descriptionUser:this.state.descriptionUser,
       displayNamePattern: SCHEMA.definitions.profile.properties.displayName.pattern,
-      onChangeDisplayName: e => this.updateUserDisplayName(e.target.value),
-      onChangeCompanyName: e => this.updateUserCompanyName(e.target.value ),
-      onChangeJobTitle: e => this.updateUserJobTitle(e.target.value),
-      onChangePhoneNumber: e => this.updateUserPhoneNumber(e.target.value),
+      onChangeDisplayName: e => this.setState({displayName:e.target.value}),
+      onChangeCompanyName: e => this.setState({companyName:e.target.value}),
+      onChangeJobTitle: e => this.setState({jobTitle:e.target.value}),
+      onChangePhoneNumber: e => this.setState({phoneNumber:e.target.value}),
+      test:()=>{
+        this.updateUserDisplayName(this.state.displayName);
+        this.updateUserCompanyName(this.state.companyName);
+        this.updateUserJobTitle(this.state.jobTitle);
+        this.updateUserPhoneNumber(this.state.phoneNumber);
+      },
       //onChangeUserBio: e => ,
       avatarPreview: <AvatarPreview avatarGltfUrl={this.state.avatar && this.state.avatar.gltf_url} />,
       onChangeAvatar: e => {
@@ -266,6 +272,7 @@ async getUserProfile() {
         this.props.mediaSearchStore.sourceNavigateWithNoNav("avatars", "use");
       },
       onSubmit: this.saveStateAndFinish ,
+
       onClose: this.props.onClose,
       onBack: this.props.onBack
     };

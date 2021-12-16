@@ -5,10 +5,13 @@ import { getAvatarThumbnailUrl, fetchAvatarGltfUrl } from "../../utils/avatar-ut
 import { UserProfileSidebar } from "./UserProfileSidebar.js";
 import { SignInMessages } from "../auth/SignInModal";
 import { getAvatarPreview } from "./../ui-root";
+import { Prop } from "../debug-panel/Prop";
 export function UserProfileSidebarContainer({
+  mySessionId,
   user,
   imgTab,
   hubChannel,
+  presences,
   performConditionalSignIn,
   showBackButton,
   onBack,
@@ -16,6 +19,9 @@ export function UserProfileSidebarContainer({
   onCloseDialog,
   showNonHistoriedDialog,
   toggleChatSidebar,
+  onSelectPerson,
+  store,
+  mediaSearchStore,
   
 }) {
   const [avatarThumbnailUrl, setAvatarThumbnailUrl] = useState();
@@ -116,7 +122,11 @@ export function UserProfileSidebarContainer({
     }
   }, [performConditionalSignIn, hubChannel, userId, onClose, onBack]);
   return (
+
     <UserProfileSidebar
+    mySessionId={mySessionId}
+    hubChannel={hubChannel}
+    presences={presences}
       displayName={displayName}
       identityName={identityName}
       avatarPreview={<img src={avatarThumbnailUrl} />}
@@ -138,6 +148,12 @@ export function UserProfileSidebarContainer({
       onClose={onClose}
       onBack={onBack}
       toggleChatSidebar={toggleChatSidebar}
+      performConditionalSignIn={performConditionalSignIn}
+      onCloseDialog={onCloseDialog}
+      showNonHistoriedDialog={showNonHistoriedDialog}
+      onSelectPerson={onSelectPerson}
+      store={store}
+      mediaSearchStore={mediaSearchStore}
     />
   );
 }
@@ -163,9 +179,11 @@ export function getUrl(avatarGlb) {
   });
 }
 UserProfileSidebarContainer.propTypes = {
+  mySessionId:PropTypes.string,
   user: PropTypes.object.isRequired,
   imgTab: PropTypes.array,
   hubChannel: PropTypes.object,
+  presences:PropTypes.object,
   performConditionalSignIn: PropTypes.func,
   showBackButton: PropTypes.bool,
   onBack: PropTypes.func,
@@ -173,4 +191,7 @@ UserProfileSidebarContainer.propTypes = {
   onCloseDialog: PropTypes.func.isRequired,
   showNonHistoriedDialog: PropTypes.func,
   toggleChatSidebar: PropTypes.func,
+  onSelectPerson: PropTypes.func,
+  store: PropTypes.object.isRequired,
+  mediaSearchStore: PropTypes.object.isRequired
 };
