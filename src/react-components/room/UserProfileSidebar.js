@@ -222,6 +222,7 @@ else{
   return (
     <UserProfileVisitCardContainer
     mySessionId={mySessionId}
+    displayName={displayName}
     userId={userId}
     toggleChatSidebar={toggleChatSidebar}
     hubChannel={hubChannel}
@@ -239,15 +240,6 @@ else{
   );
 }
 }
-
-
-
-/*
-else{
-  return (
-    <PeopleListContainer onSelectPerson={null} onClose={onClose} hubChannel={hubChannel} people={people} />
- );
-}*/
 
 }
 export function getSelected() {

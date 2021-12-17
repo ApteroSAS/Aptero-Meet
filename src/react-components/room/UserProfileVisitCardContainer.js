@@ -3,9 +3,10 @@ import PropTypes from "prop-types";
 import UserProfileVisitCard from "./UserProfileVisitCard";
 import axios from "axios";
 import { getProfileList ,getAvatarPreview} from "./../ui-root";
+import { usePeopleList } from "./PeopleSidebarContainer";
 // get the profile of the selected user
 var profileList=[];
-var displayName="";
+var displayName_user="";
 var email="";
 var jobTitle="";
 var companyName="";
@@ -14,8 +15,6 @@ export function UserProfileVisitCardContainer({
   mySessionId,
   presences,
   userId,
-  //user,
-  //imgTab,
   hubChannel,
   performConditionalSignIn,
   onClose,
@@ -24,10 +23,13 @@ export function UserProfileVisitCardContainer({
   showNonHistoriedDialog,
   onSelectPerson,
   store,
-  mediaSearchStore
+  mediaSearchStore,
+  displayName
   
 }) {
-
+    var iSignedIn=false;
+    const people = usePeopleList(presences, mySessionId);
+    const selectedPerson = people.find(person => person.id === userId);
     profileList=getProfileList();
     var selectedPersonProfile=null;
     profileList.map((profile)=>{
@@ -38,18 +40,20 @@ export function UserProfileVisitCardContainer({
     });
     if(selectedPersonProfile!=null)
     {
-        
-        
-        displayName=selectedPersonProfile.displayName;
+        displayName_user=selectedPersonProfile.displayName;
         email=selectedPersonProfile.email;
         jobTitle=selectedPersonProfile.jobTitle;
         companyName=selectedPersonProfile.companyName;
-        phoneNumber=selectedPersonProfile.phoneNumber;
-        
+        phoneNumber=selectedPersonProfile.phoneNumber;   
+    }
+    if(selectedPerson)
+    {
+      iSignedIn=selectedPerson.roles.signed_in;
     }
     
   return (
     <UserProfileVisitCard
+      isSignedIn={iSignedIn}
       displayName={displayName}
       email={email}
       phoneNumber={phoneNumber}
@@ -98,6 +102,7 @@ UserProfileVisitCardContainer.propTypes = {
   showNonHistoriedDialog: PropTypes.func,
   toggleChatSidebar: PropTypes.func,
   onSelectPerson: PropTypes.func,
-  mediaSearchStore: PropTypes.object.isRequired
+  mediaSearchStore: PropTypes.object.isRequired,
+  displayName:PropTypes.string
   
 };

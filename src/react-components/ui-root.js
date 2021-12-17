@@ -1575,6 +1575,7 @@ export class UIRoot extends Component {
                       )}
                       {this.state.sidebarId === "profile" && (
                         <ProfileEntryPanel
+                       
                           history={this.props.history}
                           containerType="sidebar"
                           displayNameOverride={displayNameOverride}

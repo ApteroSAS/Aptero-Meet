@@ -38,14 +38,14 @@ export function UserProfileVisitCard ({
     showNonHistoriedDialog,
     onSelectPerson,
     store,
-    mediaSearchStore
+    mediaSearchStore,
+    isSignedIn
 }){     
         const [goBackToUserPanel,setBackToUserPanel]=useState("test");
         const micPresences=getMicrophonePresences();
         const presence = presences[userId];
 
         const user=userFromPresence(userId, presence, micPresences, mySessionId);
-        
         let avatarImgae = "";
         let history = useHistory();
         if (imgUrl.length != 0) {
@@ -57,74 +57,112 @@ export function UserProfileVisitCard ({
             }
           });
         }
-  if(goBackToUserPanel!=null)
- {
-  return (
-
-    <Sidebar
-    title={displayName}
-    beforeTitle={ <BackButton onClick={()=>setBackToUserPanel(null)} />}
->
-<Column center padding>
-<div className='control-pane'>
-              <div className="sample_container card_sample">
-                  
-                  <div className="e-card e-custom-card">
-                      <div className="e-card-header">
-                          
-                          <div className="e-avatar e-avatar-circle">
-                                  {avatarImgae == "" && (     
-                                     <AcountIcon className="acount-icon"/>
-                                  )}
-                             {avatarImgae!="" && ( <img src={avatarImgae} className="avatar-image"/>)}
-                          </div>
-                          &nbsp;
+    if(isSignedIn)
+    {
+      if(goBackToUserPanel!=null)
+      {
+       return (
+     
+         <Sidebar
+         title={displayName}
+         beforeTitle={ <BackButton onClick={()=>setBackToUserPanel(null)} />}
+     >
+     <Column center padding>
+     <div className='control-pane'>
+                   <div className="sample_container card_sample">
+                       
+                       <div className="e-card e-custom-card">
+                           <div className="e-card-header">
+                               
+                               <div className="e-avatar e-avatar-circle">
+                                       {avatarImgae == "" && (     
+                                          <AcountIcon className="acount-icon"/>
+                                       )}
+                                  {avatarImgae!="" && ( <img src={avatarImgae} className="avatar-image"/>)}
+                               </div>
+                               &nbsp;
+                                </div>
+                           <div className="e-card-header">
+                               <div className="e-card-header-caption center">
+                                   <div className="e-card-header-title name">{displayName}</div>
+                                   <div className="e-card-sub-title">{jobTitle}</div>
+                               </div>
                            </div>
-                      <div className="e-card-header">
-                          <div className="e-card-header-caption center">
-                              <div className="e-card-header-title name">{displayName}</div>
-                              <div className="e-card-sub-title">{jobTitle}</div>
-                          </div>
-                      </div>
-                      <div className="e-card-content">
-                          <div className="phone-number"><PhoneIcon className="icon-phone"></PhoneIcon><span className="phone-number-text">{phoneNumber}</span></div>
-                          <div className="email"><EmailIcon className="icon-phone"></EmailIcon><span className="email-text">{email}</span></div>
-                      </div>
-                  </div>
-              </div>
-          </div>
-          <Button preset="basic" onClick={() => toggleChatSidebar("chat", userId,null)} >
-        <FormattedMessage id="user-profile-sidebar.chat-button" defaultMessage="Chat" />
-      </Button>
-      <Button preset="basic" >
-        <FormattedMessage id="user-profile-sidebar.send-mail-button" defaultMessage="Send Mail" />
-      </Button>
-      </Column>
-
-
-</Sidebar>
-);
- }
- 
+                           <div className="e-card-content">
+                               <div className="phone-number"><PhoneIcon className="icon-phone"></PhoneIcon><span className="phone-number-text">{phoneNumber}</span></div>
+                               <div className="email"><EmailIcon className="icon-phone"></EmailIcon><span className="email-text">{email}</span></div>
+                           </div>
+                       </div>
+                   </div>
+               </div>
+               <Button preset="basic" onClick={() => toggleChatSidebar("chat", userId,null)} >
+             <FormattedMessage id="user-profile-sidebar.chat-button" defaultMessage="Chat" />
+           </Button>
+           <Button preset="basic" >
+             <FormattedMessage id="user-profile-sidebar.send-mail-button" defaultMessage="Send Mail" />
+           </Button>
+           </Column>
+     
+     
+     </Sidebar>
+     );
+      }
+      
+      else{
+       return(
+         <UserProfileSidebarContainer
+         user={user}
+         imgTab={avatarImgae.toString()}
+         presences={presences}
+         hubChannel={hubChannel}
+         mySessionId={mySessionId}
+         performConditionalSignIn={performConditionalSignIn}
+         onClose={onClose}
+         onCloseDialog={onCloseDialog}
+         toggleChatSidebar={toggleChatSidebar}
+         showNonHistoriedDialog={showNonHistoriedDialog}
+         onSelectPerson={onSelectPerson}
+         store={store}
+         mediaSearchStore={mediaSearchStore}
+         />);
+      }
+     
+    }
  else{
-  return(
-    <UserProfileSidebarContainer
-    user={user}
-    imgTab={avatarImgae.toString()}
-    presences={presences}
-    hubChannel={hubChannel}
-    mySessionId={mySessionId}
-    performConditionalSignIn={performConditionalSignIn}
-    onClose={onClose}
-    onCloseDialog={onCloseDialog}
-    toggleChatSidebar={toggleChatSidebar}
-    showNonHistoriedDialog={showNonHistoriedDialog}
-    onSelectPerson={onSelectPerson}
-    store={store}
-    mediaSearchStore={mediaSearchStore}
-    />);
- }
+  if(goBackToUserPanel!=null)
+      {
+        return (
+          <Sidebar
+          title={displayName}
+          beforeTitle={ <BackButton onClick={()=>setBackToUserPanel(null)} />}
+      >
+      <Column center padding>
+          <div >no data</div>
+            </Column>
+      </Sidebar>
+      );
+      }
+      else{
+        return(
+          <UserProfileSidebarContainer
+          user={user}
+          imgTab={avatarImgae.toString()}
+          presences={presences}
+          hubChannel={hubChannel}
+          mySessionId={mySessionId}
+          performConditionalSignIn={performConditionalSignIn}
+          onClose={onClose}
+          onCloseDialog={onCloseDialog}
+          toggleChatSidebar={toggleChatSidebar}
+          showNonHistoriedDialog={showNonHistoriedDialog}
+          onSelectPerson={onSelectPerson}
+          store={store}
+          mediaSearchStore={mediaSearchStore}
+          />);
+      }
 
+
+ }
 }
 
 UserProfileVisitCard.propTypes = {
@@ -151,7 +189,8 @@ UserProfileVisitCard.propTypes = {
     toggleChatSidebar: PropTypes.func,
     onSelectPerson: PropTypes.func,
     store: PropTypes.object.isRequired,
-    mediaSearchStore: PropTypes.object.isRequired
+    mediaSearchStore: PropTypes.object.isRequired,
+    isSignedIn:PropTypes.bool
 
 };
 export  default UserProfileVisitCard;

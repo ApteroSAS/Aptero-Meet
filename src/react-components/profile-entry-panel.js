@@ -7,6 +7,7 @@ import { AvatarSettingsSidebar } from "./room/AvatarSettingsSidebar";
 import { AvatarSetupModal } from "./room/AvatarSetupModal";
 import AvatarPreview from "./avatar-preview";
 import axios from "axios";
+import { people } from "@microsoft/teams-js";
 
 export default class ProfileEntryPanel extends Component {
   static propTypes = {
@@ -20,7 +21,8 @@ export default class ProfileEntryPanel extends Component {
     avatarId: PropTypes.string,
     onClose: PropTypes.func,
     onBack: PropTypes.func,
-    showBackButton: PropTypes.bool
+    showBackButton: PropTypes.bool,
+    isSignedIn:PropTypes.bool
   };
 
   static defaultProps = {
@@ -243,9 +245,9 @@ async getUserProfile() {
   };
 
   render() {
-    //this.getUserProfile();
-    //.updateUserProfile()
+  
     const avatarSettingsProps = {
+      isSignedIn:this.props.isSignedIn,
       displayNameInputRef: inp => (this.nameInput = inp),
       disableDisplayNameInput: !!this.props.displayNameOverride,
       displayName: this.props.displayNameOverride ? this.props.displayNameOverride : this.state.displayName,
@@ -259,7 +261,7 @@ async getUserProfile() {
       onChangeCompanyName: e => this.setState({companyName:e.target.value}),
       onChangeJobTitle: e => this.setState({jobTitle:e.target.value}),
       onChangePhoneNumber: e => this.setState({phoneNumber:e.target.value}),
-      test:()=>{
+      submit_info:()=>{
         this.updateUserDisplayName(this.state.displayName);
         this.updateUserCompanyName(this.state.companyName);
         this.updateUserJobTitle(this.state.jobTitle);
@@ -276,7 +278,6 @@ async getUserProfile() {
       onClose: this.props.onClose,
       onBack: this.props.onBack
     };
-
     if (this.props.containerType === "sidebar") {
       return <AvatarSettingsSidebar {...avatarSettingsProps} showBackButton={this.props.showBackButton} />;
     }

@@ -86,12 +86,12 @@ export function PeopleSidebarContainer({
   toggleChatSidebar
 }) {
   const people = usePeopleList(presences, mySessionId);
-
   const [selectedPersonId, setSelectedPersonId] = useState(null);
   const selectedPerson = people.find(person => person.id === selectedPersonId);
-  if (selectedPerson != null) {
-    selectedId = selectedPerson.id;
-    selectedName = selectedPerson.profile.displayName;
+  var iSignedIn=true;
+  if(selectedPerson)
+  {
+    iSignedIn=selectedPerson.roles.signed_in;
   }
 
   const setSelectedPerson = useCallback(
@@ -104,6 +104,8 @@ export function PeopleSidebarContainer({
     if (selectedPerson.id === mySessionId) {
       return (
         <ProfileEntryPanel
+        isSignedIn={iSignedIn}
+          people={people}
           containerType="sidebar"
           displayNameOverride={displayNameOverride}
           store={store}
