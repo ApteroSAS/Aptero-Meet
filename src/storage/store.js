@@ -11,6 +11,7 @@ const validator = new Validator();
 import { EventTarget } from "event-target-shim";
 import { fetchRandomDefaultAvatarId, generateRandomName } from "../utils/identity.js";
 import { microsoftService } from "../aptero/service/MicrosoftIntegration/MicrosoftService";
+import {microsoftLoginService} from "../aptero/service/MicrosoftIntegration/MicrosoftLoginService";
 
 export const defaultMaterialQualitySetting = (function() {
   const MATERIAL_QUALITY_OPTIONS = ["low", "medium", "high"];
@@ -52,6 +53,8 @@ export const SCHEMA = {
         jobTitleName: { type: "string" },
         phoneNumber: { type: "string" },
         description: { type: "string" },
+        profilePicture:{type:"string"},
+        microsoftUser:{type:"bool"},
         // personalAvatarId is obsolete, but we need it here for backwards compatibility.
         personalAvatarId: { type: "string" }
       }
@@ -73,6 +76,7 @@ export const SCHEMA = {
         hasFoundFreeze: { type: "boolean" },
         hasChangedName: { type: "boolean" },
         hasAcceptedProfile: { type: "boolean" },
+        hasChangedPicture:{type:"boolean"},
         lastEnteredAt: { type: "string" },
         hasPinned: { type: "boolean" },
         hasRotated: { type: "boolean" },
@@ -240,7 +244,7 @@ export default class Store extends EventTarget {
       activity: {},
       settings: {},
       credentials: {},
-      profile: { companyName: "aptero" },
+      profile: {},
       confirmedDiscordRooms: [],
       confirmedBroadcastedRooms: [],
       uploadPromotionTokens: [],
@@ -283,8 +287,9 @@ export default class Store extends EventTarget {
 
     // Regenerate name to encourage users to change it.
     if (!this.state.activity.hasChangedName) {
+      //const authenticationModule= new MicrosoftLoginService();
       this.update({
-        profile: { displayName: microsoftService.getName() || generateRandomName() }
+        profile: {  displayName:generateRandomName() }
       });
     }
   };

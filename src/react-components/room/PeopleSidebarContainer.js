@@ -83,7 +83,8 @@ export function PeopleSidebarContainer({
   onCloseDialog,
   showNonHistoriedDialog,
   onClose,
-  toggleChatSidebar
+  toggleChatSidebar,
+  signedIn
 }) {
   const people = usePeopleList(presences, mySessionId);
   const [selectedPersonId, setSelectedPersonId] = useState(null);
@@ -114,6 +115,7 @@ export function PeopleSidebarContainer({
           history={history}
           showBackButton
           onBack={() => setSelectedPersonId(null)}
+          signedIn={signedIn}
         />
       );
     } else {
@@ -161,5 +163,6 @@ PeopleSidebarContainer.propTypes = {
   performConditionalSignIn: PropTypes.func.isRequired,
   onCloseDialog: PropTypes.func.isRequired,
   showNonHistoriedDialog: PropTypes.func.isRequired,
-  toggleChatSidebar: PropTypes.func
+  toggleChatSidebar: PropTypes.func,
+  signedIn:PropTypes.func
 };

@@ -211,7 +211,7 @@ else{
           <FormattedMessage id="user-profile-sidebar.chat-button" defaultMessage="Chat" />
         </Button>
         <Button preset="basic" onClick={()=>setgoToUserInformation("go") }>
-        <FormattedMessage id="user-profile-sidebar.check-other-user-info-button" defaultMessage="User Information" />
+        <FormattedMessage id="user-profile-sidebar.check-other-user-info-button" defaultMessage="Visit card" />
         </Button>
       </Column>
     </Sidebar>

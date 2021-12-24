@@ -11,6 +11,7 @@ var email="";
 var jobTitle="";
 var companyName="";
 var phoneNumber="";
+var profilePicture="";
 export function UserProfileVisitCardContainer({
   mySessionId,
   presences,
@@ -44,7 +45,18 @@ export function UserProfileVisitCardContainer({
         email=selectedPersonProfile.email;
         jobTitle=selectedPersonProfile.jobTitle;
         companyName=selectedPersonProfile.companyName;
-        phoneNumber=selectedPersonProfile.phoneNumber;   
+        phoneNumber=selectedPersonProfile.phoneNumber;  
+        profilePicture=getAvatarPreview(); 
+    }
+    
+    if(selectedPerson){
+      console.log("selected person",selectedPerson);
+      displayName_user=selectedPerson.profile.displayName;
+      email=selectedPerson.profile.email;
+      jobTitle=selectedPerson.profile.jobTitle;
+      companyName=selectedPerson.profile.companyName;
+      phoneNumber=selectedPerson.profile.phoneNumber;
+      profilePicture=selectedPerson.profile.profilePicture;   
     }
     if(selectedPerson)
     {
@@ -59,7 +71,8 @@ export function UserProfileVisitCardContainer({
       phoneNumber={phoneNumber}
       jobTitle={jobTitle}
       companyName={companyName}
-      imgUrl={getAvatarPreview()}
+      profilePictureList={getAvatarPreview()}
+      profilePictureMicrosoftUser={profilePicture}
       userId={userId}
       mySessionId={mySessionId}
       presences={presences}

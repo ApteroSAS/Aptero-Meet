@@ -44,8 +44,8 @@ export class MicrosoftService{
     //this.overrideXHRSendRequest();
     window.Buffer = window.Buffer || (await import('buffer')).Buffer;
     let Msal = (await import('msal')).default
-    let { ImplicitMSALAuthenticationProvider } = (await import("@microsoft/microsoft-graph-client/lib/src/ImplicitMSALAuthenticationProvider"));
-    let { MSALAuthenticationProviderOptions } = (await import("@microsoft/microsoft-graph-client/lib/src/MSALAuthenticationProviderOptions"));
+    //let { ImplicitMSALAuthenticationProvider } = (await import("@microsoft/microsoft-graph-client/lib/src/ImplicitMSALAuthenticationProvider"));
+    //let { MSALAuthenticationProviderOptions } = (await import("@microsoft/microsoft-graph-client/lib/src/MSALAuthenticationProviderOptions"));
     this.msalInstance = new Msal.UserAgentApplication(this.msalConfig);
     const options = new MSALAuthenticationProviderOptions(this.scopes);
     this.authProvider = new ImplicitMSALAuthenticationProvider(this.msalInstance, options);
@@ -56,7 +56,7 @@ export class MicrosoftService{
       authProvider : this.authProvider, // An instance created from previous step
     };
     //import { Client } from "@microsoft/microsoft-graph-client/lib/src/Client";
-    let { Client } = (await import("@microsoft/microsoft-graph-client/lib/src/Client"))
+    //let { Client } = (await import("@microsoft/microsoft-graph-client/lib/src/Client"))
     this.client = Client.initWithMiddleware(options2);
     //import * as microsoftTeams from "@microsoft/teams-js";
     let microsoftTeams = (await import("@microsoft/teams-js")).default

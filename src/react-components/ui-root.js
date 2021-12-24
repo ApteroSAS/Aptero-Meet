@@ -459,7 +459,7 @@ export class UIRoot extends Component {
       message: signInMessage,
       onSubmitEmail: async email => {
         const { authComplete } = await authChannel.startAuthentication(email, this.props.hubChannel);
-
+        
         this.showNonHistoriedDialog(RoomSignInModalContainer, {
           step: SignInStep.waitForVerification,
           onClose: onContinueAfterSignIn || this.closeDialog
@@ -1559,6 +1559,7 @@ export class UIRoot extends Component {
                       )}
                       {this.state.sidebarId === "people" && (
                         <PeopleSidebarContainer
+                          signedIn={()=>this.showContextualSignInDialog()}
                           displayNameOverride={displayNameOverride}
                           store={this.props.store}
                           mediaSearchStore={this.props.mediaSearchStore}

@@ -6,6 +6,7 @@ import configs from "../../utils/configs";
 import jwtDecode from "jwt-decode";
 import AuthChannel from "../../utils/auth-channel";
 import { connectToReticulum } from "../../utils/phoenix-utils";
+import { microsoftLoginService } from "../../aptero/service/MicrosoftIntegration/MicrosoftLoginService";
 
 export const AuthContext = createContext();
 
@@ -81,13 +82,25 @@ export function AuthContextProvider({ children, store }) {
       const authChannel = new AuthChannel(store);
       const socket = await connectToReticulum();
       authChannel.setSocket(socket);
+      //const { authComplete } = await authChannel.startAuthentication(email);
       const { authComplete } = await authChannel.startAuthentication(email);
       await authComplete;
       await checkIsAdmin(socket, store);
     },
     [store]
   );
-
+  const signInMicrosoft = useCallback(
+    async user=>{
+      const authChannel=new AuthChannel(store);
+      const socket = await connectToReticulum();
+      authChannel.setSocket(socket);
+      const user_=microsoftLoginService.getUserAccount();
+      //const { authComplete } = await authChannel.startMicrosoftAuthentication(user);
+      await authChannel.convertToHubToken(user_);
+      //await authComplete;
+      //await checkIsAdmin(socket,store);
+    }
+  );
   const verify = useCallback(
     async authParams => {
       const authChannel = new AuthChannel(store);
@@ -114,6 +127,7 @@ export function AuthContextProvider({ children, store }) {
     email: store.state.credentials && store.state.credentials.email,
     userId: store.credentialsAccountId,
     signIn,
+    signInMicrosoft,
     verify,
     signOut
   });

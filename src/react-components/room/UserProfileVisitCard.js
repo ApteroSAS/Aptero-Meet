@@ -25,7 +25,8 @@ export function UserProfileVisitCard ({
     email,
     phoneNumber,
     jobTitle,
-    imgUrl,
+    profilePictureList,
+    profilePictureMicrosoftUser,
     userId,
     companyName, 
     presences,
@@ -46,16 +47,21 @@ export function UserProfileVisitCard ({
         const presence = presences[userId];
 
         const user=userFromPresence(userId, presence, micPresences, mySessionId);
-        let avatarImgae = "";
+        let avatarImage = "";
         let history = useHistory();
-        if (imgUrl.length != 0) {
-          imgUrl.map(e => {
-            if (e.id == userId) {
-            avatarImgae = e.url;
-            avatarImgae = avatarImgae.replace('"', "");
-            avatarImgae = avatarImgae.replace('"', "");
-            }
-          });
+        if(profilePictureMicrosoftUser!=null){
+          avatarImage=profilePictureMicrosoftUser;
+        }
+        else{
+          if (profilePictureList.length != 0) {
+            profilePictureList.map(e => {
+              if (e.id == userId) {
+              avatarImage = e.url;
+              avatarImage = avatarImage.replace('"', "");
+              avatarImage = avatarImage.replace('"', "");
+              }
+            });
+          }
         }
     if(isSignedIn)
     {
@@ -75,10 +81,10 @@ export function UserProfileVisitCard ({
                            <div className="e-card-header">
                                
                                <div className="e-avatar e-avatar-circle">
-                                       {avatarImgae == "" && (     
+                                       {avatarImage == "" && (     
                                           <AcountIcon className="acount-icon"/>
                                        )}
-                                  {avatarImgae!="" && ( <img src={avatarImgae} className="avatar-image"/>)}
+                                  {avatarImage!="" && ( <img src={avatarImage} className="avatar-image"/>)}
                                </div>
                                &nbsp;
                                 </div>
@@ -112,7 +118,7 @@ export function UserProfileVisitCard ({
        return(
          <UserProfileSidebarContainer
          user={user}
-         imgTab={avatarImgae.toString()}
+         imgTab={avatarImage.toString()}
          presences={presences}
          hubChannel={hubChannel}
          mySessionId={mySessionId}
@@ -146,7 +152,7 @@ export function UserProfileVisitCard ({
         return(
           <UserProfileSidebarContainer
           user={user}
-          imgTab={avatarImgae.toString()}
+          imgTab={avatarImage.toString()}
           presences={presences}
           hubChannel={hubChannel}
           mySessionId={mySessionId}
@@ -171,13 +177,11 @@ UserProfileVisitCard.propTypes = {
     phoneNumber:PropTypes.string,
     jobTitle:PropTypes.string,
     companyName:PropTypes.string,
-    imgUrl:PropTypes.string,
+    profilePictureList:PropTypes.string,
     userId:PropTypes.string,
     presences:PropTypes.object,
     mySessionId:PropTypes.string,
-    
-    //user: PropTypes.object.isRequired,
-    //imgTab: PropTypes.array,
+    profilePictureMicrosoftUser:PropTypes.string,
     hubChannel: PropTypes.object,
     presences:PropTypes.object,
     performConditionalSignIn: PropTypes.func,

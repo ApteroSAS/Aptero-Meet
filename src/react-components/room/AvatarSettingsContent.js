@@ -24,6 +24,7 @@ export function AvatarSettingsContent({
   onChangeAvatar,
   submit_info,
   isSignedIn,
+  signedIn,
   ...rest
 }) {
   if(isSignedIn)
@@ -109,6 +110,7 @@ export function AvatarSettingsContent({
     );
   }
   else{
+    
     return (
     <Column as="form" className={styles.content} {...rest}>
     <TextInputField
@@ -133,6 +135,9 @@ export function AvatarSettingsContent({
         <FormattedMessage id="avatar-settings-content.change-avatar-button" defaultMessage="Change Avatar" />
       </Button>
     </div>
+    <Button type="button" preset="basic" onClick={signedIn}>
+        <FormattedMessage  id="avatar-settings-content.sign-up-button" defaultMessage="Sign in"/>
+      </Button>
     <AcceptButton preset="accept" type="submit" />
   </Column>
 );
@@ -158,5 +163,6 @@ AvatarSettingsContent.propTypes = {
   avatarPreview: PropTypes.node,
   onChangeAvatar: PropTypes.func,
   submit_info:PropTypes.func,
-  isSignedIn:PropTypes.bool
+  isSignedIn:PropTypes.bool,
+  signedIn:PropTypes.func
 };

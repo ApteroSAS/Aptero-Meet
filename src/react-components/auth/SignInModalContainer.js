@@ -2,6 +2,7 @@ import React, { useCallback, useReducer, useContext, useEffect } from "react";
 import configs from "../../utils/configs";
 import { AuthContext } from "./AuthContext";
 import { SignInModal, SignInStep, WaitForVerification, SubmitEmail } from "./SignInModal";
+import { microsoftLoginService } from "../../aptero/service/MicrosoftIntegration/MicrosoftLoginService";
 
 const SignInAction = {
   submitEmail: "submitEmail",
@@ -19,6 +20,7 @@ function loginReducer(state, action) {
     case SignInAction.submitEmail:
       return { step: SignInStep.waitForVerification, email: action.email };
     case SignInAction.verificationReceived:
+      console.log("recived");
       return { ...state, step: SignInStep.complete };
     case SignInAction.cancel:
       return { ...state, step: SignInStep.submit };
@@ -39,6 +41,16 @@ function useSignIn() {
     [auth]
   );
 
+  const submitEmailMicrosoftLogin =useCallback(
+    user=>{
+      auth.signInMicrosoft(user).then(()=>{
+        dispatch({type:SignInAction.verificationReceived});
+      });
+      [auth]
+    }
+   
+  );
+
   const cancel = useCallback(() => {
     dispatch({ type: SignInAction.cancel });
   }, []);
@@ -47,18 +59,21 @@ function useSignIn() {
     step: state.step,
     email: state.email,
     submitEmail,
+    submitEmailMicrosoftLogin,
     cancel
   };
 }
 
 export function SignInModalContainer() {
   const qs = new URLSearchParams(location.search);
-  const { step, submitEmail, cancel, email } = useSignIn();
+  const { step, submitEmail, submitEmailMicrosoftLogin, cancel, email } = useSignIn();
   const redirectUrl = qs.get("sign_in_destination_url") || "/";
 
   useEffect(
     () => {
       if (step === SignInStep.complete) {
+        console.log(window.location);
+        console.log(redirectUrl);
         window.location = redirectUrl;
       }
     },
@@ -70,6 +85,7 @@ export function SignInModalContainer() {
       {step === SignInStep.submit ? (
         <SubmitEmail
           onSubmitEmail={submitEmail}
+          onSubmitEmailMicrosoftLogin={submitEmailMicrosoftLogin}
           initialEmail={email}
           signInReason={qs.get("sign_in_reason")}
           termsUrl={configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}

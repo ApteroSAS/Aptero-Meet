@@ -8,6 +8,7 @@ import { AvatarSetupModal } from "./room/AvatarSetupModal";
 import AvatarPreview from "./avatar-preview";
 import axios from "axios";
 import { people } from "@microsoft/teams-js";
+import { Prop } from "./debug-panel/Prop";
 
 export default class ProfileEntryPanel extends Component {
   static propTypes = {
@@ -22,7 +23,8 @@ export default class ProfileEntryPanel extends Component {
     onClose: PropTypes.func,
     onBack: PropTypes.func,
     showBackButton: PropTypes.bool,
-    isSignedIn:PropTypes.bool
+    isSignedIn:PropTypes.bool,
+    signedIn:PropTypes.func
   };
 
   static defaultProps = {
@@ -43,7 +45,11 @@ export default class ProfileEntryPanel extends Component {
   constructor(props) {
     super(props);
     this.state = this.getStateFromProfile();
-    this.getUserProfile();
+    if(!this.props.store.state.profile.microsoftUser)
+    {
+      this.getUserProfile();
+    }
+    console.log("microfost user",this.props.store.state.profile.microsoftUser);
     if (props.avatarId) {
       this.state.avatarId = props.avatarId;
     }
@@ -274,9 +280,9 @@ async getUserProfile() {
         this.props.mediaSearchStore.sourceNavigateWithNoNav("avatars", "use");
       },
       onSubmit: this.saveStateAndFinish ,
-
       onClose: this.props.onClose,
-      onBack: this.props.onBack
+      onBack: this.props.onBack,
+      signedIn:this.props.signedIn
     };
     if (this.props.containerType === "sidebar") {
       return <AvatarSettingsSidebar {...avatarSettingsProps} showBackButton={this.props.showBackButton} />;
