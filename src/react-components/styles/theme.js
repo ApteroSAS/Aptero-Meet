@@ -97,7 +97,6 @@ export function useThemeFromStore(store) {
   useEffect(() => {
     function onStoreChanged() {
       const nextThemeId = store.state?.preferences?.theme;
-
       if (themeId !== nextThemeId) {
         setThemeId(nextThemeId);
       }

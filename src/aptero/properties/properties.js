@@ -61,8 +61,38 @@ window.APP_PROPS = {
       privacy_notice:"https://aptero.co/privacy.html",
       terms_of_use:"https://aptero.co/terms.html",
     },
-    theme: {
-      "dark-theme": false
+   
+    theme:
+      {
+      "dark-theme": false,
+      "action-color":"#F59C26",
+      "action-color-highlight":"#F59C26",
+      "action-text-color":"#F59C26",
+      "action-subtitle-color":"#F59C26",
+      "action-label-color":"#F59C26",
+      "notice-background-color":"#F59C26",
+      "notice-text-color":"#F59C26",
+      "notice-widget-color":"#F59C26",
+      "favorited-color":"#F59C26",
+      themes:
+          [
+            {
+              "id": "Aptero-default",
+              "default": true,
+              "name": "Aptero default",
+              "variables": {
+                "dark-theme": false,
+                "action-color":"#F59C26",
+                "action-color-highlight":"#F59C26",
+                "action-text-color":"#F59C26",
+                "action-subtitle-color":"#F59C26",
+                "action-label-color":"#F59C26",
+                "notice-background-color":"#F59C26",
+                "notice-text-color":"#F59C26",
+                "notice-widget-color":"#F59C26",
+                "favorited-color":"#F59C26",
+              }
+            }],
     }
   }
 

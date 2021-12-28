@@ -10,11 +10,11 @@ import stylesUtils from "../../react-components/styles/style-utils.scss";
 import stylesMoreMenuPopover from "../../react-components/room/MoreMenuPopover.scss";
 import stylesToolbarButton from "../../react-components/input/ToolbarButton.scss";
 import stylesModal from "../../react-components/modal/Modal.scss";
+import stylesEnterOnDeviceModal from "../../react-components/room/EnterOnDeviceModal.scss";
 //import { StylesContext } from "@material-ui/core/node_modules/@material-ui/styles";
 
 const inviteSelector = `.ApteroStyles .${stylesUtils.showLg}.${stylesToolbar.content}:first-child > *:first-child`; //Also present before loading
-const leaveSelector =
-  ".ApteroStyles.entered " + `.${stylesUtils.showLg}.${stylesToolbar.content}:last-child > *:first-child`;
+const leaveSelector = ".ApteroStyles.entered " + `.${stylesUtils.showLg}.${stylesToolbar.content}:last-child > *:first-child`;
 const moreSelector = `.ApteroStyles .${stylesUtils.showLg}.${stylesToolbar.content}:last-child > *:last-child`; //Also present before loading
 const voiceSelector = `.ApteroStyles.entered .${stylesToolbar.content}:nth-child(2) > *:first-child`;
 const shareSelector = `.ApteroStyles.entered .${stylesToolbar.content}:nth-child(2) > *:nth-child(2)`;
@@ -23,6 +23,19 @@ const reactSelector = `.ApteroStyles.entered .${stylesToolbar.content}:nth-child
 const chatSelector = `.ApteroStyles .${stylesToolbar.content}:nth-child(2) > *:last-child`; //Also present before loading
 const peopleSelector = `.ApteroStyles .${stylesContentMenu.contentMenuButton}:last-child`; //Also present before loading
 const objectSelector = `.ApteroStyles.entered .${stylesContentMenu.contentMenuButton}:first-child`;
+const headsetSelector = `.ApteroStyles .${stylesRoomEntryModal.buttons} > :nth-child(2)`;
+
+const apt_bleu = "#172540";
+const apt_bleu_1 = "#183260";
+const apt_bleu_2 = "#1b4186";
+const apt_rouge = "#f05e46";
+const apt_rouge_1 = "#de4f3f";
+const apt_rouge_2 = "#f57769";
+const apt_jaune = "#f59c26";
+const apt_jaune_1 = "#d8800d";
+const apt_jaune_2 = "#fab030";
+const apt_gris = "#eff4fa";
+const apt_bleu_fonce = "#131b2f";
 
 export default class AptStyle extends Component {
   constructor(props) {
@@ -32,11 +45,11 @@ export default class AptStyle extends Component {
 
   setUp() {
     const scene = AFRAME.scenes[0];
-
+    //console.log(stylesEnterOnDeviceModal);
     //We apply styling priority by adding a selector class
     document.body.classList.add("ApteroStyles");
     //We apply class to inform the styles about the state of the room
-    scene.addEventListener("entered", a => {
+    scene.addEventListener("entered", () => {
       document.body.classList.add("entered");
     });
   }
@@ -54,6 +67,35 @@ export default class AptStyle extends Component {
     return (
       <>
         <style>
+          
+          .ApteroStyles {`{
+            --primary-color: ${apt_rouge};
+            --primary-color-hover: ${apt_rouge_1};
+            --primary-color-pressed: ${apt_rouge_2};
+            --secondary-color: ${apt_jaune};
+            --secondary-color-hover: ${apt_jaune_1};
+            --secondary-color-pressed: ${apt_jaune_2};
+            --accent1-color: ${apt_rouge};
+            --accent1-color-hover: ${apt_rouge_1};
+            --accent1-color-pressed: ${apt_rouge_2};
+            --accent2-color: ${apt_jaune};
+            --accent2-color-hover: ${apt_jaune_1};
+            --accent2-color-pressed: ${apt_jaune_2};
+            --accent3-color: ${apt_bleu};
+            --accent3-color-hover: ${apt_bleu_1};
+            --accent4-color-pressed: ${apt_bleu_2};
+            --accent4-color: ${apt_jaune};
+            --accent4-color-hover: ${apt_jaune_1};
+            --accent4-color-pressed: ${apt_jaune_2};
+            --accent5-color: ${apt_rouge};
+            --accent5-color-hover: ${apt_rouge_1};
+            --accent5-color-pressed: ${apt_rouge_2};
+          }`}
+          
+          .ApteroStyles .{stylesEnterOnDeviceModal.shortUrlContainer}{`{
+            width: max-content;
+            padding: 1em 0.3em;
+          }`}
           .ApteroStyles .{stylesToolbar.toolbar}
           {`{
             background-color : transparent;
@@ -62,6 +104,54 @@ export default class AptStyle extends Component {
             height: min-content;
             padding: 12px;
             position: relative;
+          }`}
+          .ApteroStyles .{stylesRoomEntryModal.buttons}
+          {`{
+                flex-direction: row;
+                width: 100%;
+                justify-content: space-around;
+                flex-wrap: wrap;
+                
+          }`}
+          .ApteroStyles .{stylesRoomEntryModal.buttons} button:nth-child(-n+3)
+          {`{
+            background-color: transparent;
+            color: black;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            padding: 0;
+            height: 4.9em;
+            justify-content: space-between;
+            width: calc(100%/3);
+            min-width: 0px;
+          }`}
+          .ApteroStyles .{stylesRoomEntryModal.buttons} button:nth-child(-n+3) span
+          {`{
+            margin-top: 0.5em;
+            max-width: 100%;
+            white-space: break-spaces;
+          }`}
+          .ApteroStyles .{stylesRoomEntryModal.buttons} button:nth-child(-n+3) svg {`{
+            background-color: var(--accent1-color);
+            border-color: var(--accent1-color);
+            transition: background-color 0.1s ease-in-out, border-color 0.1s ease-in-out;
+          }`}
+          .ApteroStyles .{stylesRoomEntryModal.buttons} button:nth-child(-n+3):hover svg {`{
+            background-color: var(--accent1-color-hover);
+            border-color: var(--accent1-color-hover);
+          }`}
+          .ApteroStyles .{stylesRoomEntryModal.buttons} button:nth-child(-n+3):active svg {`{
+            background-color: var(--accent1-color-pressed);
+            border-color: var(--accent1-color-pressed);
+          }`}
+          .ApteroStyles .{stylesRoomEntryModal.buttons} button svg
+          {`{
+            width: 40px;
+            height: 40px;
+            padding: 7px;
+            border-radius: 50px;
+            margin:0;
           }`}
           .ApteroStyles .{stylesModal.content}
           {`{
@@ -93,6 +183,10 @@ export default class AptStyle extends Component {
               top: 8px;
               right: 8px;
           }`}
+          .ApteroStyles .{stylesContentMenu.active} svg *[stroke=\#000]
+          {`{
+              stroke: var(--text1-color);
+          }`}
           .ApteroStyles .{stylesContentMenu.separator}
           {`{
             display:none;
@@ -122,6 +216,7 @@ export default class AptStyle extends Component {
             justify-content: center;
             border-radius: 14px;
             border: solid 1px darkgrey;
+            color: black;
           }`}
           .ApteroStyles .{stylesContentMenu.contentMenuButton} svg
           {`{
@@ -150,6 +245,10 @@ export default class AptStyle extends Component {
           }`}
           
           {objectSelector}
+          {`{
+            display:none;
+          }`}
+          {headsetSelector}
           {`{
             display:none;
           }`}

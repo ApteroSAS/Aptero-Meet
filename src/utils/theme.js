@@ -18,7 +18,8 @@ const DEFAULT_COLORS = {
 };
 
 function getThemeColor(name) {
-  const themeId = window.APP?.store?.state?.preferences?.theme;
+  //Aptero default
+  const themeId = window.APP?.store?.state?.preferences?.theme || "Aptero-default";
 
   const theme = themeId && configs.APP_CONFIG?.theme?.themes?.find(theme => theme.id === themeId);
   if (theme?.variables?.[name]) {
