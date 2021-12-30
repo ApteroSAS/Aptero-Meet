@@ -67,32 +67,9 @@ export default class AptStyle extends Component {
     return (
       <>
         <style>
-          
-          .ApteroStyles {`{
-            --primary-color: ${apt_rouge};
-            --primary-color-hover: ${apt_rouge_1};
-            --primary-color-pressed: ${apt_rouge_2};
-            --secondary-color: ${apt_jaune};
-            --secondary-color-hover: ${apt_jaune_1};
-            --secondary-color-pressed: ${apt_jaune_2};
-            --accent1-color: ${apt_rouge};
-            --accent1-color-hover: ${apt_rouge_1};
-            --accent1-color-pressed: ${apt_rouge_2};
-            --accent2-color: ${apt_jaune};
-            --accent2-color-hover: ${apt_jaune_1};
-            --accent2-color-pressed: ${apt_jaune_2};
-            --accent3-color: ${apt_bleu};
-            --accent3-color-hover: ${apt_bleu_1};
-            --accent4-color-pressed: ${apt_bleu_2};
-            --accent4-color: ${apt_jaune};
-            --accent4-color-hover: ${apt_jaune_1};
-            --accent4-color-pressed: ${apt_jaune_2};
-            --accent5-color: ${apt_rouge};
-            --accent5-color-hover: ${apt_rouge_1};
-            --accent5-color-pressed: ${apt_rouge_2};
-          }`}
-          
-          .ApteroStyles .{stylesEnterOnDeviceModal.shortUrlContainer}{`{
+
+          .ApteroStyles .{stylesEnterOnDeviceModal.shortUrlContainer}
+          {`{
             width: max-content;
             padding: 1em 0.3em;
           }`}
@@ -132,12 +109,14 @@ export default class AptStyle extends Component {
             max-width: 100%;
             white-space: break-spaces;
           }`}
-          .ApteroStyles .{stylesRoomEntryModal.buttons} button:nth-child(-n+3) svg {`{
+          .ApteroStyles .{stylesRoomEntryModal.buttons} button:nth-child(-n+3) svg
+          {`{
             background-color: var(--accent1-color);
             border-color: var(--accent1-color);
             transition: background-color 0.1s ease-in-out, border-color 0.1s ease-in-out;
           }`}
-          .ApteroStyles .{stylesRoomEntryModal.buttons} button:nth-child(-n+3):hover svg {`{
+          .ApteroStyles .{stylesRoomEntryModal.buttons} button:nth-child(-n+3):hover svg
+          {`{
             background-color: var(--accent1-color-hover);
             border-color: var(--accent1-color-hover);
           }`}
@@ -227,6 +206,10 @@ export default class AptStyle extends Component {
               padding:2px;
               margin:0;
           }`}
+          .ApteroStyles .{stylesToolbarButton.selected} .{stylesToolbarButton.iconContainer}
+          {`{
+            background-color: white;
+          }`}
           {moreSelector} div, {voiceSelector} {`>`} div, {inviteSelector} div,  .ApteroStyles .{stylesContentMenu.contentMenuButton}
           {`{
             border-color: var(--basic-color);
@@ -243,7 +226,6 @@ export default class AptStyle extends Component {
             border-color: var(--basic-color-pressed);
             background-color: var(--basic-color-pressed);
           }`}
-          
           {objectSelector}
           {`{
             display:none;
