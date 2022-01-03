@@ -184,16 +184,17 @@ export default class AptStyle extends Component {
           .ApteroStyles .{stylesContentMenu.contentMenuButton}:last-child:after
           {`{
             content: attr(presencecount);
-            top: -2px;
+            top: -4px;
             position: absolute;
-            right: -2px;
+            font-size: 1.1em;
+            right: -4px;
             background: white;
-            width: 14px;
-            height: 14px;
+            width: 16px;
+            height: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 14px;
+            border-radius: 16px;
             border: solid 1px darkgrey;
             color: black;
           }`}
@@ -203,7 +204,7 @@ export default class AptStyle extends Component {
               border-radius:9999px;
               width:41px;
               height:41px;
-              padding:2px;
+              padding:5px;
               margin:0;
           }`}
           .ApteroStyles .{stylesToolbarButton.selected} .{stylesToolbarButton.iconContainer}
