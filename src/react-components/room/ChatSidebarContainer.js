@@ -212,7 +212,6 @@ export function ChatContextProvider({ messageDispatch, children, people }) {
     }
     function onReceivePrivateMessage(event) {
       const newMessage = event.detail;
-
       if (newMessage.receiverClientId == NAF.clientId) {
         const found = bulles_list_chat.find(element => element.id == newMessage.sessionId);
         if (found == null) {

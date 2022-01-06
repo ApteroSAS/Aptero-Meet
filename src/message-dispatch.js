@@ -29,7 +29,7 @@ export default class MessageDispatch extends EventTarget {
     }
 
     // Fade out and then remove
-    /*
+    
     setTimeout(() => {
       entry.expired = true;
       this.remountUI({ presenceLogEntries: this.presenceLogEntries });
@@ -39,7 +39,7 @@ export default class MessageDispatch extends EventTarget {
         this.remountUI({ presenceLogEntries: this.presenceLogEntries });
       }, 5000);
     }, 20000);
-    */
+    
   }
   addToPresenceLogPrivate(entry) {
     entry.key = Date.now().toString();
