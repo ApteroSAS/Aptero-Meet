@@ -574,5 +574,13 @@
    "avatar-settings-content.phone-number-label":"Numéro de téléphone",
    "user-profile-sidebar.send-mail-button":"Envoyer un mail",
    "avatar-settings-content.sign-up-button":"Se connecter",
-   "sign-in-with-teams":"Se connecter avec teams"
+   "sign-in-with-teams":"Se connecter avec teams",
+   "user-profile-visit-card-no-data-found":"L'utilisateur n'a pas fourni d'information",
+   "avatar-settings.display-name-label-placeholder":"Entrez votre nom",
+   "avatar-settings.company-name-placeholder":"Nom de l'entreprise",
+   "avatar-settings.job-title-placeholder":"Titre du poste",
+   "avatar-settings.email-placeholder":"Adresse e-mail",
+   "avatar-settings.phone-number-placeholder":"Numéro de téléphone",
+   "sign-in-modal.wait-for-microsoft-verification":"Veuillez patienter jusqu'à ce que nous vous authentifions.",
+   "user-profile-visit-card-no-data-found":"Information non fournie"
 }

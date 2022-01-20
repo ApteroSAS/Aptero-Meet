@@ -41,7 +41,12 @@ AFRAME.registerComponent("player-info", {
     isSharingAvatarCamera: { default: false }
   },
   init() {
+    this.el.addEventListener('object3dset', () => { 
+      this.el.addEventListener('click', () => {
+      });
+    }); 
     this.displayName = null;
+    this.companyName=null;
     this.identityName = null;
     this.isOwner = false;
     this.isRecording = false;
@@ -71,6 +76,7 @@ AFRAME.registerComponent("player-info", {
     deregisterComponentInstance(this, "player-info");
   },
   play() {
+   
     this.el.addEventListener("model-loaded", this.applyProperties);
     this.el.sceneEl.addEventListener("presence_updated", this.updateDisplayName);
     if (this.isLocalPlayerInfo) {
@@ -119,6 +125,7 @@ AFRAME.registerComponent("player-info", {
   updateFromPresenceMeta(presenceMeta) {
     this.permissions = presenceMeta.permissions;
     this.displayName = presenceMeta.profile.displayName;
+    this.companyName=presenceMeta.profile.companyName;
     this.identityName = presenceMeta.profile.identityName;
     this.isRecording = !!(presenceMeta.streaming || presenceMeta.recording);
     this.isOwner = !!(presenceMeta.roles && presenceMeta.roles.owner);
@@ -133,8 +140,16 @@ AFRAME.registerComponent("player-info", {
       this.isLocalPlayerInfo || (window.getPreferences("onlyShowNametagsInFreeze") && !this.el.sceneEl.is("frozen"));
 
     const nametagEl = this.el.querySelector(".nametag");
+    //aptero
     if (this.displayName && nametagEl) {
-      nametagEl.setAttribute("text", { value: this.displayName });
+      if(this.companyName!=null)
+      {
+        nametagEl.setAttribute("text", { value: this.displayName+"\n"+this.companyName });
+      }
+      else{
+        nametagEl.setAttribute("text", { value: this.displayName});
+      }
+    
       nametagEl.object3D.visible = !infoShouldBeHidden;
     }
     const identityNameEl = this.el.querySelector(".identityName");
@@ -154,9 +169,15 @@ AFRAME.registerComponent("player-info", {
       modBadgeEl.object3D.visible = !this.isRecording && this.isOwner && !infoShouldBeHidden;
     }
   },
+  test()
+  {
+    console.log("jj");
+  },
+
   applyProperties(e) {
     this.applyDisplayName();
-
+    //this.el.addEventListener("click",this.test)
+    //cursorEl.components.raycaster.refreshObjects();
     const modelEl = this.el.querySelector(".model");
     if (this.data.avatarSrc && modelEl) {
       modelEl.components["gltf-model-plus"].jsonPreprocessor = ensureAvatarNodes;

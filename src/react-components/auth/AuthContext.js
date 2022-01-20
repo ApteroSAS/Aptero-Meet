@@ -116,6 +116,8 @@ export function AuthContextProvider({ children, store }) {
       configs.setIsAdmin(false);
       store.update({ credentials: { token: null, email: null } });
       await store.resetToRandomDefaultAvatar();
+      const authChannel=new AuthChannel(store);
+      await authChannel.signOut(null);
     },
     [store]
   );

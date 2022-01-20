@@ -4,7 +4,7 @@ import { Button, AcceptButton } from "../input/Button";
 import styles from "./AvatarSettingsContent.scss";
 import { TextInputField } from "../input/TextInputField";
 import { Column } from "../layout/Column";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 export function AvatarSettingsContent({
   displayName,
@@ -25,10 +25,13 @@ export function AvatarSettingsContent({
   submit_info,
   isSignedIn,
   signedIn,
+  containerType,
   ...rest
 }) {
-  if(isSignedIn)
+  const intl = useIntl();
+  if(containerType==="sidebar")
   {
+    
     return (
       <Column as="form" className={styles.content} {...rest}>
         <div className={styles.container}>
@@ -37,11 +40,15 @@ export function AvatarSettingsContent({
               className={styles.test}
               disabled={disableDisplayNameInput}
               label={<FormattedMessage id="avatar-settings-content.display-name-label" defaultMessage="Display Name" />}
-              value={displayName}
+              value={displayName??''}
               pattern={displayNamePattern}
               spellCheck="false"
-              required
+              //required
               onChange={onChangeDisplayName}
+              placeholder={intl.formatMessage({
+                id: "avatar-settings.display-name-label-placeholder",
+                defaultMessage: "Enter your name"
+              })}
               /*
             description={
               <FormattedMessage
@@ -63,52 +70,78 @@ export function AvatarSettingsContent({
               className={styles.test}
               //disabled={disableDisplayNameInput}
               label={<FormattedMessage id="avatar-settings-content.company-name-label" defaultMessage="Company Name" />}
-              value={companyName}
+              value={companyName??''}
               //pattern={displayNamePattern}
               spellCheck="false"
-              required
+              //required
               onChange={onChangeCompanyName}
               //ref={displayNameInputRef}
+              placeholder={intl.formatMessage({
+                id: "avatar-settings.company-name-placeholder",
+                defaultMessage: "Company name"
+              })}
             />
             <TextInputField
               className={styles.test}
               //disabled={disableDisplayNameInput}
               label={<FormattedMessage id="avatar-settings-content.job-title-label" defaultMessage="Job Title" />}
-              value={jobTitle}
+              value={jobTitle??''}
               //pattern={displayNamePattern}
               spellCheck="false"
               //required
               onChange={onChangeJobTitle}
+              placeholder={intl.formatMessage({
+                id: "avatar-settings.job-title-placeholder",
+                defaultMessage: "Job title"
+              })}
               //ref={displayNameInputRef}
             />
             <TextInputField
               className={styles.test}
               //disabled={disableDisplayNameInput}
               label={<FormattedMessage id="avatar-settings-content.email-label" defaultMessage="Email" />}
-              value={email}
+              value={email??''}
               //pattern={displayNamePattern}
               spellCheck="false"
               ///required
               //ref={displayNameInputRef}
+              placeholder={intl.formatMessage({
+                id: "avatar-settings.email-placeholder",
+                defaultMessage: "Job email address"
+              })}
             />
             <TextInputField
               className={styles.test}
               //disabled={disableDisplayNameInput}
               label={<FormattedMessage id="avatar-settings-content.phone-number-label" defaultMessage="Phone Number" />}
-              value={phoneNumber}
+              value={phoneNumber??''}
               //pattern={displayNamePattern}
               spellCheck="false"
-              required
+              //required
               onChange={onChangePhoneNumber}
               //ref={displayNameInputRef}
+              placeholder={intl.formatMessage({
+                id: "avatar-settings.phone-number-placeholder",
+                defaultMessage: "Phone number"
+              })}
             />
-       
+
           </div>
         </div>
-        <AcceptButton preset="accept" type="submit" onClick={submit_info} />
+        {isSignedIn && (
+            <AcceptButton preset="accept" type="submit" onClick={submit_info} />
+        )
+        }
+        {
+          !isSignedIn && (
+            <AcceptButton preset="accept" type="submit" onClick={signedIn} />
+          )
+        }
+  
       </Column>
     );
   }
+//avant l'entree dans la salle
   else{
     
     return (
@@ -128,6 +161,10 @@ export function AvatarSettingsContent({
         />
       }
       ref={displayNameInputRef}
+      placeholder={intl.formatMessage({
+        id: "avatar-settings.display-name-label-placeholder",
+        defaultMessage: "Enter your name"
+      })}
     />
     <div className={styles.avatarPreviewContainer}>
       {avatarPreview || <div />}
@@ -135,13 +172,20 @@ export function AvatarSettingsContent({
         <FormattedMessage id="avatar-settings-content.change-avatar-button" defaultMessage="Change Avatar" />
       </Button>
     </div>
-    <Button type="button" preset="basic" onClick={signedIn}>
-        <FormattedMessage  id="avatar-settings-content.sign-up-button" defaultMessage="Sign in"/>
-      </Button>
-    <AcceptButton preset="accept" type="submit" />
+    {isSignedIn && (
+        <AcceptButton preset="accept" type="submit" onClick={submit_info} />
+        )
+        }
+        {
+          !isSignedIn && (
+            <AcceptButton preset="accept" type="submit" onClick={signedIn} />
+          )
+        }
+  
   </Column>
 );
   }
+  
 
 }
 
@@ -164,5 +208,6 @@ AvatarSettingsContent.propTypes = {
   onChangeAvatar: PropTypes.func,
   submit_info:PropTypes.func,
   isSignedIn:PropTypes.bool,
-  signedIn:PropTypes.func
+  signedIn:PropTypes.func,
+  containerType:PropTypes.string
 };

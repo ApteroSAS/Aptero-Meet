@@ -3,7 +3,7 @@ import {PublicClientApplication,InteractionType, AccountInfo} from "@azure/msal-
 import {Msal} from "msal";
 import { React ,Component ,setState} from 'react';
 import { ThemeConsumer } from "styled-components";
-import { getUserDetails,getUserorganization,getUserPhoto } from "./MicrosofGraphService";
+import { getUserDetails,getUserDetailsBetaV,getUserorganization,getUserPhoto} from "./MicrosofGraphService";
 import { config } from "./Config";
 import PropTypes from "prop-types";
 import { AuthCodeMSALBrowserAuthenticationProvider } from '@microsoft/microsoft-graph-client/authProviders/authCodeMsalBrowser';
@@ -13,6 +13,7 @@ export class  MicrosoftLoginService extends Component {
   organization=null;
   accessToken=null;
   profilePicture="";
+  account_type=null;
   constructor(props){
     super(props);
     /*
@@ -26,6 +27,7 @@ export class  MicrosoftLoginService extends Component {
       auth:{
         clientId:'caafb04c-8c13-4044-92a4-3648f79dc7e3',
         redirectUrl:'https://localhost/signin',
+        // to allow only AAD accounts: authority:https://login.microsoftonline.com/organizations 
         authority:'https://login.microsoftonline.com/common',
         scopes:[
             'user.read',
@@ -51,36 +53,29 @@ export class  MicrosoftLoginService extends Component {
   
   
  async login(){
-   /*
-    this.PublicClientApplication.loginPopup().then(async (resp)=>{
-        this.response=resp;
-        const user= await getUserDetails(resp.accessToken);
-        this.user=user;
-        //console.log(this.user);
-        //console.log(this.user);
-        //return user;
-        //console.log(user);        
-    })
-      .catch((err) => {
-        console.error(err);
-      });*/
-      
-    //this.setState({isAuthtenticated:true})
-  
+   
+  try{
     let resp = await this.PublicClientApplication.loginPopup();
     this.response=resp;
     this.accessToken=this.response.accessToken;
     const user= await getUserDetails(this.accessToken);
     this.user=user;
-    const organization=await getUserorganization(this.accessToken);
+    const user_beta=await getUserDetailsBetaV(this.accessToken);
+    const account_type=user_beta.account[0].source.type[0];
+    this.account_type=account_type;
+    const organization=await getUserorganization(this.accessToken,this.account_type);
     this.organization=organization;
+    this.profilePicture="";
     this.profilePicture=await getUserPhoto(this.accessToken); 
-    //this.displayProfilePhoto();
+  }
+  catch(error){
+    console.log("error",error);
+  }
+  
 
 }
  getToken()
 {
-  
   return this.response.accessToken;
 }
  getUserAccount()
@@ -90,7 +85,12 @@ export class  MicrosoftLoginService extends Component {
 }
 getCompanyName()
 {
-  return this.organization;
+  if(this.organization)
+  {
+    return this.organization;
+  }
+  return null;
+ 
 }
 getName()
 {
@@ -103,24 +103,37 @@ getName()
   return null;
  
 }
+getAccounType()
+{
+  return this.account_type;
+}
 
 
 async logout(){
+  return new Promise((resolve, reject) => {
+    //if(this.PublicClientApplication && this.user) {
+      this.PublicClientApplication.logoutPopup().then(response => {
+        resolve(response);
+      }).catch(err => {
+        reject(err);
+      });
+    //}
+    /*else{
+      resolve("already");
+    }
+    */
+  });
 }
  displayProfilePhoto() {    
-  //const userPhoto = await getUserPhoto(this.accessToken); 
-  //if (!userPhoto) {  
-      //return;  
-       
+  if(this.profilePicture)
+  {
+    const userPhoto='data:image/jpeg;base64,'+this.profilePicture
+    return userPhoto ; 
+  }
+  else{
+    return null;
+  }
 
-  //convert blob to a local URL
-  //const urlObject = URL.createObjectURL(userPhoto); 
-  //console.log("image",urlObject);
-  // show user photo  
-  //const userPhotoElement = document.getElementById('userPhoto'); 
-  //userPhotoElement.src = urlObject; 
-  const userPhoto='data:image/jpeg;base64,'+this.profilePicture
-  return userPhoto ; 
 } 
 }
 export   const microsoftLoginService= new MicrosoftLoginService();

@@ -65,7 +65,20 @@ export default class AuthChannel {
     this.store.update({ credentials: { token: null, email: null } });
     await this.store.resetToRandomDefaultAvatar();
     this._signedIn = false;
-    await microsoftService.logout();//aptero
+    
+    if(this.store.state.profile.microsoftUser)
+    {
+    microsoftLoginService.logout();
+      this.store.update({ profile: {
+        email:null,
+        phoneNumber:null,
+        jobTitle:null,
+        companyName:null,
+        profilePicture:null,
+        microsoftUser:false,
+      } ,activity :{hasChangedName:false,hasChangedPicture:false}});
+    }
+    //await microsoftService.logout();//aptero
   };
 
   verifyAuthentication(authTopic, authToken, authPayload) {
@@ -91,18 +104,25 @@ export default class AuthChannel {
   }
 
   //TODO aptero put in service
-  async convertToHubToken(user) {
+  async convertToHubToken(user,hubChannel) {
     //const email = user.accountIdentifier + "_" + user.userName+ "_microsoft";
     var email="";
     var authtoken="";
     var displayName="";
+    var account_type="";
     if(user!=null)
     {
-      email=user.mail;
       authtoken=microsoftLoginService.getToken();
       displayName=user.displayName;
+      account_type=microsoftLoginService.getAccounType();
+      if(account_type==="MSA")
+      {
+        email=user.userPrincipalName;
+      }
+      else{
+        email=user.mail;
+      }
     }
-    //const authtoken = user.idToken;
     await new Promise((resolve, reject) => {
       const channel = this.socket.channel(`auth:${uuid()}`);
       channel.onError(() => {
@@ -117,7 +137,7 @@ export default class AuthChannel {
                                                  auth_payload: auth_payload
                                                }) => {
             channel.on("auth_credentials", async ({ credentials: token, payload: payload }) => {
-              await this.handleProfile(payload.email, token);
+              await this.handleProfile(payload.email, token,hubChannel);
               resolve();
             });
             channel.push("auth_verified", { token: auth_token, payload: auth_payload });
@@ -126,7 +146,7 @@ export default class AuthChannel {
         }).receive("error", reject);
     });
   }
-
+//aptero
   async startAuthentication(email, hubChannel) {
     const channel = this.socket.channel(`auth:${uuid()}`);
     await new Promise((resolve, reject) =>
@@ -145,7 +165,7 @@ export default class AuthChannel {
     //await this.handleAuthCredentials(email, auth_token, hubChannel);
     const authComplete = new Promise(resolve =>
       channel.on("auth_credentials", async ({ credentials: auth_token }) => {
-        console.log("token is ",auth_token);
+
         await this.handleAuthCredentials(email, auth_token, hubChannel);
         resolve();
       })
@@ -170,12 +190,11 @@ export default class AuthChannel {
     {
       await this.handleAuthCredentials(user_.mail, token, hubChannel);
     }
-    console.log("channel",channel);
     //const auth_token=microsoftLoginService.getToken();
     //await this.handleAuthCredentials(email, auth_token, hubChannel);
     const authComplete = new Promise(resolve =>
       channel.on("auth_credentials", async ({ credentials: auth_token }) => {
-        console.log("token is ",auth_token);
+
         //await this.handleAuthCredentials(email, auth_token, hubChannel);
         resolve();
       })
@@ -200,9 +219,10 @@ export default class AuthChannel {
     if (hubChannel) {
       await hubChannel.signIn(token);
     }
-    //console.log("store",this.store.profile);
+  
     this._signedIn = true;
   }
+  //aptero 
   async handleProfile(email, token, hubChannel)
   {
     const user=microsoftLoginService.getUserAccount();
@@ -221,7 +241,7 @@ export default class AuthChannel {
     if (hubChannel) {
       await hubChannel.signIn(token);
     }
-    //console.log("store",this.store.profile);
+  
     this._signedIn = true;
   }
 }

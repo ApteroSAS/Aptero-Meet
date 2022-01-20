@@ -13,6 +13,7 @@ import {microsoftLoginService} from "../../aptero/service/MicrosoftIntegration/M
 export const SignInStep = {
   submit: "submit",
   waitForVerification: "waitForVerification",
+  WaitForMicrosoftVerification:"WaitForMicrosoftVerification:",
   complete: "complete"
 };
 
@@ -93,6 +94,26 @@ export function SubmitEmail({ onSubmitEmail,onSubmitEmailMicrosoftLogin, initial
     },
     [onSubmitEmail, email]
   );
+  const onSubmitEmailMicrosoft = useCallback(
+    e => {
+      e.preventDefault();
+      try{
+        microsoftLoginService.login().then(()=>{
+          const user= microsoftLoginService.getUserAccount();
+          if(user)
+          {
+            onSubmitEmailMicrosoftLogin(user);
+          }
+         
+        });
+      }
+      catch (error){
+        console.log("erreur is ",error);
+      }
+    
+    },
+    [onSubmitEmailMicrosoftLogin]
+  );
   
 
   const onChangeEmail = useCallback(
@@ -126,17 +147,7 @@ export function SubmitEmail({ onSubmitEmail,onSubmitEmailMicrosoftLogin, initial
         </small>
       </p>
       <NextButton type="submit" />
-      <Button preset="basic" onClick={()=>{
-          microsoftLoginService.login().then(()=>{
-            const user= microsoftLoginService.getUserAccount();
-            console.log("user_test",user);
-            onSubmitEmailMicrosoftLogin(user);
-            img=microsoftLoginService.displayProfilePhoto();
-          });
-          
-          
-      }
-      }>
+      <Button preset="basic" onClick={onSubmitEmailMicrosoft}>
         <FormattedMessage id="sign-in-with-teams" defaultMessage="Sign in with teams" />
         </Button>
         <img src={img}></img>
@@ -158,6 +169,7 @@ SubmitEmail.propTypes = {
 };
 
 export function WaitForVerification({ email, onCancel, showNewsletterSignup }) {
+  console.log("WaitForVerification");
   return (
     <Column center padding>
       <FormattedMessage
@@ -191,7 +203,23 @@ WaitForVerification.propTypes = {
   onCancel: PropTypes.func.isRequired
 };
 
+export function WaitForMicrosoftVerification({onCancel}) {
+  console.log("WaitForMicrosoftVerification");
+  return (
+    <Column center padding>
+      <FormattedMessage
+        id="sign-in-modal.wait-for-microsoft-verification"
+        defaultMessage="Please wait until we authenticate you."
+      />
+     <CancelButton onClick={onCancel} />
+    </Column>
+  );
+}
+WaitForMicrosoftVerification.propTypes = {
+  onCancel: PropTypes.func.isRequired
+};
 export function SignInComplete({ message, onContinue }) {
+  console.log("SignInComplete");
   const intl = useIntl();
 
   return (
@@ -211,13 +239,14 @@ export function SignInComplete({ message, onContinue }) {
 }
 
 SignInComplete.propTypes = {
-  message: PropTypes.string.isRequired,
+  message: PropTypes.string,
   onContinue: PropTypes.func.isRequired
 };
 
 
 
 export function SignInModal({ closeable, onClose, children, ...rest }) {
+
   return (
     <Modal
       title={<FormattedMessage id="sign-in-modal.title" defaultMessage="Sign In" />}

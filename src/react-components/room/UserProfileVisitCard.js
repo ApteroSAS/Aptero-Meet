@@ -40,7 +40,8 @@ export function UserProfileVisitCard ({
     onSelectPerson,
     store,
     mediaSearchStore,
-    isSignedIn
+    isSignedIn,
+    signedIn
 }){     
         const [goBackToUserPanel,setBackToUserPanel]=useState("test");
         const micPresences=getMicrophonePresences();
@@ -95,8 +96,9 @@ export function UserProfileVisitCard ({
                                </div>
                            </div>
                            <div className="e-card-content">
-                               <div className="phone-number"><PhoneIcon className="icon-phone"></PhoneIcon><span className="phone-number-text">{phoneNumber}</span></div>
-                               <div className="email"><EmailIcon className="icon-phone"></EmailIcon><span className="email-text">{email}</span></div>
+                               <div className="phone-number"><PhoneIcon className="icon-phone"></PhoneIcon><span className="phone-number-text">{phoneNumber??<FormattedMessage id="user-profile-visit-card-no-data" defaultMessage="Information not provided" />}</span></div>
+                               <div className="email"><EmailIcon className="icon-phone"></EmailIcon><span className="email-text">{email??<FormattedMessage id="user-profile-visit-card-no-data" defaultMessage="Information not provided" />
+          }</span></div>
                            </div>
                        </div>
                    </div>
@@ -130,6 +132,7 @@ export function UserProfileVisitCard ({
          onSelectPerson={onSelectPerson}
          store={store}
          mediaSearchStore={mediaSearchStore}
+         signedIn={signedIn}
          />);
       }
      
@@ -143,7 +146,9 @@ export function UserProfileVisitCard ({
           beforeTitle={ <BackButton onClick={()=>setBackToUserPanel(null)} />}
       >
       <Column center padding>
-          <div >no data</div>
+          <div >
+          <FormattedMessage id="user-profile-visit-card-no-data-found" defaultMessage="Unfortunately, the user has not provided information" />
+          </div>
             </Column>
       </Sidebar>
       );
@@ -164,6 +169,7 @@ export function UserProfileVisitCard ({
           onSelectPerson={onSelectPerson}
           store={store}
           mediaSearchStore={mediaSearchStore}
+          signedIn={signedIn}
           />);
       }
 
@@ -177,7 +183,7 @@ UserProfileVisitCard.propTypes = {
     phoneNumber:PropTypes.string,
     jobTitle:PropTypes.string,
     companyName:PropTypes.string,
-    profilePictureList:PropTypes.string,
+    profilePictureList:PropTypes.array,
     userId:PropTypes.string,
     presences:PropTypes.object,
     mySessionId:PropTypes.string,
@@ -194,7 +200,8 @@ UserProfileVisitCard.propTypes = {
     onSelectPerson: PropTypes.func,
     store: PropTypes.object.isRequired,
     mediaSearchStore: PropTypes.object.isRequired,
-    isSignedIn:PropTypes.bool
+    isSignedIn:PropTypes.bool,
+    signedIn:PropTypes.func
 
 };
 export  default UserProfileVisitCard;

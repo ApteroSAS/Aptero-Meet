@@ -1,12 +1,13 @@
 import React, { useCallback, useReducer, useContext, useEffect } from "react";
 import configs from "../../utils/configs";
 import { AuthContext } from "./AuthContext";
-import { SignInModal, SignInStep, WaitForVerification, SubmitEmail } from "./SignInModal";
+import { SignInModal, SignInStep, WaitForVerification, SubmitEmail,WaitForMicrosoftVerification } from "./SignInModal";
 import { microsoftLoginService } from "../../aptero/service/MicrosoftIntegration/MicrosoftLoginService";
 
 const SignInAction = {
   submitEmail: "submitEmail",
   verificationReceived: "verificationReceived",
+  WaitForMicrosoftVerification:"WaitForMicrosoftVerification",
   cancel: "cancel"
 };
 
@@ -14,16 +15,21 @@ const initialSignInState = {
   step: SignInStep.submit,
   email: ""
 };
+const authenticationType={
+  microsoftAuhtentication:false,
+  adresseMailAuhtentication:false
+}
 
 function loginReducer(state, action) {
   switch (action.type) {
     case SignInAction.submitEmail:
       return { step: SignInStep.waitForVerification, email: action.email };
     case SignInAction.verificationReceived:
-      console.log("recived");
       return { ...state, step: SignInStep.complete };
     case SignInAction.cancel:
       return { ...state, step: SignInStep.submit };
+      case SignInAction.WaitForMicrosoftVerification:
+        return { step: SignInStep.WaitForMicrosoftVerification};
   }
 }
 
@@ -35,20 +41,33 @@ function useSignIn() {
     email => {
       auth.signIn(email).then(() => {
         dispatch({ type: SignInAction.verificationReceived });
-      });
+      }).catch(e => {
+        console.log(e);
+    });
+      authenticationType.adresseMailAuhtentication=true;
+      authenticationType.microsoftAuhtentication=false;
       dispatch({ type: SignInAction.submitEmail, email });
     },
     [auth]
   );
-
+/**
+ *  ) : step===SignInStep.microsoftverificationReceived ?(
+        <SignInComplete/>
+      )
+ */
   const submitEmailMicrosoftLogin =useCallback(
     user=>{
       auth.signInMicrosoft(user).then(()=>{
         dispatch({type:SignInAction.verificationReceived});
-      });
-      [auth]
-    }
-   
+      }).catch(e => {
+        console.log(e);
+    });
+      authenticationType.microsoftAuhtentication=true;
+      authenticationType.adresseMailAuhtentication=false;
+      dispatch({type:SignInAction.WaitForMicrosoftVerification});
+
+    },
+    [auth]
   );
 
   const cancel = useCallback(() => {
@@ -72,34 +91,44 @@ export function SignInModalContainer() {
   useEffect(
     () => {
       if (step === SignInStep.complete) {
-        console.log(window.location);
-        console.log(redirectUrl);
         window.location = redirectUrl;
       }
     },
     [step, redirectUrl]
   );
-
-  return (
-    <SignInModal disableFullscreen>
-      {step === SignInStep.submit ? (
-        <SubmitEmail
-          onSubmitEmail={submitEmail}
-          onSubmitEmailMicrosoftLogin={submitEmailMicrosoftLogin}
-          initialEmail={email}
-          signInReason={qs.get("sign_in_reason")}
-          termsUrl={configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
-          showTerms={configs.feature("show_terms")}
-          privacyUrl={configs.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")}
-          showPrivacy={configs.feature("show_privacy")}
-        />
-      ) : (
-        <WaitForVerification
+  if(!authenticationType.microsoftAuhtentication)
+  {
+    return (
+      <SignInModal disableFullscreen>
+        {step === SignInStep.submit ? (
+          <SubmitEmail
+            onSubmitEmail={submitEmail}
+            onSubmitEmailMicrosoftLogin={submitEmailMicrosoftLogin}
+            initialEmail={email}
+            signInReason={qs.get("sign_in_reason")}
+            termsUrl={configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
+            showTerms={configs.feature("show_terms")}
+            privacyUrl={configs.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")}
+            showPrivacy={configs.feature("show_privacy")}
+          />
+        ) : (
+          <WaitForVerification
+            onCancel={cancel}
+            email={email}
+            showNewsletterSignup={configs.feature("show_newsletter_signup")}
+          />
+        )}
+      </SignInModal>
+    );
+  }
+  else{
+    return (
+      <SignInModal disableFullscreen>
+      <WaitForMicrosoftVerification 
           onCancel={cancel}
-          email={email}
-          showNewsletterSignup={configs.feature("show_newsletter_signup")}
         />
-      )}
-    </SignInModal>
-  );
+      </SignInModal>
+    );
+  }
+
 }

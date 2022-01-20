@@ -135,6 +135,7 @@ export function PeopleSidebarContainer({
           showNonHistoriedDialog={showNonHistoriedDialog}
           store={store}
           mediaSearchStore={mediaSearchStore}
+          signedIn={signedIn}
         />
       );
     }
@@ -156,7 +157,7 @@ PeopleSidebarContainer.propTypes = {
   store: PropTypes.object.isRequired,
   mediaSearchStore: PropTypes.object.isRequired,
   hubChannel: PropTypes.object.isRequired,
-  history: PropTypes.object.isRequired,
+  history: PropTypes.object,
   onClose: PropTypes.func.isRequired,
   mySessionId: PropTypes.string.isRequired,
   presences: PropTypes.object.isRequired,

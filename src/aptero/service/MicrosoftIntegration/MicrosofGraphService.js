@@ -20,18 +20,43 @@ export async function getUserDetails(accessToken)
    
     return user;
 }
+export async function getUserDetailsBetaV(accessToken)
+{
+    const client =getAuthenticatedClient(accessToken);
+    const user_beta=await client.api('/me/profile')
+    .version('beta')
+    .get();
+    return user_beta;
+}
 
-export  async function getUserorganization(accessToken)
+export  async function getUserorganization(accessToken,account_type)
 {
     //https://graph.microsoft.com/v1.0/organization
     const client =getAuthenticatedClient(accessToken);
-    const organization= await client.api('/organization').get();
-    return organization.value[0].displayName;
-}
-export async function getUserPhoto(accessToken) {
-    const graphEndpoint = "https://graph.microsoft.com/v1.0/me/photo/$value";
+    //check if the  user account is a work account (MSA For personal account and AAD for work account)
+    if(account_type==="AAD")
+    {
+        const organization= await client.api('/organization').get();
+        return organization.value[0].displayName;
+    }
+    else{
+        return null;
+    }
 
+}
+
+export async function getUserPhoto(accessToken) {
+    //const graphEndpoint = "https://graph.microsoft.com/v1.0/me/photo/";
+    const graphEndpoint = "https://graph.microsoft.com/v1.0/me/photo/$value";
+    try{
+        // verifier si l'image exist
     const response = await axios(graphEndpoint, { headers: { Authorization: `Bearer ${accessToken}` }, responseType: 'arraybuffer' });
     const avatar = new Buffer(response.data, 'binary').toString('base64');
     return avatar;
+    }
+    catch(e)
+    {
+        console.log("profile photo not found");
+    }
+    return null;
  } 

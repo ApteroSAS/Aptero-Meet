@@ -553,7 +553,13 @@ export function ChatSidebarContainer({
             if (bulles.id == "everyone") {
               str = "";
             } else {
-              if (tab.length != 0) {
+              
+              people.map(person=>{
+                if(person.id==bulles.id){
+                  str=person.profile.profilePicture;
+                }
+              });
+              if (tab.length != 0 && str==null) {
                 tab.map(element => {
                   if (element.id == bulles.id) {
                     str = element.url;

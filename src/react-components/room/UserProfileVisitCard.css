@@ -108,16 +108,20 @@ body.tailwind-dark .e-custom-card .e-avatar,
   margin-left: 15px;
 }
 .icon-phone{
+  margin-top: 9px;
   /*display: unset;*/
 }
 .phone-number{
   margin-top: 15px;
   margin-left: 4px;
-  margin-right: 49px;
+  display: flex;
+  flex-direction: column;
 }
 .email{
   margin-left: 4px;
   margin-top: 5px;
+  display: flex;
+  flex-direction: column;
 }
 .acount-icon{
   height: 80px;
@@ -125,12 +129,19 @@ body.tailwind-dark .e-custom-card .e-avatar,
   margin-left: 20px;
 }
 .phone-number-text{
-  position: absolute;
+  /*position: absolute;
   top:54%;
-  left:16%;
+  left:16%;*/
+  margin-top: -16px;
+  text-align: justify;
+  margin-left: 20px;
 }
 .email-text{
-  position: absolute;
+  /*position: absolute;
   top:65%;
   left:16.5%;
+  */
+  margin-top: -19px;
+  text-align: justify;
+  margin-left: 25px;
 }

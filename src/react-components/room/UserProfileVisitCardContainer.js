@@ -25,7 +25,8 @@ export function UserProfileVisitCardContainer({
   onSelectPerson,
   store,
   mediaSearchStore,
-  displayName
+  displayName,
+  signedIn
   
 }) {
     var iSignedIn=false;
@@ -50,7 +51,6 @@ export function UserProfileVisitCardContainer({
     }
     
     if(selectedPerson){
-      console.log("selected person",selectedPerson);
       displayName_user=selectedPerson.profile.displayName;
       email=selectedPerson.profile.email;
       jobTitle=selectedPerson.profile.jobTitle;
@@ -85,6 +85,7 @@ export function UserProfileVisitCardContainer({
       onSelectPerson={onSelectPerson}
       store={store}
       mediaSearchStore={mediaSearchStore}
+      signedIn={signedIn}
       //identityName={identityName}
       /*
       avatarPreview={<img src={avatarThumbnailUrl} />}
@@ -116,6 +117,6 @@ UserProfileVisitCardContainer.propTypes = {
   toggleChatSidebar: PropTypes.func,
   onSelectPerson: PropTypes.func,
   mediaSearchStore: PropTypes.object.isRequired,
-  displayName:PropTypes.string
-  
+  displayName:PropTypes.string,
+  signedIn:PropTypes.func
 };

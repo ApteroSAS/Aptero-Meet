@@ -10,6 +10,7 @@ import axios from "axios";
 import { people } from "@microsoft/teams-js";
 import { Prop } from "./debug-panel/Prop";
 
+
 export default class ProfileEntryPanel extends Component {
   static propTypes = {
     containerType: PropTypes.oneOf(["sidebar", "modal"]),
@@ -45,11 +46,10 @@ export default class ProfileEntryPanel extends Component {
   constructor(props) {
     super(props);
     this.state = this.getStateFromProfile();
-    if(!this.props.store.state.profile.microsoftUser)
+    if(!this.props.store.state.profile.microsoftUser && this.props.isSignedIn)
     {
       this.getUserProfile();
     }
-    console.log("microfost user",this.props.store.state.profile.microsoftUser);
     if (props.avatarId) {
       this.state.avatarId = props.avatarId;
     }
@@ -92,7 +92,6 @@ export default class ProfileEntryPanel extends Component {
   };
   
   async updateUserDisplayName(displayName) {
-    console.log("hello to change displayName");
     return await new Promise((resolve, reject) => {
       this.setState({ displayName: displayName });
       const profile = {
@@ -251,8 +250,8 @@ async getUserProfile() {
   };
 
   render() {
-  
     const avatarSettingsProps = {
+      containerType:this.props.containerType,
       isSignedIn:this.props.isSignedIn,
       displayNameInputRef: inp => (this.nameInput = inp),
       disableDisplayNameInput: !!this.props.displayNameOverride,
@@ -268,10 +267,13 @@ async getUserProfile() {
       onChangeJobTitle: e => this.setState({jobTitle:e.target.value}),
       onChangePhoneNumber: e => this.setState({phoneNumber:e.target.value}),
       submit_info:()=>{
-        this.updateUserDisplayName(this.state.displayName);
-        this.updateUserCompanyName(this.state.companyName);
-        this.updateUserJobTitle(this.state.jobTitle);
-        this.updateUserPhoneNumber(this.state.phoneNumber);
+        if(!this.props.store.state.profile.microsoftUser)
+        {
+          this.updateUserDisplayName(this.state.displayName);
+          this.updateUserCompanyName(this.state.companyName);
+          this.updateUserJobTitle(this.state.jobTitle);
+          this.updateUserPhoneNumber(this.state.phoneNumber);
+        }      
       },
       //onChangeUserBio: e => ,
       avatarPreview: <AvatarPreview avatarGltfUrl={this.state.avatar && this.state.avatar.gltf_url} />,

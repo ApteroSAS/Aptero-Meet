@@ -106,6 +106,7 @@ import { CheckUserInfoButton } from "./input/CheckUserInfoButton";
 import { UserProfileVisitCard } from "./room/UserProfileVisitCard";
 import { UserProfileVisitCardContainer } from "./room/UserProfileVisitCardContainer";
 import axios from "axios";
+import { store } from "emoji-mart";
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 const IN_ROOM_MODAL_ROUTER_PATHS = ["/media"];
 const IN_ROOM_MODAL_QUERY_VARS = ["media_source"];
@@ -317,8 +318,12 @@ export class UIRoot extends Component {
 
   componentDidMount() {
     this.props.scene.addEventListener("join", e => {
+      if(!!this.props.store.state.credentials && !!this.props.store.state.credentials.token && !this.props.store.state.profile.microsoftUser ){
+        getUserProfile(this.props.store);
+      }
+
+    
       this.setState({ people: usePeopleList(this.props.presences, this.props.sessionId) });
-      getAllUsersMail(this.props.presences,this.props.sessionId);
       const useFetch = async avatarId => {
         var data;
         const fetchData = async () => {
@@ -346,6 +351,7 @@ export class UIRoot extends Component {
         });
         ImageList = tab2;
       });
+      
     });
 
     window.addEventListener("concurrentload", this.onConcurrentLoad);
@@ -474,10 +480,63 @@ export class UIRoot extends Component {
           onContinue: onContinueAfterSignIn || this.closeDialog
         });
       },
+      onSubmitEmailMicrosoftLogin: async user => {
+        this.showNonHistoriedDialog(RoomSignInModalContainer, {
+          step: SignInStep.WaitForMicrosoftVerification,
+          onClose: onContinueAfterSignIn || this.closeDialog
+        });
+         await authChannel.convertToHubToken(user, this.props.hubChannel);
+      
+        
+        //onSubmitEmailMicrosoftLogin(user);
+   
+   
+
+      //await authComplete;
+
+      this.setState({ signedIn: true });
+      this.showNonHistoriedDialog(RoomSignInModalContainer, {
+        step: SignInStep.complete,
+        onClose: onContinueAfterSignIn || this.closeDialog,
+        onContinue: onContinueAfterSignIn || this.closeDialog
+      });
+    },
       onClose: onContinueAfterSignIn || this.closeDialog
     });
   };
+  /*
+  showContextualMicrosoftSignInDialog = () => {
+    
+    const { signInMessage, authChannel, onContinueAfterSignIn } = this.props;
 
+    this.showNonHistoriedDialog(RoomSignInModalContainer, {
+      step: SignInStep.submit,
+      message: signInMessage,
+      onSubmitEmailMicrosoftLogin: async user => {
+        
+        
+          const { authComplete } = await authChannel.convertToHubToken(user, this.props.hubChannel);
+          //onSubmitEmailMicrosoftLogin(user);
+     
+        this.showNonHistoriedDialog(RoomSignInModalContainer, {
+          step: SignInStep.waitForVerification,
+          onClose: onContinueAfterSignIn || this.closeDialog
+        });
+
+        await authComplete;
+
+        this.setState({ signedIn: true });
+        this.showNonHistoriedDialog(RoomSignInModalContainer, {
+          step: SignInStep.complete,
+          onClose: onContinueAfterSignIn || this.closeDialog,
+          onContinue: onContinueAfterSignIn || this.closeDialog
+        });
+      },
+      onClose: onContinueAfterSignIn || this.closeDialog
+    });
+    
+  };
+*/
   updateSubscribedState = () => {
     const isSubscribed = this.props.subscriptions && this.props.subscriptions.isSubscribed();
     this.setState({ isSubscribed });
@@ -1560,6 +1619,7 @@ export class UIRoot extends Component {
                       {this.state.sidebarId === "people" && (
                         <PeopleSidebarContainer
                           signedIn={()=>this.showContextualSignInDialog()}
+                          signedInMicorsoft={()=>this.showContextualMicrosoftSignInDialog()}
                           displayNameOverride={displayNameOverride}
                           store={this.props.store}
                           mediaSearchStore={this.props.mediaSearchStore}
@@ -1796,6 +1856,31 @@ function getUrl(avatarGlb) {
     };
   });
 }
+async function getUserProfile(store) {
+  const mail=store.state.credentials.email;
+  return axios.get("http://127.0.0.1:8086/get/user/"+mail).then(resp => {
+    let data=resp.data;
+    //this.setState({displayName:data.displayName});
+    //this.setState({jobTitle:data.jobTitle});
+    //this.setState({companyName:data.companyName});
+    //this.setState({phoneNumber:data.phoneNumber});
+    store.update({
+      profile: {
+        displayName:data.displayName,
+        //avatarId: this.state.avatarId,
+        companyName:data.companyName,
+        jobTitle:data.jobTitle,
+        email:store.state.credentials.email,
+        phoneNumber:data.phoneNumber,
+      }
+    });
+
+  }).catch(reason => {
+    console.error(reason);
+  });
+}
+
+
 export function getAvatarPreview() {
   return ImageList;
 }
@@ -1803,6 +1888,7 @@ export function getProfileList()
 {
   return profileList;
 }
+/*
 export async function getAllUsersMail(presences,sessionId)
 {
   if(presences!=null && sessionId!=null)
@@ -1839,6 +1925,7 @@ export async function  getUserProfile(mail,userId) {
       console.error(reason);
   }
 }
+*/
 function UIRootHooksWrapper(props) {
   useAccessibleOutlineStyle();
   const breakpoint = useCssBreakpoints();

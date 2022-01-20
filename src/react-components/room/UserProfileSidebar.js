@@ -57,6 +57,7 @@ export function UserProfileSidebar({
   onSelectPerson,
   store,
   mediaSearchStore,
+  signedIn,
   ...rest
 }) {
   const intl = useIntl();
@@ -82,7 +83,6 @@ if(goBack==null)
     hubChannel={hubChannel}
     presences={presences}
     mySessionId={mySessionId}
-    displayNameOverride={displayName}
     store={store}
     mediaSearchStore={mediaSearchStore}
     performConditionalSignIn={performConditionalSignIn}
@@ -90,6 +90,7 @@ if(goBack==null)
     showNonHistoriedDialog={showNonHistoriedDialog}
     onClose={onClose}
     toggleChatSidebar={toggleChatSidebar}
+    signedIn={signedIn}
 
     />
  );
@@ -218,6 +219,7 @@ else{
   );
 }
 else{
+ 
   //setgoToUserInformation(null);
   return (
     <UserProfileVisitCardContainer
@@ -236,6 +238,7 @@ else{
     onSelectPerson={onSelectPerson}
     store={store}
     mediaSearchStore={mediaSearchStore}
+    signedIn={signedIn}
   />
   );
 }
@@ -276,7 +279,8 @@ UserProfileSidebar.propTypes = {
   showNonHistoriedDialog:PropTypes.func,
   onSelectPerson: PropTypes.func,
   store: PropTypes.object.isRequired,
-  mediaSearchStore: PropTypes.object.isRequired
+  mediaSearchStore: PropTypes.object.isRequired,
+  signedIn:PropTypes.func
 };
 
 function useGoToSelectedAvatar(entity) {
