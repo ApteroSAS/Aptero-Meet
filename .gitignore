@@ -69,4 +69,4 @@ src/assets/locales/extracted-messages.json
 /.idea
 /docker/www
 
-package-lock.json
+#package-lock.json do not ignore it contains npm to yarn warning
