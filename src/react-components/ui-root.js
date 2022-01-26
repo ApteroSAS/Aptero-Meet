@@ -305,7 +305,7 @@ export class UIRoot extends Component {
 
   componentDidMount() {
     this.props.scene.addEventListener("join", e => {
-      this.setState({ people: usePeopleList(this.props.presences, this.props.sessionId) });
+      let people = usePeopleList(this.props.presences, this.props.sessionId);
       const useFetch = async avatarId => {
         var data;
         const fetchData = async () => {
@@ -1717,26 +1717,15 @@ export class UIRoot extends Component {
     );
   }
 }
-function usePeopleList(presences, mySessionId, micUpdateFrequency = 500) {
+function usePeopleList(presences, mySessionId) {
   let people;
 
-  //useEffect(
-  //() => {
-  let timeout;
+  const micPresences = getMicrophonePresences();
 
-  function updateMicrophoneState() {
-    const micPresences = getMicrophonePresences();
+  people = Object.entries(presences).map(([id, presence]) => {
+    return userFromPresence(id, presence, micPresences, mySessionId);
+  });
 
-    people = Object.entries(presences).map(([id, presence]) => {
-      return userFromPresence(id, presence, micPresences, mySessionId);
-    });
-
-    timeout = setTimeout(updateMicrophoneState, micUpdateFrequency);
-  }
-
-  updateMicrophoneState();
-
-  //aptero state cleanup
   people = people.filter(value => {
     return presences[value.id];
   });
