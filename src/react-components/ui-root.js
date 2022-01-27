@@ -195,7 +195,6 @@ export class UIRoot extends Component {
     showPrefs: false,
     watching: false,
     isStreaming: false,
-    imgTab: [],
     waitingOnAudio: false,
     audioTrackClone: null,
     displayName:null,
@@ -318,12 +317,11 @@ export class UIRoot extends Component {
   };
 
   componentDidMount() {
+    
     this.props.scene.addEventListener("join", e => {
       if(!!this.props.store.state.credentials && !!this.props.store.state.credentials.token && !this.props.store.state.profile.microsoftUser ){
         getUserProfile(this.props.store);
       }
-
-    
       this.setState({ people: usePeopleList(this.props.presences, this.props.sessionId) });
       const useFetch = async avatarId => {
         var data;
@@ -333,28 +331,17 @@ export class UIRoot extends Component {
         await fetchData();
         return data;
       };
-      const tab = [];
-      const tab2 = [];
-      var i = 0;
-      this.state.people.map(person => {
-        tab.push(useFetch(person.profile.avatarId));
-      });
-      Promise.all(tab).then(urls => {
-        this.setState({ imgTab: urls });
-        this.state.people.map(person => {
-          const user = {
-            id: person.id,
-            url: urls[i]
-          };
-          i++;
-          tab2.push(user);
-          tab.push(useFetch(person.profile.avatarId));
-        });
-        ImageList = tab2;
-      });
-      
+        useFetch(this.props.store.state.profile.avatarId).then(resp=>{
+          var profilePictureUrl=resp;
+          if(resp!=null){
+            profilePictureUrl = profilePictureUrl.replace('"', "");
+            profilePictureUrl= profilePictureUrl.replace('"', "");
+            this.props.store.update({
+              profile: { profilePicture: profilePictureUrl }
+            });
+          }
+        })
     });
-
     window.addEventListener("concurrentload", this.onConcurrentLoad);
     window.addEventListener("idle_detected", this.onIdleDetected);
     window.addEventListener("activity_detected", this.onActivityDetected);
@@ -1650,7 +1637,6 @@ export class UIRoot extends Component {
                       {this.state.sidebarId === "user" && (
                         <UserProfileSidebarContainer
                           user={this.getSelectedUser()}
-                          imgTab={this.state.imgTab}
                           performConditionalSignIn={this.props.performConditionalSignIn}
                           onClose={() => this.setSidebar(null)}
                           onCloseDialog={() => this.closeDialog()}

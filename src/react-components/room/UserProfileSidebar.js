@@ -32,7 +32,6 @@ export function UserProfileSidebar({
   identityName,
   avatarPreview,
   avatarId,
-  imgUrl,
   userId,
   isSignedIn,
   canPromote,
@@ -61,20 +60,10 @@ export function UserProfileSidebar({
   ...rest
 }) {
   const intl = useIntl();
-  let str = "";
   const [goToUserInformation,setgoToUserInformation]=useState(null);
   const [goBack,setgoBack]=useState("goBack");
   const micUpdateFrequency = 500;
   const people = usePeopleList(presences, mySessionId, micUpdateFrequency);
-  if (imgUrl.length != 0) {
-    imgUrl.map(e => {
-      if (e.id == userId) {
-        str = e.url;
-        str = str.replace('"', "");
-        str = str.replace('"', "");
-      }
-    });
-  }
 if(goBack==null)
 {
   //setgoBack("goBack");
@@ -108,7 +97,7 @@ else{
       {...rest}
     >
       <Column center padding>
-        {str == "" && (
+        {avatarPreview== null && (
           <div className={styles.avatarPreviewContainer}>
             {
               <div className="div_spinner">
@@ -117,7 +106,7 @@ else{
             }
           </div>
         )}
-        {str != "" && <div className={styles.avatarPreviewContainer}>{<img src={str} />}</div>}
+        {avatarPreview!=null && <div className={styles.avatarPreviewContainer}>{<img src={avatarPreview} />}</div>}
 
         {canPromote && (
           <Button
@@ -255,7 +244,6 @@ UserProfileSidebar.propTypes = {
   identityName: PropTypes.string,
   avatarPreview: PropTypes.node,
   avatarId: PropTypes.string,
-  imgUrl: PropTypes.array,
   userId: PropTypes.string,
   isSignedIn: PropTypes.bool,
   canPromote: PropTypes.bool,

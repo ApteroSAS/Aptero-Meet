@@ -21,7 +21,6 @@ import { discordBridgesForPresences } from "../../utils/phoenix-utils";
 import { useIntl } from "react-intl";
 import { MAX_MESSAGE_LENGTH } from "../../utils/chat-message";
 import { PrivatechatBubbles } from "../input/PrivatechatBubbles";
-import { getAvatarPreview } from "./../ui-root";
 import { usePeopleList } from "./PeopleSidebarContainer";
 import { Prop } from "../debug-panel/Prop";
 const ChatContext = createContext({ messageGroups: [], privateMessages: [], sendMessage: () => {} });
@@ -548,7 +547,6 @@ export function ChatSidebarContainer({
         <ul className="bubbles-container">
           {bulles_list.map(bulles => {
             const a = 0;
-            const tab = getAvatarPreview();
             let str = "";
             if (bulles.id == "everyone") {
               str = "";
@@ -559,17 +557,6 @@ export function ChatSidebarContainer({
                   str=person.profile.profilePicture;
                 }
               });
-              if (tab.length != 0 && str==null) {
-                tab.map(element => {
-                  if (element.id == bulles.id) {
-                    str = element.url;
-                    if (str != null) {
-                      str = str.replace('"', "");
-                      str = str.replace('"', "");
-                    }
-                  }
-                });
-              }
             }
             return (
               <li className="bubbles">

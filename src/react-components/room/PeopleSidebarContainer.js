@@ -4,11 +4,9 @@ import { PeopleSidebar } from "./PeopleSidebar";
 import { getMicrophonePresences } from "../../utils/microphone-presence";
 import ProfileEntryPanel from "../profile-entry-panel";
 import { UserProfileSidebarContainer } from "./UserProfileSidebarContainer";
-import { getAvatarPreview } from "./../ui-root";
 import { media } from "@microsoft/teams-js";
 var selectedId;
 var selectedName;
-var imageList = getAvatarPreview();
 export function userFromPresence(sessionId, presence, micPresences, mySessionId) {
   const meta = presence.metas[presence.metas.length - 1];
   const micPresence = micPresences.get(sessionId);
