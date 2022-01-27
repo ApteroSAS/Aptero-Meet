@@ -107,6 +107,7 @@ import { UserProfileVisitCard } from "./room/UserProfileVisitCard";
 import { UserProfileVisitCardContainer } from "./room/UserProfileVisitCardContainer";
 import axios from "axios";
 import { store } from "emoji-mart";
+import { propertiesService } from "../aptero/properties/propertiesService";
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 const IN_ROOM_MODAL_ROUTER_PATHS = ["/media"];
 const IN_ROOM_MODAL_QUERY_VARS = ["media_source"];
@@ -1858,7 +1859,7 @@ function getUrl(avatarGlb) {
 }
 async function getUserProfile(store) {
   const mail=store.state.credentials.email;
-  return axios.get("http://127.0.0.1:8086/get/user/"+mail).then(resp => {
+  return axios.get(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER+"/service/user/get/user/"+mail).then(resp => {
     let data=resp.data;
     //this.setState({displayName:data.displayName});
     //this.setState({jobTitle:data.jobTitle});

@@ -9,7 +9,7 @@ import AvatarPreview from "./avatar-preview";
 import axios from "axios";
 import { people } from "@microsoft/teams-js";
 import { Prop } from "./debug-panel/Prop";
-
+import { propertiesService } from "../aptero/properties/propertiesService";
 
 export default class ProfileEntryPanel extends Component {
   static propTypes = {
@@ -103,7 +103,7 @@ export default class ProfileEntryPanel extends Component {
       };   
       const json = JSON.stringify({ mail: this.state.email, profile: profile });
 
-      axios.post("http://127.0.0.1:8086/update/user", json, {
+      axios.post(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER+"/service/user/update/user", json, {
         headers: {
           // Overwrite Axios's automatically set Content-Type
           "Content-Type": "application/json"
@@ -123,7 +123,7 @@ export default class ProfileEntryPanel extends Component {
       this.setState({ jobTitle: jobTitle });
       const json = JSON.stringify({ mail: this.state.email, profile: profile });
 
-      axios.post("http://127.0.0.1:8086/update/user", json, {
+      axios.post(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER+"service/user/update/user", json, {
         headers: {
           // Overwrite Axios's automatically set Content-Type
           "Content-Type": "application/json"
@@ -143,7 +143,7 @@ export default class ProfileEntryPanel extends Component {
       this.setState({ companyName: companyName });
       const json = JSON.stringify({ mail: this.state.email, profile: profile });
 
-      axios.post("http://127.0.0.1:8086/update/user", json, {
+      axios.post(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER+"/service/user/update/user", json, {
         headers: {
           // Overwrite Axios's automatically set Content-Type
           "Content-Type": "application/json"
@@ -163,7 +163,7 @@ export default class ProfileEntryPanel extends Component {
       this.setState({ phoneNumber: phoneNumber });
       const json = JSON.stringify({ mail: this.state.email, profile: profile });
 
-      axios.post("http://127.0.0.1:8086/update/user", json, {
+      axios.post(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER+"/service/user/update/user", json, {
         headers: {
           // Overwrite Axios's automatically set Content-Type
           "Content-Type": "application/json"
@@ -174,7 +174,7 @@ export default class ProfileEntryPanel extends Component {
 
 async getUserProfile() {
   const mail=this.props.store.state.credentials.email;
-  return axios.get("http://127.0.0.1:8086/get/user/"+mail).then(resp => {
+  return axios.get(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER+"/service/user/get/user/"+mail).then(resp => {
     let data=resp.data;
     this.setState({displayName:data.displayName});
     this.setState({jobTitle:data.jobTitle});
