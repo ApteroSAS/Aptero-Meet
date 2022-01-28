@@ -342,6 +342,30 @@ export class UIRoot extends Component {
           }
         })
     });
+  
+    this.props.scene.addEventListener("avatarChanged", e => {
+      console.log("has changed avatar");
+      const useFetch = async avatarId => {
+        var data;
+        const fetchData = async () => {
+          data = await getUrl(avatarId);
+        };
+        await fetchData();
+        return data;
+      };
+        useFetch(this.props.store.state.profile.avatarId).then(resp=>{
+          var profilePictureUrl=resp;
+          if(resp!=null){
+            profilePictureUrl = profilePictureUrl.replace('"', "");
+            profilePictureUrl= profilePictureUrl.replace('"', "");
+            this.props.store.update({
+              profile: { profilePicture: profilePictureUrl }
+            });
+          }
+        });
+        this.props.store.update({activity :{hasChangedAvatar:false}});
+    });
+    
     window.addEventListener("concurrentload", this.onConcurrentLoad);
     window.addEventListener("idle_detected", this.onIdleDetected);
     window.addEventListener("activity_detected", this.onActivityDetected);

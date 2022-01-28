@@ -46,8 +46,15 @@ export function UserProfileVisitCardContainer({
         email=selectedPersonProfile.email;
         jobTitle=selectedPersonProfile.jobTitle;
         companyName=selectedPersonProfile.companyName;
-        phoneNumber=selectedPersonProfile.phoneNumber;  
-        profilePicture=getAvatarPreview(); 
+        phoneNumber=selectedPersonProfile.phoneNumber; 
+        if(selectedPersonProfile.microsoftUserprofilePicture)
+        {
+          profilePicture=selectedPersonProfile.microsoftUserprofilePicture; 
+        }
+        else{
+          profilePicture=selectedPersonProfile.profilePicture; 
+        }
+        
     }
     
     if(selectedPerson){
@@ -56,7 +63,14 @@ export function UserProfileVisitCardContainer({
       jobTitle=selectedPerson.profile.jobTitle;
       companyName=selectedPerson.profile.companyName;
       phoneNumber=selectedPerson.profile.phoneNumber;
-      profilePicture=selectedPerson.profile.profilePicture;   
+      if(selectedPerson.profile.microsoftUserprofilePicture)
+      {
+        profilePicture=selectedPerson.profile.microsoftUserprofilePicture;  
+      }
+      else{
+        profilePicture=selectedPerson.profile.profilePicture;  
+      }
+      
     }
     if(selectedPerson)
     {
@@ -71,8 +85,7 @@ export function UserProfileVisitCardContainer({
       phoneNumber={phoneNumber}
       jobTitle={jobTitle}
       companyName={companyName}
-      profilePictureList={getAvatarPreview()}
-      profilePictureMicrosoftUser={profilePicture}
+      profilePicture={profilePicture}
       userId={userId}
       mySessionId={mySessionId}
       presences={presences}

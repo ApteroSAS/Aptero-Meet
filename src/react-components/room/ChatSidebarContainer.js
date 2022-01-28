@@ -554,7 +554,15 @@ export function ChatSidebarContainer({
               
               people.map(person=>{
                 if(person.id==bulles.id){
-                  str=person.profile.profilePicture;
+                  if(person.profile.microsoftUserprofilePicture)
+                  {
+                    str=person.profile.microsoftUserprofilePicture;
+                  }
+                  else{
+                    str=person.profile.profilePicture;
+                  }
+
+                  
                 }
               });
             }

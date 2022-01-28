@@ -74,7 +74,7 @@ export default class AuthChannel {
         phoneNumber:null,
         jobTitle:null,
         companyName:null,
-        profilePicture:null,
+        microsoftUserprofilePicture:null,
         microsoftUser:false,
       } ,activity :{hasChangedName:false,hasChangedPicture:false}});
     }
@@ -234,7 +234,7 @@ export default class AuthChannel {
       phoneNumber:user.mobilePhone,
       jobTitle:user.jobTitle,
       companyName:companyName,
-      profilePicture:profilePicture,
+      microsoftUserprofilePicture:profilePicture,
       microsoftUser:true,
     } ,activity :{hasChangedName:true,hasChangedPicture:true}});
   

@@ -582,5 +582,9 @@
    "avatar-settings.email-placeholder":"Adresse e-mail",
    "avatar-settings.phone-number-placeholder":"Numéro de téléphone",
    "sign-in-modal.wait-for-microsoft-verification":"Veuillez patienter jusqu'à ce que nous vous authentifions.",
-   "user-profile-visit-card-no-data-found":"Information non fournie"
+   "user-profile-visit-card-no-data-found":"Information non fournie",
+   "fallback-modal.mic-activity-issue": " Aucun son détecté provenant de votre microphone, appuyez sur retour et essayez de changer de microphone.",
+   "fallback-modal.enter-room-error-button-compatibility":"Redémarrer en mode compatibilité",
+   "fallback-modal.enter-room-button-anyway":"Entrez quand même dans la salle"
+
 }

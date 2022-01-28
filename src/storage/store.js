@@ -54,6 +54,7 @@ export const SCHEMA = {
         phoneNumber: { type: "string" },
         description: { type: "string" },
         profilePicture:{type:"string"},
+        microsoftUserprofilePicture:{type:"string"},
         microsoftUser:{type:"bool"},
         // personalAvatarId is obsolete, but we need it here for backwards compatibility.
         personalAvatarId: { type: "string" }
@@ -77,6 +78,7 @@ export const SCHEMA = {
         hasChangedName: { type: "boolean" },
         hasAcceptedProfile: { type: "boolean" },
         hasChangedPicture:{type:"boolean"},
+        hasChangedAvatar:{type:"boolean"},
         lastEnteredAt: { type: "string" },
         hasPinned: { type: "boolean" },
         hasRotated: { type: "boolean" },

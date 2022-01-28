@@ -89,6 +89,10 @@ export default class ProfileEntryPanel extends Component {
     });
     this.props.finished();
     this.scene.emit("avatar_updated");
+    if(this.props.store.state.activity.hasChangedAvatar)
+    {
+      this.scene.emit("avatarChanged");
+    }
   };
   
   async updateUserDisplayName(displayName) {
