@@ -5,7 +5,7 @@ import { Spinner } from "../misc/Spinner";
 import { useRandomMessageTransition } from "./useRandomMessageTransition";
 
 export function LoadingScreen({ logoSrc, message, infoMessages }) {
-  const infoMessage = useRandomMessageTransition(infoMessages);
+  //const infoMessage = useRandomMessageTransition(infoMessages);
 
   return (
     <LoadingScreenLayout
@@ -16,12 +16,7 @@ export function LoadingScreen({ logoSrc, message, infoMessages }) {
           <p>{message}</p>
         </>
       }
-      bottom={
-        <>
-          <h3>{infoMessage.heading}</h3>
-          <p>{infoMessage.message}</p>
-        </>
-      }
+      bottom={<div></div>}
     />
   );
 }
