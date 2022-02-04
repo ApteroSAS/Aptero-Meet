@@ -1457,7 +1457,7 @@ export class UIRoot extends Component {
                               onClick={() => this.toggleSidebar("custom")}
                             />
                           )}
-                          {showObjectList && (
+                          {showObjectList && false && (//Aptero
                             <ObjectsMenuButton
                               active={this.state.sidebarId === "objects"}
                               onClick={() => this.toggleSidebar("objects")}

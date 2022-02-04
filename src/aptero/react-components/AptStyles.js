@@ -227,10 +227,6 @@ export default class AptStyle extends Component {
             border-color: var(--basic-color-pressed);
             background-color: var(--basic-color-pressed);
           }`}
-          {objectSelector}
-          {`{
-            display:none;
-          }`}
           {headsetSelector}
           {`{
             display:none;
