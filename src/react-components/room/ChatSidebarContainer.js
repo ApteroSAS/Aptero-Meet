@@ -567,7 +567,7 @@ export function ChatSidebarContainer({
               });
             }
             return (
-              <li className="bubbles">
+              <li className="bubbles" key={bulles.id}>
                 <PrivatechatBubbles
                   receivedMessageNumber={bulles.receivedMessageNumber}
                   imgUrl={str}
