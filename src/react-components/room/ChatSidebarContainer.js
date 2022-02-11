@@ -27,11 +27,12 @@ const ChatContext = createContext({ messageGroups: [], privateMessages: [], send
 let uniqueMessageId = 0;
 const everyone_value = {
   id: "everyone",
-  receivedMessageNumber: 0
+  receivedMessageNumber: 0,
+  display_bulle:true
 };
 var bulles_list = [everyone_value];
 const NEW_MESSAGE_GROUP_TIMEOUT = 1000 * 60;
-
+var deleted_item_id='';
 function shouldCreateNewMessageGroup(messageGroups, newMessage, now) {
   if (messageGroups.length === 0) {
     return true;
@@ -217,18 +218,35 @@ export function ChatContextProvider({ messageDispatch, children, people }) {
         if (found == null) {
           const element = {
             id: newMessage.sessionId,
-            receivedMessageNumber: 1
+            receivedMessageNumber: 1,
+            display_bulle:true
           };
           bulles_list_chat.push(element);
         } else {
           bulles_list_chat.map(option => {
             if (option.id == newMessage.sessionId) {
               option.receivedMessageNumber = 1;
+              option.display_bulle=true;
+            }
+            else{
+              option.display_bulle=true;
             }
           });
         }
       }
-
+      else{
+        const found = bulles_list_chat.find(element => element.id == newMessage.sessionId);
+       if(!found) {
+          bulles_list_chat.map(option => {
+            if (option.id == newMessage.sessionId) {
+              option.display_bulle=true;
+            }
+            else{
+              option.display_bulle=true;
+            }
+          });
+        }
+      }
       settestmessage(test_messages => [...test_messages, newMessage]);
       setPrivateMessage(messages => updateprivateMessageGroups(messages, newMessage));
 
@@ -319,6 +337,13 @@ export function ChatSidebarContainer({
   var name;
   const people = usePeopleList(presences, NAF.clientId);
   bulles_list = bulles_list_chat;
+  console.log("before",deleted_item_id);
+  if(deleted_item_id!='')
+  {
+    bulles_list=bulles_list.filter(item =>!(item.id == deleted_item_id));
+    deleted_item_id='';
+  }
+  console.log("after",deleted_item_id,bulles_list);
   if (userId != "everyone") {
     people.map(person => {
       if (person.id == userId) {
@@ -481,7 +506,8 @@ export function ChatSidebarContainer({
                 if (found == null) {
                   const element = {
                     id: option.senderSessionId,
-                    receivedMessageNumber: 0
+                    receivedMessageNumber: 0,
+                    display_bulle:true
                   };
                   bulles_list.push(element);
                 }
@@ -490,7 +516,8 @@ export function ChatSidebarContainer({
                 if (found == null) {
                   const element = {
                     id: option.userReceiverId,
-                    receivedMessageNumber: 0
+                    receivedMessageNumber: 0,
+                    display_bulle:true
                   };
                   bulles_list.push(element);
                 }
@@ -525,7 +552,8 @@ export function ChatSidebarContainer({
                 if (found == null) {
                   const element = {
                     id: option.senderSessionId,
-                    receivedMessageNumber: 0
+                    receivedMessageNumber: 0,
+                    display_bulle:true
                   };
                   bulles_list.push(element);
                 }
@@ -534,7 +562,8 @@ export function ChatSidebarContainer({
                 if (found == null) {
                   const element = {
                     id: option.userReceiverId,
-                    receivedMessageNumber: 0
+                    receivedMessageNumber: 0,
+                    display_bulle:true
                   };
                   bulles_list.push(element);
                 }
@@ -566,20 +595,30 @@ export function ChatSidebarContainer({
                 }
               });
             }
-            return (
-              <li className="bubbles" key={bulles.id}>
-                <PrivatechatBubbles
-                  receivedMessageNumber={bulles.receivedMessageNumber}
-                  imgUrl={str}
-                  bulle_id={bulles.id}
-                  onClick={e => {
-                    bulles.receivedMessageNumber = 0;
-                    onClose();
-                    toggleChatSidebar("chat", bulles.id);
-                  }}
-                />
-              </li>
-            );
+            if(bulles.display_bulle)
+            {
+              return (
+                <li className="bubbles">
+                  <PrivatechatBubbles
+                    receivedMessageNumber={bulles.receivedMessageNumber}
+                    imgUrl={str}
+                    bulle_id={bulles.id}
+                    onDelete={()=>{
+                      var index= bulles_list.findIndex((item => item.id == bulles.id));
+                      bulles_list[index].display_bulle=false;
+                      onClose();
+                      toggleChatSidebar("chat", 'everyone');
+                    }}
+                    onClick={e => {
+                      bulles.receivedMessageNumber = 0;
+                      onClose();
+                      toggleChatSidebar("chat", bulles.id);
+                    }}
+                  />
+                </li>
+              );
+            }
+
           })}
         </ul>
       </div>
@@ -613,8 +652,11 @@ export function ChatSidebarContainer({
           </>
         }
       />
+     
     </ChatSidebar>
+     
   );
+
 }
 
 ChatSidebarContainer.propTypes = {
@@ -651,3 +693,7 @@ export function cleanBulle_list(bulles_list, people) {
   });
   return test;
 }
+/*
+export function  test(array){
+  return array.splice(1,1);
+}*/
