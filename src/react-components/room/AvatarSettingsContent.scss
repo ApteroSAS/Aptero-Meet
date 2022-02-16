@@ -1,13 +1,31 @@
 @use "../styles/theme.scss";
 
 :local(.content) {
-  align-items: center;
+  //align-items: center;
   padding: 24px;
   text-align: center;
+  flex-direction: column !important ;
+  margin-bottom: 0px !important;
+  align-items: center;
+  justify-content: center;
+  & > :last-child{
+    margin-top: 8px;
+  }
+}
+
+:local(.container)
+{
+  display:flex;
+  flex-direction: row;
+  margin-bottom: 0px !important;
+  @media(max-width: 600px) {
+   flex-direction: column;
+  }
 }
 
 
 :local(.avatar-preview-container) {
+
   display: flex;
   flex-direction: column;
   position: relative;
@@ -27,4 +45,41 @@
     bottom: 0;
     margin-bottom: 8px;
   }
+}
+:local(.avatar-preview-inputs){
+  float: left;
+  width:50%;
+  display: flex;
+  flex-direction: column;
+  @media(max-width: 600px) {
+    width: 100%;
+   }
+  & > * {
+//margin-bottom: 45px;
+margin-bottom: 47px;
+@media(max-width: 600px) {
+ margin-bottom: 5px;
+ }
+  }
+  
+}
+:local(.avatar-preview-form-container){
+  margin-right: 8px;
+  display: flex;
+  flex-direction: column;
+  @media(max-width: 600px) {
+    width: 100%;
+    flex-direction: column-reverse;
+    & >:last-child{
+      margin-bottom: 15px;
+    }
+   }
+  
+  & >:last-child{
+    margin-top: 10px;
+  }
+  & > :first-child {
+    margin-bottom: 9px !important;
+      }
+
 }

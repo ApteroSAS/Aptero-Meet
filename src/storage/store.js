@@ -11,6 +11,7 @@ const validator = new Validator();
 import { EventTarget } from "event-target-shim";
 import { fetchRandomDefaultAvatarId, generateRandomName } from "../utils/identity.js";
 import { microsoftService } from "../aptero/service/MicrosoftIntegration/MicrosoftService";
+import {microsoftLoginService} from "../aptero/service/MicrosoftIntegration/MicrosoftLoginService";
 
 export const defaultMaterialQualitySetting = (function() {
   const MATERIAL_QUALITY_OPTIONS = ["low", "medium", "high"];
@@ -47,6 +48,14 @@ export const SCHEMA = {
       properties: {
         displayName: { type: "string", pattern: "^[A-Za-z0-9_~ -]{3,32}$" },
         avatarId: { type: "string" },
+        //aptero
+        companyName: { type: "string" },
+        jobTitleName: { type: "string" },
+        phoneNumber: { type: "string" },
+        description: { type: "string" },
+        profilePicture:{type:"string"},
+        microsoftUserprofilePicture:{type:"string"},
+        microsoftUser:{type:"bool"},
         // personalAvatarId is obsolete, but we need it here for backwards compatibility.
         personalAvatarId: { type: "string" }
       }
@@ -68,6 +77,8 @@ export const SCHEMA = {
         hasFoundFreeze: { type: "boolean" },
         hasChangedName: { type: "boolean" },
         hasAcceptedProfile: { type: "boolean" },
+        hasChangedPicture:{type:"boolean"},
+        hasChangedAvatar:{type:"boolean"},
         lastEnteredAt: { type: "string" },
         hasPinned: { type: "boolean" },
         hasRotated: { type: "boolean" },
@@ -133,7 +144,7 @@ export const SCHEMA = {
         enableAudioClipping: { type: "bool" },
         audioClippingThreshold: { type: "number" },
         theme: { type: "string" },
-        thirdPersonMode: { type: "bool" },
+        thirdPersonMode: { type: "bool" }
       }
     },
 
@@ -248,6 +259,7 @@ export default class Store extends EventTarget {
     this._shouldResetAvatarOnInit = false;
 
     const oauthFlowCredentials = Cookies.getJSON(OAUTH_FLOW_CREDENTIALS_KEY);
+
     if (oauthFlowCredentials) {
       this.update({ credentials: oauthFlowCredentials });
       this._shouldResetAvatarOnInit = true;
@@ -277,7 +289,10 @@ export default class Store extends EventTarget {
 
     // Regenerate name to encourage users to change it.
     if (!this.state.activity.hasChangedName) {
-      this.update({ profile: { displayName: microsoftService.getName() || generateRandomName() } });
+      //const authenticationModule= new MicrosoftLoginService();
+      this.update({
+        profile: {  displayName:generateRandomName() }
+      });
     }
   };
 
@@ -354,7 +369,7 @@ export default class Store extends EventTarget {
     if (!valid) {
       // Intentionally not including details about the state or validation result here, since we don't want to leak
       // sensitive data in the error message.
-      console.log(`Write to store failed schema validation.`)
+      console.log(`Write to store failed schema validation.`);
       //throw new Error(`Write to store failed schema validation.`);
     }
 

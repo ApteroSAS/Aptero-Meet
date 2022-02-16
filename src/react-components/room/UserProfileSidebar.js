@@ -14,20 +14,24 @@ import MessageDispatch from "../../message-dispatch";
 import HubChannel from "../../utils/hub-channel";
 import AuthChannel from "../../utils/auth-channel";
 import SceneEntryManager from "../../scene-entry-manager";
-import toggleSidebar, { UIRoot } from "../ui-root";
 import { rotateInPlaceAroundWorldUp, affixToWorldUp } from "../../utils/three-utils";
 import { Spinner } from "../misc/Spinner";
+import { CheckUserInfoButton } from "../input/CheckUserInfoButton";
+import {usePeopleList,PeopleListContainer} from "./PeopleSidebarContainer";
+import { Prop } from "../debug-panel/Prop";
+import {UserProfileVisitCardContainer} from "./UserProfileVisitCardContainer";
+import {PeopleSidebarContainer} from "./PeopleSidebarContainer";
 export function remountUI(props) {
   uiProps = { ...uiProps, ...props };
   mountUI(uiProps);
 }
 export function UserProfileSidebar({
+  mySessionId,
   className,
   displayName,
   identityName,
   avatarPreview,
   avatarId,
-  imgUrl,
   userId,
   isSignedIn,
   canPromote,
@@ -44,29 +48,56 @@ export function UserProfileSidebar({
   onBack,
   onClose,
   toggleChatSidebar,
+  hubChannel,
+  presences,
+  performConditionalSignIn,
+  onCloseDialog,
+  showNonHistoriedDialog,
+  onSelectPerson,
+  store,
+  mediaSearchStore,
+  signedIn,
   ...rest
 }) {
   const intl = useIntl();
-  let str = "";
-  if (imgUrl.length != 0) {
-    imgUrl.map(e => {
-      if (e.id == userId) {
-        str = e.url;
-        str = str.replace('"', "");
-        str = str.replace('"', "");
-      }
-    });
-  }
+  const [goToUserInformation,setgoToUserInformation]=useState(null);
+  const [goBack,setgoBack]=useState("goBack");
+  const micUpdateFrequency = 500;
+  const people = usePeopleList(presences, mySessionId, micUpdateFrequency);
+if(goBack==null)
+{
+  //setgoBack("goBack");
+  return (
+    <PeopleSidebarContainer
+    hubChannel={hubChannel}
+    presences={presences}
+    mySessionId={mySessionId}
+    store={store}
+    mediaSearchStore={mediaSearchStore}
+    performConditionalSignIn={performConditionalSignIn}
+    onCloseDialog={onCloseDialog}
+    showNonHistoriedDialog={showNonHistoriedDialog}
+    onClose={onClose}
+    toggleChatSidebar={toggleChatSidebar}
+    signedIn={signedIn}
 
+    />
+ );
+}
+else{
+  
+  if(goToUserInformation==null)
+{
   return (
     <Sidebar
       title={identityName ? `${displayName} (${identityName})` : displayName}
-      beforeTitle={showBackButton ? <BackButton onClick={onBack} /> : <CloseButton onClick={onClose} />}
+      beforeTitle={showBackButton ? <BackButton onClick={onBack}
+      /> : <BackButton onClick={()=>setgoBack(null)} />}
       className={className}
       {...rest}
     >
       <Column center padding>
-        {str == "" && (
+        {avatarPreview== null && (
           <div className={styles.avatarPreviewContainer}>
             {
               <div className="div_spinner">
@@ -75,7 +106,7 @@ export function UserProfileSidebar({
             }
           </div>
         )}
-        {str != "" && <div className={styles.avatarPreviewContainer}>{<img src={str} />}</div>}
+        {avatarPreview!=null && <div className={styles.avatarPreviewContainer}>{<img src={avatarPreview} />}</div>}
 
         {canPromote && (
           <Button
@@ -166,23 +197,53 @@ export function UserProfileSidebar({
             <FormattedMessage id="user-profile-sidebar.kick-button" defaultMessage="Kick" />
           </Button>
         )}
-        <Button preset="basic" onClick={() => toggleChatSidebar("chat", userId)}>
+        <Button preset="basic" onClick={() => toggleChatSidebar("chat", userId,null)}>
           <FormattedMessage id="user-profile-sidebar.chat-button" defaultMessage="Chat" />
+        </Button>
+        <Button preset="basic" onClick={()=>setgoToUserInformation("go") }>
+        <FormattedMessage id="user-profile-sidebar.check-other-user-info-button" defaultMessage="Visit card" />
         </Button>
       </Column>
     </Sidebar>
   );
 }
+else{
+ 
+  //setgoToUserInformation(null);
+  return (
+    <UserProfileVisitCardContainer
+    mySessionId={mySessionId}
+    displayName={displayName}
+    userId={userId}
+    toggleChatSidebar={toggleChatSidebar}
+    hubChannel={hubChannel}
+    presences={presences}
+    performConditionalSignIn={performConditionalSignIn}
+    showBackButton
+    onBack={onBack}
+    onClose={onClose}
+    onCloseDialog={onCloseDialog}
+    showNonHistoriedDialog={showNonHistoriedDialog}
+    onSelectPerson={onSelectPerson}
+    store={store}
+    mediaSearchStore={mediaSearchStore}
+    signedIn={signedIn}
+  />
+  );
+}
+}
+
+}
 export function getSelected() {
   return userId;
 }
 UserProfileSidebar.propTypes = {
+  mySessionId:PropTypes.string,
   className: PropTypes.string,
   displayName: PropTypes.string,
   identityName: PropTypes.string,
   avatarPreview: PropTypes.node,
   avatarId: PropTypes.string,
-  imgUrl: PropTypes.array,
   userId: PropTypes.string,
   isSignedIn: PropTypes.bool,
   canPromote: PropTypes.bool,
@@ -198,7 +259,16 @@ UserProfileSidebar.propTypes = {
   showBackButton: PropTypes.bool,
   onBack: PropTypes.func,
   onClose: PropTypes.func,
-  toggleChatSidebar: PropTypes.func
+  toggleChatSidebar: PropTypes.func,
+  hubChannel:PropTypes.object,
+  presences:PropTypes.object,
+  performConditionalSignIn:PropTypes.func,
+  onCloseDialog:PropTypes.func,
+  showNonHistoriedDialog:PropTypes.func,
+  onSelectPerson: PropTypes.func,
+  store: PropTypes.object.isRequired,
+  mediaSearchStore: PropTypes.object.isRequired,
+  signedIn:PropTypes.func
 };
 
 function useGoToSelectedAvatar(entity) {
