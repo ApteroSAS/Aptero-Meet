@@ -228,20 +228,14 @@ export function ChatContextProvider({ messageDispatch, children, people }) {
               option.receivedMessageNumber = 1;
               option.display_bulle=true;
             }
-            else{
-              option.display_bulle=true;
-            }
           });
         }
       }
       else{
-        const found = bulles_list_chat.find(element => element.id == newMessage.sessionId);
-       if(!found) {
+        const found = bulles_list_chat.find(element => element.id == newMessage.receiverClientId);
+       if(found) {
           bulles_list_chat.map(option => {
-            if (option.id == newMessage.sessionId) {
-              option.display_bulle=true;
-            }
-            else{
+            if (option.id == newMessage.receiverClientId) {
               option.display_bulle=true;
             }
           });
@@ -337,13 +331,11 @@ export function ChatSidebarContainer({
   var name;
   const people = usePeopleList(presences, NAF.clientId);
   bulles_list = bulles_list_chat;
-  console.log("before",deleted_item_id);
   if(deleted_item_id!='')
   {
     bulles_list=bulles_list.filter(item =>!(item.id == deleted_item_id));
     deleted_item_id='';
   }
-  console.log("after",deleted_item_id,bulles_list);
   if (userId != "everyone") {
     people.map(person => {
       if (person.id == userId) {
@@ -598,7 +590,7 @@ export function ChatSidebarContainer({
             if(bulles.display_bulle)
             {
               return (
-                <li className="bubbles">
+                <li className="bubbles" key={bulles.id}>
                   <PrivatechatBubbles
                     receivedMessageNumber={bulles.receivedMessageNumber}
                     imgUrl={str}
@@ -607,7 +599,7 @@ export function ChatSidebarContainer({
                       var index= bulles_list.findIndex((item => item.id == bulles.id));
                       bulles_list[index].display_bulle=false;
                       onClose();
-                      toggleChatSidebar("chat", 'everyone');
+                      toggleChatSidebar("chat",'everyone');
                     }}
                     onClick={e => {
                       bulles.receivedMessageNumber = 0;
