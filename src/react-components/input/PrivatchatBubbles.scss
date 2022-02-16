@@ -42,10 +42,14 @@
   }
   .closeBtn{
     position: absolute;
-    top: -6px;
-    right: -8px;
-    background: #CDC7CB;
-    border: 1px;
-    border-radius: 88%;
+    margin-top: -33px;
+    margin-left: 19px;
+    background: #E7E4E4;
+    border: 2px solid;
+    border-radius: 46%;
   }
+ .closeBtn svg{
+   height: 12px;
+   width: 12px;
+ }
 

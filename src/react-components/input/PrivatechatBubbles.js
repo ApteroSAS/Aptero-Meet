@@ -8,18 +8,20 @@ import { CloseButton } from "./CloseButton";
 export function PrivatechatBubbles({ receivedMessageNumber, onClick, imgUrl, bulle_id,onDelete}) {
   if (bulle_id == "everyone") {
     return (
-      <button onClick={onClick} class="button">
+      <button onClick={onClick} className="button">
         <PeopleIcon />
-        {receivedMessageNumber != 0 && <span class="icon-button-badge">{receivedMessageNumber}</span>}
+        {receivedMessageNumber != 0 && <span className="icon-button-badge">{receivedMessageNumber}</span>}
       </button>
     );
   } else {
     return (
-      <button onClick={onDelete} class="button">
-        <img src={imgUrl} class="img"></img>
-        {receivedMessageNumber==0 && <div><CloseButton className={closeBtn}></CloseButton></div>}
-        {receivedMessageNumber != 0 && <span class="icon-button-badge">{receivedMessageNumber}</span>}
-      </button>
+      <div>
+        <button onClick={onClick} className="button">
+        <img src={imgUrl} className="img"></img>
+        {receivedMessageNumber != 0 && <span className="icon-button-badge">{receivedMessageNumber}</span>}
+        </button>
+        {receivedMessageNumber==0 && <CloseButton onClick={onDelete} className="closeBtn"></CloseButton>}
+      </div>
     );
   }
 }
