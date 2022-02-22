@@ -15,7 +15,7 @@ import stylesEnterOnDeviceModal from "../../react-components/room/EnterOnDeviceM
 
 const inviteSelector = `.ApteroStyles .${stylesUtils.showLg}.${stylesToolbar.content}:first-child > *:first-child`; //Also present before loading
 const leaveSelector = ".ApteroStyles.entered " + `.${stylesUtils.showLg}.${stylesToolbar.content}:last-child > *:first-child`;
-const moreSelector = `.ApteroStyles .${stylesUtils.showLg}.${stylesToolbar.content}:last-child > *:last-child`; //Also present before loading
+const moreSelector = `.ApteroStyles .${stylesUtils.showLg}.${stylesToolbar.content}:last-child > *:nth-last-child(2)`; //Also present before loading
 const voiceSelector = `.ApteroStyles.entered .${stylesToolbar.content}:nth-child(2) > *:first-child`;
 const shareSelector = `.ApteroStyles.entered .${stylesToolbar.content}:nth-child(2) > *:nth-child(2)`;
 const placeSelector = `.ApteroStyles.entered .${stylesToolbar.content}:nth-child(2) > *:nth-child(3)`;
@@ -147,6 +147,10 @@ export default class AptStyle extends Component {
             grid-row-start: 1;
             grid-row-end: 3;
           }`}
+          .ApteroStyles .{stylesToolbar.content}:first-of-type {">"} *
+          {`{
+            width:48px
+          }`}
           .ApteroStyles .{stylesToolbar.content} {">"} *:last-child
           {`{
             margin-right:0;
@@ -226,6 +230,10 @@ export default class AptStyle extends Component {
           {`{
             border-color: var(--basic-color-pressed);
             background-color: var(--basic-color-pressed);
+          }`}
+          {moreSelector}
+          {`{
+            margin-right:0;
           }`}
           {headsetSelector}
           {`{

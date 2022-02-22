@@ -4,7 +4,7 @@ import classNames from "classnames";
 import copy from "copy-to-clipboard";
 import { FormattedMessage } from "react-intl";
 import screenfull from "screenfull";
-
+import { ReactComponent as ObjectsIcon } from "./icons/Objects.svg";
 import configs from "../utils/configs";
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
 import { canShare } from "../utils/share";
@@ -1246,19 +1246,32 @@ export class UIRoot extends Component {
         id: "room",
         label: <FormattedMessage id="more-menu.room" defaultMessage="Room" />,
         items: [
+          renderEntryFlow && (enableSpectateVRButton || true) && { //Aptero add enter-device menu
+            id: "enter-device",
+            label: <FormattedMessage id="room-entry-modal.enter-on-device-button" defaultMessage="Enter On Device" />,
+            icon: VRIcon,
+            onClick: () => this.attemptLink()
+          },
           {
             id: "room-info",
             label: <FormattedMessage id="more-menu.room-info" defaultMessage="Room Info and Settings" />,
             icon: HomeIcon,
             onClick: () => this.setSidebar("room-info")
           },
-          (this.props.breakpoint === "sm" || this.props.breakpoint === "md") &&
+          {
+            id: "objects",
+            label: <FormattedMessage id="more-menu.objects" defaultMessage="Objects" />,
+            icon: ObjectsIcon,
+            onClick: () => this.setSidebar("objects")
+          },
+          (this.props.breakpoint === "sm" || this.props.breakpoint === "md" || true) &&//Aptero for the '|| to force render of invite'
             this.props.hub &&
             (this.props.hub.entry_mode !== "invite" || this.props.hubChannel.can("update_hub")) && {
               id: "invite",
               label: <FormattedMessage id="more-menu.invite" defaultMessage="Invite" />,
               icon: InviteIcon,
-              onClick: () => this.props.scene.emit("action_invite")
+              onClick: () => console.log(document.querySelector("."+ styles.inviteButtonContainer).click())
+              // this.props.scene.emit("action_invite")
             },
           this.isFavorited()
             ? {
@@ -1370,6 +1383,12 @@ export class UIRoot extends Component {
             label: <FormattedMessage id="more-menu.privacy" defaultMessage="Privacy Notice" />,
             icon: ShieldIcon,
             href: configs.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")
+          },
+          {
+            id: "faq",
+            label: <FormattedMessage id="more-menu.faq" defaultMessage="FAQ" />,
+            icon: SupportIcon,
+            href: configs.link("docs", "https://www.aptero.co/help.html")
           }
         ].filter(item => item)
       }
@@ -1621,13 +1640,7 @@ export class UIRoot extends Component {
                 }
                 modal={this.state.dialog}
                 toolbarLeft={<div></div>/*
-                  !aptGuiVisible ? null : (
-                    <InvitePopoverContainer
-                      hub={this.props.hub}
-                      hubChannel={this.props.hubChannel}
-                      scene={this.props.scene}
-                    />
-                  )*/
+                  */
                 }
                 toolbarCenter={
                   !aptGuiVisible ? null : (
@@ -1695,7 +1708,13 @@ export class UIRoot extends Component {
                           onClick={() => exit2DInterstitialAndEnterVR(true)}
                         />
                       )}
-                      <MoreMenuPopoverButton menu={moreMenu} />
+                      <MoreMenuPopoverButton menu={moreMenu} />{/*Aptero*/}
+                      {!aptGuiVisible ? null : (
+                      <InvitePopoverContainer className={styles.inviteButtonContainer}
+                        hub={this.props.hub}
+                        hubChannel={this.props.hubChannel}
+                        scene={this.props.scene}
+                      />)}
                     </>
                   )
                 }
