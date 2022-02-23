@@ -4,10 +4,9 @@ import { PeopleSidebar } from "./PeopleSidebar";
 import { getMicrophonePresences } from "../../utils/microphone-presence";
 import ProfileEntryPanel from "../profile-entry-panel";
 import { UserProfileSidebarContainer } from "./UserProfileSidebarContainer";
-import { getAvatarPreview } from "./../ui-root";
+import { media } from "@microsoft/teams-js";
 var selectedId;
 var selectedName;
-var imageList = getAvatarPreview();
 export function userFromPresence(sessionId, presence, micPresences, mySessionId) {
   const meta = presence.metas[presence.metas.length - 1];
   const micPresence = micPresences.get(sessionId);
@@ -45,7 +44,7 @@ export function usePeopleList(presences, mySessionId, micUpdateFrequency = 500) 
   });
   return people;
 }
-function PeopleListContainer({ hubChannel, people, onSelectPerson, onClose }) {
+export function PeopleListContainer({ hubChannel, people, onSelectPerson, onClose }) {
   const onMuteAll = useCallback(() => {
     for (const person of people) {
       if (person.presence === "room" && person.permissions && !person.permissions.mute_users) {
@@ -82,14 +81,16 @@ export function PeopleSidebarContainer({
   onCloseDialog,
   showNonHistoriedDialog,
   onClose,
-  toggleChatSidebar
+  toggleChatSidebar,
+  signedIn
 }) {
   const people = usePeopleList(presences, mySessionId);
   const [selectedPersonId, setSelectedPersonId] = useState(null);
   const selectedPerson = people.find(person => person.id === selectedPersonId);
-  if (selectedPerson != null) {
-    selectedId = selectedPerson.id;
-    selectedName = selectedPerson.profile.displayName;
+  var iSignedIn=true;
+  if(selectedPerson)
+  {
+    iSignedIn=selectedPerson.roles.signed_in;
   }
 
   const setSelectedPerson = useCallback(
@@ -102,6 +103,8 @@ export function PeopleSidebarContainer({
     if (selectedPerson.id === mySessionId) {
       return (
         <ProfileEntryPanel
+        isSignedIn={iSignedIn}
+          people={people}
           containerType="sidebar"
           displayNameOverride={displayNameOverride}
           store={store}
@@ -110,19 +113,27 @@ export function PeopleSidebarContainer({
           history={history}
           showBackButton
           onBack={() => setSelectedPersonId(null)}
+          signedIn={signedIn}
         />
       );
     } else {
       return (
         <UserProfileSidebarContainer
+          mySessionId={mySessionId}
           user={selectedPerson}
           toggleChatSidebar={toggleChatSidebar}
           hubChannel={hubChannel}
+          presences={presences}
           performConditionalSignIn={performConditionalSignIn}
           showBackButton
           onBack={() => setSelectedPersonId(null)}
+          onSelectPerson={setSelectedPerson}
+          onClose={onClose}
           onCloseDialog={onCloseDialog}
           showNonHistoriedDialog={showNonHistoriedDialog}
+          store={store}
+          mediaSearchStore={mediaSearchStore}
+          signedIn={signedIn}
         />
       );
     }
@@ -144,12 +155,13 @@ PeopleSidebarContainer.propTypes = {
   store: PropTypes.object.isRequired,
   mediaSearchStore: PropTypes.object.isRequired,
   hubChannel: PropTypes.object.isRequired,
-  history: PropTypes.object.isRequired,
+  history: PropTypes.object,
   onClose: PropTypes.func.isRequired,
   mySessionId: PropTypes.string.isRequired,
   presences: PropTypes.object.isRequired,
   performConditionalSignIn: PropTypes.func.isRequired,
   onCloseDialog: PropTypes.func.isRequired,
   showNonHistoriedDialog: PropTypes.func.isRequired,
-  toggleChatSidebar: PropTypes.func
+  toggleChatSidebar: PropTypes.func,
+  signedIn:PropTypes.func
 };

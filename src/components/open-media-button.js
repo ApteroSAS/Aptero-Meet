@@ -84,7 +84,7 @@ AFRAME.registerComponent("open-media-button", {
           changeHub(hubId);
         } else {
           //aptero
-          this.src = duplicateEntryModeOnSrc(this.src,this.el.sceneEl);
+          this.src = duplicateEntryModeOnSrc(this.src, this.el.sceneEl);
           //await exitImmersive();
           location.href = this.src;
         }

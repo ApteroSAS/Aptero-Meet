@@ -1,6 +1,8 @@
 import { microsoftService } from "../service/MicrosoftIntegration/MicrosoftService";
 
+
 async function main() {
+  
   await microsoftService.start(() => {
     window.location.href = window.location.origin;
   });
@@ -27,5 +29,6 @@ async function main() {
       }
     });
   }
+  
 }
 main();

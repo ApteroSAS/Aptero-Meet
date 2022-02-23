@@ -102,7 +102,13 @@ import { customMenuService } from "../aptero/service/CustomMenuService";
 import AptRoot from "../aptero/react-components/AptRoot";
 import { getSelectedPersonId, getSelectedPersonName } from "./room/PeopleSidebarContainer";
 import { Promise } from "core-js";
+import { CheckUserInfoButton } from "./input/CheckUserInfoButton";
+import { UserProfileVisitCard } from "./room/UserProfileVisitCard";
+import { UserProfileVisitCardContainer } from "./room/UserProfileVisitCardContainer";
+import axios from "axios";
 import { msTeams } from "../aptero/util/MsTeams";
+import { store } from "emoji-mart";
+import { propertiesService } from "../aptero/properties/propertiesService";
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 const IN_ROOM_MODAL_ROUTER_PATHS = ["/media"];
 const IN_ROOM_MODAL_QUERY_VARS = ["media_source"];
@@ -121,6 +127,8 @@ const AUTO_EXIT_TIMER_SECONDS = 10;
 
 const aptGuiVisible = !new URL(window.location.href).searchParams.get("hideui"); //aptero
 var ImageList = [];
+const profileList=[];
+
 export class UIRoot extends Component {
   willCompileAndUploadMaterials = false;
 
@@ -188,10 +196,15 @@ export class UIRoot extends Component {
     showPrefs: false,
     watching: false,
     isStreaming: false,
-    imgTab: [],
     waitingOnAudio: false,
     audioTrackClone: null,
-
+    displayName:null,
+    identityName:null,
+    //email:null,
+    //jobTitle:null,
+    //companyName:null,
+    onBack:null,
+    onClose:null,
     autoExitTimerStartedAt: null,
     autoExitTimerInterval: null,
     autoExitReason: null,
@@ -305,7 +318,11 @@ export class UIRoot extends Component {
   };
 
   componentDidMount() {
+    
     this.props.scene.addEventListener("join", e => {
+      if(!!this.props.store.state.credentials && !!this.props.store.state.credentials.token && !this.props.store.state.profile.microsoftUser ){
+        getUserProfile(this.props.store);
+      }
       let people = usePeopleList(this.props.presences, this.props.sessionId);
       const useFetch = async avatarId => {
         var data;
@@ -315,27 +332,41 @@ export class UIRoot extends Component {
         await fetchData();
         return data;
       };
-      const tab = [];
-      const tab2 = [];
-      var i = 0;
-      this.state.people.map(person => {
-        tab.push(useFetch(person.profile.avatarId));
-      });
-      Promise.all(tab).then(urls => {
-        this.setState({ imgTab: urls });
-        this.state.people.map(person => {
-          const user = {
-            id: person.id,
-            url: urls[i]
-          };
-          i++;
-          tab2.push(user);
-          tab.push(useFetch(person.profile.avatarId));
-        });
-        ImageList = tab2;
-      });
+        useFetch(this.props.store.state.profile.avatarId).then(resp=>{
+          var profilePictureUrl=resp;
+          if(resp!=null){
+            profilePictureUrl = profilePictureUrl.replace('"', "");
+            profilePictureUrl= profilePictureUrl.replace('"', "");
+            this.props.store.update({
+              profile: { profilePicture: profilePictureUrl }
+            });
+          }
+        })
     });
-
+  
+    this.props.scene.addEventListener("avatarChanged", e => {
+      console.log("has changed avatar");
+      const useFetch = async avatarId => {
+        var data;
+        const fetchData = async () => {
+          data = await getUrl(avatarId);
+        };
+        await fetchData();
+        return data;
+      };
+        useFetch(this.props.store.state.profile.avatarId).then(resp=>{
+          var profilePictureUrl=resp;
+          if(resp!=null){
+            profilePictureUrl = profilePictureUrl.replace('"', "");
+            profilePictureUrl= profilePictureUrl.replace('"', "");
+            this.props.store.update({
+              profile: { profilePicture: profilePictureUrl }
+            });
+          }
+        });
+        this.props.store.update({activity :{hasChangedAvatar:false}});
+    });
+    
     window.addEventListener("concurrentload", this.onConcurrentLoad);
     window.addEventListener("idle_detected", this.onIdleDetected);
     window.addEventListener("activity_detected", this.onActivityDetected);
@@ -447,7 +478,59 @@ export class UIRoot extends Component {
       message: signInMessage,
       onSubmitEmail: async email => {
         const { authComplete } = await authChannel.startAuthentication(email, this.props.hubChannel);
+        
+        this.showNonHistoriedDialog(RoomSignInModalContainer, {
+          step: SignInStep.waitForVerification,
+          onClose: onContinueAfterSignIn || this.closeDialog
+        });
 
+        await authComplete;
+
+        this.setState({ signedIn: true });
+        this.showNonHistoriedDialog(RoomSignInModalContainer, {
+          step: SignInStep.complete,
+          onClose: onContinueAfterSignIn || this.closeDialog,
+          onContinue: onContinueAfterSignIn || this.closeDialog
+        });
+      },
+      onSubmitEmailMicrosoftLogin: async user => {
+        this.showNonHistoriedDialog(RoomSignInModalContainer, {
+          step: SignInStep.WaitForMicrosoftVerification,
+          onClose: onContinueAfterSignIn || this.closeDialog
+        });
+         await authChannel.convertToHubToken(user, this.props.hubChannel);
+      
+        
+        //onSubmitEmailMicrosoftLogin(user);
+   
+   
+
+      //await authComplete;
+
+      this.setState({ signedIn: true });
+      this.showNonHistoriedDialog(RoomSignInModalContainer, {
+        step: SignInStep.complete,
+        onClose: onContinueAfterSignIn || this.closeDialog,
+        onContinue: onContinueAfterSignIn || this.closeDialog
+      });
+    },
+      onClose: onContinueAfterSignIn || this.closeDialog
+    });
+  };
+  /*
+  showContextualMicrosoftSignInDialog = () => {
+    
+    const { signInMessage, authChannel, onContinueAfterSignIn } = this.props;
+
+    this.showNonHistoriedDialog(RoomSignInModalContainer, {
+      step: SignInStep.submit,
+      message: signInMessage,
+      onSubmitEmailMicrosoftLogin: async user => {
+        
+        
+          const { authComplete } = await authChannel.convertToHubToken(user, this.props.hubChannel);
+          //onSubmitEmailMicrosoftLogin(user);
+     
         this.showNonHistoriedDialog(RoomSignInModalContainer, {
           step: SignInStep.waitForVerification,
           onClose: onContinueAfterSignIn || this.closeDialog
@@ -464,8 +547,9 @@ export class UIRoot extends Component {
       },
       onClose: onContinueAfterSignIn || this.closeDialog
     });
+    
   };
-
+*/
   updateSubscribedState = () => {
     const isSubscribed = this.props.subscriptions && this.props.subscriptions.isSubscribed();
     this.setState({ isSubscribed });
@@ -812,6 +896,9 @@ export class UIRoot extends Component {
   toggleSidebar(sidebarId, otherState) {
     if (sidebarId === "chat") {
       this.setState({ userId: otherState });
+    }
+    if(sidebarId==="cardVisit"){
+        this.setState({ userId: otherState });
     }
 
     this.setState(({ sidebarId: curSidebarId }) => {
@@ -1563,6 +1650,8 @@ export class UIRoot extends Component {
                       )}
                       {this.state.sidebarId === "people" && (
                         <PeopleSidebarContainer
+                          signedIn={()=>this.showContextualSignInDialog()}
+                          signedInMicorsoft={()=>this.showContextualMicrosoftSignInDialog()}
                           displayNameOverride={displayNameOverride}
                           store={this.props.store}
                           mediaSearchStore={this.props.mediaSearchStore}
@@ -1574,11 +1663,12 @@ export class UIRoot extends Component {
                           onCloseDialog={() => this.closeDialog()}
                           showNonHistoriedDialog={this.showNonHistoriedDialog}
                           performConditionalSignIn={this.props.performConditionalSignIn}
-                          toggleChatSidebar={(type, userid) => this.toggleSidebar(type, userid)}
+                          toggleChatSidebar={(type, userid,onBack) => this.toggleSidebar(type, userid,onBack)}
                         />
                       )}
                       {this.state.sidebarId === "profile" && (
                         <ProfileEntryPanel
+                       
                           history={this.props.history}
                           containerType="sidebar"
                           displayNameOverride={displayNameOverride}
@@ -1591,11 +1681,25 @@ export class UIRoot extends Component {
                       {this.state.sidebarId === "user" && (
                         <UserProfileSidebarContainer
                           user={this.getSelectedUser()}
-                          imgTab={this.state.imgTab}
-                          hubChannel={this.props.hubChannel}
                           performConditionalSignIn={this.props.performConditionalSignIn}
                           onClose={() => this.setSidebar(null)}
                           onCloseDialog={() => this.closeDialog()}
+                          toggleSidebar={(type)=>this.toggleSidebar(type)}
+                          showNonHistoriedDialog={this.showNonHistoriedDialog}
+                        />
+                      )}
+                         {this.state.sidebarId === "cardVisit" && (
+                        <UserProfileVisitCardContainer
+                          mySessionId={this.props.sessionId}
+                          presences={this.props.presences}
+                          userId={this.state.userId}
+                          store={this.props.store}
+                          hubChannel={this.props.hubChannel}
+                          presences={this.props.presences}
+                          performConditionalSignIn={this.props.performConditionalSignIn}
+                          onClose={() => this.setSidebar(null)}
+                          onCloseDialog={() => this.closeDialog()}
+                          toggleSidebar={(type)=>this.toggleSidebar(type)}
                           showNonHistoriedDialog={this.showNonHistoriedDialog}
                         />
                       )}
@@ -1761,9 +1865,76 @@ function getUrl(avatarGlb) {
     };
   });
 }
+async function getUserProfile(store) {
+  const mail=store.state.credentials.email;
+  return axios.get(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER+"/service/user/get/user/"+mail).then(resp => {
+    let data=resp.data;
+    //this.setState({displayName:data.displayName});
+    //this.setState({jobTitle:data.jobTitle});
+    //this.setState({companyName:data.companyName});
+    //this.setState({phoneNumber:data.phoneNumber});
+    store.update({
+      profile: {
+        displayName:data.displayName,
+        //avatarId: this.state.avatarId,
+        companyName:data.companyName,
+        jobTitle:data.jobTitle,
+        email:store.state.credentials.email,
+        phoneNumber:data.phoneNumber,
+      }
+    });
+
+  }).catch(reason => {
+    console.error(reason);
+  });
+}
+
+
 export function getAvatarPreview() {
   return ImageList;
 }
+export function getProfileList()
+{
+  return profileList;
+}
+/*
+export async function getAllUsersMail(presences,sessionId)
+{
+  if(presences!=null && sessionId!=null)
+  {
+    const people=usePeopleList(presences,sessionId);
+    people.map((person)=>{
+      if(person.profile.email!=null)
+      {
+        const email=person.profile.email;
+        const userId=person.id;
+        getUserProfile(email,userId);
+      }
+    });
+  }
+
+  
+}
+export async function  getUserProfile(mail,userId) {
+  try {
+      const resp = await axios.get("http://127.0.0.1:8086/get/user/" + mail);
+      let data = resp.data;
+      const profile={
+        email :mail,
+        displayName :data.displayName,
+        jobTitle:data.jobTitle,
+        companyName:data.companyName,
+        phoneNumber:data.phoneNumber,
+        userId:userId
+        
+      }
+      profileList.push(profile);
+     
+  } catch (reason) {
+      console.error(reason);
+  }
+}
+*/
 function UIRootHooksWrapper(props) {
   useAccessibleOutlineStyle();
   const breakpoint = useCssBreakpoints();

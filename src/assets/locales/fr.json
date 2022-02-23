@@ -566,5 +566,25 @@
   "webvr-unsupported-modal.webvr-rocks-link": "Pour consulter la liste des navigateurs avec support expérimental VR, visitez la page <a>WebVR Rocks</a>.",
     "whats-new-page.title": "Quoi de neuf",
    "avatar-teleport":"Téléporter",
-   "user-profile-sidebar.chat-button":"Discuter"
+   "user-profile-sidebar.chat-button":"Discuter",
+   "user-profile-sidebar.check-other-user-info-button":"Carte de visite",
+   "avatar-settings-content.company-name-label":"Nom de l'entreprise",
+   "avatar-settings-content.job-title-label":"Titre du poste",
+   "avatar-settings-content.email-label":"Email",
+   "avatar-settings-content.phone-number-label":"Numéro de téléphone",
+   "user-profile-sidebar.send-mail-button":"Envoyer un mail",
+   "avatar-settings-content.sign-up-button":"Se connecter",
+   "sign-in-with-teams":"Se connecter avec teams",
+   "user-profile-visit-card-no-data-found":"L'utilisateur n'a pas fourni d'information",
+   "avatar-settings.display-name-label-placeholder":"Entrez votre nom",
+   "avatar-settings.company-name-placeholder":"Nom de l'entreprise",
+   "avatar-settings.job-title-placeholder":"Titre du poste",
+   "avatar-settings.email-placeholder":"Adresse e-mail",
+   "avatar-settings.phone-number-placeholder":"Numéro de téléphone",
+   "sign-in-modal.wait-for-microsoft-verification":"Veuillez patienter jusqu'à ce que nous vous authentifions.",
+   "user-profile-visit-card-no-data-found":"Information non fournie",
+   "fallback-modal.mic-activity-issue": " Aucun son détecté provenant de votre microphone, appuyez sur retour et essayez de changer de microphone.",
+   "fallback-modal.enter-room-error-button-compatibility":"Redémarrer en mode compatibilité",
+   "fallback-modal.enter-room-button-anyway":"Entrez quand même dans la salle"
+
 }

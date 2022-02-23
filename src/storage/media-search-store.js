@@ -256,6 +256,7 @@ export default class MediaSearchStore extends EventTarget {
         }
       } else {
         if (source === "avatars") {
+          window.APP.store.update({activity :{hasChangedAvatar:true}});
           const hasAccountWithAvatars = await this._hasAccountWithAvatars();
           searchParams.set("filter", hasAccountWithAvatars ? "my-avatars" : "featured");
         } else if (MEDIA_SOURCE_DEFAULT_FILTERS[source]) {

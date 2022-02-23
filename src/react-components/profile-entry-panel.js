@@ -6,6 +6,10 @@ import { replaceHistoryState } from "../utils/history";
 import { AvatarSettingsSidebar } from "./room/AvatarSettingsSidebar";
 import { AvatarSetupModal } from "./room/AvatarSetupModal";
 import AvatarPreview from "./avatar-preview";
+import axios from "axios";
+import { people } from "@microsoft/teams-js";
+import { Prop } from "./debug-panel/Prop";
+import { propertiesService } from "../aptero/properties/propertiesService";
 
 export default class ProfileEntryPanel extends Component {
   static propTypes = {
@@ -19,7 +23,9 @@ export default class ProfileEntryPanel extends Component {
     avatarId: PropTypes.string,
     onClose: PropTypes.func,
     onBack: PropTypes.func,
-    showBackButton: PropTypes.bool
+    showBackButton: PropTypes.bool,
+    isSignedIn:PropTypes.bool,
+    signedIn:PropTypes.func
   };
 
   static defaultProps = {
@@ -29,12 +35,21 @@ export default class ProfileEntryPanel extends Component {
   state = {
     avatarId: null,
     displayName: null,
+    companyName:null,
+    jobTitle:null,
+    email:null,
+    phoneNumber:null,
+    descriptionUser:null,
     avatar: null
   };
 
   constructor(props) {
     super(props);
     this.state = this.getStateFromProfile();
+    if(!this.props.store.state.profile.microsoftUser && this.props.isSignedIn)
+    {
+      this.getUserProfile();
+    }
     if (props.avatarId) {
       this.state.avatarId = props.avatarId;
     }
@@ -43,16 +58,17 @@ export default class ProfileEntryPanel extends Component {
   }
 
   getStateFromProfile = () => {
-    const { displayName, avatarId } = this.props.store.state.profile;
-    return { displayName, avatarId };
+    const { displayName, avatarId ,companyName,jobTitle,email,phoneNumber,descriptionUser} = this.props.store.state.profile;
+    return { displayName, avatarId,companyName ,jobTitle,email,phoneNumber,descriptionUser};
   };
 
   storeUpdated = () => this.setState(this.getStateFromProfile());
 
   saveStateAndFinish = e => {
     e && e.preventDefault();
-
+   
     const { displayName } = this.props.store.state.profile;
+    const { companyName } = this.props.store.state.profile;
     const { hasChangedName } = this.props.store.state.activity;
 
     const hasChangedNowOrPreviously = hasChangedName || this.state.displayName !== displayName;
@@ -63,12 +79,126 @@ export default class ProfileEntryPanel extends Component {
       },
       profile: {
         displayName: this.state.displayName,
-        avatarId: this.state.avatarId
+        avatarId: this.state.avatarId,
+        companyName:this.state.companyName,
+        jobTitle:this.state.jobTitle,
+        email:this.props.store.state.credentials.email,
+        phoneNumber:this.state.phoneNumber,
+        descriptionUser:this.state.descriptionUser,
       }
     });
     this.props.finished();
     this.scene.emit("avatar_updated");
+    if(this.props.store.state.activity.hasChangedAvatar)
+    {
+      this.scene.emit("avatarChanged");
+    }
   };
+  
+  async updateUserDisplayName(displayName) {
+    return await new Promise((resolve, reject) => {
+      this.setState({ displayName: displayName });
+      const profile = {
+        displayName:displayName,
+        phoneNumber: this.state.phoneNumber,
+        companyName: this.state.companyName,
+        jobTitle: this.state.jobTitle,
+        bio:this.state.descriptionUser
+      };   
+      const json = JSON.stringify({ mail: this.state.email, profile: profile });
+
+      axios.post(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER+"/service/user/update/user", json, {
+        headers: {
+          // Overwrite Axios's automatically set Content-Type
+          "Content-Type": "application/json"
+        }
+      });
+    });
+  }
+  async updateUserJobTitle(jobTitle) {
+    return await new Promise((resolve, reject) => {
+      const profile = {
+        displayName:this.state.displayName,
+        phoneNumber: this.state.phoneNumber,
+        companyName: this.state.companyName,
+        jobTitle: jobTitle,
+        bio:this.state.descriptionUser
+      };
+      this.setState({ jobTitle: jobTitle });
+      const json = JSON.stringify({ mail: this.state.email, profile: profile });
+
+      axios.post(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER+"service/user/update/user", json, {
+        headers: {
+          // Overwrite Axios's automatically set Content-Type
+          "Content-Type": "application/json"
+        }
+      });
+    });
+  }
+  async updateUserCompanyName(companyName) {
+    return await new Promise((resolve, reject) => {
+      const profile = {
+        displayName:this.state.displayName,
+        phoneNumber: this.state.phoneNumber,
+        companyName: companyName,
+        jobTitle: this.state.jobTitle,
+        bio:this.state.descriptionUser
+      };
+      this.setState({ companyName: companyName });
+      const json = JSON.stringify({ mail: this.state.email, profile: profile });
+
+      axios.post(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER+"/service/user/update/user", json, {
+        headers: {
+          // Overwrite Axios's automatically set Content-Type
+          "Content-Type": "application/json"
+        }
+      });
+    });
+  }
+  async updateUserPhoneNumber(phoneNumber) {
+    return await new Promise((resolve, reject) => {
+      const profile = {
+        displayName:this.state.displayName,
+        phoneNumber: phoneNumber,
+        companyName: this.state.companyName,
+        jobTitle: this.state.jobTitle,
+        bio:this.state.descriptionUser
+      };
+      this.setState({ phoneNumber: phoneNumber });
+      const json = JSON.stringify({ mail: this.state.email, profile: profile });
+
+      axios.post(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER+"/service/user/update/user", json, {
+        headers: {
+          // Overwrite Axios's automatically set Content-Type
+          "Content-Type": "application/json"
+        }
+      });
+    });
+  }
+
+async getUserProfile() {
+  const mail=this.props.store.state.credentials.email;
+  return axios.get(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER+"/service/user/get/user/"+mail).then(resp => {
+    let data=resp.data;
+    this.setState({displayName:data.displayName});
+    this.setState({jobTitle:data.jobTitle});
+    this.setState({companyName:data.companyName});
+    this.setState({phoneNumber:data.phoneNumber});
+    this.props.store.update({
+      profile: {
+        displayName:data.displayName,
+        avatarId: this.state.avatarId,
+        companyName:this.state.companyName,
+        jobTitle:data.jobTitle,
+        email:this.props.store.state.credentials.email,
+        phoneNumber:data.phoneNumber,
+      }
+    });
+
+  }).catch(reason => {
+    console.error(reason);
+  });
+}
 
   stopPropagation = e => {
     e.stopPropagation();
@@ -85,6 +215,7 @@ export default class ProfileEntryPanel extends Component {
   };
 
   componentDidMount() {
+    //this.getUserProfile();
     if (this.nameInput) {
       // stop propagation so that avatar doesn't move when wasd'ing during text input.
       this.nameInput.addEventListener("keydown", this.stopPropagation);
@@ -105,6 +236,7 @@ export default class ProfileEntryPanel extends Component {
   }
 
   componentWillUnmount() {
+   
     this.props.store.removeEventListener("statechanged", this.storeUpdated);
     if (this.nameInput) {
       this.nameInput.removeEventListener("keydown", this.stopPropagation);
@@ -123,21 +255,41 @@ export default class ProfileEntryPanel extends Component {
 
   render() {
     const avatarSettingsProps = {
+      containerType:this.props.containerType,
+      isSignedIn:this.props.isSignedIn,
       displayNameInputRef: inp => (this.nameInput = inp),
       disableDisplayNameInput: !!this.props.displayNameOverride,
       displayName: this.props.displayNameOverride ? this.props.displayNameOverride : this.state.displayName,
+      companyName:this.state.companyName,
+      jobTitle:this.state.jobTitle,
+      email:this.state.email,
+      phoneNumber:this.state.phoneNumber,
+      descriptionUser:this.state.descriptionUser,
       displayNamePattern: SCHEMA.definitions.profile.properties.displayName.pattern,
-      onChangeDisplayName: e => this.setState({ displayName: e.target.value }),
+      onChangeDisplayName: e => this.setState({displayName:e.target.value}),
+      onChangeCompanyName: e => this.setState({companyName:e.target.value}),
+      onChangeJobTitle: e => this.setState({jobTitle:e.target.value}),
+      onChangePhoneNumber: e => this.setState({phoneNumber:e.target.value}),
+      submit_info:()=>{
+        if(!this.props.store.state.profile.microsoftUser)
+        {
+          this.updateUserDisplayName(this.state.displayName);
+          this.updateUserCompanyName(this.state.companyName);
+          this.updateUserJobTitle(this.state.jobTitle);
+          this.updateUserPhoneNumber(this.state.phoneNumber);
+        }      
+      },
+      //onChangeUserBio: e => ,
       avatarPreview: <AvatarPreview avatarGltfUrl={this.state.avatar && this.state.avatar.gltf_url} />,
       onChangeAvatar: e => {
         e.preventDefault();
         this.props.mediaSearchStore.sourceNavigateWithNoNav("avatars", "use");
       },
-      onSubmit: this.saveStateAndFinish,
+      onSubmit: this.saveStateAndFinish ,
       onClose: this.props.onClose,
-      onBack: this.props.onBack
+      onBack: this.props.onBack,
+      signedIn:this.props.signedIn
     };
-
     if (this.props.containerType === "sidebar") {
       return <AvatarSettingsSidebar {...avatarSettingsProps} showBackButton={this.props.showBackButton} />;
     }

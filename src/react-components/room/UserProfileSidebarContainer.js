@@ -4,21 +4,32 @@ import { PromoteClientModal } from "./PromoteClientModal";
 import { getAvatarThumbnailUrl, fetchAvatarGltfUrl } from "../../utils/avatar-utils";
 import { UserProfileSidebar } from "./UserProfileSidebar.js";
 import { SignInMessages } from "../auth/SignInModal";
-import { getAvatarPreview } from "./../ui-root";
+import { Prop } from "../debug-panel/Prop";
+import {usePeopleList} from "./PeopleSidebarContainer";
+import avatarPreview from "../avatar-preview";
 export function UserProfileSidebarContainer({
+  mySessionId,
   user,
-  imgTab,
   hubChannel,
+  presences,
   performConditionalSignIn,
   showBackButton,
   onBack,
   onClose,
   onCloseDialog,
   showNonHistoriedDialog,
-  toggleChatSidebar
+  toggleChatSidebar,
+  onSelectPerson,
+  store,
+  mediaSearchStore,
+  signedIn
+  
 }) {
+  const micUpdateFrequency = 500;
+  const people = usePeopleList(presences, mySessionId, micUpdateFrequency);
   const [avatarThumbnailUrl, setAvatarThumbnailUrl] = useState();
   const [avatarGlb, setAvatarGlb] = useState();
+  var   avatarPreview="";
   const {
     id: userId,
     profile: { displayName, identityName, avatarId },
@@ -114,13 +125,21 @@ export function UserProfileSidebarContainer({
       onBack();
     }
   }, [performConditionalSignIn, hubChannel, userId, onClose, onBack]);
+  people.map(person=>{
+    if(person.id==userId){
+    avatarPreview=person.profile.profilePicture;
+    }
+  })
   return (
+
     <UserProfileSidebar
+     mySessionId={mySessionId}
+     hubChannel={hubChannel}
+     presences={presences}
       displayName={displayName}
       identityName={identityName}
-      avatarPreview={<img src={avatarThumbnailUrl} />}
       avatarId={avatarId}
-      imgUrl={getAvatarPreview()}
+      avatarPreview={avatarPreview}
       userId={userId}
       isSignedIn={isSignedIn}
       canPromote={mayAddOwner}
@@ -137,39 +156,31 @@ export function UserProfileSidebarContainer({
       onClose={onClose}
       onBack={onBack}
       toggleChatSidebar={toggleChatSidebar}
+      performConditionalSignIn={performConditionalSignIn}
+      onCloseDialog={onCloseDialog}
+      showNonHistoriedDialog={showNonHistoriedDialog}
+      onSelectPerson={onSelectPerson}
+      store={store}
+      mediaSearchStore={mediaSearchStore}
+      signedIn={signedIn}
     />
   );
 }
-export function getUrl(avatarGlb) {
-  return new Promise(function(resolve, reject) {
-    const params = {
-      model: avatarGlb,
-      scene: "halfbody-portrait-v1",
-      armature: "ArmatureTargetMale",
-      blendShapes: {}
-    };
-    const http = new XMLHttpRequest();
-    http.open("POST", "https://render.readyplayer.me/render");
-    http.setRequestHeader("Content-type", "application/json");
-    http.send(JSON.stringify(params));
-    http.onload = function() {
-      // Do whatever with response
-      let str = http.responseText;
-      str = str.replace('{"renders":[', "");
-      str = str.replace("]}", "");
-      resolve(str);
-    };
-  });
-}
+
 UserProfileSidebarContainer.propTypes = {
+  mySessionId:PropTypes.string,
   user: PropTypes.object.isRequired,
-  imgTab: PropTypes.array,
   hubChannel: PropTypes.object,
+  presences:PropTypes.object,
   performConditionalSignIn: PropTypes.func,
   showBackButton: PropTypes.bool,
   onBack: PropTypes.func,
   onClose: PropTypes.func,
   onCloseDialog: PropTypes.func.isRequired,
   showNonHistoriedDialog: PropTypes.func,
-  toggleChatSidebar: PropTypes.func
+  toggleChatSidebar: PropTypes.func,
+  onSelectPerson: PropTypes.func,
+  store: PropTypes.object.isRequired,
+  mediaSearchStore: PropTypes.object.isRequired,
+  signedIn:PropTypes.func
 };

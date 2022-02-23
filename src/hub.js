@@ -263,6 +263,7 @@ import { ThemeProvider } from "./react-components/styles/theme";
 import { wait } from "./aptero/util/AsyncWaiter";
 import { networkService } from "./aptero/service/NetworkService";
 import { getEntryMode } from "./aptero/util/EntryMode";
+import { msTeams } from "./aptero/util/MsTeams";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -838,7 +839,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   remountUI({
     performConditionalSignIn,
     embed: isEmbed,
-    showPreload: isEmbed && !new URL(window.location.href).searchParams.get("hideui")
+    showPreload: isEmbed && !new URL(window.location.href).searchParams.get("hideui") && !msTeams()
   });
   entryManager.performConditionalSignIn = performConditionalSignIn;
   entryManager.init();

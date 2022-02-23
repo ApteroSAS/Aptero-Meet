@@ -40,4 +40,16 @@
     align-items: center;
     border-radius: 50%;
   }
+  .closeBtn{
+    position: absolute;
+    margin-top: -33px;
+    margin-left: 19px;
+    background: #E7E4E4;
+    border: 2px solid;
+    border-radius: 46%;
+  }
+ .closeBtn svg{
+   height: 12px;
+   width: 12px;
+ }
 

@@ -14,7 +14,11 @@ let turnRightKey = "E";
 // TODO The API to map from physical key to character is experimental. Depending on prospects of this getting wider
 // implimentation we may want to cook up our own polyfill based on observing key inputs
 // edit : added iframe testing before asking for keyboard in order to fix "getLayoutMap() must be called from a top-level browsing context." error
-if (( window.location == window.parent.location ) && window.navigator.keyboard !== undefined && window.navigator.keyboard.getLayoutMap) {
+if (
+  window.location == window.parent.location &&
+  window.navigator.keyboard !== undefined &&
+  window.navigator.keyboard.getLayoutMap
+) {
   window.navigator.keyboard.getLayoutMap().then(function(map) {
     moveKeys = `${map.get("KeyW") || "W"} ${map.get("KeyA") || "A"} ${map.get("KeyS") || "S"} ${map.get("KeyD") ||
       "D"}`.toUpperCase();
@@ -80,25 +84,19 @@ export function TipContainer({ hide, inLobby, inRoom, isStreaming, isEmbedded, s
   const [embeddedTipDismissed, setEmbeddedTipDismissed] = useState(false);
   const [onboardingTipId, setOnboardingTipId] = useState(null);
 
-  const onSkipOnboarding = useCallback(
-    () => {
-      scene.systems.tips.skipTips();
-    },
-    [scene]
-  );
+  const onSkipOnboarding = useCallback(() => {
+    scene.systems.tips.skipTips();
+  }, [scene]);
 
-  useEffect(
-    () => {
-      function onSceneTipChanged({ detail: tipId }) {
-        setOnboardingTipId(tipId);
-      }
+  useEffect(() => {
+    function onSceneTipChanged({ detail: tipId }) {
+      setOnboardingTipId(tipId);
+    }
 
-      scene.addEventListener("tip-changed", onSceneTipChanged);
+    scene.addEventListener("tip-changed", onSceneTipChanged);
 
-      setOnboardingTipId(scene.systems.tips.activeTip);
-    },
-    [scene]
-  );
+    setOnboardingTipId(scene.systems.tips.activeTip);
+  }, [scene]);
 
   const discordBridges = presences ? discordBridgesForPresences(presences) : [];
   const isBroadcasting = discordBridges.length > 0;

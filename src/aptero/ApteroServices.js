@@ -99,7 +99,9 @@ export class ApteroServices {
   }
 
   async onEnterRoom() {
-    await wait(()=>{return AFRAME && AFRAME.scenes && AFRAME.scenes[0] && AFRAME.scenes[0].systems});
+    await wait(() => {
+      return AFRAME && AFRAME.scenes && AFRAME.scenes[0] && AFRAME.scenes[0].systems;
+    });
     await setlistenerEndShareVideo();
     await roomParameters.applyRoomParameters();
     aptLogger.setUserId(window.APP.store.credentialsAccountId);
