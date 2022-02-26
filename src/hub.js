@@ -263,7 +263,7 @@ import { ThemeProvider } from "./react-components/styles/theme";
 import { wait } from "./aptero/util/AsyncWaiter";
 import { networkService } from "./aptero/service/NetworkService";
 import { getEntryMode } from "./aptero/util/EntryMode";
-import { msTeams } from "./aptero/util/MsTeams";
+import { msTeams } from "./aptero/service/MicrosoftIntegration/MsTeams";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -534,7 +534,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data,
 
   // Turn off NAF for embeds as an optimization, so the user's browser isn't getting slammed
   // with NAF traffic on load.
-  if (isEmbed) {
+  if (isEmbed && !msTeams()) {
     hubChannel.allowNAFTraffic(false);
   }
 
@@ -653,8 +653,8 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data,
     window.APP.hub = hub;
     updateUIForHub(hub, hubChannel);
     scene.emit("hub_updated", { hub });
-
-    if (!isEmbed || new URL(window.location.href).searchParams.get("hideui")) {
+    const hideui = new URL(window.location.href).searchParams.get("hideui");
+    if (!isEmbed || hideui || msTeams()) {
       loadEnvironmentAndConnect();
     } else {
       remountUI({
@@ -835,11 +835,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       SignInMessages.changeScene
     );
   });
-
+  const hideui = new URL(window.location.href).searchParams.get("hideui");
   remountUI({
     performConditionalSignIn,
     embed: isEmbed,
-    showPreload: isEmbed && !new URL(window.location.href).searchParams.get("hideui") && !msTeams()
+    showPreload: isEmbed && !hideui && !msTeams()
   });
   entryManager.performConditionalSignIn = performConditionalSignIn;
   entryManager.init();

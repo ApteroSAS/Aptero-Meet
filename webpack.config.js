@@ -277,10 +277,11 @@ module.exports = async (env, argv) => {
     },
     devtool: argv.mode === "production" ? "source-map" : "source-map",
     devServer: {
-      https: createHTTPSConfig(),
+      https: createHTTPSConfig(),//Comment for ngrok http 8080
       host: "0.0.0.0",
       public: `${host}:8080`,
       useLocalIp: true,
+      disableHostCheck: true,
       allowedHosts: [host, "localhost"],
       headers: {
         "Access-Control-Allow-Origin": "*"

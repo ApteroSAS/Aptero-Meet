@@ -1,4 +1,4 @@
-import { msTeams } from "./MsTeams";
+import { msTeams } from "../service/MicrosoftIntegration/MsTeams";
 
 const qs = new URLSearchParams(location.search);
 

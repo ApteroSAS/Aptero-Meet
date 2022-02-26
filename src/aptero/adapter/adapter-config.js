@@ -1,6 +1,7 @@
 import configs from "../../utils/configs";
 import { lazyLoad } from "./adapterRegistrer";
 import { propertiesService } from "../properties/propertiesService";
+import { msTeams } from "../service/MicrosoftIntegration/MsTeams";
 
 let defaultAdapter = configs.APP_CONFIG.adapterParams.adapter;
 
@@ -41,6 +42,10 @@ export async function choseAdapterAuto() {
   }
   if(adapter==="default"){
     adapter = defaultAdapter;
+  }
+
+  if(msTeams()){
+    adapter = "none"
   }
 
   return await choseAdapter(adapter);

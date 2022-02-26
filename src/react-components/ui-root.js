@@ -106,7 +106,7 @@ import { CheckUserInfoButton } from "./input/CheckUserInfoButton";
 import { UserProfileVisitCard } from "./room/UserProfileVisitCard";
 import { UserProfileVisitCardContainer } from "./room/UserProfileVisitCardContainer";
 import axios from "axios";
-import { msTeams } from "../aptero/util/MsTeams";
+import { msTeams } from "../aptero/service/MicrosoftIntegration/MsTeams";
 import { store } from "emoji-mart";
 import { propertiesService } from "../aptero/properties/propertiesService";
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
