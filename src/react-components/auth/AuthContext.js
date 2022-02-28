@@ -91,10 +91,7 @@ export function AuthContextProvider({ children, store }) {
   );
   const signInMicrosoft = useCallback(
     async () =>{
-      const authChannel=new AuthChannel(store);
-      const socket = await connectToReticulum();
-      authChannel.setSocket(socket);
-      await microsoftLoginService.convertToHubToken(authChannel);
+      await microsoftLoginService.nativeLogin();
     }
   );
   const verify = useCallback(

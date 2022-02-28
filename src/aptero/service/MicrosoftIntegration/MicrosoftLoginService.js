@@ -3,6 +3,8 @@ import { Component } from "react";
 import { getUserDetails, getUserDetailsBetaV, getUserOrganization, getUserPhoto } from "./MicrosofGraphService";
 import configs from "../../../utils/configs";
 import uuid from "uuid/v4";
+import AuthChannel from "../../../utils/auth-channel";
+import { connectToReticulum } from "../../../utils/phoenix-utils";
 
 export function getScopes(){
   return [
@@ -39,7 +41,7 @@ export class MicrosoftLoginService extends Component {
     //if msteams
     // log using token from msteams
     //if cookie oauth microsoft
-    if (window.APP.store.state.profile.microsoftUser) {
+    if (window.APP.store.state.profile.microsoftUser && !this.accessToken) {
       try {
         //  try silent login
         const account = this.publicClientApplication.getAllAccounts()[0];
@@ -49,6 +51,7 @@ export class MicrosoftLoginService extends Component {
         };
         let authenticationResult = await this.publicClientApplication.acquireTokenSilent(accessTokenRequest);
         this.init(authenticationResult.accessToken);
+        await this.nativeLogin();
       } catch (err) {
         console.error(err);
         // logout Moz to be sync
@@ -120,7 +123,14 @@ export class MicrosoftLoginService extends Component {
     return this.account_type;
   }
 
-  async convertToHubToken(hubChannel) {
+  async nativeLogin() {
+    if(window.APP.store.state.credentials.token){
+      return;
+    }
+    const hubChannel=new AuthChannel(window.APP.store);
+    const socket = await connectToReticulum();
+    hubChannel.setSocket(socket);
+
     let user = this.getUserAccount();
     //const email = user.accountIdentifier + "_" + user.userName+ "_microsoft";
     let email = "";
@@ -180,7 +190,7 @@ export class MicrosoftLoginService extends Component {
 
   async logout() {
     if (window.APP.store.state.profile.microsoftUser) {
-      window.APP.store.store.update({
+      window.APP.store.update({
         profile: {
           email: null,
           phoneNumber: null,
