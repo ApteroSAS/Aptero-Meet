@@ -103,7 +103,7 @@ export function PeopleSidebarContainer({
     if (selectedPerson.id === mySessionId) {
       return (
         <ProfileEntryPanel
-        isSignedIn={iSignedIn}
+          isSignedIn={iSignedIn}
           people={people}
           containerType="sidebar"
           displayNameOverride={displayNameOverride}

@@ -1553,7 +1553,7 @@ export class UIRoot extends Component {
                   <>
                     {!this.state.dialog && renderEntryFlow ? entryDialog : undefined}
                     {!this.props.selectedObject && <CompactMoreMenuButton />}
-                    {(aptGuiVisible && !msTeams()) &&
+                    {(aptGuiVisible) &&
                       (!this.props.selectedObject ||
                         (this.props.breakpoint !== "sm" && this.props.breakpoint !== "md")) && (
                         <ContentMenu>

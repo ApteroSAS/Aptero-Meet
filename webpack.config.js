@@ -262,7 +262,6 @@ module.exports = async (env, argv) => {
       scene: path.join(__dirname, "src", "scene.js"),
       avatar: path.join(__dirname, "src", "avatar.js"),
       link: path.join(__dirname, "src", "link.js"),
-      microsoft: path.join(__dirname, "src", "./aptero/pages/microsoft.js"),
       discord: path.join(__dirname, "src", "discord.js"),
       cloud: path.join(__dirname, "src", "cloud.js"),
       signin: path.join(__dirname, "src", "signin.js"),

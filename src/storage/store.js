@@ -10,8 +10,6 @@ const OAUTH_FLOW_CREDENTIALS_KEY = "ret-oauth-flow-account-credentials";
 const validator = new Validator();
 import { EventTarget } from "event-target-shim";
 import { fetchRandomDefaultAvatarId, generateRandomName } from "../utils/identity.js";
-import { microsoftService } from "../aptero/service/MicrosoftIntegration/MicrosoftService";
-import {microsoftLoginService} from "../aptero/service/MicrosoftIntegration/MicrosoftLoginService";
 
 export const defaultMaterialQualitySetting = (function() {
   const MATERIAL_QUALITY_OPTIONS = ["low", "medium", "high"];

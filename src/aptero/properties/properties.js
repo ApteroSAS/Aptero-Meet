@@ -35,7 +35,8 @@ window.APP_PROPS = {
 
   APP_CONFIG: {
     MICROSOFT_APP_ID: "caafb04c-8c13-4044-92a4-3648f79dc7e3",
-    MICROSOFT_APP_AUTHORITY: "https://login.microsoftonline.com/apteroco.onmicrosoft.com",
+    //MICROSOFT_APP_AUTHORITY: "https://login.microsoftonline.com/apteroco.onmicrosoft.com",
+    MICROSOFT_APP_AUTHORITY:"https://login.microsoftonline.com/common",
     GLOBAL_ASSETS_PATH: "https://hub.aptero.co/data/global/",
     LOGGER:{
       URL:"https://aptero.co/tracking",

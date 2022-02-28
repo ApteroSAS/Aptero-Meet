@@ -90,15 +90,11 @@ export function AuthContextProvider({ children, store }) {
     [store]
   );
   const signInMicrosoft = useCallback(
-    async user=>{
+    async () =>{
       const authChannel=new AuthChannel(store);
       const socket = await connectToReticulum();
       authChannel.setSocket(socket);
-      const user_=microsoftLoginService.getUserAccount();
-      //const { authComplete } = await authChannel.startMicrosoftAuthentication(user);
-      await authChannel.convertToHubToken(user_);
-      //await authComplete;
-      //await checkIsAdmin(socket,store);
+      await microsoftLoginService.convertToHubToken(authChannel);
     }
   );
   const verify = useCallback(

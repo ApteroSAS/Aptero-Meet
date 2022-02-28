@@ -194,7 +194,7 @@ import { sleep } from "./utils/async-utils";
 import { platformUnsupported } from "./support";
 
 //aptero service
-import { microsoftService } from "./aptero/service/MicrosoftIntegration/MicrosoftService";
+import { microsoftUrlService } from "./aptero/service/MicrosoftIntegration/MicrosoftUrlService";
 import { apteroService } from "./aptero/ApteroServices";
 import { roomController } from "./aptero/service/api/RoomController";
 import { minimumQualityService } from "./aptero/service/MinimumQualityService";
@@ -392,7 +392,7 @@ export async function getSceneUrlForHub(hub) {
   }
 
   //aptero
-  await microsoftService.preFetchConvertMicrosoftUrl(sceneUrl);
+  await microsoftUrlService.preFetchConvertMicrosoftUrl(sceneUrl);
 
   if (isLegacyBundle) {
     // Deprecated

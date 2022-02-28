@@ -7,13 +7,13 @@ import { CancelButton, NextButton, ContinueButton, Button } from "../input/Butto
 import { TextInputField } from "../input/TextInputField";
 import { Column } from "../layout/Column";
 import { LegalMessage } from "./LegalMessage";
-import {PublicClientApplication} from "@azure/msal-browser";
-import {microsoftLoginService} from "../../aptero/service/MicrosoftIntegration/MicrosoftLoginService";
+import { PublicClientApplication } from "@azure/msal-browser";
+import { microsoftLoginService } from "../../aptero/service/MicrosoftIntegration/MicrosoftLoginService";
 
 export const SignInStep = {
   submit: "submit",
   waitForVerification: "waitForVerification",
-  WaitForMicrosoftVerification:"WaitForMicrosoftVerification:",
+  WaitForMicrosoftVerification: "WaitForMicrosoftVerification:",
   complete: "complete"
 };
 
@@ -80,12 +80,12 @@ export const SignInMessages = defineMessages({
   }
 });
 
-export function SubmitEmail({ onSubmitEmail,onSubmitEmailMicrosoftLogin, initialEmail, privacyUrl, termsUrl, message }) {
-  
+export function SubmitEmail({ onSubmitEmail, onSubmitEmailMicrosoftLogin, initialEmail, privacyUrl, termsUrl, message }) {
+
   const intl = useIntl();
 
   const [email, setEmail] = useState(initialEmail);
-  var img="";
+  var img = "";
 
   const onSubmitForm = useCallback(
     e => {
@@ -97,24 +97,22 @@ export function SubmitEmail({ onSubmitEmail,onSubmitEmailMicrosoftLogin, initial
   const onSubmitEmailMicrosoft = useCallback(
     e => {
       e.preventDefault();
-      try{
-        microsoftLoginService.login().then(()=>{
-          const user= microsoftLoginService.getUserAccount();
-          if(user)
-          {
+      try {
+        microsoftLoginService.login().then(() => {
+          const user = microsoftLoginService.getUserAccount();
+          if (user) {
             onSubmitEmailMicrosoftLogin(user);
           }
-         
+
         });
+      } catch (error) {
+        console.log("erreur is ", error);
       }
-      catch (error){
-        console.log("erreur is ",error);
-      }
-    
+
     },
     [onSubmitEmailMicrosoftLogin]
   );
-  
+
 
   const onChangeEmail = useCallback(
     e => {
@@ -130,7 +128,7 @@ export function SubmitEmail({ onSubmitEmail,onSubmitEmailMicrosoftLogin, initial
         {message ? (
           intl.formatMessage(message)
         ) : (
-          <FormattedMessage id="sign-in-modal.prompt" defaultMessage="Please Sign In" />
+          <FormattedMessage id="sign-in-modal.prompt" defaultMessage="Please Sign In"/>
         )}
       </p>
       <TextInputField
@@ -143,14 +141,14 @@ export function SubmitEmail({ onSubmitEmail,onSubmitEmailMicrosoftLogin, initial
       />
       <p>
         <small>
-          <LegalMessage termsUrl={termsUrl} privacyUrl={privacyUrl} />
+          <LegalMessage termsUrl={termsUrl} privacyUrl={privacyUrl}/>
         </small>
       </p>
-      <NextButton type="submit" />
+      <NextButton type="submit"/>
       <Button preset="basic" onClick={onSubmitEmailMicrosoft}>
-        <FormattedMessage id="sign-in-with-teams" defaultMessage="Sign in with teams" />
-        </Button>
-        <img src={img}></img>
+        <FormattedMessage id="sign-in-with-teams" defaultMessage="Sign in with teams"/>
+      </Button>
+      <img src={img}></img>
     </Column>
   );
 }
@@ -165,7 +163,7 @@ SubmitEmail.propTypes = {
   privacyUrl: PropTypes.string,
   initialEmail: PropTypes.string,
   onSubmitEmail: PropTypes.func.isRequired,
-  onSubmitEmailMicrosoftLogin:PropTypes.func
+  onSubmitEmailMicrosoftLogin: PropTypes.func
 };
 
 export function WaitForVerification({ email, onCancel, showNewsletterSignup }) {
@@ -185,14 +183,14 @@ export function WaitForVerification({ email, onCancel, showNewsletterSignup }) {
               id="sign-in-modal.newsletter-signup-question"
               defaultMessage="Want Hubs news sent to your inbox?"
             />
-            <br />
+            <br/>
             <a href="https://eepurl.com/gX_fH9" target="_blank" rel="noopener noreferrer">
-              <FormattedMessage id="sign-in-modal.newsletter-signup-link" defaultMessage="Subscribe for updates" />
+              <FormattedMessage id="sign-in-modal.newsletter-signup-link" defaultMessage="Subscribe for updates"/>
             </a>
           </small>
         </p>
       )}
-      <CancelButton onClick={onCancel} />
+      <CancelButton onClick={onCancel}/>
     </Column>
   );
 }
@@ -203,7 +201,7 @@ WaitForVerification.propTypes = {
   onCancel: PropTypes.func.isRequired
 };
 
-export function WaitForMicrosoftVerification({onCancel}) {
+export function WaitForMicrosoftVerification({ onCancel }) {
   console.log("WaitForMicrosoftVerification");
   return (
     <Column center padding>
@@ -211,13 +209,15 @@ export function WaitForMicrosoftVerification({onCancel}) {
         id="sign-in-modal.wait-for-microsoft-verification"
         defaultMessage="Please wait until we authenticate you."
       />
-     <CancelButton onClick={onCancel} />
+      <CancelButton onClick={onCancel}/>
     </Column>
   );
 }
+
 WaitForMicrosoftVerification.propTypes = {
   onCancel: PropTypes.func.isRequired
 };
+
 export function SignInComplete({ message, onContinue }) {
   console.log("SignInComplete");
   const intl = useIntl();
@@ -229,11 +229,11 @@ export function SignInComplete({ message, onContinue }) {
           {message ? (
             intl.formatMessage(message)
           ) : (
-            <FormattedMessage id="sign-in-modal.complete" defaultMessage="You are now signed in." />
+            <FormattedMessage id="sign-in-modal.complete" defaultMessage="You are now signed in."/>
           )}
         </b>
       </p>
-      <ContinueButton onClick={onContinue} />
+      <ContinueButton onClick={onContinue}/>
     </Column>
   );
 }
@@ -244,13 +244,12 @@ SignInComplete.propTypes = {
 };
 
 
-
 export function SignInModal({ closeable, onClose, children, ...rest }) {
 
   return (
     <Modal
-      title={<FormattedMessage id="sign-in-modal.title" defaultMessage="Sign In" />}
-      beforeTitle={closeable && <CloseButton onClick={onClose} />}
+      title={<FormattedMessage id="sign-in-modal.title" defaultMessage="Sign In"/>}
+      beforeTitle={closeable && <CloseButton onClick={onClose}/>}
       {...rest}
     >
       {children}
