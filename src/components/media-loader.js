@@ -357,7 +357,7 @@ AFRAME.registerComponent("media-loader", {
     }
     const srcChanged = oldData.src !== src;
     const versionChanged = !!(oldData.version && oldData.version !== version);
-    await microsoftUrlService.preFetchConvertMicrosoftUrl(src);
+    src = await microsoftUrlService.preFetchConvertMicrosoftUrl(src);//APTERO
 
     if (versionChanged) {
       this.el.emit("media_refreshing");

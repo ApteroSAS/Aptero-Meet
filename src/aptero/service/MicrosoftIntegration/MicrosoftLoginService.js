@@ -1,11 +1,11 @@
 import { PublicClientApplication } from "@azure/msal-browser";
 import { Component } from "react";
-import { getUserDetails, getUserDetailsBetaV, getUserOrganization, getUserPhoto } from "./MicrosofGraphService";
 import configs from "../../../utils/configs";
 import uuid from "uuid/v4";
 import AuthChannel from "../../../utils/auth-channel";
 import { connectToReticulum } from "../../../utils/phoenix-utils";
 import { msTeams, msTeamsInitOkRequestAuthToken, requestAuthToken } from "./MsTeams";
+import { MicrosoftGraphService } from "./MicrosoftGraphService";
 
 export function getScopes(){
   return [
@@ -20,6 +20,7 @@ export class MicrosoftLoginService extends Component {
   accessToken = null;
   profilePicture = "";
   account_type = null;
+  msGraphService = new MicrosoftGraphService();
 
   constructor(props) {
     super(props);
@@ -73,12 +74,13 @@ export class MicrosoftLoginService extends Component {
   async init(token) {
     console.log("microsoft login toke:" + token);
     this.accessToken = token;
-    this.user = await getUserDetails(this.accessToken);
-    const user_beta = await getUserDetailsBetaV(this.accessToken);
+    this.msGraphService.setToken(this.accessToken);
+    this.user = await this.msGraphService.getUserDetails();
+    const user_beta = await this.msGraphService.getUserDetailsBetaV();
     this.account_type = user_beta.account[0].source.type[0];
-    this.organization = await getUserOrganization(this.accessToken, this.account_type);
+    this.organization = await this.msGraphService.getUserOrganization(this.account_type);
     this.profilePicture = "";
-    this.profilePicture = await getUserPhoto(this.accessToken);
+    this.profilePicture = await this.msGraphService.getUserPhoto();
 
     const user = this.getUserAccount();
     const companyName = this.getCompanyName();
