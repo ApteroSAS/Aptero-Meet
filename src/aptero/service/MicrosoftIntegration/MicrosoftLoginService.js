@@ -5,6 +5,7 @@ import configs from "../../../utils/configs";
 import uuid from "uuid/v4";
 import AuthChannel from "../../../utils/auth-channel";
 import { connectToReticulum } from "../../../utils/phoenix-utils";
+import { msTeams, msTeamsInitOkRequestAuthToken, requestAuthToken } from "./MsTeams";
 
 export function getScopes(){
   return [
@@ -41,6 +42,14 @@ export class MicrosoftLoginService extends Component {
     //if msteams
     // log using token from msteams
     //if cookie oauth microsoft
+    if(msTeams()){
+      const atCallback = (accessToken)=>{
+        this.init(accessToken.token);
+        this.nativeLogin();
+      };
+      msTeamsInitOkRequestAuthToken(atCallback);//in case of passive login before ms bridge established
+      requestAuthToken(atCallback);//in case of passive login after ms bridge established
+    }
     if (window.APP.store.state.profile.microsoftUser && !this.accessToken) {
       try {
         //  try silent login

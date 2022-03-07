@@ -1,82 +1,72 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import UserProfileVisitCard from "./UserProfileVisitCard";
-import axios from "axios";
-import { getProfileList ,getAvatarPreview} from "./../ui-root";
+import { getProfileList } from "./../ui-root";
 import { usePeopleList } from "./PeopleSidebarContainer";
 // get the profile of the selected user
-var profileList=[];
-var displayName_user="";
-var email="";
-var jobTitle="";
-var companyName="";
-var phoneNumber="";
-var profilePicture="";
+let profileList = [];
+let email = "";
+let jobTitle = "";
+let companyName = "";
+let phoneNumber = "";
+let profilePicture = "";
+
 export function UserProfileVisitCardContainer({
-  mySessionId,
-  presences,
-  userId,
-  hubChannel,
-  performConditionalSignIn,
-  onClose,
-  onCloseDialog,
-  toggleChatSidebar,
-  showNonHistoriedDialog,
-  onSelectPerson,
-  store,
-  mediaSearchStore,
-  displayName,
-  signedIn
-  
-}) {
-    var iSignedIn=false;
-    const people = usePeopleList(presences, mySessionId);
-    const selectedPerson = people.find(person => person.id === userId);
-    profileList=getProfileList();
-    var selectedPersonProfile=null;
-    profileList.map((profile)=>{
-        if(profile.userId==userId)
-        {
-            selectedPersonProfile=profile;     
-        }
-    });
-    if(selectedPersonProfile!=null)
-    {
-        displayName_user=selectedPersonProfile.displayName;
-        email=selectedPersonProfile.email;
-        jobTitle=selectedPersonProfile.jobTitle;
-        companyName=selectedPersonProfile.companyName;
-        phoneNumber=selectedPersonProfile.phoneNumber; 
-        if(selectedPersonProfile.microsoftUserprofilePicture)
-        {
-          profilePicture=selectedPersonProfile.microsoftUserprofilePicture; 
-        }
-        else{
-          profilePicture=selectedPersonProfile.profilePicture; 
-        }
-        
+                                                mySessionId,
+                                                presences,
+                                                userId,
+                                                hubChannel,
+                                                performConditionalSignIn,
+                                                onClose,
+                                                onCloseDialog,
+                                                toggleChatSidebar,
+                                                showNonHistoriedDialog,
+                                                onSelectPerson,
+                                                store,
+                                                mediaSearchStore,
+                                                displayName,
+                                                signedIn
+
+                                              }) {
+  let iSignedIn = false;
+  const people = usePeopleList(presences, mySessionId);
+  const selectedPerson = people.find(person => person.id === userId);
+  profileList = getProfileList();
+  let selectedPersonProfile = null;
+  profileList.map((profile) => {
+    if (profile.userId === userId) {
+      selectedPersonProfile = profile;
     }
-    
-    if(selectedPerson){
-      displayName_user=selectedPerson.profile.displayName;
-      email=selectedPerson.profile.email;
-      jobTitle=selectedPerson.profile.jobTitle;
-      companyName=selectedPerson.profile.companyName;
-      phoneNumber=selectedPerson.profile.phoneNumber;
-      if(selectedPerson.profile.microsoftUserprofilePicture)
-      {
-        profilePicture=selectedPerson.profile.microsoftUserprofilePicture;  
-      }
-      else{
-        profilePicture=selectedPerson.profile.profilePicture;  
-      }
-      
+  });
+  if (selectedPersonProfile != null) {
+    email = selectedPersonProfile.email;
+    jobTitle = selectedPersonProfile.jobTitle;
+    companyName = selectedPersonProfile.companyName;
+    phoneNumber = selectedPersonProfile.phoneNumber;
+    if (selectedPersonProfile.microsoftUserprofilePicture) {
+      profilePicture = selectedPersonProfile.microsoftUserprofilePicture;
+    } else {
+      profilePicture = selectedPersonProfile.profilePicture;
     }
-    if(selectedPerson)
-    {
-      iSignedIn=selectedPerson.roles.signed_in;
+
+  }
+
+  if (selectedPerson) {
+    email = selectedPerson.profile.email;
+    jobTitle = selectedPerson.profile.jobTitle;
+    companyName = selectedPerson.profile.companyName;
+    phoneNumber = selectedPerson.profile.phoneNumber;
+    if (selectedPerson.profile.microsoftUserprofilePicture) {
+      profilePicture = selectedPerson.profile.microsoftUserprofilePicture;
+    } else {
+      profilePicture = selectedPerson.profile.profilePicture;
     }
-    
+
+  }
+  if (selectedPerson) {
+    iSignedIn = selectedPerson.roles.signed_in;
+  }
+
   return (
     <UserProfileVisitCard
       isSignedIn={iSignedIn}
@@ -116,10 +106,10 @@ export function UserProfileVisitCardContainer({
 }
 
 UserProfileVisitCardContainer.propTypes = {
-  presences:PropTypes.object,
-  mySessionId:PropTypes.string,
+  presences: PropTypes.object,
+  mySessionId: PropTypes.string,
   userId: PropTypes.string,
-  store:PropTypes.object,
+  store: PropTypes.object,
   hubChannel: PropTypes.object,
   performConditionalSignIn: PropTypes.func,
   showBackButton: PropTypes.bool,
@@ -130,6 +120,6 @@ UserProfileVisitCardContainer.propTypes = {
   toggleChatSidebar: PropTypes.func,
   onSelectPerson: PropTypes.func,
   mediaSearchStore: PropTypes.object.isRequired,
-  displayName:PropTypes.string,
-  signedIn:PropTypes.func
+  displayName: PropTypes.string,
+  signedIn: PropTypes.func
 };

@@ -8,7 +8,6 @@ import { AvatarSetupModal } from "./room/AvatarSetupModal";
 import AvatarPreview from "./avatar-preview";
 import axios from "axios";
 import { propertiesService } from "../aptero/properties/propertiesService";
-import { changeSelectedUser } from "../aptero/service/MicrosoftIntegration/MsTeams";
 
 export default class ProfileEntryPanel extends Component {
   static propTypes = {
@@ -45,7 +44,6 @@ export default class ProfileEntryPanel extends Component {
   constructor(props) {
     super(props);
     this.state = this.getStateFromProfile();
-    changeSelectedUser(this.props.store.state.profile.email);
     if (!this.props.store.state.profile.microsoftUser && this.props.isSignedIn) {
       this.getUserProfile();
     }
@@ -237,7 +235,6 @@ export default class ProfileEntryPanel extends Component {
     }
     this.scene.removeEventListener("action_selected_media_result_entry", this.setAvatarFromMediaResult);
     this.scene.removeEventListener("action_avatar_saved", this.refetchAvatar);
-    changeSelectedUser("")//clear the selected user
   }
 
   refetchAvatar = async () => {
