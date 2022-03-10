@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import { ToolbarButton } from "./ToolbarButton";
 import "./PrivatchatBubbles.scss";
 import { ReactComponent as PeopleIcon } from "../icons/People.svg";
-import { CloseButton } from "./CloseButton";
+import { ChatCloseButton } from "./ChatCloseButton";
 export function PrivatechatBubbles({ receivedMessageNumber, onClick, imgUrl, bulle_id,onDelete}) {
   if (bulle_id == "everyone") {
     return (
@@ -20,7 +20,7 @@ export function PrivatechatBubbles({ receivedMessageNumber, onClick, imgUrl, bul
         <img src={imgUrl} className="img"></img>
         {receivedMessageNumber != 0 && <span className="icon-button-badge">{receivedMessageNumber}</span>}
         </button>
-        {receivedMessageNumber==0 && <CloseButton onClick={onDelete} className="closeBtn"></CloseButton>}
+        {receivedMessageNumber==0 && <ChatCloseButton onClick={onDelete} className="closeBtn"></ChatCloseButton>}
       </div>
     );
   }
