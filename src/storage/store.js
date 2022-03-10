@@ -53,7 +53,7 @@ export const SCHEMA = {
         description: { type: "string" },
         profilePicture:{type:"string"},
         microsoftUserprofilePicture:{type:"string"},
-        microsoftUser:{type:"bool"},
+        microsoftUser:{type:"string"},
         // personalAvatarId is obsolete, but we need it here for backwards compatibility.
         personalAvatarId: { type: "string" }
       }

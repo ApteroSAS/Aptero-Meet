@@ -44,8 +44,12 @@ export async function msTeamsInitOkRequestAuthToken(callback){
   })
 }
 
-export function changeSelectedUser(email){
+export function changeSelectedUserByMail(email){
     sendIframeMessage(CHANGE_USER,{email});
+}
+
+export function changeSelectedUserByUID(msUserID){
+  sendIframeMessage(CHANGE_USER,{uid:msUserID});
 }
 
 export function changeUrlSettings(url){

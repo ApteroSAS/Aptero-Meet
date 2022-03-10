@@ -6,13 +6,7 @@ export default class AuthChannel {
     this.store = store;
     this.socket = null;
     this._signedIn = !!this.store.state.credentials.token;
-    microsoftLoginService.passiveLogin(async () => {
-      try {
-        await this.signOut();
-      } catch (e) {
-        console.warn("unable to logout");
-      }
-    });
+    microsoftLoginService.passiveLogin();
   }
 
   setSocket = socket => {

@@ -39,7 +39,7 @@ export class MicrosoftLoginService extends Component {
     });
   }
 
-  async passiveLogin(onLogOutRequest) {
+  async passiveLogin() {
     //if msteams
     // log using token from msteams
     //if cookie oauth microsoft
@@ -66,7 +66,7 @@ export class MicrosoftLoginService extends Component {
         console.error(err);
         // logout Moz to be sync
         //this.store.state.profile.microsoftUser = false; //will be done by the logout/signout
-        onLogOutRequest();
+        //onLogOutRequest(); TODO this cause issue with a logout popup always showing up at page loading
       }
     }
   }
@@ -93,7 +93,7 @@ export class MicrosoftLoginService extends Component {
         jobTitle: user.jobTitle,
         companyName: companyName,
         microsoftUserprofilePicture: profilePicture,
-        microsoftUser: true
+        microsoftUser: user.id
       }, activity: { hasChangedName: true, hasChangedPicture: true }
     });
   }
@@ -192,7 +192,7 @@ export class MicrosoftLoginService extends Component {
         jobTitle: user.jobTitle,
         companyName: companyName,
         microsoftUserprofilePicture: profilePicture,
-        microsoftUser: true
+        microsoftUser: user.id
       }, activity: { hasChangedName: true, hasChangedPicture: true }
     });
 
@@ -208,7 +208,7 @@ export class MicrosoftLoginService extends Component {
           jobTitle: null,
           companyName: null,
           microsoftUserprofilePicture: null,
-          microsoftUser: false
+          microsoftUser: null
         }, activity: { hasChangedName: false, hasChangedPicture: false }
       });
       return this.publicClientApplication.logoutPopup();
