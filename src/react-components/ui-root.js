@@ -343,6 +343,9 @@ export class UIRoot extends Component {
           }
         })
     });
+    this.props.scene.addEventListener('avatarClick',e=>{
+    this.setSidebar("display_user_panel", { selectedUserId: e.detail})
+    });
   
     this.props.scene.addEventListener("avatarChanged", e => {
       console.log("has changed avatar");
@@ -890,6 +893,7 @@ export class UIRoot extends Component {
   pushHistoryState = (k, v) => pushHistoryState(this.props.history, k, v);
 
   setSidebar(sidebarId, otherState) {
+    
     this.setState({ sidebarId, selectedUserId: null, ...otherState });
   }
 
@@ -1098,11 +1102,12 @@ export class UIRoot extends Component {
     const micPresences = getMicrophonePresences();
     return userFromPresence(selectedUserId, presence, micPresences, this.props.sessionId);
   }
+
   getSelectedId() {
     const selectedUserId = this.state.selectedUserId;
     return selectedUserId;
   }
-
+  
   render() {
     const isGhost =
       configs.feature("enable_lobby_ghosts") && (this.state.watching || this.state.hide || this.props.hide);
@@ -1649,7 +1654,6 @@ export class UIRoot extends Component {
                       )}
                       {this.state.sidebarId === "profile" && (
                         <ProfileEntryPanel
-                       
                           history={this.props.history}
                           containerType="sidebar"
                           displayNameOverride={displayNameOverride}
@@ -1667,6 +1671,30 @@ export class UIRoot extends Component {
                           onCloseDialog={() => this.closeDialog()}
                           toggleSidebar={(type)=>this.toggleSidebar(type)}
                           showNonHistoriedDialog={this.showNonHistoriedDialog}
+                        />
+                      )}
+                      
+                      {this.state.sidebarId === "display_user_panel" && (
+                        <UserProfileSidebarContainer
+                          user={this.getSelectedUser()}
+                          performConditionalSignIn={this.props.performConditionalSignIn}
+                          onClose={() => this.setSidebar(null)}
+                          onCloseDialog={() => this.closeDialog()}
+                          toggleSidebar={(type)=>this.toggleSidebar(type)}
+                          showNonHistoriedDialog={this.showNonHistoriedDialog}
+                          signedIn={()=>this.showContextualSignInDialog()}
+                          signedInMicorsoft={()=>this.showContextualMicrosoftSignInDialog()}
+                          displayNameOverride={displayNameOverride}
+                          store={this.props.store}
+                          mediaSearchStore={this.props.mediaSearchStore}
+                          hubChannel={this.props.hubChannel}
+                          history={this.props.history}
+                          mySessionId={this.props.sessionId}
+                          presences={this.props.presences}
+                          onClose={() => this.setSidebar(null)}
+                          onCloseDialog={() => this.closeDialog()}
+                          performConditionalSignIn={this.props.performConditionalSignIn}
+                          toggleChatSidebar={(type, userid,onBack) => this.toggleSidebar(type, userid,onBack)}
                         />
                       )}
                          {this.state.sidebarId === "cardVisit" && (

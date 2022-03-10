@@ -136,6 +136,10 @@
                                 hand-pose__left
                                 hand-pose__right
                                 networked-audio-analyser
+                                class="interactable"
+                                identity-name-click
+                                is-remote-hover-target
+                                tags="singleActionButton: true;"
                             ></a-entity>
                         </template>
 
@@ -144,11 +148,10 @@
                                 <a-entity
                                     billboard
                                     class="nametag interactable"
-                                    identity-name-click
-                                    mixin="rounded-text-button"
+                                   
                                     text="side: double; align: center; color: #ddd"
                                     text="value: name; anchor: center; align: center; color: #ccc; letterSpacing: 4; width: 2.5;"
-                                    position="0 -1 0"
+                                    position="0 1 0"
                                     is-remote-hover-target
                                     tags="singleActionButton: true;"
                                     text-raycast-hack

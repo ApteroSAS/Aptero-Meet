@@ -36,8 +36,8 @@ function ensureAvatarNodes(json) {
 AFRAME.registerComponent("identity-name-click", {
   init() {
     this.onClick = async () => {
-      alert("ici");
-      console.log("click");
+     
+      this.el.sceneEl.emit("avatarClick", this.el.components['networked-audio-analyser'].playerSessionId);
     }
   },
   play() {
@@ -181,11 +181,6 @@ AFRAME.registerComponent("player-info", {
       modBadgeEl.object3D.visible = !this.isRecording && this.isOwner && !infoShouldBeHidden;
     }
   },
-  test()
-  {
-    console.log("jj");
-  },
-
   applyProperties(e) {
     this.applyDisplayName();
     //this.el.addEventListener("click",this.test)
