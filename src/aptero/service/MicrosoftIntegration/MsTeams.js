@@ -7,6 +7,8 @@ export const INIT_OK = "ms-teams-init-ok";
 export const REQUEST_AUTH_TOKEN = "ms-teams-request-auth-token";
 export const AUTH_TOKEN = "ms-teams-auth-token";
 export const CHANGE_USER = "ms-teams-change-selected-user";
+export const CHANGE_SETTINGS_URL = "ms-teams-change-settings-url";
+export const DECLARE_FRAME_SIZE = "ms-teams-declare-frame-size";
 
 export function sendIframeMessage(type, data) {
   if (window.parent) {
@@ -44,6 +46,14 @@ export async function msTeamsInitOkRequestAuthToken(callback){
 
 export function changeSelectedUser(email){
     sendIframeMessage(CHANGE_USER,{email});
+}
+
+export function changeUrlSettings(url){
+  sendIframeMessage(CHANGE_SETTINGS_URL,{url});
+}
+
+export function declareFrameSize(size){
+  sendIframeMessage(DECLARE_FRAME_SIZE,{size});
 }
 
 export function msTeams(){

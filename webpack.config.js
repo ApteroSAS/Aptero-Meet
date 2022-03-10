@@ -256,6 +256,7 @@ module.exports = async (env, argv) => {
       fs: "empty"
     },
     entry: {
+      "microsoft-settings": path.join(__dirname, "src/aptero/page/microsoft", "microsoft-settings.js"),
       support: path.join(__dirname, "src", "support.js"),
       index: path.join(__dirname, "src", "index.js"),
       hub: path.join(__dirname, "src", "hub.js"),
@@ -515,6 +516,15 @@ module.exports = async (env, argv) => {
         analyzerMode: env && env.bundleAnalyzer ? "server" : "disabled"
       }),
       // Each output page needs a HTMLWebpackPlugin entry
+      new HTMLWebpackPlugin({
+        filename: "microsoft-settings.html",
+        template: path.join(__dirname, "src/aptero/page/microsoft", "microsoft-settings.html"),
+        chunks: ["microsoft-settings"],
+        chunksSortMode: "manual",
+        minify: {
+          removeComments: false
+        }
+      }),
       new HTMLWebpackPlugin({
         filename: "index.html",
         template: path.join(__dirname, "src", "index.html"),
