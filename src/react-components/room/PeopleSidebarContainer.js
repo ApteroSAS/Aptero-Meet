@@ -117,6 +117,7 @@ export function PeopleSidebarContainer({
         />
       );
     } else {
+    
       return (
         <UserProfileSidebarContainer
           mySessionId={mySessionId}

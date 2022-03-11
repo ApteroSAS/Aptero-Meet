@@ -43,6 +43,7 @@ export function UserProfileSidebarContainer({
   const mayAddOwner = hubChannel.canOrWillIfCreator("update_roles") && !isOwner && !isCreator;
   const mayRemoveOwner = hubChannel.canOrWillIfCreator("update_roles") && isOwner && !isCreator;
   const [isHidden, setIsHidden] = useState(hubChannel.isHidden(user.id));
+
   useEffect(() => {
     if (avatarId) {
       getAvatarThumbnailUrl(avatarId).then(avatarThumbnailUrl => setAvatarThumbnailUrl(avatarThumbnailUrl));
@@ -176,11 +177,11 @@ UserProfileSidebarContainer.propTypes = {
   showBackButton: PropTypes.bool,
   onBack: PropTypes.func,
   onClose: PropTypes.func,
-  onCloseDialog: PropTypes.func.isRequired,
+  onCloseDialog: PropTypes.func,
   showNonHistoriedDialog: PropTypes.func,
   toggleChatSidebar: PropTypes.func,
   onSelectPerson: PropTypes.func,
-  store: PropTypes.object.isRequired,
-  mediaSearchStore: PropTypes.object.isRequired,
+  store: PropTypes.object,
+  mediaSearchStore: PropTypes.object,
   signedIn:PropTypes.func
 };

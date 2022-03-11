@@ -129,13 +129,17 @@
 
                     <a-entity class="right-controller" matrix-auto-update></a-entity>
 
-                    <a-entity class="model" gltf-model-plus="inflate: true">
+                    <a-entity class="model interactable" gltf-model-plus="inflate: true">
                         <template data-name="AvatarRoot">
                             <a-entity
                                 ik-controller
                                 hand-pose__left
                                 hand-pose__right
                                 networked-audio-analyser
+                                class="interactable"
+                                identity-name-click
+                                is-remote-hover-target
+                                tags="singleActionButton: true;"
                             ></a-entity>
                         </template>
 
@@ -143,19 +147,28 @@
                             <a-entity tags="ignoreSpaceBubble: true;">
                                 <a-entity
                                     billboard
-                                    class="nametag"
+                                    class="nametag interactable"
+                                   
                                     text="side: double; align: center; color: #ddd"
+                                    text="value: name; anchor: center; align: center; color: #ccc; letterSpacing: 4; width: 2.5;"
                                     position="0 1 0"
-                                    scale="6 6 6"
+                                    is-remote-hover-target
+                                    tags="singleActionButton: true;"
+                                    text-raycast-hack
+                                    scale="2 2 2"
                                 ></a-entity>
-                                <a-entity
-                                    billboard
-                                    class="identityName"
-                                    text="side: double; align: center; color: #ddd"
-                                    visibility-while-frozen="withinDistance: 100; requireHoverOnNonMobile: false;"
-                                    position="0 0.8 0"
-                                    scale="3 3 3"
-                                ></a-entity>
+                                <!--<a-entity
+                                        billboard
+                                        identity-name-click
+                                        class="interactable"
+                                        mixin="rounded-button"
+                                        is-remote-hover-target
+                                        tags="singleActionButton: true;"
+                                        text="value: name; anchor: center; align: center; color: #ccc; letterSpacing: 4; width: 2.5;"
+                                        text-raycast-hack
+                                        position="0 1 0"
+                                        scale="3 3 3">
+                                </a-entity>-->
                                 <a-entity
                                     billboard
                                     is-not-remote-hover-target
