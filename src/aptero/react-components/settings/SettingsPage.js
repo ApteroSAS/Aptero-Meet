@@ -195,11 +195,16 @@ export function SettingsPage() {
     const {results: favoriteRooms} = useFavoriteRooms();
     const {results: spokeProject} = useSpokeProject();
 
+    //https://meet.aptero.co/scenes/pywjaKD
+    //https://meet.aptero.co/files/b84ea235-b3cf-4d5c-a3bf-76f89d3f94c1.jpg
+    //https://meet.aptero.co/scenes/ttQn7dJ
+    //https://meet.aptero.co/files/5894d964-620c-4cc9-8376-1f243e5dcae4.jpg
+    //https://meet.aptero.co/scenes/HkZhZjU
+    //https://meet.aptero.co/files/352a32d7-f46f-4b8e-8c7b-555875e624e4.jpg
     const sortedFeaturedScene = [
-        createRoomEntry("room1","EW4e3CG","https://alphahub.aptero.co/files/cb50c02d-585a-4feb-8461-e6d8cd34b656.jpg"),
-        createRoomEntry("room2","EW4e3CG","https://alphahub.aptero.co/files/cb50c02d-585a-4feb-8461-e6d8cd34b656.jpg"),
-        createRoomEntry("room3","EW4e3CG","https://alphahub.aptero.co/files/cb50c02d-585a-4feb-8461-e6d8cd34b656.jpg"),
-        createRoomEntry("room4","EW4e3CG","https://alphahub.aptero.co/files/cb50c02d-585a-4feb-8461-e6d8cd34b656.jpg"),
+        createRoomEntry("Room 1","pywjaKD","https://meet.aptero.co/files/b84ea235-b3cf-4d5c-a3bf-76f89d3f94c1.jpg"),
+        createRoomEntry("Room 2","ttQn7dJ","https://meet.aptero.co/files/5894d964-620c-4cc9-8376-1f243e5dcae4.jpg"),
+        createRoomEntry("Room 3","HkZhZjU","https://meet.aptero.co/files/352a32d7-f46f-4b8e-8c7b-555875e624e4.jpg"),
     ];
     const sortedFavoriteRooms = Array.from(favoriteRooms).sort((a, b) => b.member_count - a.member_count);
     const sortedSpokeProject = Array.from(spokeProject).sort((a, b) => b.member_count - a.member_count);
