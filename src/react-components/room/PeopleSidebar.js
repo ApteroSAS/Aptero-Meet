@@ -104,7 +104,7 @@ export function PeopleSidebar({ people, onSelectPerson, onClose, showMuteAll, on
       }
       beforeTitle={<CloseButton onClick={onClose} />}
       afterTitle={
-        showMuteAll ? (
+        showMuteAll && !msTeams()? (
           <IconButton onClick={onMuteAll}>
             <FormattedMessage id="people-sidebar.mute-all-button" defaultMessage="Mute All" />
           </IconButton>

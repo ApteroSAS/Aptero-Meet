@@ -1273,173 +1273,173 @@ export class UIRoot extends Component {
     const canCloseRoom = this.props.hubChannel && !!this.props.hubChannel.canOrWillIfCreator("close_hub");
     const isModerator = this.props.hubChannel && this.props.hubChannel.canOrWillIfCreator("kick_users") && !isMobileVR;
 
-    const moreMenu = [
+    let moreMenu = [
       {
         id: "user",
         label:
-          "You" +
-          (this.state.signedIn ? ` (Signed in as: ${maskEmail(this.props.store.state.credentials.email)})` : ""),
+            "You" +
+            (this.state.signedIn ? ` (Signed in as: ${maskEmail(this.props.store.state.credentials.email)})` : ""),
         items: [
           this.state.signedIn
-            ? {
+              ? {
                 id: "sign-out",
-                label: <FormattedMessage id="more-menu.sign-out" defaultMessage="Sign Out" />,
+                label: <FormattedMessage id="more-menu.sign-out" defaultMessage="Sign Out"/>,
                 icon: LeaveIcon,
                 onClick: async () => {
                   await this.props.authChannel.signOut(this.props.hubChannel);
-                  this.setState({ signedIn: false });
+                  this.setState({signedIn: false});
                 }
               }
-            : {
+              : {
                 id: "sign-in",
-                label: <FormattedMessage id="more-menu.sign-in" defaultMessage="Sign In" />,
+                label: <FormattedMessage id="more-menu.sign-in" defaultMessage="Sign In"/>,
                 icon: EnterIcon,
                 onClick: () => this.showContextualSignInDialog()
               },
           canCreateRoom && {
             id: "create-room",
-            label: <FormattedMessage id="more-menu.create-room" defaultMessage="Create Room" />,
+            label: <FormattedMessage id="more-menu.create-room" defaultMessage="Create Room"/>,
             icon: AddIcon,
             onClick: () =>
-              this.showNonHistoriedDialog(LeaveRoomModal, {
-                destinationUrl: "/",
-                reason: LeaveReason.createRoom
-              })
+                this.showNonHistoriedDialog(LeaveRoomModal, {
+                  destinationUrl: "/",
+                  reason: LeaveReason.createRoom
+                })
           },
           {
             id: "user-profile",
-            label: <FormattedMessage id="more-menu.profile" defaultMessage="Change Name & Avatar" />,
+            label: <FormattedMessage id="more-menu.profile" defaultMessage="Change Name & Avatar"/>,
             icon: AvatarIcon,
             onClick: () => this.setSidebar("profile")
           },
           {
             id: "favorite-rooms",
-            label: <FormattedMessage id="more-menu.favorite-rooms" defaultMessage="Favorite Rooms" />,
+            label: <FormattedMessage id="more-menu.favorite-rooms" defaultMessage="Favorite Rooms"/>,
             icon: FavoritesIcon,
             onClick: () =>
-              this.props.performConditionalSignIn(
-                () => this.props.hubChannel.signedIn,
-                () => {
-                  showFullScreenIfAvailable();
-                  this.props.mediaSearchStore.sourceNavigateWithNoNav("favorites", "use");
-                },
-                SignInMessages.favoriteRooms
-              )
+                this.props.performConditionalSignIn(
+                    () => this.props.hubChannel.signedIn,
+                    () => {
+                      showFullScreenIfAvailable();
+                      this.props.mediaSearchStore.sourceNavigateWithNoNav("favorites", "use");
+                    },
+                    SignInMessages.favoriteRooms
+                )
           },
           {
             id: "preferences",
             label: "Preferences",
             icon: SettingsIcon,
-            onClick: () => this.setState({ showPrefs: true })
+            onClick: () => this.setState({showPrefs: true})
           }
         ].filter(item => item)
       },
       {
         id: "room",
-        label: <FormattedMessage id="more-menu.room" defaultMessage="Room" />,
+        label: <FormattedMessage id="more-menu.room" defaultMessage="Room"/>,
         items: [
           renderEntryFlow && (enableSpectateVRButton || true) && { //Aptero add enter-device menu
             id: "enter-device",
-            label: <FormattedMessage id="room-entry-modal.enter-on-device-button" defaultMessage="Enter On Device" />,
+            label: <FormattedMessage id="room-entry-modal.enter-on-device-button" defaultMessage="Enter On Device"/>,
             icon: VRIcon,
             onClick: () => this.attemptLink()
           },
           {
             id: "room-info",
-            label: <FormattedMessage id="more-menu.room-info" defaultMessage="Room Info and Settings" />,
+            label: <FormattedMessage id="more-menu.room-info" defaultMessage="Room Info and Settings"/>,
             icon: HomeIcon,
             onClick: () => this.setSidebar("room-info")
           },
           {
             id: "objects",
-            label: <FormattedMessage id="more-menu.objects" defaultMessage="Objects" />,
+            label: <FormattedMessage id="more-menu.objects" defaultMessage="Objects"/>,
             icon: ObjectsIcon,
             onClick: () => this.setSidebar("objects")
           },
           (this.props.breakpoint === "sm" || this.props.breakpoint === "md" || true) &&//Aptero for the '|| to force render of invite'
-            this.props.hub &&
-            (this.props.hub.entry_mode !== "invite" || this.props.hubChannel.can("update_hub")) && {
-              id: "invite",
-              label: <FormattedMessage id="more-menu.invite" defaultMessage="Invite" />,
-              icon: InviteIcon,
-              onClick: () => console.log(document.querySelector("."+ styles.inviteButtonContainer).click())
-              // this.props.scene.emit("action_invite")
-            },
+          this.props.hub &&
+          (this.props.hub.entry_mode !== "invite" || this.props.hubChannel.can("update_hub")) && {
+            id: "invite",
+            label: <FormattedMessage id="more-menu.invite" defaultMessage="Invite"/>,
+            icon: InviteIcon,
+            onClick: () => console.log(document.querySelector("." + styles.inviteButtonContainer).click())
+            // this.props.scene.emit("action_invite")
+          },
           this.isFavorited()
-            ? {
+              ? {
                 id: "unfavorite-room",
-                label: <FormattedMessage id="more-menu.unfavorite-room" defaultMessage="Unfavorite Room" />,
+                label: <FormattedMessage id="more-menu.unfavorite-room" defaultMessage="Unfavorite Room"/>,
                 icon: StarIcon,
                 onClick: () => this.toggleFavorited()
               }
-            : {
+              : {
                 id: "favorite-room",
-                label: <FormattedMessage id="more-menu.favorite-room" defaultMessage="Favorite Room" />,
+                label: <FormattedMessage id="more-menu.favorite-room" defaultMessage="Favorite Room"/>,
                 icon: StarOutlineIcon,
                 onClick: () => this.toggleFavorited()
               },
           isModerator &&
-            entered && {
-              id: "streamer-mode",
-              label: streaming ? (
-                <FormattedMessage id="more-menu.exit-streamer-mode" defaultMessage="Exit Streamer Mode" />
-              ) : (
-                <FormattedMessage id="more-menu.enter-streamer-mode" defaultMessage="Enter Streamer Mode" />
-              ),
-              icon: CameraIcon,
-              onClick: () => this.toggleStreamerMode()
-            },
+          entered && {
+            id: "streamer-mode",
+            label: streaming ? (
+                <FormattedMessage id="more-menu.exit-streamer-mode" defaultMessage="Exit Streamer Mode"/>
+            ) : (
+                <FormattedMessage id="more-menu.enter-streamer-mode" defaultMessage="Enter Streamer Mode"/>
+            ),
+            icon: CameraIcon,
+            onClick: () => this.toggleStreamerMode()
+          },
           (this.props.breakpoint === "sm" || this.props.breakpoint === "md") &&
-            entered && {
-              id: "leave-room",
-              label: <FormattedMessage id="more-menu.enter-leave-room" defaultMessage="Leave Room" />,
-              icon: LeaveIcon,
-              onClick: () => {
-                this.showNonHistoriedDialog(LeaveRoomModal, {
-                  destinationUrl: "/",
-                  reason: LeaveReason.leaveRoom
-                });
-              }
-            },
+          entered && {
+            id: "leave-room",
+            label: <FormattedMessage id="more-menu.enter-leave-room" defaultMessage="Leave Room"/>,
+            icon: LeaveIcon,
+            onClick: () => {
+              this.showNonHistoriedDialog(LeaveRoomModal, {
+                destinationUrl: "/",
+                reason: LeaveReason.leaveRoom
+              });
+            }
+          },
           canCloseRoom && {
             id: "close-room",
-            label: <FormattedMessage id="more-menu.close-room" defaultMessage="Close Room" />,
+            label: <FormattedMessage id="more-menu.close-room" defaultMessage="Close Room"/>,
             icon: DeleteIcon,
             onClick: () =>
-              this.props.performConditionalSignIn(
-                () => this.props.hubChannel.can("update_hub"),
-                () => {
-                  this.showNonHistoriedDialog(CloseRoomModal, {
-                    roomName: this.props.hub.name,
-                    onConfirm: () => {
-                      this.props.hubChannel.closeHub();
-                    }
-                  });
-                },
-                SignInMessages.closeRoom
-              )
+                this.props.performConditionalSignIn(
+                    () => this.props.hubChannel.can("update_hub"),
+                    () => {
+                      this.showNonHistoriedDialog(CloseRoomModal, {
+                        roomName: this.props.hub.name,
+                        onConfirm: () => {
+                          this.props.hubChannel.closeHub();
+                        }
+                      });
+                    },
+                    SignInMessages.closeRoom
+                )
           }
         ].filter(item => item)
       },
       {
         id: "support",
-        label: <FormattedMessage id="more-menu.support" defaultMessage="Support" />,
+        label: <FormattedMessage id="more-menu.support" defaultMessage="Support"/>,
         items: [
           configs.feature("show_community_link") && {
             id: "community",
-            label: <FormattedMessage id="more-menu.community" defaultMessage="Community" />,
+            label: <FormattedMessage id="more-menu.community" defaultMessage="Community"/>,
             icon: DiscordIcon,
             href: configs.link("community", "https://discord.gg/dFJncWwHun")
           },
           configs.feature("show_issue_report_link") && {
             id: "report-issue",
-            label: <FormattedMessage id="more-menu.report-issue" defaultMessage="Report Issue" />,
+            label: <FormattedMessage id="more-menu.report-issue" defaultMessage="Report Issue"/>,
             icon: WarningCircleIcon,
             href: configs.link("issue_report", "https://www.aptero.co/docs/help.html")
           },
           entered && {
             id: "start-tour",
-            label: <FormattedMessage id="more-menu.start-tour" defaultMessage="Start Tour" />,
+            label: <FormattedMessage id="more-menu.start-tour" defaultMessage="Start Tour"/>,
             icon: SupportIcon,
             onClick: () => {
               window.open("https://vimeo.com/524816064");
@@ -1448,43 +1448,179 @@ export class UIRoot extends Component {
           },
           configs.feature("show_docs_link") && {
             id: "help",
-            label: <FormattedMessage id="more-menu.help" defaultMessage="Help" />,
+            label: <FormattedMessage id="more-menu.help" defaultMessage="Help"/>,
             icon: SupportIcon,
             href: configs.link("docs", "https://www.aptero.co/docs")
           },
           configs.feature("show_controls_link") && {
             id: "controls",
-            label: <FormattedMessage id="more-menu.controls" defaultMessage="Controls" />,
+            label: <FormattedMessage id="more-menu.controls" defaultMessage="Controls"/>,
             icon: SupportIcon,
             href: configs.link("controls", "https://www.aptero.co/docs/hubs-controls.html")
           },
           configs.feature("show_whats_new_link") && {
             id: "whats-new",
-            label: <FormattedMessage id="more-menu.whats-new" defaultMessage="What's New" />,
+            label: <FormattedMessage id="more-menu.whats-new" defaultMessage="What's New"/>,
             icon: SupportIcon,
             href: "/whats-new"
           },
           configs.feature("show_terms") && {
             id: "tos",
-            label: <FormattedMessage id="more-menu.tos" defaultMessage="Terms of Service" />,
+            label: <FormattedMessage id="more-menu.tos" defaultMessage="Terms of Service"/>,
             icon: TextDocumentIcon,
             href: configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")
           },
           configs.feature("show_privacy") && {
             id: "privacy",
-            label: <FormattedMessage id="more-menu.privacy" defaultMessage="Privacy Notice" />,
+            label: <FormattedMessage id="more-menu.privacy" defaultMessage="Privacy Notice"/>,
             icon: ShieldIcon,
             href: configs.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")
           },
           {
             id: "faq",
-            label: <FormattedMessage id="more-menu.faq" defaultMessage="FAQ" />,
+            label: <FormattedMessage id="more-menu.faq" defaultMessage="FAQ"/>,
             icon: SupportIcon,
             href: configs.link("docs", "https://www.aptero.co/help.html")
           }
         ].filter(item => item)
       }
     ];
+
+    if(msTeams()){
+      moreMenu = [
+        {
+          id: "user",
+          label:
+              "You" +
+              (this.state.signedIn ? ` (Signed in as: ${maskEmail(this.props.store.state.credentials.email)})` : ""),
+          items: [
+            {
+              id: "user-profile",
+              label: <FormattedMessage id="more-menu.profile" defaultMessage="Change Name & Avatar"/>,
+              icon: AvatarIcon,
+              onClick: () => this.setSidebar("profile")
+            },
+            {
+              id: "preferences",
+              label: "Preferences",
+              icon: SettingsIcon,
+              onClick: () => this.setState({showPrefs: true})
+            }
+          ].filter(item => item)
+        },
+        {
+          id: "room",
+          label: <FormattedMessage id="more-menu.room" defaultMessage="Room"/>,
+          items: [
+            renderEntryFlow && (enableSpectateVRButton || true) && { //Aptero add enter-device menu
+              id: "enter-device",
+              label: <FormattedMessage id="room-entry-modal.enter-on-device-button" defaultMessage="Enter On Device"/>,
+              icon: VRIcon,
+              onClick: () => this.attemptLink()
+            },
+            {
+              id: "room-info",
+              label: <FormattedMessage id="more-menu.room-info" defaultMessage="Room Info and Settings"/>,
+              icon: HomeIcon,
+              onClick: () => this.setSidebar("room-info")
+            },
+            {
+              id: "objects",
+              label: <FormattedMessage id="more-menu.objects" defaultMessage="Objects"/>,
+              icon: ObjectsIcon,
+              onClick: () => this.setSidebar("objects")
+            },
+            this.isFavorited()
+                ? {
+                  id: "unfavorite-room",
+                  label: <FormattedMessage id="more-menu.unfavorite-room" defaultMessage="Unfavorite Room"/>,
+                  icon: StarIcon,
+                  onClick: () => this.toggleFavorited()
+                }
+                : {
+                  id: "favorite-room",
+                  label: <FormattedMessage id="more-menu.favorite-room" defaultMessage="Favorite Room"/>,
+                  icon: StarOutlineIcon,
+                  onClick: () => this.toggleFavorited()
+                },
+            isModerator &&
+            entered && {
+              id: "streamer-mode",
+              label: streaming ? (
+                  <FormattedMessage id="more-menu.exit-streamer-mode" defaultMessage="Exit Streamer Mode"/>
+              ) : (
+                  <FormattedMessage id="more-menu.enter-streamer-mode" defaultMessage="Enter Streamer Mode"/>
+              ),
+              icon: CameraIcon,
+              onClick: () => this.toggleStreamerMode()
+            }
+          ].filter(item => item)
+        },
+        {
+          id: "support",
+          label: <FormattedMessage id="more-menu.support" defaultMessage="Support"/>,
+          items: [
+            configs.feature("show_community_link") && {
+              id: "community",
+              label: <FormattedMessage id="more-menu.community" defaultMessage="Community"/>,
+              icon: DiscordIcon,
+              href: configs.link("community", "https://discord.gg/dFJncWwHun")
+            },
+            configs.feature("show_issue_report_link") && {
+              id: "report-issue",
+              label: <FormattedMessage id="more-menu.report-issue" defaultMessage="Report Issue"/>,
+              icon: WarningCircleIcon,
+              href: configs.link("issue_report", "https://www.aptero.co/docs/help.html")
+            },
+            entered && {
+              id: "start-tour",
+              label: <FormattedMessage id="more-menu.start-tour" defaultMessage="Start Tour"/>,
+              icon: SupportIcon,
+              onClick: () => {
+                window.open("https://vimeo.com/524816064");
+                this.props.scene.systems.tips.resetTips();
+              }
+            },
+            configs.feature("show_docs_link") && {
+              id: "help",
+              label: <FormattedMessage id="more-menu.help" defaultMessage="Help"/>,
+              icon: SupportIcon,
+              href: configs.link("docs", "https://www.aptero.co/docs")
+            },
+            configs.feature("show_controls_link") && {
+              id: "controls",
+              label: <FormattedMessage id="more-menu.controls" defaultMessage="Controls"/>,
+              icon: SupportIcon,
+              href: configs.link("controls", "https://www.aptero.co/docs/hubs-controls.html")
+            },
+            configs.feature("show_whats_new_link") && {
+              id: "whats-new",
+              label: <FormattedMessage id="more-menu.whats-new" defaultMessage="What's New"/>,
+              icon: SupportIcon,
+              href: "/whats-new"
+            },
+            configs.feature("show_terms") && {
+              id: "tos",
+              label: <FormattedMessage id="more-menu.tos" defaultMessage="Terms of Service"/>,
+              icon: TextDocumentIcon,
+              href: configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")
+            },
+            configs.feature("show_privacy") && {
+              id: "privacy",
+              label: <FormattedMessage id="more-menu.privacy" defaultMessage="Privacy Notice"/>,
+              icon: ShieldIcon,
+              href: configs.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")
+            },
+            {
+              id: "faq",
+              label: <FormattedMessage id="more-menu.faq" defaultMessage="FAQ"/>,
+              icon: SupportIcon,
+              href: configs.link("docs", "https://www.aptero.co/help.html")
+            }
+          ].filter(item => item)
+        }
+      ];
+    }
     return (
       <MoreMenuContextProvider>
         <ReactAudioContext.Provider value={this.state.audioContext}>
