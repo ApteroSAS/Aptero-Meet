@@ -4,7 +4,7 @@ import configs from "../../../utils/configs";
 import uuid from "uuid/v4";
 import AuthChannel from "../../../utils/auth-channel";
 import { connectToReticulum } from "../../../utils/phoenix-utils";
-import { msTeams, msTeamsInitOkRequestAuthToken, requestAuthToken } from "./MsTeams";
+import { msTeams, msTeamsWaitInit, requestAuthToken, requestUserInfo } from "./MsTeams";
 import { MicrosoftGraphService } from "./MicrosoftGraphService";
 
 export function getScopes(){
@@ -44,12 +44,22 @@ export class MicrosoftLoginService extends Component {
     // log using token from msteams
     //if cookie oauth microsoft
     if(msTeams()){
-      const atCallback = (accessToken)=>{
-        this.init(accessToken.token);
-        this.nativeLogin();
+      const msMeetInit = () => {
+        requestAuthToken((accessToken)=>{
+          this.init(accessToken.token);
+          this.nativeLogin();
+        });
+        requestUserInfo((data)=>{
+          this.initBasic(data);
+          this.nativeLogin();
+        })
       };
-      msTeamsInitOkRequestAuthToken(atCallback);//in case of passive login before ms bridge established
-      requestAuthToken(atCallback);//in case of passive login after ms bridge established
+      msTeamsWaitInit().then(() => {
+        //in case of passive login before ms bridge established
+        msMeetInit();
+      });
+      //in case of passive login after ms bridge established
+      msMeetInit();
     }
     if (window.APP.store.state.profile.microsoftUser && !this.accessToken) {
       try {
@@ -66,9 +76,41 @@ export class MicrosoftLoginService extends Component {
         console.error(err);
         // logout Moz to be sync
         //this.store.state.profile.microsoftUser = false; //will be done by the logout/signout
-        //onLogOutRequest(); TODO this cause issue with a logout popup always showing up at page loading
+        this.accessToken = null;//passive clean of acces token
+        window.APP.store.update({
+          profile: {
+            phoneNumber: null,
+            jobTitle: null,
+            companyName: null,
+            microsoftUserprofilePicture: null,
+            microsoftUser: null
+          }, activity: { hasChangedName: false, hasChangedPicture: false }
+        });
       }
     }
+  }
+
+  async initBasic(basicUserInfo) {
+    if(this.accessToken){
+      return; //if we have an access token that means we are fully authenticated
+    }
+    //in this case we login without a graph token
+    //only this data available {"displayName":"Admin Aptero","objectId":"abb64646-d3e2-473d-8d13-0b6faff23605","preferredUserName":"admin@aptero.co"}
+    this.user = {};
+    this.user.email = basicUserInfo.preferredUserName;
+    this.user.displayName = basicUserInfo.displayName;
+    this.user.id = basicUserInfo.objectId;
+    window.APP.store.update({
+      profile: {
+        email: this.user.email,
+        displayName: this.user.displayName,
+        phoneNumber: null,
+        jobTitle: null,
+        companyName: null,
+        microsoftUserprofilePicture: null,
+        microsoftUser: this.user.id
+      }, activity: { hasChangedName: true, hasChangedPicture: true }
+    });
   }
 
   async init(token) {
@@ -142,20 +184,7 @@ export class MicrosoftLoginService extends Component {
     const socket = await connectToReticulum();
     hubChannel.setSocket(socket);
 
-    let user = this.getUserAccount();
     //const email = user.accountIdentifier + "_" + user.userName+ "_microsoft";
-    let email = "";
-    let authtoken = "";
-    let account_type = "";
-    if (user != null) {
-      authtoken = this.getToken();
-      account_type = this.getAccounType();
-      if (account_type === "MSA") {
-        email = user.userPrincipalName;
-      } else {
-        email = user.mail;
-      }
-    }
     await new Promise((resolve, reject) => {
       const channel = hubChannel.socket.channel(`auth:${uuid()}`);
       channel.onError(() => {
@@ -175,7 +204,14 @@ export class MicrosoftLoginService extends Component {
             });
             channel.push("auth_verified", { token: auth_token, payload: auth_payload });
           });
-          channel.push("auth_token_request", { email, authtoken, origin: "hubs" });
+          let email = "";
+          let user = this.user;
+          if (this.getAccounType() === "MSA") {
+            email = user.userPrincipalName;
+          } else {
+            email = user.mail || user.email;
+          }
+          channel.push("auth_token_request", { email, authtoken:this.accessToken?this.accessToken:this.user.id, origin: "hubs" });
         }).receive("error", reject);
     });
   }
@@ -211,7 +247,9 @@ export class MicrosoftLoginService extends Component {
           microsoftUser: null
         }, activity: { hasChangedName: false, hasChangedPicture: false }
       });
-      return this.publicClientApplication.logoutPopup();
+      if(this.accessToken) {
+        return this.publicClientApplication.logoutPopup();
+      }
     }
   }
 

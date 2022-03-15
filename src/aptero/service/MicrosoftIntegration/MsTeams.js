@@ -1,14 +1,17 @@
-let url = new URL(window.location.href);
-let msmode = !!url.searchParams.get("msteams");
 const EventEmitter = require("eventemitter3");
 
-let eventListener = new EventEmitter();
 export const INIT_OK = "ms-teams-init-ok";
 export const REQUEST_AUTH_TOKEN = "ms-teams-request-auth-token";
 export const AUTH_TOKEN = "ms-teams-auth-token";
 export const CHANGE_USER = "ms-teams-change-selected-user";
 export const CHANGE_SETTINGS_URL = "ms-teams-change-settings-url";
 export const DECLARE_FRAME_SIZE = "ms-teams-declare-frame-size";
+export const REQUEST_USER_INFO = "ms-teams-request-user-info";
+export const USER_INFO = "ms-teams-user-info";
+export const RELOAD = "ms-teams-reload";
+
+let url = new URL(window.location.href);
+let msmode = !!url.searchParams.get("msteams");
 
 export function sendIframeMessage(type, data) {
   if (window.parent) {
@@ -16,6 +19,7 @@ export function sendIframeMessage(type, data) {
   }
 }
 
+let eventListener = new EventEmitter();
 window.addEventListener("message", event => {
   try {
     if (event.data) {
@@ -28,7 +32,9 @@ window.addEventListener("message", event => {
     //ignore data
   }
 });
-
+eventListener.once(RELOAD,() => {
+  window.location.reload();
+});
 
 
 export async function requestAuthToken(callback){
@@ -38,9 +44,18 @@ export async function requestAuthToken(callback){
   sendIframeMessage(REQUEST_AUTH_TOKEN,{});
 }
 
-export async function msTeamsInitOkRequestAuthToken(callback){
-  eventListener.once(INIT_OK,() => {
-    requestAuthToken(callback)
+export async function requestUserInfo(callback){
+  eventListener.once(USER_INFO,data => {
+    callback(data);
+  });
+  sendIframeMessage(REQUEST_USER_INFO,{});
+}
+
+export async function msTeamsWaitInit(){
+  return new Promise((resolve) => {
+    eventListener.once(INIT_OK,() => {
+      resolve()
+    })
   })
 }
 

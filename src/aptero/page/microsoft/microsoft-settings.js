@@ -8,8 +8,10 @@ import { SettingsPage } from "../../react-components/settings/SettingsPage";
 import { AuthContextProvider } from "./../../../react-components/auth/AuthContext";
 import "./../../../react-components/styles/global.scss";
 import { ThemeProvider } from "./../../../react-components/styles/theme";
+import { microsoftLoginService } from "../../service/MicrosoftIntegration/MicrosoftLoginService";
 
 registerTelemetry("/home", "Hubs Home Page");
+
 
 const store = new Store();
 window.APP = { store };
@@ -27,3 +29,4 @@ function Root() {
 }
 
 ReactDOM.render(<Root />, document.getElementById("home-root"));
+microsoftLoginService.passiveLogin();
