@@ -114,27 +114,31 @@ export class MicrosoftLoginService extends Component {
   }
 
   async init(token) {
-    console.log("microsoft login toke:" + token);
+    console.log("microsoft login token:" + token);
     this.accessToken = token;
     this.msGraphService.setToken(this.accessToken);
     this.user = await this.msGraphService.getUserDetails();
-    const user_beta = await this.msGraphService.getUserDetailsBetaV();
-    this.account_type = user_beta.account[0].source.type[0];
-    this.organization = await this.msGraphService.getUserOrganization(this.account_type);
     this.profilePicture = "";
-    this.profilePicture = await this.msGraphService.getUserPhoto();
+    this.organization = "";
+    try {
+      this.profilePicture = await this.msGraphService.getUserPhoto();
+      const user_beta = await this.msGraphService.getUserDetailsBetaV();
+      this.account_type = user_beta.account[0].source.type[0];
+      this.organization = await this.msGraphService.getUserOrganization(this.account_type);
+    }catch (e) {
+      //ignore error from beta organisation
+      console.error(e);
+    }
 
     const user = this.getUserAccount();
-    const companyName = this.getCompanyName();
-    const profilePicture = this.displayProfilePhoto();
     window.APP.store.update({
       profile: {
         email: user.email,
         displayName: user.displayName,
         phoneNumber: user.mobilePhone,
         jobTitle: user.jobTitle,
-        companyName: companyName,
-        microsoftUserprofilePicture: profilePicture,
+        companyName: this.organization,
+        microsoftUserprofilePicture: this.profilePicture,
         microsoftUser: user.id
       }, activity: { hasChangedName: true, hasChangedPicture: true }
     });
@@ -156,13 +160,6 @@ export class MicrosoftLoginService extends Component {
 
   getUserAccount() {
     return this.user;
-  }
-
-  getCompanyName() {
-    if (this.organization) {
-      return this.organization;
-    }
-    return null;
   }
 
   getName() {
@@ -218,7 +215,7 @@ export class MicrosoftLoginService extends Component {
 
   async handleProfile(email, token, hubChannel) {
     const user = this.getUserAccount();
-    const companyName = this.getCompanyName();
+    const companyName = this.organization;
     const profilePicture = this.displayProfilePhoto();
     window.APP.store.update({
       credentials: { email, token }, profile: {
