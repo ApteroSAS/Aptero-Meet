@@ -1,17 +1,10 @@
-import React, {useState} from "react";
+import React from "react";
 import PropTypes from "prop-types";
-import {Sidebar} from "../sidebar/Sidebar";
-import {BackButton} from "../input/BackButton";
-import {Button} from "../input/Button";
-import {Column} from "../layout/Column";
 import "./UserProfileVisitCard.css";
 import {FormattedMessage} from "react-intl";
 import {ReactComponent as PhoneIcon} from "../icons/Phone.svg";
 import {ReactComponent as AcountIcon} from "../icons/Acount.svg";
 import {ReactComponent as EmailIcon} from "../icons/Email.svg";
-import {UserProfileSidebarContainer} from "./UserProfileSidebarContainer";
-import {getMicrophonePresences} from "../../utils/microphone-presence";
-import {userFromPresence} from "./PeopleSidebarContainer";
 
 export function UserProfileVisitCard({
                                          displayName,
@@ -19,136 +12,53 @@ export function UserProfileVisitCard({
                                          phoneNumber,
                                          jobTitle,
                                          profilePicture,
-                                         userId,
-                                         companyName,
-                                         presences,
-                                         mySessionId,
-                                         hubChannel,
-                                         performConditionalSignIn,
-                                         onClose,
-                                         onCloseDialog,
-                                         toggleChatSidebar,
-                                         showNonHistoriedDialog,
-                                         onSelectPerson,
-                                         store,
-                                         mediaSearchStore,
-                                         isSignedIn,
-                                         signedIn
+                                         isSignedIn
                                      }) {
-    const [goBackToUserPanel, setBackToUserPanel] = useState("test");
-    const micPresences = getMicrophonePresences();
-    const presence = presences[userId];
-    const user = userFromPresence(userId, presence, micPresences, mySessionId);
     if (isSignedIn) {
-        if (goBackToUserPanel != null) {
-            return (
+        return (
+            <div className='control-pane'>
+                <div className="sample_container card_sample">
 
-                <Sidebar
-                    title={displayName}
-                    beforeTitle={<BackButton onClick={() => setBackToUserPanel(null)}/>}
-                >
-                    <Column center padding>
-                        <div className='control-pane'>
-                            <div className="sample_container card_sample">
+                    <div className="e-card e-custom-card">
+                        <div className="e-card-header">
 
-                                <div className="e-card e-custom-card">
-                                    <div className="e-card-header">
-
-                                        <div className="e-avatar e-avatar-circle">
-                                            {profilePicture === "" && (
-                                                <AcountIcon className="acount-icon"/>
-                                            )}
-                                            {profilePicture !== "" && (
-                                                <img src={profilePicture} className="avatar-image"/>)}
-                                        </div>
-                                        &nbsp;
-                                    </div>
-                                    <div className="e-card-header">
-                                        <div className="e-card-header-caption center">
-                                            <div className="e-card-header-title name">{displayName}</div>
-                                            <div className="e-card-sub-title">{jobTitle}</div>
-                                        </div>
-                                    </div>
-                                    <div className="e-card-content">
-                                        <div className="phone-number"><PhoneIcon
-                                            className="icon-phone"></PhoneIcon><span
-                                            className="phone-number-text">{phoneNumber ??
-                                            <FormattedMessage id="user-profile-visit-card-no-data"
-                                                              defaultMessage="Information not provided"/>}</span></div>
-                                        <div className="email"><EmailIcon className="icon-phone"></EmailIcon><span
-                                            className="email-text">{email ??
-                                            <FormattedMessage id="user-profile-visit-card-no-data"
-                                                              defaultMessage="Information not provided"/>
-                                        }</span></div>
-                                    </div>
-                                </div>
+                            <div className="e-avatar e-avatar-circle">
+                                {!profilePicture && (
+                                    <AcountIcon className="acount-icon"/>
+                                )}
+                                {profilePicture && (
+                                    <img src={profilePicture} className="avatar-image"/>)}
+                            </div>
+                            &nbsp;
+                        </div>
+                        <div className="e-card-header">
+                            <div className="e-card-header-caption center">
+                                <div className="e-card-header-title name">{displayName}</div>
+                                <div className="e-card-sub-title">{jobTitle}</div>
                             </div>
                         </div>
-                        <Button preset="basic" onClick={() => toggleChatSidebar("chat", userId, null)}>
-                            <FormattedMessage id="user-profile-sidebar.chat-button" defaultMessage="Chat"/>
-                        </Button>
-                        <Button preset="basic">
-                            <FormattedMessage id="user-profile-sidebar.send-mail-button" defaultMessage="Send Mail"/>
-                        </Button>
-                    </Column>
-
-
-                </Sidebar>
-            );
-        } else {
-            return (
-                <UserProfileSidebarContainer
-                    user={user}
-                    presences={presences}
-                    hubChannel={hubChannel}
-                    mySessionId={mySessionId}
-                    performConditionalSignIn={performConditionalSignIn}
-                    onClose={onClose}
-                    onCloseDialog={onCloseDialog}
-                    toggleChatSidebar={toggleChatSidebar}
-                    showNonHistoriedDialog={showNonHistoriedDialog}
-                    onSelectPerson={onSelectPerson}
-                    store={store}
-                    mediaSearchStore={mediaSearchStore}
-                    signedIn={signedIn}
-                />);
-        }
-
-    } else {
-        if (goBackToUserPanel != null) {
-            return (
-                <Sidebar
-                    title={displayName}
-                    beforeTitle={<BackButton onClick={() => setBackToUserPanel(null)}/>}
-                >
-                    <Column center padding>
-                        <div>
-                            <FormattedMessage id="user-profile-visit-card-no-data-found"
-                                              defaultMessage="Unfortunately, the user has not provided information"/>
+                        <div className="e-card-content">
+                            <div className="phone-number"><PhoneIcon className="icon-phone"/><span
+                                className="phone-number-text">{phoneNumber ??
+                                <FormattedMessage id="user-profile-visit-card-no-data"
+                                                  defaultMessage="Information not provided"/>}</span></div>
+                            <div className="email"><EmailIcon className="icon-phone"/><span
+                                className="email-text">{email ??
+                                <FormattedMessage id="user-profile-visit-card-no-data"
+                                                  defaultMessage="Information not provided"/>
+                            }</span></div>
                         </div>
-                    </Column>
-                </Sidebar>
-            );
-        } else {
-            return (
-                <UserProfileSidebarContainer
-                    user={user}
-                    presences={presences}
-                    hubChannel={hubChannel}
-                    mySessionId={mySessionId}
-                    performConditionalSignIn={performConditionalSignIn}
-                    onClose={onClose}
-                    onCloseDialog={onCloseDialog}
-                    toggleChatSidebar={toggleChatSidebar}
-                    showNonHistoriedDialog={showNonHistoriedDialog}
-                    onSelectPerson={onSelectPerson}
-                    store={store}
-                    mediaSearchStore={mediaSearchStore}
-                    signedIn={signedIn}
-                />);
-        }
-
-
+                    </div>
+                </div>
+            </div>
+        )
+    } else {
+        return (
+            <div>
+                <FormattedMessage id="user-profile-visit-card-no-data-found"
+                                  defaultMessage="Unfortunately, the user has not provided information"/>
+            </div>
+        )
     }
 }
 
@@ -158,23 +68,9 @@ UserProfileVisitCard.propTypes = {
     phoneNumber: PropTypes.string,
     jobTitle: PropTypes.string,
     companyName: PropTypes.string,
-    userId: PropTypes.string,
-    presences: PropTypes.object,
-    mySessionId: PropTypes.string,
     profilePicture: PropTypes.string,
-    hubChannel: PropTypes.object,
-    performConditionalSignIn: PropTypes.func,
-    showBackButton: PropTypes.bool,
-    onBack: PropTypes.func,
-    onClose: PropTypes.func,
-    onCloseDialog: PropTypes.func.isRequired,
-    showNonHistoriedDialog: PropTypes.func,
-    toggleChatSidebar: PropTypes.func,
-    onSelectPerson: PropTypes.func,
-    store: PropTypes.object.isRequired,
-    mediaSearchStore: PropTypes.object.isRequired,
-    isSignedIn: PropTypes.bool,
-    signedIn: PropTypes.func
+    avatarPreview: PropTypes.string,
+    isSignedIn: PropTypes.bool
 
 };
 export default UserProfileVisitCard;

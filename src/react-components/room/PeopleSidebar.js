@@ -14,7 +14,7 @@ import { ReactComponent as VolumeHighIcon } from "../icons/VolumeHigh.svg";
 import { ReactComponent as VolumeMutedIcon } from "../icons/VolumeMuted.svg";
 import { List, ButtonListItem } from "../layout/List";
 import { FormattedMessage, useIntl } from "react-intl";
-import {changeSelectedUserByUID, msTeams} from "../../aptero/service/MicrosoftIntegration/MsTeams";
+import { msTeams} from "../../aptero/service/MicrosoftIntegration/MsTeams";
 
 function getDeviceLabel(ctx, intl) {
   if (ctx) {
@@ -127,7 +127,7 @@ export function PeopleSidebar({ people, onSelectPerson, onClose, showMuteAll, on
                   //Aptero
                   const microsoftUser = person?.profile?.microsoftUser;
                   console.log(microsoftUser)
-                  changeSelectedUserByUID(microsoftUser);
+                  //changeSelectedUserByUID(microsoftUser);
                 } else {
                   onSelectPerson(person, e)
                 }

@@ -10,7 +10,27 @@ import {rotateInPlaceAroundWorldUp, affixToWorldUp} from "../../utils/three-util
 import {Spinner} from "../misc/Spinner";
 import {UserProfileVisitCardContainer} from "./UserProfileVisitCardContainer";
 import {PeopleSidebarContainer, usePeopleList} from "./PeopleSidebarContainer";
-import {changeSelectedUserByMail, changeSelectedUserByUID} from "../../aptero/service/MicrosoftIntegration/MsTeams";
+import { processDeepLink } from "../../aptero/service/MicrosoftIntegration/MsTeams";
+
+function useGoToSelectedAvatar(entity) {
+    const targetMatrix = new THREE.Matrix4();
+    const translation = new THREE.Matrix4();
+    //entity.object3D.translateZ(1);
+    targetMatrix.copy(entity.object3D.matrixWorld);
+    translation.makeTranslation(0, 0, 0.75);
+    targetMatrix.multiply(translation);
+    affixToWorldUp(targetMatrix, targetMatrix);
+    rotateInPlaceAroundWorldUp(targetMatrix, Math.PI, targetMatrix);
+
+    document
+        .querySelector("a-scene")
+        .systems["hubs-systems"].characterController.enqueueWaypointTravelTo(targetMatrix, true, {
+        willDisableMotion: false,
+        willDisableTeleporting: false,
+        snapToNavMesh: false,
+        willMaintainInitialOrientation: false
+    });
+}
 
 export function UserProfileSidebar({
                                        mySessionId,
@@ -18,6 +38,7 @@ export function UserProfileSidebar({
                                        displayName,
                                        identityName,
                                        avatarPreview,
+                                       // eslint-disable-next-line no-unused-vars
                                        avatarId,
                                        userId,
                                        isSignedIn,
@@ -40,6 +61,7 @@ export function UserProfileSidebar({
                                        performConditionalSignIn,
                                        onCloseDialog,
                                        showNonHistoriedDialog,
+                                       // eslint-disable-next-line no-unused-vars
                                        onSelectPerson,
                                        store,
                                        mediaSearchStore,
@@ -47,7 +69,6 @@ export function UserProfileSidebar({
                                        ...rest
                                    }) {
     const intl = useIntl();
-    const [goToUserInformation, setgoToUserInformation] = useState(null);
     const [goBack, setgoBack] = useState("goBack");
     const people = usePeopleList(presences, mySessionId);
     if (goBack == null) {
@@ -69,156 +90,149 @@ export function UserProfileSidebar({
             />
         );
     } else {
-        if (goToUserInformation == null) {
-            try {
-                const selectedPerson = people.find(person => person.id === userId);
-                const microsoftUser = selectedPerson?.profile?.microsoftUser;
-                //console.log("selected user :" + microsoftUser);
-                changeSelectedUserByUID(microsoftUser);
-            } catch (e) {
-                console.error(e);
-            }
-            return (
-                <Sidebar
-                    title={identityName ? `${displayName} (${identityName})` : displayName}
-                    beforeTitle={showBackButton ? <BackButton onClick={onBack}
-                    /> : <BackButton onClick={() => {
-                        changeSelectedUserByMail("");
-                        setgoBack(null)//TODO strange goback management
-                    }}/>}
-                    className={className}
-                    {...rest}
-                >
-                    <Column center padding>
-                        {avatarPreview == null && (
-                            <div className={styles.avatarPreviewContainer}>
-                                {
-                                    <div className="div_spinner">
-                                        <Spinner/>
-                                    </div>
-                                }
-                            </div>
-                        )}
-                        {avatarPreview != null &&
-                            <div className={styles.avatarPreviewContainer}>{<img src={avatarPreview}/>}</div>}
+        let microsoftUserId = null;
+        let microsoftUserEmail = null;
+        try {
+            const selectedPerson = people.find(person => person.id === userId);
+            microsoftUserId = selectedPerson?.profile?.microsoftUser;
+            microsoftUserEmail = selectedPerson?.profile?.email;
+            //console.log("selected user :" + microsoftUser);
+            //changeSelectedUserByUID(microsoftUserId);
+        } catch (e) {
+            console.error(e);
+        }
+        return (
+            <Sidebar
+                title={identityName ? `${displayName} (${identityName})` : displayName}
+                beforeTitle={showBackButton ? <BackButton onClick={onBack}
+                /> : <BackButton onClick={() => {
+                    //changeSelectedUserByMail("");
+                    setgoBack(null)//TODO strange goback management
+                }}/>}
+                className={className}
+                {...rest}
+            >
+                <Column center padding>
+                    {microsoftUserId &&
+                        <UserProfileVisitCardContainer
+                            mySessionId={mySessionId}
+                            displayName={displayName}
+                            avatarPreview={avatarPreview}
+                            userId={userId}
+                            presences={presences}
+                        />}
+                    {!microsoftUserId &&
+                        <div className={styles.avatarPreviewContainer}>
+                        {avatarPreview == null && (<div className="div_spinner"><Spinner/></div>)}
+                        {avatarPreview != null && <img src={avatarPreview}/>}
+                        </div>
+                    }
 
-                        {canPromote && (
-                            <Button
-                                preset="accept"
-                                disabled={!isSignedIn}
-                                title={
-                                    isSignedIn
-                                        ? intl.formatMessage({
-                                            id: "user-profile-sidebar.promote-button",
-                                            defaultMessage: "Promote"
-                                        })
-                                        : intl.formatMessage(
-                                            {
-                                                id: "user-profile-sidebar.promote-button-disabled-label",
-                                                defaultMessage: "{displayName} is signed out."
-                                            },
-                                            {displayName}
-                                        )
-                                }
-                                onClick={onPromote}
-                            >
-                                <FormattedMessage id="user-profile-sidebar.promote-button" defaultMessage="Promote"/>
-                            </Button>
-                        )}
-                        {canDemote && (
-                            <Button
-                                preset="cancel"
-                                disabled={!isSignedIn}
-                                title={
-                                    isSignedIn
-                                        ? intl.formatMessage({
-                                            id: "user-profile-sidebar.demote-button",
-                                            defaultMessage: "Demote"
-                                        })
-                                        : intl.formatMessage(
-                                            {
-                                                id: "user-profile-sidebar.demote-button-disabled-label",
-                                                defaultMessage: "{displayName} is signed out."
-                                            },
-                                            {displayName}
-                                        )
-                                }
-                                onClick={onDemote}
-                            >
-                                <FormattedMessage id="user-profile-sidebar.demote-button" defaultMessage="Demote"/>
-                            </Button>
-                        )}
-                        <Button onClick={onToggleHidden}>
-                            {isHidden ? (
-                                <FormattedMessage id="user-profile-sidebar.unhide-button" defaultMessage="Unhide"/>
-                            ) : (
-                                <FormattedMessage id="user-profile-sidebar.hide-button" defaultMessage="Hide"/>
-                            )}
-                        </Button>
+                    {canPromote && (
                         <Button
-                            type="button"
-                            preset="basic"
-                            onClick={() => {
-                                let a = NAF.connection.entities["entities"];
-                                let entity1;
-                                for (let key in a) {
-                                    let entity = a[key];
-                                    if (entity.components.networked.attrValue.creator != null) {
-                                        if (entity.components.networked.attrValue.creator.toString() === userId.toString()) {
-                                            entity1 = entity;
-                                        }
+                            preset="accept"
+                            disabled={!isSignedIn}
+                            title={
+                                isSignedIn
+                                    ? intl.formatMessage({
+                                        id: "user-profile-sidebar.promote-button",
+                                        defaultMessage: "Promote"
+                                    })
+                                    : intl.formatMessage(
+                                        {
+                                            id: "user-profile-sidebar.promote-button-disabled-label",
+                                            defaultMessage: "{displayName} is signed out."
+                                        },
+                                        {displayName}
+                                    )
+                            }
+                            onClick={onPromote}
+                        >
+                            <FormattedMessage id="user-profile-sidebar.promote-button" defaultMessage="Promote"/>
+                        </Button>
+                    )}
+                    {canDemote && (
+                        <Button
+                            preset="cancel"
+                            disabled={!isSignedIn}
+                            title={
+                                isSignedIn
+                                    ? intl.formatMessage({
+                                        id: "user-profile-sidebar.demote-button",
+                                        defaultMessage: "Demote"
+                                    })
+                                    : intl.formatMessage(
+                                        {
+                                            id: "user-profile-sidebar.demote-button-disabled-label",
+                                            defaultMessage: "{displayName} is signed out."
+                                        },
+                                        {displayName}
+                                    )
+                            }
+                            onClick={onDemote}
+                        >
+                            <FormattedMessage id="user-profile-sidebar.demote-button" defaultMessage="Demote"/>
+                        </Button>
+                    )}
+                    <Button onClick={onToggleHidden}>
+                        {isHidden ? (
+                            <FormattedMessage id="user-profile-sidebar.unhide-button" defaultMessage="Unhide"/>
+                        ) : (
+                            <FormattedMessage id="user-profile-sidebar.hide-button" defaultMessage="Hide"/>
+                        )}
+                    </Button>
+                    <Button
+                        type="button"
+                        preset="basic"
+                        onClick={() => {
+                            let a = NAF.connection.entities["entities"];
+                            let entity1;
+                            for (let key in a) {
+                                let entity = a[key];
+                                if (entity.components.networked.attrValue.creator != null) {
+                                    if (entity.components.networked.attrValue.creator.toString() === userId.toString()) {
+                                        entity1 = entity;
                                     }
                                 }
-                                useGoToSelectedAvatar(entity1);
+                            }
+                            useGoToSelectedAvatar(entity1);
 
-                            }}
-                        >
-                            <FormattedMessage id="avatar-teleport" defaultMessage="Go to"/>
+                        }}
+                    >
+                        <FormattedMessage id="avatar-teleport" defaultMessage="Go to"/>
+                    </Button>
+                    {canMute && (
+                        <Button preset="cancel" onClick={onMute}>
+                            <FormattedMessage id="user-profile-sidebar.mute-button" defaultMessage="Mute"/>
                         </Button>
-                        {canMute && (
-                            <Button preset="cancel" onClick={onMute}>
-                                <FormattedMessage id="user-profile-sidebar.mute-button" defaultMessage="Mute"/>
-                            </Button>
-                        )}
-                        {canKick && (
-                            <Button preset="cancel" onClick={onKick}>
-                                <FormattedMessage id="user-profile-sidebar.kick-button" defaultMessage="Kick"/>
-                            </Button>
-                        )}
+                    )}
+                    {canKick && (
+                        <Button preset="cancel" onClick={onKick}>
+                            <FormattedMessage id="user-profile-sidebar.kick-button" defaultMessage="Kick"/>
+                        </Button>
+                    )}
+                    {!microsoftUserId &&
                         <Button preset="basic" onClick={() => toggleChatSidebar("chat", userId, null)}>
                             <FormattedMessage id="user-profile-sidebar.chat-button" defaultMessage="Chat"/>
                         </Button>
-                        <Button preset="basic" onClick={() => setgoToUserInformation("go")}>
-                            <FormattedMessage id="user-profile-sidebar.check-other-user-info-button"
-                                              defaultMessage="Visit card"/>
-                        </Button>
-                    </Column>
-                </Sidebar>
-            );
-        } else {
-
-            //setgoToUserInformation(null);
-            return (
-                <UserProfileVisitCardContainer
-                    mySessionId={mySessionId}
-                    displayName={displayName}
-                    userId={userId}
-                    toggleChatSidebar={toggleChatSidebar}
-                    hubChannel={hubChannel}
-                    presences={presences}
-                    performConditionalSignIn={performConditionalSignIn}
-                    showBackButton
-                    onBack={onBack}
-                    onClose={onClose}
-                    onCloseDialog={onCloseDialog}
-                    showNonHistoriedDialog={showNonHistoriedDialog}
-                    onSelectPerson={onSelectPerson}
-                    store={store}
-                    mediaSearchStore={mediaSearchStore}
-                    signedIn={signedIn}
-                />
-            );
-        }
+                    }
+                    {microsoftUserId &&
+                        <>
+                            <Button preset="basic" onClick={() =>{
+                                processDeepLink("https://teams.microsoft.com/l/chat/0/0?users="+microsoftUserEmail);
+                            }}>
+                                <FormattedMessage id="user-profile-sidebar.chat-button" defaultMessage="Chat"/>
+                            </Button>
+                            <Button preset="basic" onClick={() => {
+                                processDeepLink("https://teams.microsoft.com/l/call/0/0?users="+microsoftUserEmail);
+                            }}>
+                                <FormattedMessage id="user-profile-sidebar.call-button" defaultMessage="Call"/>
+                            </Button>
+                        </>
+                    }
+                </Column>
+            </Sidebar>
+        );
     }
 
 }
@@ -257,22 +271,3 @@ UserProfileSidebar.propTypes = {
     signedIn: PropTypes.func
 };
 
-function useGoToSelectedAvatar(entity) {
-    const targetMatrix = new THREE.Matrix4();
-    const translation = new THREE.Matrix4();
-    //entity.object3D.translateZ(1);
-    targetMatrix.copy(entity.object3D.matrixWorld);
-    translation.makeTranslation(0, 0, 0.75);
-    targetMatrix.multiply(translation);
-    affixToWorldUp(targetMatrix, targetMatrix);
-    rotateInPlaceAroundWorldUp(targetMatrix, Math.PI, targetMatrix);
-
-    document
-        .querySelector("a-scene")
-        .systems["hubs-systems"].characterController.enqueueWaypointTravelTo(targetMatrix, true, {
-        willDisableMotion: false,
-        willDisableTeleporting: false,
-        snapToNavMesh: false,
-        willMaintainInitialOrientation: false
-    });
-}

@@ -4,7 +4,7 @@ import configs from "../../../utils/configs";
 import uuid from "uuid/v4";
 import AuthChannel from "../../../utils/auth-channel";
 import { connectToReticulum } from "../../../utils/phoenix-utils";
-import { msTeams, msTeamsWaitInit, requestAuthToken, requestUserInfo } from "./MsTeams";
+import {AUTH_TOKEN, getMSEvents, msTeams, msTeamsWaitInit, requestAuthToken, requestUserInfo} from "./MsTeams";
 import { MicrosoftGraphService } from "./MicrosoftGraphService";
 
 export function getScopes(){
@@ -24,19 +24,25 @@ export class MicrosoftLoginService extends Component {
 
   constructor(props) {
     super(props);
-    this.publicClientApplication = new PublicClientApplication({
-      auth: {
-        clientId: configs.APP_CONFIG.MICROSOFT_APP_ID,
-        redirectUrl: window.location.origin + "/signin",
-        // to allow only AAD accounts: authority:https://login.microsoftonline.com/organizations
-        authority: configs.APP_CONFIG.MICROSOFT_APP_AUTHORITY || "https://login.microsoftonline.com/common",
-        scopes: getScopes()
-      },
-      cache: {
-        cacheLocation: "sessionStorage",
-        storeAuthStateInCookie: true
-      }
-    });
+  }
+
+  getPublicClientApplication(){
+    if(!this.publicClientApplication){
+      this.publicClientApplication = new PublicClientApplication({
+        auth: {
+          clientId: configs.APP_CONFIG.MICROSOFT_APP_ID,
+          redirectUrl: window.location.origin + "/signin",
+          // to allow only AAD accounts: authority:https://login.microsoftonline.com/organizations
+          authority: configs.APP_CONFIG.MICROSOFT_APP_AUTHORITY || "https://login.microsoftonline.com/common",
+          scopes: getScopes()
+        },
+        cache: {
+          cacheLocation: "sessionStorage",
+          storeAuthStateInCookie: true
+        }
+      });
+    }
+    return this.publicClientApplication;
   }
 
   async passiveLogin() {
@@ -45,10 +51,7 @@ export class MicrosoftLoginService extends Component {
     //if cookie oauth microsoft
     if(msTeams()){
       const msMeetInit = () => {
-        requestAuthToken((accessToken)=>{
-          this.init(accessToken.token);
-          this.nativeLogin();
-        });
+        requestAuthToken();
         requestUserInfo((data)=>{
           this.initBasic(data);
           this.nativeLogin();
@@ -57,20 +60,27 @@ export class MicrosoftLoginService extends Component {
       msTeamsWaitInit().then(() => {
         //in case of passive login before ms bridge established
         msMeetInit();
+        getMSEvents().once(AUTH_TOKEN,data => {
+          if(this.accessToken) {
+            this.setNewToken(data.token);
+          }else {
+            this.initWithToken(data.token);
+            this.nativeLogin();
+          }
+        });
       });
       //in case of passive login after ms bridge established
       msMeetInit();
-    }
-    if (window.APP.store.state.profile.microsoftUser && !this.accessToken) {
+    }else if (window.APP.store.state.profile.microsoftUser && !this.accessToken) {
       try {
         //  try silent login
-        const account = this.publicClientApplication.getAllAccounts()[0];
+        const account = this.getPublicClientApplication().getAllAccounts()[0];
         const accessTokenRequest = {
           scopes: getScopes(),
           account: account
         };
-        let authenticationResult = await this.publicClientApplication.acquireTokenSilent(accessTokenRequest);
-        this.init(authenticationResult.accessToken);
+        let authenticationResult = await this.getPublicClientApplication().acquireTokenSilent(accessTokenRequest);
+        this.initWithToken(authenticationResult.accessToken);
         await this.nativeLogin();
       } catch (err) {
         console.error(err);
@@ -113,10 +123,14 @@ export class MicrosoftLoginService extends Component {
     });
   }
 
-  async init(token) {
+  setNewToken(token){
     console.log("microsoft login token:" + token);
     this.accessToken = token;
     this.msGraphService.setToken(this.accessToken);
+  }
+
+  async initWithToken(token) {
+    this.setNewToken(token);
     this.user = await this.msGraphService.getUserDetails();
     this.profilePicture = "";
     this.organization = "";
@@ -146,8 +160,8 @@ export class MicrosoftLoginService extends Component {
 
   async login() {
     try {
-      let response = await this.publicClientApplication.loginPopup();
-      await this.init(response.accessToken);
+      let response = await this.getPublicClientApplication().loginPopup();
+      await this.initWithToken(response.accessToken);
     } catch (error) {
       console.log("error", error);
     }
@@ -244,8 +258,8 @@ export class MicrosoftLoginService extends Component {
           microsoftUser: null
         }, activity: { hasChangedName: false, hasChangedPicture: false }
       });
-      if(this.accessToken) {
-        return this.publicClientApplication.logoutPopup();
+      if(this.publicClientApplication) {
+        return this.getPublicClientApplication().logoutPopup();
       }
     }
   }
