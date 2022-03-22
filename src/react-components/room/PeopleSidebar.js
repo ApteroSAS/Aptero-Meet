@@ -123,14 +123,7 @@ export function PeopleSidebar({ people, onSelectPerson, onClose, showMuteAll, on
               key={person.id}
               type="button"
               onClick={e => {
-                if(msTeams()){
-                  //Aptero
-                  const microsoftUser = person?.profile?.microsoftUser;
-                  console.log(microsoftUser)
-                  //changeSelectedUserByUID(microsoftUser);
-                } else {
                   onSelectPerson(person, e)
-                }
               }}
             >
               {<DeviceIcon title={getDeviceLabel(person.context, intl)} />}

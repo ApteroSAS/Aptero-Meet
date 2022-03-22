@@ -14,6 +14,9 @@ export function UserProfileVisitCard({
                                          profilePicture,
                                          isSignedIn
                                      }) {
+    if(profilePicture && !profilePicture.startsWith("http") && !profilePicture.startsWith("data:")) {
+        profilePicture = "data:image/jpeg;base64, " + profilePicture
+    }
     if (isSignedIn) {
         return (
             <div className='control-pane'>
