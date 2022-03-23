@@ -1099,15 +1099,19 @@ export class UIRoot extends Component {
   getSelectedUser() {
     const selectedUserId = this.state.selectedUserId;
     const presence = this.props.presences[selectedUserId];
-    const micPresences = getMicrophonePresences();
-    return userFromPresence(selectedUserId, presence, micPresences, this.props.sessionId);
+    if(!presence){
+      return null;
+    } else {
+      const micPresences = getMicrophonePresences();
+      return userFromPresence(selectedUserId, presence, micPresences, this.props.sessionId);
+    }
   }
 
   getSelectedId() {
     const selectedUserId = this.state.selectedUserId;
     return selectedUserId;
   }
-  
+
   render() {
     const isGhost =
       configs.feature("enable_lobby_ghosts") && (this.state.watching || this.state.hide || this.props.hide);
@@ -1621,6 +1625,11 @@ export class UIRoot extends Component {
         }
       ];
     }
+
+    if(!this.getSelectedUser() && (this.state.sidebarId === "display_user_panel" ||  this.state.sidebarId ==="user")){
+      this.setState({sidebarId:null});
+    }
+
     return (
       <MoreMenuContextProvider>
         <ReactAudioContext.Provider value={this.state.audioContext}>
@@ -1818,7 +1827,7 @@ export class UIRoot extends Component {
                           mediaSearchStore={this.props.mediaSearchStore}
                         />
                       )}
-                      {this.state.sidebarId === "user" && (
+                      {(this.state.sidebarId === "user" && this.getSelectedUser()) && (
                         <UserProfileSidebarContainer
                           user={this.getSelectedUser()}
                           performConditionalSignIn={this.props.performConditionalSignIn}
@@ -1829,7 +1838,7 @@ export class UIRoot extends Component {
                         />
                       )}
                       
-                      {this.state.sidebarId === "display_user_panel" && (
+                      {(this.state.sidebarId === "display_user_panel" && this.getSelectedUser()) && (
                         <UserProfileSidebarContainer
                           user={this.getSelectedUser()}
                           performConditionalSignIn={this.props.performConditionalSignIn}

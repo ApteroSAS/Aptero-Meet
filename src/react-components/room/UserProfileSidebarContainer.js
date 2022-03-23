@@ -1,12 +1,9 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import PropTypes from "prop-types";
 import { PromoteClientModal } from "./PromoteClientModal";
-import { getAvatarThumbnailUrl, fetchAvatarGltfUrl } from "../../utils/avatar-utils";
 import { UserProfileSidebar } from "./UserProfileSidebar.js";
 import { SignInMessages } from "../auth/SignInModal";
-import { Prop } from "../debug-panel/Prop";
 import {usePeopleList} from "./PeopleSidebarContainer";
-import avatarPreview from "../avatar-preview";
 export function UserProfileSidebarContainer({
   mySessionId,
   user,
@@ -27,8 +24,6 @@ export function UserProfileSidebarContainer({
 }) {
   const micUpdateFrequency = 500;
   const people = usePeopleList(presences, mySessionId, micUpdateFrequency);
-  const [avatarThumbnailUrl, setAvatarThumbnailUrl] = useState();
-  const [avatarGlb, setAvatarGlb] = useState();
   var   avatarPreview="";
   const {
     id: userId,
@@ -43,12 +38,6 @@ export function UserProfileSidebarContainer({
   const mayAddOwner = hubChannel.canOrWillIfCreator("update_roles") && !isOwner && !isCreator;
   const mayRemoveOwner = hubChannel.canOrWillIfCreator("update_roles") && isOwner && !isCreator;
   const [isHidden, setIsHidden] = useState(hubChannel.isHidden(user.id));
-
-  useEffect(() => {
-    if (avatarId) {
-      getAvatarThumbnailUrl(avatarId).then(avatarThumbnailUrl => setAvatarThumbnailUrl(avatarThumbnailUrl));
-    }
-  }, []);
 
   const addOwner = useCallback(() => {
     performConditionalSignIn(
@@ -66,23 +55,6 @@ export function UserProfileSidebarContainer({
       SignInMessages.addOwner
     );
   }, [performConditionalSignIn, hubChannel, showNonHistoriedDialog, userId, onCloseDialog, displayName]);
-
-  const useFetch = () => {
-    const [status, setStatus] = useState("idle");
-    const [data, setData] = useState("");
-    useEffect(() => {
-      const fetchData = async () => {
-        setStatus("fetching");
-        const data = await getUrl(avatarId);
-        setData(data);
-        setStatus("fetched");
-      };
-
-      fetchData();
-    }, []);
-
-    return data;
-  };
 
   const removeOwner = useCallback(() => {
     performConditionalSignIn(
@@ -127,10 +99,10 @@ export function UserProfileSidebarContainer({
     }
   }, [performConditionalSignIn, hubChannel, userId, onClose, onBack]);
   people.map(person=>{
-    if(person.id==userId){
+    if(person.id===userId){
     avatarPreview=person.profile.profilePicture;
     }
-  })
+  });
   return (
 
     <UserProfileSidebar
@@ -170,7 +142,7 @@ export function UserProfileSidebarContainer({
 
 UserProfileSidebarContainer.propTypes = {
   mySessionId:PropTypes.string,
-  user: PropTypes.object.isRequired,
+  user: PropTypes.object.required,
   hubChannel: PropTypes.object,
   presences:PropTypes.object,
   performConditionalSignIn: PropTypes.func,
