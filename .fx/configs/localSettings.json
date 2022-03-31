@@ -1,0 +1,25 @@
+{
+    "teamsApp": {
+        "tenantId": "48caed5d-d20d-40ce-b0cd-9261fc5d8f83",
+        "teamsAppId": "8c5a66dc-a1d7-4c8b-a4b8-6b27807e664a"
+    },
+    "auth": {
+        "clientId": "9cc87836-b9fd-4fd2-a457-856fd8685121",
+        "clientSecret": "crypto_68c9f20b5b20a53a1d8c767196472dd296d5e2ae6b6f8770ad0de7dc254cae976b4116776b7fa663d98895ffe94a3cfad7293edaa8a4e4e0f7abc021ebcc25fae3de2236973cf310b8a1b41ce48c28c1fc918fc911043df7106376edfb3d071568b894dabaf34aa35dd0336f90fc030cb7ee546e441dd68bdce07fe4365b3443cca42cf88c",
+        "objectId": "5d647f99-73f9-4f9e-8bd8-1cf2199cb7c9",
+        "oauth2PermissionScopeId": "0096dd6a-2543-4d12-8dc8-9fe7b60baa2b",
+        "oauthAuthority": "https://login.microsoftonline.com/48caed5d-d20d-40ce-b0cd-9261fc5d8f83",
+        "oauthHost": "https://login.microsoftonline.com",
+        "applicationIdUris": "api://localhost/9cc87836-b9fd-4fd2-a457-856fd8685121",
+        "tenantId": "48caed5d-d20d-40ce-b0cd-9261fc5d8f83"
+    },
+    "frontend": {
+        "browser": "none",
+        "https": true,
+        "sslCertFile": "C:/Users/pierr/.fx/certificate/localhost.crt",
+        "sslKeyFile": "C:/Users/pierr/.fx/certificate/localhost.key",
+        "tabDomain": "localhost",
+        "tabEndpoint": "https://localhost:53000",
+        "tabIndexPath": "/index.html#"
+    }
+}
