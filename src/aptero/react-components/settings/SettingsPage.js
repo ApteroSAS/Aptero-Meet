@@ -13,7 +13,7 @@ import {PageContainer} from "../../../react-components/layout/PageContainer";
 import {scaledThumbnailUrlFor} from "../../../utils/media-url-utils";
 import {Column} from "../../../react-components/layout/Column";
 import {Container} from "../../../react-components/layout/Container";
-import {changeUrlSettings, declareFrameSize} from "../../service/MicrosoftIntegration/MsTeams";
+import {changeUrlSettings} from "../../service/MicrosoftIntegration/MsTeams";
 import {AuthContext} from "../../../react-components/auth/AuthContext";
 import {usePaginatedAPI} from "../../../react-components/home/usePaginatedAPI";
 import Button from "@material-ui/core/Button";
@@ -190,7 +190,7 @@ function createRoomEntry(name,sceneid,imageUrl){
     }
 }
 
-export function SettingsPage() {
+export function SettingsPage(props) {
     const [currentTab, setTab] = useState("featured");
     const {results: favoriteRooms} = useFavoriteRooms();
     const {results: spokeProject} = useSpokeProject();
@@ -227,12 +227,6 @@ export function SettingsPage() {
             createAndRedirectToNewHub(null, null, true);
         }
     }, []);
-
-    setTimeout(()=>{
-        const size = {height:window.document.body.scrollHeight,width:window.document.body.scrollWidth};
-        console.log(size);
-        declareFrameSize(size)
-    },0)
 
     return (
         <PageContainer className={styles.homePage} style={{backgroundColor:"#f3f2f1"}}>

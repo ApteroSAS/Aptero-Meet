@@ -1,10 +1,9 @@
 @secure()
 param provisionParameters object
 var resourceBaseName = provisionParameters.resourceBaseName
-var storageName = contains(provisionParameters, 'frontendHostingStorageName') ? provisionParameters['frontendHostingStorageName'] : '${resourceBaseName}tab' // Try to read name for frontend hosting Storage Account from parameters
-var storageSku = contains(provisionParameters, 'frontendHostingStorageSku') ? provisionParameters['frontendHostingStorageSku'] : 'Standard_LRS' // Try to read SKU for frontend hosting Storage Account from parameters
+var storageName = contains(provisionParameters, 'frontendHostingStorageName') ? provisionParameters['frontendHostingStorageName'] : '${resourceBaseName}tab'
+var storageSku = contains(provisionParameters, 'frontendHostingStorageSku') ? provisionParameters['frontendHostingStorageSku'] : 'Standard_LRS'
 
-// Azure Storage that hosts your static web site
 resource storage 'Microsoft.Storage/storageAccounts@2021-06-01' = {
   kind: 'StorageV2'
   location: resourceGroup().location
@@ -20,6 +19,5 @@ resource storage 'Microsoft.Storage/storageAccounts@2021-06-01' = {
 var siteDomain = replace(replace(storage.properties.primaryEndpoints.web, 'https://', ''), '/', '')
 
 output resourceId string = storage.id
-output endpoint string = 'https://${siteDomain}'
-output domain string = siteDomain
-output indexPath string = '/index.html#'
+output endpoint string = 'https://meet.aptero.co'
+output domain string = 'meet.aptero.co'

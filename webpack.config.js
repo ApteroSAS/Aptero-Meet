@@ -15,6 +15,8 @@ const versionJson = require("./version.json");
 const request = require("request");
 const internalIp = require("internal-ip");
 
+const PORT = 53000;//Teams needs port 53000
+
 function createHTTPSConfig() {
   // Generate certs for the local webpack-dev-server.
   if (fs.existsSync(path.join(__dirname, "certs"))) {
@@ -180,7 +182,7 @@ async function fetchAppConfigAndEnvironmentVars() {
 
   process.env.RETICULUM_SERVER = host;
   process.env.SHORTLINK_DOMAIN = shortlink_domain;
-  process.env.CORS_PROXY_SERVER = `${localIp}:3000/cors-proxy`;
+  process.env.CORS_PROXY_SERVER = `${localIp}:${PORT}/cors-proxy`;
   process.env.THUMBNAIL_SERVER = thumbnail_server;
   process.env.NON_CORS_PROXY_DOMAINS = `${localIp},localhost`;
 
@@ -223,7 +225,7 @@ module.exports = async (env, argv) => {
         RETICULUM_SOCKET_SERVER: "localhost",
         CORS_PROXY_SERVER: "hubs-proxy.local:4000",
         NON_CORS_PROXY_DOMAINS: "localhost,dev.reticulum.io",
-        BASE_ASSETS_PATH: "https://localhost:3000/",
+        BASE_ASSETS_PATH: "https://localhost:"+PORT+"/",
         RETICULUM_SERVER: "localhost:4000",
         POSTGREST_SERVER: "",
         ITA_SERVER: ""
@@ -277,9 +279,10 @@ module.exports = async (env, argv) => {
     },
     devtool: argv.mode === "production" ? "source-map" : "source-map",
     devServer: {
-      https: createHTTPSConfig(),//Comment for ngrok http 3000
+      https: createHTTPSConfig(),//Comment for ngrok http <port>
       host: "0.0.0.0",
-      public: `${host}:3000`,
+      port: PORT,
+      public: `${host}:${PORT}`,
       useLocalIp: true,
       disableHostCheck: true,
       allowedHosts: [host, "localhost"],
@@ -314,7 +317,7 @@ module.exports = async (env, argv) => {
           const redirectLocation = req.header("location");
 
           if (redirectLocation) {
-            res.header("Location", "https://localhost:3000/cors-proxy/" + redirectLocation);
+            res.header("Location", "https://localhost:"+PORT+"/cors-proxy/" + redirectLocation);
           }
 
           if (req.method === "OPTIONS") {
@@ -526,24 +529,6 @@ module.exports = async (env, argv) => {
         }
       }),
       new HTMLWebpackPlugin({
-        filename: "auth-end.html",
-        template: path.join(__dirname, "src/aptero/page/microsoft", "auth-end.html"),
-        chunks: ["microsoft-settings"],
-        chunksSortMode: "manual",
-        minify: {
-          removeComments: false
-        }
-      }),
-      new HTMLWebpackPlugin({
-        filename: "auth-start.html",
-        template: path.join(__dirname, "src/aptero/page/microsoft", "auth-start.html"),
-        chunks: ["microsoft-settings"],
-        chunksSortMode: "manual",
-        minify: {
-          removeComments: false
-        }
-      }),
-      new HTMLWebpackPlugin({
         filename: "index.html",
         template: path.join(__dirname, "src", "index.html"),
         chunks: ["support", "index"],
@@ -665,7 +650,19 @@ module.exports = async (env, argv) => {
         to: "favicon.ico"
       }
     ]),
-    new CopyWebpackPlugin([
+      new CopyWebpackPlugin([
+        {
+          from: "src/aptero/page/microsoft/auth-start.html",
+          to: "auth-start.html"
+        }
+      ]),
+      new CopyWebpackPlugin([
+        {
+          from: "src/aptero/page/microsoft/auth-end.html",
+          to: "auth-end.html"
+        }
+      ]),
+      new CopyWebpackPlugin([
       {
         from: "src/assets/manifest.webmanifest",
         to: "manifest.webmanifest"

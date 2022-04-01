@@ -2,7 +2,14 @@
     {
         "resource": "Microsoft Graph",
         "delegated": [
-            "User.Read"
+            "Contacts.Read",
+            "Presence.Read.All",
+            "User.ReadBasic.All",
+            "People.Read",
+            "profile",
+            "openid",
+            "Files.Read",
+            "Files.Read.All"
         ],
         "application": []
     }

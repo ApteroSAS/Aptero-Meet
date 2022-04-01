@@ -1,9 +1,8 @@
 @secure()
 param provisionParameters object
 var resourceBaseName = provisionParameters.resourceBaseName
-var identityName = contains(provisionParameters, 'userAssignedIdentityName') ? provisionParameters['userAssignedIdentityName'] : '${resourceBaseName}' // Try to read name for user assigned identity from parameters
+var identityName = contains(provisionParameters, 'userAssignedIdentityName') ? provisionParameters['userAssignedIdentityName'] : '${resourceBaseName}'
 
-// user assigned identity will be used to access other Azure resources
 resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = {
   name: identityName
   location: resourceGroup().location

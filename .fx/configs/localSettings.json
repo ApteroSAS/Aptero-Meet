@@ -1,23 +1,23 @@
 {
     "teamsApp": {
         "tenantId": "48caed5d-d20d-40ce-b0cd-9261fc5d8f83",
-        "teamsAppId": "8c5a66dc-a1d7-4c8b-a4b8-6b27807e664a"
+        "teamsAppId": "ed34160a-58d9-4682-b4fc-f8d17390eab3"
     },
     "auth": {
-        "clientId": "9cc87836-b9fd-4fd2-a457-856fd8685121",
-        "clientSecret": "crypto_68c9f20b5b20a53a1d8c767196472dd296d5e2ae6b6f8770ad0de7dc254cae976b4116776b7fa663d98895ffe94a3cfad7293edaa8a4e4e0f7abc021ebcc25fae3de2236973cf310b8a1b41ce48c28c1fc918fc911043df7106376edfb3d071568b894dabaf34aa35dd0336f90fc030cb7ee546e441dd68bdce07fe4365b3443cca42cf88c",
-        "objectId": "5d647f99-73f9-4f9e-8bd8-1cf2199cb7c9",
-        "oauth2PermissionScopeId": "0096dd6a-2543-4d12-8dc8-9fe7b60baa2b",
+        "clientId": "c89c5d54-37ec-49d6-952a-befc9b770079",
+        "clientSecret": "crypto_1d337d094dbd4acb92a4f605948cac6db3d3478df5dd90835ed2113a4cd07a571cd9ea4fb472a84d6c506633960d54c2605a531726d1e0de7fdbc63f0571d7bfa0fcb0ecf5b969887fd597ed2f0911e6af45c16ee786df6ef728258238fbb7e86c7fe1c39eb22ba11ae147b50f7236dc28a32da473d0dc0c43480ef11c6e0472ebeddc40d8",
+        "objectId": "742afe70-12a0-40ba-809c-819ad63c9dba",
+        "oauth2PermissionScopeId": "5cacb41a-7ef2-424b-8807-c5f3fdf5252a",
         "oauthAuthority": "https://login.microsoftonline.com/48caed5d-d20d-40ce-b0cd-9261fc5d8f83",
         "oauthHost": "https://login.microsoftonline.com",
-        "applicationIdUris": "api://localhost/9cc87836-b9fd-4fd2-a457-856fd8685121",
+        "applicationIdUris": "api://localhost/c89c5d54-37ec-49d6-952a-befc9b770079",
         "tenantId": "48caed5d-d20d-40ce-b0cd-9261fc5d8f83"
     },
     "frontend": {
         "browser": "none",
         "https": true,
-        "sslCertFile": "C:/Users/pierr/.fx/certificate/localhost.crt",
-        "sslKeyFile": "C:/Users/pierr/.fx/certificate/localhost.key",
+        "sslCertFile": "C:/Users/Pierre-HenriFRICOT/.fx/certificate/localhost.crt",
+        "sslKeyFile": "C:/Users/Pierre-HenriFRICOT/.fx/certificate/localhost.key",
         "tabDomain": "localhost",
         "tabEndpoint": "https://localhost:53000",
         "tabIndexPath": "/index.html#"

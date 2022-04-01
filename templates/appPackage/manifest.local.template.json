@@ -1,48 +1,48 @@
 {
     "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.11/MicrosoftTeams.schema.json",
     "manifestVersion": "1.11",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "id": "{{localSettings.teamsApp.teamsAppId}}",
     "packageName": "com.microsoft.teams.extension",
+    "localizationInfo": {
+        "defaultLanguageTag": "en"
+    },   
     "developer": {
-        "name": "Teams App, Inc.",
-        "websiteUrl": "{{{localSettings.frontend.tabEndpoint}}}",
-        "privacyUrl": "{{{localSettings.frontend.tabEndpoint}}}{{{localSettings.frontend.tabIndexPath}}}/privacy",
-        "termsOfUseUrl": "{{{localSettings.frontend.tabEndpoint}}}{{{localSettings.frontend.tabIndexPath}}}/termsofuse"
+        "name": "Aptero Local",
+        "websiteUrl": "https://www.aptero.co",
+        "privacyUrl": "https://www.aptero.co/legal/privacy.html",
+        "termsOfUseUrl": "https://www.aptero.co/legal/termsofuse.html"
     },
     "icons": {
         "color": "resources/color.png",
         "outline": "resources/outline.png"
     },
     "name": {
-        "short": "testjs-local-debug",
-        "full": "testjs-local-debug"
+        "short": "{{config.manifest.appName.short}}",
+        "full": "{{config.manifest.appName.full}}"
     },
     "description": {
-        "short": "Short description of testjs-local-debug",
-        "full": "Full description of testjs-local-debug"
+        "short": "{{config.manifest.description.short}}",
+        "full": "{{config.manifest.description.full}}"
     },
     "accentColor": "#FFFFFF",
     "bots": [],
     "composeExtensions": [],
     "configurableTabs": [
         {
-            "configurationUrl": "{{{localSettings.frontend.tabEndpoint}}}{{{localSettings.frontend.tabIndexPath}}}/config",
+            "configurationUrl": "{{{localSettings.frontend.tabEndpoint}}}/microsoft-settings.html",
             "canUpdateConfiguration": true,
             "scopes": [
                 "team",
                 "groupchat"
-            ]
-        }
-    ],
-    "staticTabs": [
-        {
-            "entityId": "index",
-            "name": "Personal Tab",
-            "contentUrl": "{{{localSettings.frontend.tabEndpoint}}}{{{localSettings.frontend.tabIndexPath}}}/tab",
-            "websiteUrl": "{{{localSettings.frontend.tabEndpoint}}}{{{localSettings.frontend.tabIndexPath}}}/tab",
-            "scopes": [
-                "personal"
+            ],
+            "context": [
+              "channelTab",
+              "privateChatTab",
+              "meetingChatTab",
+              "meetingDetailsTab",
+              "meetingSidePanel",
+              "meetingStage"
             ]
         }
     ],
@@ -50,7 +50,7 @@
         "identity",
         "messageTeamMembers"
     ],
-    "validDomains": [],
+    "validDomains": ["*.aptero.co","*.axolotis.com"],
     "webApplicationInfo": {
         "id": "{{localSettings.auth.clientId}}",
         "resource": "{{{localSettings.auth.applicationIdUris}}}"

@@ -8,34 +8,16 @@ export const CHANGE_SETTINGS_URL = "ms-teams-change-settings-url";
 export const DECLARE_FRAME_SIZE = "ms-teams-declare-frame-size";
 export const REQUEST_USER_INFO = "ms-teams-request-user-info";
 export const USER_INFO = "ms-teams-user-info";
-export const RELOAD = "ms-teams-reload";
 export const PROCESS_DEEPLINK = "ms-teams-deep-link";
 
 let url = new URL(window.location.href);
 let msmode = !!url.searchParams.get("msteams");
 
 export function sendIframeMessage(type, data) {
-  if (window.parent) {
-    window.parent.postMessage(JSON.stringify({ type, data }), "*");
-  }
+  this.eventListener.emit(type, data);
 }
 
 let eventListener = new EventEmitter();
-window.addEventListener("message", event => {
-  try {
-    if (event.data) {
-      var message = JSON.parse(event.data);
-      if (message.type) {
-        eventListener.emit(message.type, message.data)
-      }
-    }
-  }catch(err){
-    //ignore data
-  }
-});
-eventListener.once(RELOAD,() => {
-  window.location.reload();
-});
 
 export function getMSEvents(){
   return eventListener;
@@ -73,10 +55,6 @@ export function changeSelectedUserByUID(msUserID){
 
 export function changeUrlSettings(url){
   sendIframeMessage(CHANGE_SETTINGS_URL,{url});
-}
-
-export function declareFrameSize(size){
-  sendIframeMessage(DECLARE_FRAME_SIZE,{size});
 }
 
 export function msTeams(){
