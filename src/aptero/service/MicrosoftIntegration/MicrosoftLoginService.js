@@ -11,11 +11,12 @@ import { TeamsFxProvider } from "@microsoft/mgt-teamsfx-provider";
 import { loadConfiguration, TeamsUserCredential, ResourceType, LogLevel, setLogLevel, setLogFunction } from "@microsoft/teamsfx";
 import EventEmitter from "eventemitter3";
 import * as microsoftTeams from "@microsoft/teams-js";
+import {deepLinkService} from "./DeepLinkService";
 
 let credential;
-const startLoginPageUrl = window.location.origin;
-const functionEndpoint = window.location.origin + "/auth-start.html";//process.env.REACT_APP_FUNC_ENDPOINT;
-const clientId = configs.APP_CONFIG.MICROSOFT_APP_ID; //process.env.REACT_APP_CLIENT_ID;
+export const startLoginPageUrl = window.location.origin;
+export const functionEndpoint = window.location.origin + "/auth-start.html";//process.env.REACT_APP_FUNC_ENDPOINT;
+export const clientId = configs.APP_CONFIG.MICROSOFT_APP_ID; //process.env.REACT_APP_CLIENT_ID;
 export const LOGGED_BASIC_INFO = "ms-auth-basic-info";
 export const TOKEN_RECEIVED = "ms-auth-basic-info";
 let passiveAuthInProgress = false;

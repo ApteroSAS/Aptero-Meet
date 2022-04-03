@@ -1,6 +1,8 @@
 import { microsoftLoginService } from "./MicrosoftLoginService";
 import { Buffer } from 'buffer/';
+import {deepLinkService} from "./DeepLinkService";
 export const MICROSOFT_AUTH_ERROR = "error_microsoft_not_authorized";
+deepLinkService.start();
 
 export class MicrosoftUrlService {
   preloaded = {};
