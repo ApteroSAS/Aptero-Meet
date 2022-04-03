@@ -21,6 +21,7 @@ import {generateHubName} from "../../../utils/name-generation";
 import Store from "../../../storage/store";
 import Cookies from "js-cookie";
 import {createHubChannelParams} from "../../../utils/hub-utils";
+import {propertiesService} from "../../properties/propertiesService";
 
 export function useSpokeProject() {
     const auth = useContext(AuthContext); // Re-render when you log in/out.
@@ -59,12 +60,12 @@ export function useFavoriteRooms() {
 
 async function setFavorite(hubId){
     const socket = await connectToReticulum(false);
-    socket.onClose(e => {});
+    socket.onClose(() => {});
     // Reticulum global channel
     APP.retChannel = socket.channel(`ret`, { hub_id: hubId });
     APP.retChannel
         .join()
-        .receive("ok", data => {
+        .receive("ok", () => {
             const OAUTH_FLOW_PERMS_TOKEN_KEY = "ret-oauth-flow-perms-token";
             const oauthFlowPermsToken = Cookies.get(OAUTH_FLOW_PERMS_TOKEN_KEY);
             if (oauthFlowPermsToken) {
@@ -83,7 +84,7 @@ async function setFavorite(hubId){
                 });
             };
             const hubPhxChannel = socket.channel(`hub:${hubId}`, hubChannelParamsForPermsToken(oauthFlowPermsToken));
-            hubPhxChannel.join().receive("ok", async data => {
+            hubPhxChannel.join().receive("ok", async () => {
                 hubPhxChannel.push("favorite", {});
             }).receive("error", res => {
                 console.error(res);
@@ -190,7 +191,7 @@ function createRoomEntry(name,sceneid,imageUrl){
     }
 }
 
-export function SettingsPage(props) {
+export function SettingsPage() {
     const [currentTab, setTab] = useState("featured");
     const {results: favoriteRooms} = useFavoriteRooms();
     const {results: spokeProject} = useSpokeProject();
@@ -228,8 +229,7 @@ export function SettingsPage(props) {
         }
     }, []);
 
-    return (
-        <PageContainer className={styles.homePage} style={{backgroundColor:"#f3f2f1"}}>
+    return (<>
             <div style={{padding: 10, display: "flex", justifyContent: "space-evenly"}}>
                 <Button style={{margin: 10}} variant="contained" disableElevation={currentTab === "featured"}
                         onClick={() => {
@@ -307,7 +307,10 @@ export function SettingsPage(props) {
                                     <MediaTile
                                         onClick={(event) => {
                                             event.preventDefault();
-                                            let roomurl = window.location.origin + "/" + room.id
+                                            let roomurl = ((propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER) || window.location.origin)+ "/" + room.id
+                                            if(window.location.origin.startsWith("https://localhost")){
+                                                roomurl = window.location.origin+"/hub.html?hub_id="+room.id;
+                                            }
                                             console.log(roomurl);
                                             changeUrlSettings(roomurl);
                                         }}
@@ -323,6 +326,8 @@ export function SettingsPage(props) {
                     </Column>
                 </Container>
             )}
+        <PageContainer className={styles.homePage} style={{backgroundColor:"#f3f2f1"}}>
         </PageContainer>
+        </>
     );
 }

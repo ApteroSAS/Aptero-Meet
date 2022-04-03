@@ -30,7 +30,7 @@
     "composeExtensions": [],
     "configurableTabs": [
         {
-            "configurationUrl": "https://localhost:53000/microsoft-settings.html",
+            "configurationUrl": "https://localhost:53000/microsoft-settings.html?msteams=true",
             "canUpdateConfiguration": true,
             "scopes": [
                 "team",

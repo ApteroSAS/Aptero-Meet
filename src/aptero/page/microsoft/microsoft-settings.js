@@ -7,26 +7,27 @@ import "./../../../utils/theme";
 import {SettingsPage} from "../../react-components/settings/SettingsPage";
 import {AuthContextProvider} from "../../../react-components/auth/AuthContext";
 import {ThemeProvider} from "../../../react-components/styles/theme";
-import {microsoftLoginService} from "../../service/MicrosoftIntegration/MicrosoftLoginService";
+import {
+    getAuthEvents, getCredential,
+    LOGGED_BASIC_INFO,
+    microsoftLoginService, TOKEN_RECEIVED
+} from "../../service/MicrosoftIntegration/MicrosoftLoginService";
 
 
 import * as microsoftTeams from "@microsoft/teams-js";
 import {AccountAuth} from "../../react-components/msft/AccountAuth";
 import {Button, Input} from "@fluentui/react-northstar";//https://fluentsite.z22.web.core.windows.net/0.60.1
 import {roomService} from "../../service/MicrosoftIntegration/RoomService";
-import {
-    CHANGE_SETTINGS_URL,
-    meetVsTeamsBridge
-} from "../../service/MicrosoftIntegration/MeetVsTeamsBridge";
-import {getDefaultOrigin} from "../../service/MicrosoftIntegration/Origin";
-import {getAuthEvents, TOKEN_RECEIVED, LOGGED_BASIC_INFO} from "../../service/MicrosoftIntegration/Auth";
 import {FormattedMessage} from "react-intl";
+import {CHANGE_SETTINGS_URL, getMSEvents} from "../../service/MicrosoftIntegration/MsTeams";
 
 registerTelemetry("/microsoft-settings", "microsoft-settings");
+import { Provider, teamsTheme } from '@fluentui/react-northstar'
 
 
 const store = new Store();
 window.APP = {store};
+microsoftLoginService.passiveLogin();
 
 /**
  * The 'Config' component is used to display your group tabs
@@ -34,7 +35,6 @@ window.APP = {store};
  * make their choices and once they are done you will need to validate
  * their choices and communicate that to Teams to enable the save button.
  */
-
 class TabConfig extends React.Component {
     state = {
         //url:"https://meet.aptero.co/3NKS9NY?embed_token=ae766e3d6bb6394d2aa38f69d5f1aad9&adapter=none"
@@ -43,13 +43,14 @@ class TabConfig extends React.Component {
         //url:"https://alphahub.aptero.co/fTj63Hg",
         url: "",
         size: {width: "100%", height: "2000px"},
-        logged: false,
+        logged: null,
         suggestedDisplayName: "Virtual Meeting",
     }
     removeListeners = () => {
     };
 
     componentDidMount() {
+        microsoftTeams.settings.setValidityState(false);
         document.getElementById("version").innerHTML = process.env.BUILD_VERSION;
         microsoftTeams.settings.getSettings((instanceSettings) => {
             if (instanceSettings.websiteUrl) {
@@ -63,15 +64,16 @@ class TabConfig extends React.Component {
         });
         const callbackUrl = (msg) => {
             try {
-                new URL(msg.data.url);//test url valide
-                this.setState({url: msg.data.url})
+                new URL(msg.url);//test url valide
+                this.setState({url: msg.url})
             } catch (ex) {
                 console.error(ex)
             }
         }
-        meetVsTeamsBridge.eventListener.on(CHANGE_SETTINGS_URL, callbackUrl);
+        getMSEvents().on(CHANGE_SETTINGS_URL, callbackUrl);
 
         const onLogged = () => {
+            console.log("onLogged")
             this.setState({logged: true});
         }
 
@@ -79,21 +81,18 @@ class TabConfig extends React.Component {
         getAuthEvents().on(TOKEN_RECEIVED, onLogged);
 
         this.removeListeners = () => {
-            meetVsTeamsBridge.eventListener.off(CHANGE_SETTINGS_URL, callbackUrl);
+            getMSEvents().off(CHANGE_SETTINGS_URL, callbackUrl);
             getAuthEvents().off(LOGGED_BASIC_INFO, onLogged);
             getAuthEvents().off(TOKEN_RECEIVED, onLogged);
         }
-    }
-
-    componentWillUnmount() {
-        this.removeListeners();
-    }
-
-
-    render() {
-        // Initialize the Microsoft Teams SDK
-        microsoftTeams.initialize();
-
+        const cred = getCredential();
+        cred.getUserInfo().then(data => {
+            //{"displayName":"Admin Aptero","objectId":"abb64646-d3e2-473d-8d13-0b6faff23605","preferredUserName":"admin@aptero.co"}
+            console.log("teams user info : ", data);
+            if (data.preferredUserName) {
+                this.setState({logged: data});
+            }
+        })
         /**
          * When the user clicks "Save", save the url for your configured tab.
          * This allows for the addition of query string parameters based on
@@ -102,24 +101,28 @@ class TabConfig extends React.Component {
         microsoftTeams.settings.registerOnSaveHandler(async (saveEvent) => {
             let config = {...this.state};
             const roomurl = new URL(config.url);
-            roomurl.searchParams.append("msteams", "true");
+            const teamsParams = btoa(encodeURIComponent(JSON.stringify(await getCredential().getUserInfo())))
+            roomurl.searchParams.append("msteams", teamsParams);
             let data = roomService.parseUrl(roomurl.toString());
             let token = await roomService.getEmbedToken(data.roomSID, data.origin);
             roomurl.searchParams.append("embed_token", token);
             config.url = roomurl.toString();
-            const atobStr = btoa(encodeURIComponent(JSON.stringify(config)));
-            const baseUrl = `https://${window.location.hostname}:${window.location.port}`;
-            const url = new URL(baseUrl + "/index.html#/scene");
-            url.searchParams.append("data", atobStr);
             microsoftTeams.settings.setSettings({
                 suggestedDisplayName: this.state.suggestedDisplayName,
                 entityId: "sceneConfig",
-                contentUrl: url.toString(),
+                contentUrl: config.url,
                 websiteUrl: config.url,
             });
             saveEvent.notifySuccess();
         });
+    }
 
+    componentWillUnmount() {
+        this.removeListeners();
+    }
+
+
+    render() {
         /**
          * After verifying that the settings for your tab are correctly
          * filled in by the user you need to set the state of the dialog
@@ -135,14 +138,6 @@ class TabConfig extends React.Component {
                 //ignore error
             }
         }
-        let frameUrl = new URL(getDefaultOrigin() + "/microsoft-settings.html");
-        try {
-            frameUrl = new URL((new URL(this.state.url).origin) + "/microsoft-settings.html");
-        } catch (e) {
-            //ignore error
-        }
-        frameUrl.searchParams.set("msteams", "true");
-        frameUrl.searchParams.set("verion", process.env.BUILD_VERSION);//add a parameters to refresh cache on new version
 
         let roomUrl = this.state.url
         try {
@@ -151,9 +146,10 @@ class TabConfig extends React.Component {
             //ignore error
         }
         return (
+            <Provider theme={teamsTheme}>
             <WrappedIntlProvider>
-                <ThemeProvider store={store}>
-                    <AuthContextProvider store={store}>
+                <AuthContextProvider store={store}>
+                    <ThemeProvider store={store}>
                         <div style={{margin: "8px"}}>
                             <h2><FormattedMessage id="microsoft.settings.identity" defaultMessage="Identity"/></h2>
                             <AccountAuth/>
@@ -179,16 +175,19 @@ class TabConfig extends React.Component {
                                         }}
                                     />
                                     <Button fluid onClick={() => {
+                                        microsoftTeams.settings.setValidityState(false);
                                         this.setState({url: ""})
                                     }}><FormattedMessage id="microsoft.settings.change-scene"
                                                          defaultMessage="Change Scene"/></Button>
                                 </>
                                 }
                                 {!this.state.url &&
-                                    <SettingsPage/>
+                                    <SettingsPage basicInfo={this.state.logged}/>
                                 }
                             </>}
-                            <span onClick={()=>{window.location.reload()}} id="version" style={{
+                            <span onClick={() => {
+                                window.location.reload()
+                            }} id="version" style={{
                                 "margin": 0,
                                 "top": 0,
                                 "left": "auto",
@@ -198,12 +197,12 @@ class TabConfig extends React.Component {
                                 "position": "fixed"
                             }}>{process.env.BUILD_VERSION}</span>
                         </div>
-                    </AuthContextProvider>
-                </ThemeProvider>
+                    </ThemeProvider>
+                </AuthContextProvider>
             </WrappedIntlProvider>
+            </Provider>
         );
     }
 }
 
 ReactDOM.render(<TabConfig/>, document.getElementById("home-root"));
-microsoftLoginService.passiveLogin();

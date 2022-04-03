@@ -30,7 +30,7 @@
     "composeExtensions": [],
     "configurableTabs": [
         {
-            "configurationUrl": "{{{localSettings.frontend.tabEndpoint}}}/microsoft-settings.html",
+            "configurationUrl": "{{{localSettings.frontend.tabEndpoint}}}/microsoft-settings.html?msteams=true",
             "canUpdateConfiguration": true,
             "scopes": [
                 "team",

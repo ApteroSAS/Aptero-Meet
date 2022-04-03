@@ -4,14 +4,90 @@ import configs from "../../../utils/configs";
 import uuid from "uuid/v4";
 import AuthChannel from "../../../utils/auth-channel";
 import { connectToReticulum } from "../../../utils/phoenix-utils";
-import {AUTH_TOKEN, getMSEvents, msTeams, msTeamsWaitInit, requestAuthToken, requestUserInfo} from "./MsTeams";
+import {AUTH_TOKEN, getMSEvents, msTeams, sendAuthToken} from "./MsTeams";
 import { MicrosoftGraphService } from "./MicrosoftGraphService";
+import { Providers, ProviderState } from '@microsoft/mgt-react';
+import { TeamsFxProvider } from "@microsoft/mgt-teamsfx-provider";
+import { loadConfiguration, TeamsUserCredential, ResourceType, LogLevel, setLogLevel, setLogFunction } from "@microsoft/teamsfx";
+import EventEmitter from "eventemitter3";
+import * as microsoftTeams from "@microsoft/teams-js";
+
+let credential;
+const startLoginPageUrl = window.location.origin;
+const functionEndpoint = window.location.origin + "/auth-start.html";//process.env.REACT_APP_FUNC_ENDPOINT;
+const clientId = configs.APP_CONFIG.MICROSOFT_APP_ID; //process.env.REACT_APP_CLIENT_ID;
+export const LOGGED_BASIC_INFO = "ms-auth-basic-info";
+export const TOKEN_RECEIVED = "ms-auth-basic-info";
+let passiveAuthInProgress = false;
+let events = new EventEmitter();
+
+export function getAuthEvents(){
+  return events;
+}
 
 export function getScopes(){
+  //const neededScopes = MgtPersonCard.getScopes();
+  //must be the same as permision.json
+  //import perm from "../../../../permissions.json"
+  //return perm[0].delegated;
+  //Try to avoid admin consent for authorization
   return [
-    "user.read",
-    "profile"
-  ];
+    // Teams app permission
+    "Contacts.Read", //use for visit card
+    "Presence.Read.All", //use for visit card
+    "User.ReadBasic.All", // Use for basic email, call and chat call to action, Avatar image and name - Mandatory
+    "People.Read", //use for visit card
+    //Permission for the web part
+    "profile",//Avatar image and name - Mandatory
+    "openid",//Avatar image and name - Mandatory
+    "Files.Read",//Use to add content in the 3d space (pdf, img, mp4 etc...)
+    "Files.Read.All"//Use to add content in the 3d space (pdf, img, mp4 etc...)
+  ]
+}
+
+function initTeamsFx(authorityHost) {
+  /*loadConfiguration({
+      authentication: {
+          initiateLoginEndpoint: process.env.REACT_APP_START_LOGIN_PAGE_URL,
+          clientId: process.env.REACT_APP_CLIENT_ID
+      }
+  });*/
+  /*if (process.env.NODE_ENV === "development") {
+      setLogLevel(LogLevel.Verbose);
+      setLogFunction((leve: LogLevel, message: string) => { console.log(message); });
+  }*/
+  if (process.env.NODE_ENV === "development") {
+    setLogLevel(LogLevel.Warn);
+    setLogFunction((leve, message) => { console.warn(message); });
+  }
+  loadConfiguration({
+    authentication: {
+      authorityHost,
+      initiateLoginEndpoint: startLoginPageUrl,
+      //simpleAuthEndpoint: teamsfxEndpoint,//https://github.com/OfficeDev/TeamsFx/wiki/How-Authentication-Works-in-TeamsFx-Tab-Template
+      clientId: clientId,
+    },
+    resources: [
+      {
+        type: ResourceType.API,
+        name: "default",
+        properties: {
+          endpoint: functionEndpoint,
+        },
+      },
+    ],
+  });
+  credential = new TeamsUserCredential();
+}
+
+export function getCredential() {
+  if (!credential) {
+    initTeamsFx("common");
+  }
+  if (!credential) {
+    throw new Error("");
+  }
+  return credential;
 }
 
 export class MicrosoftLoginService extends Component {
@@ -45,57 +121,82 @@ export class MicrosoftLoginService extends Component {
     return this.publicClientApplication;
   }
 
+  async initBasicInfo() {
+    const cred = getCredential();
+    await cred.getUserInfo();
+    events.emit(LOGGED_BASIC_INFO)
+    return cred;
+  }
+
+  initTeamsFxProvider(credential, scope) {
+    const provider = new TeamsFxProvider(credential, scope)
+    Providers.globalProvider = provider;
+  }
+
   async passiveLogin() {
-    //if msteams
-    // log using token from msteams
-    //if cookie oauth microsoft
-    if(msTeams()){
-      const msMeetInit = () => {
-        requestAuthToken();
-        requestUserInfo((data)=>{
-          this.initBasic(data);
-          this.nativeLogin();
-        })
-      };
-      msTeamsWaitInit().then(() => {
-        //in case of passive login before ms bridge established
-        msMeetInit();
-        getMSEvents().once(AUTH_TOKEN,data => {
-          if(this.accessToken) {
+    if(!passiveAuthInProgress) {
+      passiveAuthInProgress = true;
+      setTimeout(()=>{
+        passiveAuthInProgress = false;
+      },20000)
+      //if msteams
+      // log using token from msteams
+      //if cookie oauth microsoft
+      if (msTeams()) {
+        // Initialize the Microsoft Teams SDK
+        microsoftTeams.initialize();
+        getMSEvents().on(AUTH_TOKEN, data => {
+          if(this.accessToken === data.token){
+            return; // no new information so ignore
+          }
+          if (this.accessToken) {
             this.setNewToken(data.token);
-          }else {
+          } else {
             this.initWithToken(data.token);
             this.nativeLogin();
           }
         });
-      });
-      //in case of passive login after ms bridge established
-      msMeetInit();
-    }else if (window.APP.store.state.profile.microsoftUser && !this.accessToken) {
-      try {
-        //  try silent login
-        const account = this.getPublicClientApplication().getAllAccounts()[0];
-        const accessTokenRequest = {
-          scopes: getScopes(),
-          account: account
-        };
-        let authenticationResult = await this.getPublicClientApplication().acquireTokenSilent(accessTokenRequest);
-        this.initWithToken(authenticationResult.accessToken);
-        await this.nativeLogin();
-      } catch (err) {
-        console.error(err);
-        // logout Moz to be sync
-        //this.store.state.profile.microsoftUser = false; //will be done by the logout/signout
-        this.accessToken = null;//passive clean of acces token
-        window.APP.store.update({
-          profile: {
-            phoneNumber: null,
-            jobTitle: null,
-            companyName: null,
-            microsoftUserprofilePicture: null,
-            microsoftUser: null
-          }, activity: { hasChangedName: false, hasChangedPicture: false }
-        });
+        try{
+          const cred = await this.initBasicInfo();
+          await this.initTeamsFxProvider(cred, getScopes());
+          Providers.globalProvider.setState(ProviderState.SignedIn);
+          console.log("passiveAuth",cred);
+          this.initBasic(await cred.getUserInfo());
+          this.nativeLogin();
+          passiveAuthInProgress = false;
+        }catch (e) {
+          console.error(e);
+          passiveAuthInProgress = false;
+          throw e;
+        }
+      } else if (window.APP.store.state.profile.microsoftUser && !this.accessToken) {
+        try {
+          //  try silent login
+          const account = this.getPublicClientApplication().getAllAccounts()[0];
+          const accessTokenRequest = {
+            scopes: getScopes(),
+            account: account
+          };
+          let authenticationResult = await this.getPublicClientApplication().acquireTokenSilent(accessTokenRequest);
+          this.initWithToken(authenticationResult.accessToken);
+          await this.nativeLogin();
+          passiveAuthInProgress = false;
+        } catch (err) {
+          console.error(err);
+          // logout Moz to be sync
+          //this.store.state.profile.microsoftUser = false; //will be done by the logout/signout
+          this.accessToken = null;//passive clean of acces token
+          window.APP.store.update({
+            profile: {
+              phoneNumber: null,
+              jobTitle: null,
+              companyName: null,
+              microsoftUserprofilePicture: null,
+              microsoftUser: null
+            }, activity: {hasChangedName: false, hasChangedPicture: false}
+          });
+          passiveAuthInProgress = false;
+        }
       }
     }
   }
@@ -160,12 +261,38 @@ export class MicrosoftLoginService extends Component {
 
   async login() {
     try {
-      let response = await this.getPublicClientApplication().loginPopup();
-      await this.initWithToken(response.accessToken);
+      if(msTeams()){
+        this.userInteractionAuth();
+      }else {
+        let response = await this.getPublicClientApplication().loginPopup();
+        await this.initWithToken(response.accessToken);
+      }
     } catch (error) {
       console.log("error", error);
     }
 
+  }
+
+  async userInteractionAuth(consentNeeded) {
+    //To test and revok application auth => https://myapplications.microsoft.com/
+    console.log("userInteractionAuth");
+    const cred = await this.initBasicInfo();
+    //await teamsAuth();
+    await this.initTeamsFxProvider(cred, getScopes());
+    await this.checkIsConsentNeeded(consentNeeded);
+    return cred;
+  }
+
+  async checkIsConsentNeeded(consentNeeded) {
+    try {
+      const token = await credential?.getToken(getScopes());
+      Providers.globalProvider.setState(ProviderState.SignedIn);
+      events.emit(AUTH_TOKEN,{ token: token});
+      sendAuthToken({ token: token});
+    } catch (error) {
+      Providers.globalProvider.setState(ProviderState.SignedOut);
+      consentNeeded();
+    }
   }
 
   getToken() {
@@ -261,6 +388,13 @@ export class MicrosoftLoginService extends Component {
       if(this.publicClientApplication) {
         return this.getPublicClientApplication().logoutPopup();
       }
+    }
+    if (Providers.globalProvider.state === ProviderState.SignedIn) {
+      if (Providers.globalProvider && Providers.globalProvider.logout) {
+        await Providers.globalProvider.logout();
+      }
+      Providers.globalProvider.setState(ProviderState.SignedOut);
+      //meetVsTeamsBridge.sendIframeMessage(RELOAD);//Commented this because I suspect it cause a reload loop
     }
   }
 

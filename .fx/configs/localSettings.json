@@ -5,9 +5,9 @@
     },
     "auth": {
         "clientId": "c89c5d54-37ec-49d6-952a-befc9b770079",
-        "clientSecret": "crypto_1d337d094dbd4acb92a4f605948cac6db3d3478df5dd90835ed2113a4cd07a571cd9ea4fb472a84d6c506633960d54c2605a531726d1e0de7fdbc63f0571d7bfa0fcb0ecf5b969887fd597ed2f0911e6af45c16ee786df6ef728258238fbb7e86c7fe1c39eb22ba11ae147b50f7236dc28a32da473d0dc0c43480ef11c6e0472ebeddc40d8",
+        "clientSecret": "crypto_0edfc7c10cab9a713088bb1cbb0cd465d4be521cfc5b3b7e2285c04d1949e047c32e38ea961112e8e1d9adc416aff8aa58b5b70e7ac7174e5afb8dbf3072533e378f99ede46cf3ac78de5555feb42c2ed38f88cb64fb7f4ee247efa1b79ea92d7b38b9ebcf0db313b13e60d641bb2952328a56cf709432bfea45f5638ec45ed48a1a746ce3",
         "objectId": "742afe70-12a0-40ba-809c-819ad63c9dba",
-        "oauth2PermissionScopeId": "5cacb41a-7ef2-424b-8807-c5f3fdf5252a",
+        "oauth2PermissionScopeId": "47f1a25d-29c8-45f3-a78a-ebf19a6ec3e9",
         "oauthAuthority": "https://login.microsoftonline.com/48caed5d-d20d-40ce-b0cd-9261fc5d8f83",
         "oauthHost": "https://login.microsoftonline.com",
         "applicationIdUris": "api://localhost/c89c5d54-37ec-49d6-952a-befc9b770079",
