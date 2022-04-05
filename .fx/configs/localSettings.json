@@ -4,20 +4,20 @@
         "teamsAppId": "ed34160a-58d9-4682-b4fc-f8d17390eab3"
     },
     "auth": {
-        "clientId": "c89c5d54-37ec-49d6-952a-befc9b770079",
-        "clientSecret": "crypto_c58a3647d710d327df3298042a9393a69123cac0427a2d89461d7b11ea27d0fe8b05e4b538cdf51029ce25cd2d8eed9d68726f8de3e00ccad0ce559d618d5b880615b2699cad34f00b59879a5aa110258fcec4434f90c0d9cc542f5ec1044d69d33e845b7b8c1e4bda90f603875161d2888e5902ae2812b65468cf93120bf536d8d96df192",
+        "clientId": "cc9c5d54-37ec-49d6-952a-befc9b770079",
+        "clientSecret": "crypto_3a832c08e803f122076f522df922b8012147fffd5b67de07ac4576e8d71518480cccda4a1632a870c6930370539c903fa9cad76ec5737ae6cb4145364ce5850b079999aa207d52d6d128550e41b818f0af7a6b26245c06ae5b5c41bd79fb06b496cd8cdddffefc16864417ee41fb4782f5edfe004ca2e1fa136e2620d1dc7a2aa3ff787942",
         "objectId": "742afe70-12a0-40ba-809c-819ad63c9dba",
-        "oauth2PermissionScopeId": "3962f6c1-d387-4d36-911a-922c7e8e3683",
+        "oauth2PermissionScopeId": "79c1fe89-74e9-4b3d-9f03-27112ebba73b",
         "oauthAuthority": "https://login.microsoftonline.com/48caed5d-d20d-40ce-b0cd-9261fc5d8f83",
         "oauthHost": "https://login.microsoftonline.com",
-        "applicationIdUris": "api://localhost/c89c5d54-37ec-49d6-952a-befc9b770079",
+        "applicationIdUris": "api://localhost/cc9c5d54-37ec-49d6-952a-befc9b770079",
         "tenantId": "48caed5d-d20d-40ce-b0cd-9261fc5d8f83"
     },
     "frontend": {
         "browser": "none",
         "https": true,
-        "sslCertFile": "C:/Users/Pierre-HenriFRICOT/.fx/certificate/localhost.crt",
-        "sslKeyFile": "C:/Users/Pierre-HenriFRICOT/.fx/certificate/localhost.key",
+        "sslCertFile": "C:/Users/pierr/.fx/certificate/localhost.crt",
+        "sslKeyFile": "C:/Users/pierr/.fx/certificate/localhost.key",
         "tabDomain": "localhost",
         "tabEndpoint": "https://localhost:53000",
         "tabIndexPath": "/index.html#"

@@ -11,7 +11,6 @@ import { TeamsFxProvider } from "@microsoft/mgt-teamsfx-provider";
 import { loadConfiguration, TeamsUserCredential, ResourceType, LogLevel, setLogLevel, setLogFunction } from "@microsoft/teamsfx";
 import EventEmitter from "eventemitter3";
 import * as microsoftTeams from "@microsoft/teams-js";
-import {deepLinkService} from "./DeepLinkService";
 
 let credential;
 export const startLoginPageUrl = window.location.origin;
@@ -34,10 +33,10 @@ export function getScopes(){
   //Try to avoid admin consent for authorization
   return [
     // Teams app permission
-    "Contacts.Read", //use for visit card
-    "Presence.Read.All", //use for visit card
+    //"Contacts.Read", //use for visit card
+    //"Presence.Read.All", //use for visit card
+    //"People.Read", //use for visit card
     "User.ReadBasic.All", // Use for basic email, call and chat call to action, Avatar image and name - Mandatory
-    "People.Read", //use for visit card
     //Permission for the web part
     "profile",//Avatar image and name - Mandatory
     "openid",//Avatar image and name - Mandatory
@@ -139,7 +138,7 @@ export class MicrosoftLoginService extends Component {
       passiveAuthInProgress = true;
       setTimeout(()=>{
         passiveAuthInProgress = false;
-      },20000)
+      },20000);
       //if msteams
       // log using token from msteams
       //if cookie oauth microsoft
@@ -161,9 +160,17 @@ export class MicrosoftLoginService extends Component {
           const cred = await this.initBasicInfo();
           await this.initTeamsFxProvider(cred, getScopes());
           Providers.globalProvider.setState(ProviderState.SignedIn);
-          console.log("passiveAuth",cred);
-          this.initBasic(await cred.getUserInfo());
-          this.nativeLogin();
+          const userInfo = await cred.getUserInfo();
+          try{
+            console.log("passiveAuth (sso):", cred);
+            await this.initWithToken(cred.ssoToken.token);
+            await this.nativeLogin();
+          }catch(e) {
+            this.setNewToken(null);//erase invalid token from failed sso auth
+            console.log("passiveAuth (basic):", cred);
+            await this.initBasic(userInfo);
+            await this.nativeLogin();
+          }
           passiveAuthInProgress = false;
         }catch (e) {
           console.error(e);
@@ -206,6 +213,7 @@ export class MicrosoftLoginService extends Component {
     if(this.accessToken){
       return; //if we have an access token that means we are fully authenticated
     }
+    console.log("initBasic : ",basicUserInfo);
     //in this case we login without a graph token
     //only this data available {"displayName":"Admin Aptero","objectId":"abb64646-d3e2-473d-8d13-0b6faff23605","preferredUserName":"admin@aptero.co"}
     this.user = {};
@@ -223,6 +231,7 @@ export class MicrosoftLoginService extends Component {
         microsoftUser: this.user.id
       }, activity: { hasChangedName: true, hasChangedPicture: true }
     });
+    await new Promise(resolve => {setTimeout(resolve,0)});//await store.update()
   }
 
   setNewToken(token){
@@ -338,7 +347,7 @@ export class MicrosoftLoginService extends Component {
                                                  auth_payload: auth_payload
                                                }) => {
             channel.on("auth_credentials", async ({ credentials: token, payload: payload }) => {
-              await this.handleProfile(payload.email, token, hubChannel);
+              await this.handleProfile(payload.email, token);
               resolve();
             });
             channel.push("auth_verified", { token: auth_token, payload: auth_payload });
@@ -355,7 +364,7 @@ export class MicrosoftLoginService extends Component {
     });
   }
 
-  async handleProfile(email, token, hubChannel) {
+  async handleProfile(email, token) {
     const user = this.getUserAccount();
     const companyName = this.organization;
     const profilePicture = this.displayProfilePhoto();
@@ -370,8 +379,11 @@ export class MicrosoftLoginService extends Component {
         microsoftUser: user.id
       }, activity: { hasChangedName: true, hasChangedPicture: true }
     });
-
-    hubChannel._signedIn = true;
+    await new Promise(resolve => {setTimeout(resolve,0)});//await store.update()
+    if (window.APP.hubChannel) {
+      await window.APP.hubChannel.signIn(token);
+      console.log("sign in : "+token);
+    }
   }
 
   async logout() {

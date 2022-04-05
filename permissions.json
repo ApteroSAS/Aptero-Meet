@@ -2,10 +2,7 @@
     {
         "resource": "Microsoft Graph",
         "delegated": [
-            "Contacts.Read",
-            "Presence.Read.All",
             "User.ReadBasic.All",
-            "People.Read",
             "profile",
             "openid",
             "Files.Read",
