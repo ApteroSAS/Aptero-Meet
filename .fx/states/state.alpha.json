@@ -27,7 +27,7 @@
         "oauth2PermissionScopeId": "5049a16e-0537-43df-9aa5-383c10b89caa",
         "tenantId": "48caed5d-d20d-40ce-b0cd-9261fc5d8f83",
         "oauthHost": "https://login.microsoftonline.com",
-        "oauthAuthority": "https://login.microsoftonline.com/48caed5d-d20d-40ce-b0cd-9261fc5d8f83",
+        "oauthAuthority": "https://login.microsoftonline.com/common",
         "applicationIdUris": "api://alphahub.aptero.co/c89c5d54-37ec-49d6-952a-befc9b770079"
     },
     "fx-resource-frontend-hosting": {

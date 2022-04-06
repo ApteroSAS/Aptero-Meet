@@ -27,7 +27,7 @@
         "oauth2PermissionScopeId": "6872fde7-3826-4bfb-b8de-598a294aa0a9",
         "tenantId": "48caed5d-d20d-40ce-b0cd-9261fc5d8f83",
         "oauthHost": "https://login.microsoftonline.com",
-        "oauthAuthority": "https://login.microsoftonline.com/48caed5d-d20d-40ce-b0cd-9261fc5d8f83",
+        "oauthAuthority": "https://login.microsoftonline.com/common",
         "applicationIdUris": "api://meet.aptero.co/8cb358b6-25aa-4afc-b403-3362db42ea49"
     },
     "fx-resource-frontend-hosting": {
