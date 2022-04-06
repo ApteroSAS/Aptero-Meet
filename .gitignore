@@ -70,3 +70,7 @@ src/assets/locales/extracted-messages.json
 /docker/www
 
 #package-lock.json do not ignore it contains npm to yarn warning
+/.fx/configs/localSettings.json
+/build/appPackage/appPackage.local.zip
+/build/appPackage/manifest.local.json
+/tabs/.env.teamsfx.local
