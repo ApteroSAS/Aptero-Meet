@@ -1,6 +1,7 @@
 import { PublicClientApplication } from "@azure/msal-browser";
 import configs from "../../../utils/configs";
 import { getScopes } from "./scope";
+let graph = require("@microsoft/microsoft-graph-client");
 
 
 export class MicrosoftOauthLoginService {
@@ -53,7 +54,12 @@ export class MicrosoftOauthLoginService {
 
   setNewToken(token) {
     this.accessToken = token;
-    this.microsoftGraphService.setToken(this.accessToken);
+    const client = graph.Client.init({
+      authProvider: (done) => {
+        done(null, this.accessToken);
+      }
+    },this.accessToken);
+    this.microsoftGraphService.init(client);
   }
 
   async initWithToken(token) {

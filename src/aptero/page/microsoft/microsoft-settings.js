@@ -14,14 +14,19 @@ import {
 
 import * as microsoftTeams from "@microsoft/teams-js";
 import {AccountAuth} from "../../react-components/msft/AccountAuth";
-import {Button, Input} from "@fluentui/react-northstar";//https://fluentsite.z22.web.core.windows.net/0.60.1
+import { Button, Input, Loader } from "@fluentui/react-northstar";//https://fluentsite.z22.web.core.windows.net/0.60.1
 import {roomService} from "../../service/MicrosoftIntegration/RoomService";
 import {FormattedMessage} from "react-intl";
 import {CHANGE_SETTINGS_URL, getMSEvents} from "../../service/MicrosoftIntegration/MsTeams";
 
 registerTelemetry("/microsoft-settings", "microsoft-settings");
 import { Provider, teamsTheme } from '@fluentui/react-northstar'
-import { getAuthEvents, LOGGED_BASIC_INFO, TOKEN_RECEIVED } from "../../service/MicrosoftIntegration/AuthEvent";
+import {
+    getAuthEvents,
+    LOGGED_BASIC_INFO,
+    SIGN_IN_COMPLETE,
+    TOKEN_RECEIVED
+} from "../../service/MicrosoftIntegration/AuthEvent";
 import { getCredential } from "../../service/MicrosoftIntegration/TeamsLoginService";
 
 
@@ -77,22 +82,12 @@ class TabConfig extends React.Component {
             this.setState({logged: true});
         };
 
-        getAuthEvents().on(LOGGED_BASIC_INFO, onLogged);
-        getAuthEvents().on(TOKEN_RECEIVED, onLogged);
+        getAuthEvents().on(SIGN_IN_COMPLETE, onLogged);
 
         this.removeListeners = () => {
             getMSEvents().off(CHANGE_SETTINGS_URL, callbackUrl);
-            getAuthEvents().off(LOGGED_BASIC_INFO, onLogged);
-            getAuthEvents().off(TOKEN_RECEIVED, onLogged);
+            getAuthEvents().off(SIGN_IN_COMPLETE, onLogged);
         };
-        const cred = getCredential();
-        cred.getUserInfo().then(data => {
-            //{"displayName":"Admin Aptero","objectId":"abb64646-d3e2-473d-8d13-0b6faff23605","preferredUserName":"admin@aptero.co"}
-            console.log("teams user info : ", data);
-            if (data.preferredUserName) {
-                this.setState({logged: data});
-            }
-        });
         /**
          * When the user clicks "Save", save the url for your configured tab.
          * This allows for the addition of query string parameters based on
@@ -153,6 +148,8 @@ class TabConfig extends React.Component {
                         <div style={{margin: "8px"}}>
                             <h2><FormattedMessage id="microsoft.settings.identity" defaultMessage="Identity"/></h2>
                             <AccountAuth/>
+                            {!this.state.logged && <Loader />}
+
                             {this.state.logged && <>
                                 <h2><FormattedMessage id="microsoft.settings.room" defaultMessage="Room"/></h2>
                                 {this.state.url && <>
@@ -182,7 +179,7 @@ class TabConfig extends React.Component {
                                 </>
                                 }
                                 {!this.state.url &&
-                                    <SettingsPage basicInfo={this.state.logged}/>
+                                    <SettingsPage/>
                                 }
                             </>}
                             <span onClick={() => {

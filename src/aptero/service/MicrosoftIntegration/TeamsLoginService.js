@@ -1,5 +1,5 @@
 import configs from "../../../utils/configs";
-import { AUTH_TOKEN, getMSEvents, msTeams, sendAuthToken } from "./MsTeams";
+import { AUTH_TOKEN , msTeams, sendAuthToken } from "./MsTeams";
 import { Providers, ProviderState } from "@microsoft/mgt-react";
 import { TeamsFxProvider } from "@microsoft/mgt-teamsfx-provider";
 import {
@@ -8,14 +8,14 @@ import {
   ResourceType,
   LogLevel,
   setLogLevel,
-  setLogFunction
+  setLogFunction, createMicrosoftGraphClient
 } from "@microsoft/teamsfx";
 import * as microsoftTeams from "@microsoft/teams-js";
 import { getAuthEvents, LOGGED_BASIC_INFO } from "./AuthEvent";
 import { getScopes } from "./scope";
 
 let credential;
-export const startLoginPageUrl = window.location.origin;
+export const startLoginPageUrl = window.location.origin + "/auth-start.html";
 export const functionEndpoint = window.location.origin + "/auth-start.html";//process.env.REACT_APP_FUNC_ENDPOINT;
 export const clientId = configs.APP_CONFIG.MICROSOFT_APP_ID; //process.env.REACT_APP_CLIENT_ID;
 
@@ -85,6 +85,30 @@ export class TeamsLoginService {
     Providers.globalProvider = provider;
   }
 
+  async initGraph(){
+    try {
+      const token = await credential?.getToken(getScopes());
+      const graph = createMicrosoftGraphClient(credential, getScopes());
+      this.microsoftGraphService.init(graph,token);
+    }catch (e) {
+      console.error(e);
+    }
+  }
+
+  async userInteractionAuth(consentNeeded) {
+    //To test and revok application auth => https://myapplications.microsoft.com/
+    console.log("userInteractionAuth");
+    const cred = await this.initBasicInfo();
+    cred.login(getScopes());
+    //await teamsAuth();
+    await this.initGraph();
+    await this.initTeamsFxProvider(cred, getScopes());
+    const userInfo = await cred.getUserInfo();
+    await this.initBasic(userInfo);
+    await this.checkIsConsentNeeded(consentNeeded);
+    return cred;
+  }
+
   async passiveLogin() {
     //if msteams
     // log using token from msteams
@@ -97,6 +121,7 @@ export class TeamsLoginService {
         await this.initTeamsFxProvider(cred, getScopes());
         const userInfo = await cred.getUserInfo();
         console.log("passiveAuth (basic):", cred);
+        await this.initGraph();
         await this.initBasic(userInfo);
         Providers.globalProvider.setState(ProviderState.SignedIn);
       } catch (e) {
@@ -107,7 +132,10 @@ export class TeamsLoginService {
   }
 
   async initBasic(basicUserInfo) {
-    if (this.msToNativeLoginBridge.getProfile().microsoftUser) {
+    if (this.msToNativeLoginBridge.getProfile().microsoftUser &&
+      window.APP.store.state.credentials.token &&
+      this.msToNativeLoginBridge.getProfile().displayName
+    ) {
       return;
     }
     console.log("initBasic : ", basicUserInfo);
@@ -118,18 +146,37 @@ export class TeamsLoginService {
     user.displayName = basicUserInfo.displayName;
     user.id = basicUserInfo.objectId;
 
+
+    let profilePicture = "";
+    let organization = "";
+    let phoneNumber = "";
+    let jobTitle = "";
+    try {
+      const user = await this.microsoftGraphService.getUserDetails();
+      phoneNumber= user.mobilePhone;
+      jobTitle= user.jobTitle;
+      profilePicture = await this.microsoftGraphService.getUserPhoto();
+      organization = await this.microsoftGraphService.getUserOrganization();
+    } catch (e) {
+      //ignore error from beta organisation
+      console.error(e);
+    }
+    const cred = await this.initBasicInfo();
+    let token = cred.ssoToken.token;
+    try {
+      token = await credential?.getToken(getScopes());
+    }catch (e) {
+      //ignore
+    }
     await this.msToNativeLoginBridge.nativeLogin({
       email: user.email,
       displayName: user.displayName,
-      phoneNumber: null,
-      jobTitle: null,
-      companyName: null,
-      microsoftUserprofilePicture: null,
+      phoneNumber: phoneNumber,
+      jobTitle: jobTitle,
+      companyName: organization,
+      microsoftUserprofilePicture: profilePicture,
       microsoftUser: user.id
-    });
-    await new Promise(resolve => {
-      setTimeout(resolve, 0);
-    });//await store.update()
+    },token);
   }
 
   async login() {
@@ -141,16 +188,6 @@ export class TeamsLoginService {
       console.log("error", error);
     }
 
-  }
-
-  async userInteractionAuth(consentNeeded) {
-    //To test and revok application auth => https://myapplications.microsoft.com/
-    console.log("userInteractionAuth");
-    const cred = await this.initBasicInfo();
-    //await teamsAuth();
-    await this.initTeamsFxProvider(cred, getScopes());
-    await this.checkIsConsentNeeded(consentNeeded);
-    return cred;
   }
 
   async checkIsConsentNeeded(consentNeeded) {

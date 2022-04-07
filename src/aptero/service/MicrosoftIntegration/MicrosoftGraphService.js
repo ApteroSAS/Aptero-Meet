@@ -2,17 +2,12 @@ import { Buffer } from "buffer";
 import axios from "axios";
 
 Buffer.from("anything", "base64");
-let graph = require("@microsoft/microsoft-graph-client");
 
 export class MicrosoftGraphService{
 
-  setToken(accessToken){
-    this.accessToken = accessToken;
-    this.client = graph.Client.init({
-      authProvider: (done) => {
-        done(null, accessToken);
-      }
-    });
+  init(client,token){
+    this.accessToken = token;//TODO find this from client
+    this.client = client;
   }
 
   async getUserDetails() {
