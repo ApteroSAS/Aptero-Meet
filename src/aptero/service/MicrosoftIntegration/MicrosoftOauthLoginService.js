@@ -1,0 +1,106 @@
+import { PublicClientApplication } from "@azure/msal-browser";
+import configs from "../../../utils/configs";
+import { getScopes } from "./scope";
+
+
+export class MicrosoftOauthLoginService {
+  accessToken = null;
+
+  constructor(microsoftGraphService, msToNativeLoginBridge) {
+    this.microsoftGraphService = microsoftGraphService;
+    this.msToNativeLoginBridge = msToNativeLoginBridge;
+  }
+
+  getPublicClientApplication() {
+    if (!this.publicClientApplication) {
+      this.publicClientApplication = new PublicClientApplication({
+        auth: {
+          clientId: configs.APP_CONFIG.MICROSOFT_APP_ID,
+          redirectUrl: window.location.origin + "/signin",
+          // to allow only AAD accounts: authority:https://login.microsoftonline.com/organizations
+          authority: configs.APP_CONFIG.MICROSOFT_APP_AUTHORITY || "https://login.microsoftonline.com/common",
+          scopes: getScopes()
+        },
+        cache: {
+          cacheLocation: "sessionStorage",
+          storeAuthStateInCookie: true
+        }
+      });
+    }
+    return this.publicClientApplication;
+  }
+
+  async passiveLogin() {
+    if (window.APP.store.state.profile.microsoftUser && !this.accessToken) {
+      try {
+        //  try silent login
+        const account = this.getPublicClientApplication().getAllAccounts()[0];
+        const accessTokenRequest = {
+          scopes: getScopes(),
+          account: account
+        };
+        let authenticationResult = await this.getPublicClientApplication().acquireTokenSilent(accessTokenRequest);
+        this.initWithToken(authenticationResult.accessToken);
+      } catch (err) {
+        console.error(err);
+        // logout Moz to be sync
+        //this.store.state.profile.microsoftUser = false; //will be done by the logout/signout
+        this.accessToken = null;//passive clean of acces token
+        this.msToNativeLoginBridge.clearProfile();
+      }
+    }
+  }
+
+  setNewToken(token) {
+    this.accessToken = token;
+    this.microsoftGraphService.setToken(this.accessToken);
+  }
+
+  async initWithToken(token) {
+    this.setNewToken(token);
+    const user = await this.microsoftGraphService.getUserDetails();
+    let profilePicture = "";
+    let organization = "";
+    try {
+      profilePicture = await this.microsoftGraphService.getUserPhoto();
+      organization = await this.microsoftGraphService.getUserOrganization();
+    } catch (e) {
+      //ignore error from beta organisation
+      console.error(e);
+    }
+
+    await this.msToNativeLoginBridge.nativeLogin({
+      email: user.userPrincipalName || user.mail || user.email,
+      displayName: user.displayName,
+      phoneNumber: user.mobilePhone,
+      jobTitle: user.jobTitle,
+      companyName: organization,
+      microsoftUserprofilePicture: profilePicture,
+      microsoftUser: user.id
+    },token);
+  }
+
+  async login() {
+    try {
+      const loginRequest = {
+        scopes: getScopes()
+      };
+      let response = await this.getPublicClientApplication().loginPopup(loginRequest);
+      await this.initWithToken(response.accessToken);
+    } catch (error) {
+      console.log("error", error);
+    }
+
+  }
+
+  async logout() {
+    if (window.APP.store.state.profile.microsoftUser) {
+      this.msToNativeLoginBridge.clearProfile();
+      if (this.publicClientApplication) {
+        return this.getPublicClientApplication().logoutPopup();
+      }
+    }
+  }
+
+}
+

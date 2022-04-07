@@ -25,13 +25,13 @@ export class MicrosoftGraphService{
       .get();
   }
 
-  async getUserOrganization(account_type) {
+  async getUserOrganization() {
     //https://graph.microsoft.com/v1.0/organization
     //check if the  user account is a work account (MSA For personal account and AAD for work account)
-    if (account_type === "AAD") {
+    try{
       const organization = await this.client.api("/organization").get();
       return organization.value[0].displayName;
-    } else {
+    } catch(e) {
       return null;
     }
 

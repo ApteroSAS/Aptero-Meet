@@ -95,16 +95,10 @@ export function SubmitEmail({ onSubmitEmail, onSubmitEmailMicrosoftLogin, initia
     [onSubmitEmail, email]
   );
   const onSubmitEmailMicrosoft = useCallback(
-    e => {
+    async e => {
       e.preventDefault();
       try {
-        microsoftLoginService.login().then(() => {
-          const user = microsoftLoginService.getUserAccount();
-          if (user) {
-            onSubmitEmailMicrosoftLogin(user);
-          }
-
-        });
+          onSubmitEmailMicrosoftLogin();
       } catch (error) {
         console.log("erreur is ", error);
       }

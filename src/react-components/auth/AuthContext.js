@@ -91,7 +91,7 @@ export function AuthContextProvider({ children, store }) {
   );
   const signInMicrosoft = useCallback(
     async () =>{
-      await microsoftLoginService.nativeLogin();
+      await microsoftLoginService.login();
     }
   );
   const verify = useCallback(

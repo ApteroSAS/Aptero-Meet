@@ -2,6 +2,7 @@
     {
         "resource": "Microsoft Graph",
         "delegated": [
+            "User.Read",
             "User.ReadBasic.All",
             "profile",
             "openid",

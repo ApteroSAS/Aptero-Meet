@@ -502,13 +502,6 @@ export class UIRoot extends Component {
           onClose: onContinueAfterSignIn || this.closeDialog
         });
          await authChannel.convertToHubToken(user, this.props.hubChannel);
-      
-        
-        //onSubmitEmailMicrosoftLogin(user);
-   
-   
-
-      //await authComplete;
 
       this.setState({ signedIn: true });
       this.showNonHistoriedDialog(RoomSignInModalContainer, {

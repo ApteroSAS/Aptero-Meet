@@ -8,9 +8,7 @@ import {SettingsPage} from "../../react-components/settings/SettingsPage";
 import {AuthContextProvider} from "../../../react-components/auth/AuthContext";
 import {ThemeProvider} from "../../../react-components/styles/theme";
 import {
-    getAuthEvents, getCredential,
-    LOGGED_BASIC_INFO,
-    microsoftLoginService, TOKEN_RECEIVED
+    microsoftLoginService
 } from "../../service/MicrosoftIntegration/MicrosoftLoginService";
 
 
@@ -23,6 +21,8 @@ import {CHANGE_SETTINGS_URL, getMSEvents} from "../../service/MicrosoftIntegrati
 
 registerTelemetry("/microsoft-settings", "microsoft-settings");
 import { Provider, teamsTheme } from '@fluentui/react-northstar'
+import { getAuthEvents, LOGGED_BASIC_INFO, TOKEN_RECEIVED } from "../../service/MicrosoftIntegration/AuthEvent";
+import { getCredential } from "../../service/MicrosoftIntegration/TeamsLoginService";
 
 
 const store = new Store();
@@ -45,7 +45,7 @@ class TabConfig extends React.Component {
         size: {width: "100%", height: "2000px"},
         logged: null,
         suggestedDisplayName: "Virtual Meeting",
-    }
+    };
     removeListeners = () => {
     };
 
@@ -69,13 +69,13 @@ class TabConfig extends React.Component {
             } catch (ex) {
                 console.error(ex)
             }
-        }
+        };
         getMSEvents().on(CHANGE_SETTINGS_URL, callbackUrl);
 
         const onLogged = () => {
             console.log("onLogged")
             this.setState({logged: true});
-        }
+        };
 
         getAuthEvents().on(LOGGED_BASIC_INFO, onLogged);
         getAuthEvents().on(TOKEN_RECEIVED, onLogged);
@@ -84,7 +84,7 @@ class TabConfig extends React.Component {
             getMSEvents().off(CHANGE_SETTINGS_URL, callbackUrl);
             getAuthEvents().off(LOGGED_BASIC_INFO, onLogged);
             getAuthEvents().off(TOKEN_RECEIVED, onLogged);
-        }
+        };
         const cred = getCredential();
         cred.getUserInfo().then(data => {
             //{"displayName":"Admin Aptero","objectId":"abb64646-d3e2-473d-8d13-0b6faff23605","preferredUserName":"admin@aptero.co"}
@@ -92,7 +92,7 @@ class TabConfig extends React.Component {
             if (data.preferredUserName) {
                 this.setState({logged: data});
             }
-        })
+        });
         /**
          * When the user clicks "Save", save the url for your configured tab.
          * This allows for the addition of query string parameters based on
