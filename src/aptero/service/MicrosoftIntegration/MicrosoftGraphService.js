@@ -10,6 +10,10 @@ export class MicrosoftGraphService{
     this.client = client;
   }
 
+  isInitialized(){
+    return this.client;
+  }
+
   async getUserDetails() {
     return await this.client.api("/me").get();
   }

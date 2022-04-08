@@ -75,7 +75,7 @@ export class MicrosoftOauthLoginService {
       console.error(e);
     }
 
-    await this.msToNativeLoginBridge.nativeLogin({
+    await this.msToNativeLoginBridge.setProfile({
       email: user.userPrincipalName || user.mail || user.email,
       displayName: user.displayName,
       phoneNumber: user.mobilePhone,
@@ -83,7 +83,9 @@ export class MicrosoftOauthLoginService {
       companyName: organization,
       microsoftUserprofilePicture: profilePicture,
       microsoftUser: user.id
-    },token);
+    });
+    const email = user.userPrincipalName || user.mail || user.email;
+    await this.msToNativeLoginBridge.nativeLogin(email,token);
   }
 
   async login() {

@@ -37,6 +37,10 @@ export class MsToNativeLoginBridge {
       credentials: { email, token }, activity: {hasChangedName: false, hasChangedPicture: false}
     });
     await new Promise(resolve => {setTimeout(resolve,0)});//await store.update()
+    if (window.APP.hubChannel) {
+      await window.APP.hubChannel.signIn(token);
+      console.log("Native Sign In : "+token);
+    }
   }
 
   getUserAccount() {
@@ -55,7 +59,7 @@ export class MsToNativeLoginBridge {
     return window.APP.store.state.profile || {};
   }
 
-  async nativeLogin(profile,accessToken) {
+  async nativeLogin(email,accessToken) {
     if(window.APP.store.state.credentials.token){
       return;
     }
@@ -79,12 +83,10 @@ export class MsToNativeLoginBridge {
                                                }) => {
             channel.on("auth_credentials", async ({ credentials: token, payload: payload }) => {
               await this.setCredential(payload.email, token);
-              await this.setProfile(profile);
               resolve();
             });
             channel.push("auth_verified", { token: auth_token, payload: auth_payload });
           });
-          const email = profile.userPrincipalName || profile.mail || profile.email;
           //TODO security ensure we always send acces token
           if(!accessToken || !email){
             reject(new Error());

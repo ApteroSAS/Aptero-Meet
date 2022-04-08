@@ -109,6 +109,7 @@ import axios from "axios";
 import { msTeams } from "../aptero/service/MicrosoftIntegration/MsTeams";
 import { store } from "emoji-mart";
 import { propertiesService } from "../aptero/properties/propertiesService";
+import { microsoftLoginService } from "../aptero/service/MicrosoftIntegration/MicrosoftLoginService";
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 const IN_ROOM_MODAL_ROUTER_PATHS = ["/media"];
 const IN_ROOM_MODAL_QUERY_VARS = ["media_source"];
@@ -1502,6 +1503,14 @@ export class UIRoot extends Component {
               label: "Preferences",
               icon: SettingsIcon,
               onClick: () => this.setState({showPrefs: true})
+            },
+            {
+              id: "authorize",
+              label: "Authorize",
+              icon: SettingsIcon,
+              onClick: () => {
+                microsoftLoginService.login();
+              }
             }
           ].filter(item => item)
         },

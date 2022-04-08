@@ -87,11 +87,15 @@ export class TeamsLoginService {
 
   async initGraph(){
     try {
-      const token = await credential?.getToken(getScopes());
       const graph = createMicrosoftGraphClient(credential, getScopes());
+      const token = await credential?.getToken(getScopes());
       this.microsoftGraphService.init(graph,token);
     }catch (e) {
-      console.error(e);
+      if(e.toString().indexOf("please login first")!==-1){
+        console.info("app not authorized - no graph support")
+      }else {
+        console.error(e);
+      }
     }
   }
 
@@ -99,12 +103,12 @@ export class TeamsLoginService {
     //To test and revok application auth => https://myapplications.microsoft.com/
     console.log("userInteractionAuth");
     const cred = await this.initBasicInfo();
-    cred.login(getScopes());
+    cred.login(getScopes());//Trigger authorization popup
     //await teamsAuth();
     await this.initGraph();
     await this.initTeamsFxProvider(cred, getScopes());
     const userInfo = await cred.getUserInfo();
-    await this.initBasic(userInfo);
+    await this.initBasic(userInfo,true);
     await this.checkIsConsentNeeded(consentNeeded);
     return cred;
   }
@@ -122,7 +126,7 @@ export class TeamsLoginService {
         const userInfo = await cred.getUserInfo();
         console.log("passiveAuth (basic):", cred);
         await this.initGraph();
-        await this.initBasic(userInfo);
+        await this.initBasic(userInfo,false);
         Providers.globalProvider.setState(ProviderState.SignedIn);
       } catch (e) {
         console.error(e);
@@ -131,11 +135,26 @@ export class TeamsLoginService {
     }
   }
 
-  async initBasic(basicUserInfo) {
-    if (this.msToNativeLoginBridge.getProfile().microsoftUser &&
-      window.APP.store.state.credentials.token &&
-      this.msToNativeLoginBridge.getProfile().displayName
-    ) {
+  isUserBasicLogged(){
+    return this.msToNativeLoginBridge.getProfile().microsoftUser &&
+      this.msToNativeLoginBridge.getProfile().displayName &&
+      window.APP.store.state.credentials.token;
+  }
+
+  isGraphDataFilled(){
+    return this.msToNativeLoginBridge.getProfile().jobTitle ||
+    this.msToNativeLoginBridge.getProfile().phoneNumber ||
+    this.msToNativeLoginBridge.getProfile().companyName ||
+    this.msToNativeLoginBridge.getProfile().microsoftUserprofilePicture
+  }
+
+  async initBasic(basicUserInfo,force) {
+    if(this.microsoftGraphService.isInitialized() && !this.isGraphDataFilled()){
+      //graph initialized but graph information not set => force relogin with new information
+      force = true;
+    }
+    if (this.isUserBasicLogged() && !force) {
+      //Do not  force login if user is already logged
       return;
     }
     console.log("initBasic : ", basicUserInfo);
@@ -151,24 +170,26 @@ export class TeamsLoginService {
     let organization = "";
     let phoneNumber = "";
     let jobTitle = "";
-    try {
+    if(this.microsoftGraphService.isInitialized()) {
       const user = await this.microsoftGraphService.getUserDetails();
-      phoneNumber= user.mobilePhone;
-      jobTitle= user.jobTitle;
+      phoneNumber = user.mobilePhone;
+      jobTitle = user.jobTitle;
       profilePicture = await this.microsoftGraphService.getUserPhoto();
       organization = await this.microsoftGraphService.getUserOrganization();
-    } catch (e) {
-      //ignore error from beta organisation
-      console.error(e);
     }
     const cred = await this.initBasicInfo();
-    let token = cred.ssoToken.token;
+    let token = user.id;
+    try {
+      token = cred.ssoToken.token;
+    }catch (e) {
+      //ignore
+    }
     try {
       token = await credential?.getToken(getScopes());
     }catch (e) {
       //ignore
     }
-    await this.msToNativeLoginBridge.nativeLogin({
+    await this.msToNativeLoginBridge.setProfile({
       email: user.email,
       displayName: user.displayName,
       phoneNumber: phoneNumber,
@@ -176,7 +197,8 @@ export class TeamsLoginService {
       companyName: organization,
       microsoftUserprofilePicture: profilePicture,
       microsoftUser: user.id
-    },token);
+    });
+    await this.msToNativeLoginBridge.nativeLogin(user.email,token);
   }
 
   async login() {
