@@ -23,15 +23,19 @@ registerTelemetry("/microsoft-settings", "microsoft-settings");
 import { Provider, teamsTheme } from "@fluentui/react-northstar";
 import {
   getAuthEvents,
-  SIGN_IN_COMPLETE,
+  SIGN_IN_COMPLETE
 } from "../../service/MicrosoftIntegration/AuthEvent";
 import { getCredential } from "../../service/MicrosoftIntegration/TeamsLoginService";
-
+import { MeetingSidePanel } from "../../react-components/msft/MeetingSidePanel";
 
 const store = new Store();
 window.APP = { store };
-microsoftLoginService.passiveLogin();
 
+try {
+  microsoftLoginService.passiveLogin();
+}catch (e) {
+  console.error(e);
+}
 /**
  * The 'Config' component is used to display your group tabs
  * user configuration options.  Here you will allow the user to
@@ -200,4 +204,18 @@ class TabConfig extends React.Component {
   }
 }
 
-ReactDOM.render(<TabConfig/>, document.getElementById("home-root"));
+let url = new URL(window.location.href);
+if (url.searchParams.get("sidePanel")) {
+  ReactDOM.render(
+    <Provider theme={teamsTheme}>
+      <WrappedIntlProvider>
+        <AuthContextProvider store={store}>
+          <ThemeProvider store={store}>
+            <MeetingSidePanel/>
+          </ThemeProvider>
+        </AuthContextProvider>
+      </WrappedIntlProvider>
+    </Provider>, document.getElementById("home-root"));
+} else {
+  ReactDOM.render(<TabConfig/>, document.getElementById("home-root"));
+}

@@ -1,3 +1,13 @@
+
+import { getContext, msTeams } from "./aptero/service/MicrosoftIntegration/MsTeams";
+if(msTeams()) {
+  getContext((context)=>{
+    if(context.frameContext === "sidePanel") {
+      window.location.replace(window.location.origin + "/microsoft-settings.html?sidePanel=true");
+    }
+  });
+}
+
 import {
   getCurrentHubId,
   updateVRHudPresenceCount,
@@ -198,7 +208,7 @@ import { microsoftUrlService } from "./aptero/service/MicrosoftIntegration/Micro
 import { apteroService } from "./aptero/ApteroServices";
 import { roomController } from "./aptero/service/api/RoomController";
 import { minimumQualityService } from "./aptero/service/MinimumQualityService";
-import { createTrack, fetchICEservers } from "./aptero/adapter/adapter-config";
+import { fetchICEservers } from "./aptero/adapter/adapter-config";
 import { AdapterWarpper } from "./aptero/adapter/AdapterWrapper";
 //aptero service end
 
@@ -263,7 +273,6 @@ import { ThemeProvider } from "./react-components/styles/theme";
 import { wait } from "./aptero/util/AsyncWaiter";
 import { networkService } from "./aptero/service/NetworkService";
 import { getEntryMode } from "./aptero/util/EntryMode";
-import { msTeams } from "./aptero/service/MicrosoftIntegration/MsTeams";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;

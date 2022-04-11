@@ -29,10 +29,15 @@ export function msTeams(){
   return msmode;
 }
 
-export function getContext(callback){
-  // https://docs.microsoft.com/en-us/microsoftteams/platform/tabs/how-to/access-teams-context
-  //"frameContext": "The context where tab URL is loaded (for example, content, task, setting, remove, sidePanel)",
-  microsoftTeams.getContext(callback);
+export async function getContext(callback){
+  try {
+    await microsoftTeams.initialize();
+    // https://docs.microsoft.com/en-us/microsoftteams/platform/tabs/how-to/access-teams-context
+    //"frameContext": "The context where tab URL is loaded (for example, content, task, setting, remove, sidePanel)",
+    microsoftTeams.getContext(callback);
+  }catch (e) {
+    console.error(e);
+  }
 }
 
 export function processDeepLink(link){

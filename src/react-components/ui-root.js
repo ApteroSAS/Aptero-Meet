@@ -100,17 +100,13 @@ import { apteroService } from "../aptero/ApteroServices";
 import { CustomSidebarContainer } from "../aptero/react-components/CustomSidebarContainer";
 import { customMenuService } from "../aptero/service/CustomMenuService";
 import AptRoot from "../aptero/react-components/AptRoot";
-import { getSelectedPersonId, getSelectedPersonName } from "./room/PeopleSidebarContainer";
+import { getSelectedPersonName } from "./room/PeopleSidebarContainer";
 import { Promise } from "core-js";
-import { CheckUserInfoButton } from "./input/CheckUserInfoButton";
-import { UserProfileVisitCard } from "./room/UserProfileVisitCard";
 import { UserProfileVisitCardContainer } from "./room/UserProfileVisitCardContainer";
 import axios from "axios";
 import { getContext, msTeams } from "../aptero/service/MicrosoftIntegration/MsTeams";
-import { store } from "emoji-mart";
 import { propertiesService } from "../aptero/properties/propertiesService";
 import { microsoftLoginService } from "../aptero/service/MicrosoftIntegration/MicrosoftLoginService";
-import { MeetingSidePanel } from "../aptero/react-components/msft/MeetingSidePanel";
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 const IN_ROOM_MODAL_ROUTER_PATHS = ["/media"];
 const IN_ROOM_MODAL_QUERY_VARS = ["media_source"];
@@ -213,8 +209,6 @@ export class UIRoot extends Component {
     signedIn: false,
     videoShareMediaSource: null,
     showVideoShareFailed: false,
-
-    sidePanelMode:false,
 
     objectInfo: null,
     objectSrc: "",
@@ -1119,15 +1113,6 @@ export class UIRoot extends Component {
       isGhost,
       hide
     };
-
-    if(msTeams()) {
-      getContext((context)=>{
-        this.setState({sidePanelMode:context.frameContext === "sidePanel"});
-      });
-      if (this.state.sidePanelMode) {
-        return <MeetingSidePanel/>
-      }
-    }
 
     if (this.props.hide || this.state.hide) {
       return (
