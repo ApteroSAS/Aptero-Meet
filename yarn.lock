@@ -239,13 +239,6 @@
   dependencies:
     "@azure/msal-common" "^6.1.0"
 
-"@azure/msal-browser@^2.22.0":
-  version "2.23.0"
-  resolved "https://registry.yarnpkg.com/@azure/msal-browser/-/msal-browser-2.23.0.tgz#24fc58e9d1314833b09d3f52ba4e53f526cfe0de"
-  integrity sha512-qxyWmsP/pf+xJFEhMgiJ0r1v6TjF+x8iMWYU5R63Lb/fjQfKalaNX9f5D6GbJYJS5s9OF3abtdGtB/Lxea15mQ==
-  dependencies:
-    "@azure/msal-common" "^6.2.0"
-
 "@azure/msal-common@^4.3.0", "@azure/msal-common@^4.5.1":
   version "4.5.1"
   resolved "https://registry.yarnpkg.com/@azure/msal-common/-/msal-common-4.5.1.tgz#f35af8b634ae24aebd0906deb237c0db1afa5826"
@@ -259,11 +252,6 @@
   integrity sha512-IGjAHttOgKDPQr0Qxx1NjABR635ZNuN7LHjxI0Y7SEA2thcaRGTccy+oaXTFabM/rZLt4F2VrPKUX4BnR9hW9g==
   dependencies:
     debug "^4.1.1"
-
-"@azure/msal-common@^6.2.0":
-  version "6.2.0"
-  resolved "https://registry.yarnpkg.com/@azure/msal-common/-/msal-common-6.2.0.tgz#715fd68df92ed230913d1d725e9f9b09f799a66c"
-  integrity sha512-SU2/vfbKn1WvtKM8tsBKZAbmRJvO8E3H773ZT0GGKuO9rwLfxP5qOzTHV5crCEm8DgvL/IppmWh2lsUFieDi1A==
 
 "@azure/msal-node@^1.3.0":
   version "1.7.0"
@@ -285,11 +273,6 @@
     axios "^0.21.1"
     jsonwebtoken "^8.5.1"
     uuid "^8.3.0"
-
-"@azure/msal-react@1.0.1":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@azure/msal-react/-/msal-react-1.0.1.tgz#69b2d6e2f78d56d64b01d6f2961a50b5961b3cc8"
-  integrity sha512-5e5+DYnu3/a9R/QUrH7rWKmq1UjYY13kSW0TAWZTf+GEUjIcV/+cJtTVg0RNBACIWU8PAVW8Epj3qfgPDfOctg==
 
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.10.4", "@babel/code-frame@^7.16.7", "@babel/code-frame@^7.5.5", "@babel/code-frame@^7.8.3":
   version "7.16.7"
@@ -2132,24 +2115,6 @@
     "@microsoft/microsoft-graph-client" "^2.2.1"
     idb "6.0.0"
     lit-element "^2.4.0"
-
-"@microsoft/mgt-element@2.4.0":
-  version "2.4.0"
-  resolved "https://registry.yarnpkg.com/@microsoft/mgt-element/-/mgt-element-2.4.0.tgz#fa5058311f2df3832bc09b2f8ce2598768e2eb8c"
-  integrity sha512-SheXqTK09WKwFbfbUsM4cJre/h4CbwvKqUKrygzQPu2LenhLl86dWv3tVUzgaMo7qzRu7gE4BVf01OY0jfpSyg==
-  dependencies:
-    "@microsoft/microsoft-graph-client" "^2.2.1"
-    idb "6.0.0"
-    lit-element "^2.4.0"
-
-"@microsoft/mgt-msal2-provider@^2.3.1":
-  version "2.4.0"
-  resolved "https://registry.yarnpkg.com/@microsoft/mgt-msal2-provider/-/mgt-msal2-provider-2.4.0.tgz#15497d9e7d321a0efc3974d079c47136fe5662b7"
-  integrity sha512-0BmgfJNPbCV+pwIO9Q1P3HEY0rJnHD6zGUKt4CB9UdPt6h/6bd1lXrm+RqhQ3vya1bge4sNy3oM1tYwX2YpS1Q==
-  dependencies:
-    "@azure/msal-browser" "^2.22.0"
-    "@microsoft/mgt-element" "2.4.0"
-    "@microsoft/microsoft-graph-client" "^2.2.1"
 
 "@microsoft/mgt-react@2.3.2-next.teamsfx.f5fc7d2":
   version "2.3.2-next.teamsfx.f5fc7d2"
@@ -12014,7 +11979,7 @@ ms@2.1.3, ms@^2.0.0, ms@^2.1.1:
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.3.tgz#574c8138ce1d2b5861f0b44579dbadd60c6615b2"
   integrity sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==
 
-msal@^1.3.1, msal@^1.4.4:
+msal@^1.4.4:
   version "1.4.16"
   resolved "https://registry.yarnpkg.com/msal/-/msal-1.4.16.tgz#199fa0fa666c6356ca8e665651e027308466628e"
   integrity sha512-Q6jIV5RG6mD9O0bzZrR/f8v5QikrVWU0sccwOyqWE1xlBkKYVKRa/L8Gxt1X58M+J/N9V0JskhvO4KIfRHlE8g==
