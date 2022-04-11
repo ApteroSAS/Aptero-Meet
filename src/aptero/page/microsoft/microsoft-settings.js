@@ -23,9 +23,7 @@ registerTelemetry("/microsoft-settings", "microsoft-settings");
 import { Provider, teamsTheme } from "@fluentui/react-northstar";
 import {
   getAuthEvents,
-  LOGGED_BASIC_INFO,
   SIGN_IN_COMPLETE,
-  TOKEN_RECEIVED
 } from "../../service/MicrosoftIntegration/AuthEvent";
 import { getCredential } from "../../service/MicrosoftIntegration/TeamsLoginService";
 
