@@ -69,7 +69,7 @@ function isInAppBrowser() {
 }
 
 export function platformUnsupported() {
-  return getPlatformSupport().some(s => !s.supported) || isInAppBrowser();
+  return (getPlatformSupport().some(s => !s.supported) || isInAppBrowser()) && !isMsTeams();
 }
 
 class Support extends React.Component {

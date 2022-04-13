@@ -118,18 +118,25 @@ export class TeamsLoginService {
     // log using token from msteams
     //if cookie oauth microsoft
     if (msTeams()) {
-      // Initialize the Microsoft Teams SDK
-      await microsoftTeams.initialize();
       try {
-        const cred = await this.initBasicInfo();
-        await this.initTeamsFxProvider(cred, getScopes());
-        const userInfo = await cred.getUserInfo();
-        console.log("passiveAuth (basic):", cred);
-        await this.initGraph();
-        await this.initBasic(userInfo,false);
-        Providers.globalProvider.setState(ProviderState.SignedIn);
+        // Initialize the Microsoft Teams SDK
+        await microsoftTeams.initialize();
+        try {
+          // Initialize the Microsoft Teams SDK
+          await microsoftTeams.initialize();
+          const cred = await this.initBasicInfo();
+          await this.initTeamsFxProvider(cred, getScopes());
+          const userInfo = await cred.getUserInfo();
+          console.log("passiveAuth (basic):", cred);
+          await this.initGraph();
+          await this.initBasic(userInfo,false);
+          Providers.globalProvider.setState(ProviderState.SignedIn);
+        } catch (e) {
+          console.error(e);
+          throw e;
+        }
       } catch (e) {
-        console.error(e);
+        console.warn("microsoftTeams.initialize failed (probably not in teams so we skip it)",e);
         throw e;
       }
     }

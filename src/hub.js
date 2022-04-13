@@ -719,22 +719,25 @@ document.addEventListener("DOMContentLoaded", async () => {
   canvas.classList.add("a-hidden");
 
   if (platformUnsupported()) {
+    console.warn("platformUnsupported");
     return;
   }
 
-  const detectedOS = detectOS(navigator.userAgent);
-  const browser = detect();
-  // HACK - it seems if we don't initialize the mic track up-front, voices can drop out on iOS
-  // safari when initializing it later.
-  if (["iOS", "Mac OS"].includes(detectedOS) && ["safari", "ios"].includes(browser.name)) {
-    try {
-      //await createTrack({ audio: true });//Type MediaStream
-      //note aptero we do not need to use create track here since this is just a hack to trigger safari audio authorization popup
-      await navigator.mediaDevices.getUserMedia({ audio: true });
-    } catch (e) {
-      console.error(e);
-      remountUI({ showSafariMicDialog: true });
-      return;
+  if(!msTeams()) {
+    const detectedOS = detectOS(navigator.userAgent);
+    const browser = detect();
+    // HACK - it seems if we don't initialize the mic track up-front, voices can drop out on iOS
+    // safari when initializing it later.
+    if (["iOS", "Mac OS"].includes(detectedOS) && ["safari", "ios"].includes(browser.name)) {
+      try {
+        //await createTrack({ audio: true });//Type MediaStream
+        //note aptero we do not need to use create track here since this is just a hack to trigger safari audio authorization popup
+        await navigator.mediaDevices.getUserMedia({audio: true});
+      } catch (e) {
+        console.error(e);
+        remountUI({showSafariMicDialog: true});
+        return;
+      }
     }
   }
 

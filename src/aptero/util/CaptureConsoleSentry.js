@@ -45,7 +45,7 @@ export class CaptureConsoleSentry {
             fill(global.console, level, (originalConsoleMethod) => (...args) => {
                 const hub = getCurrentHub();
 
-                if (hub.getIntegration(CaptureConsole)) {
+                if (hub.getIntegration(CaptureConsoleSentry)) {
                     hub.withScope(scope => {
                         scope.setLevel(severityFromString(level));
                         scope.setExtra('arguments', args);

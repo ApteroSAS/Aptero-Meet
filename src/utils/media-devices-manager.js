@@ -1,4 +1,5 @@
 import { createTrack } from "../aptero/adapter/adapter-config";
+import {msTeams} from "../aptero/service/MicrosoftIntegration/MsTeams";
 
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
@@ -110,6 +111,9 @@ export default class MediaDevicesManager {
   }
 
   async startMicShare(deviceId) {
+    if(msTeams()){
+      console.error("no audio device in Teams");
+    }
     let constraints = { audio: {} };
     if (deviceId) {
       constraints = { audio: { deviceId: { exact: [deviceId] } } };

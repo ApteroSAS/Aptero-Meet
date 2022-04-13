@@ -11,6 +11,9 @@
       "type": "image/png"
     }
   ],
+  "permissions": [
+     "unlimitedStorage",
+   ],
   "scope": "/",
   "start_url": "/",
   "display": "standalone",

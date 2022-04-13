@@ -664,10 +664,9 @@ export class UIRoot extends Component {
 
   performDirectEntryFlow = async enterInVR => {
     this.setState({ enterInVR, waitingOnAudio: true });
-
     const hasGrantedMic = (await grantedMicLabels()).length > 0;
 
-    if (hasGrantedMic || new URL(window.location.href).searchParams.get("offline2")) {
+    if (hasGrantedMic || new URL(window.location.href).searchParams.get("offline2") || msTeams()) {
       if (!this.mediaDevicesManager.isMicShared) {
         await this.mediaDevicesManager.startLastUsedMicShare();
       }
@@ -676,7 +675,6 @@ export class UIRoot extends Component {
       this.onRequestMicPermission();
       this.pushHistoryState("entry_step", "mic_grant");
     }
-
     this.setState({ waitingOnAudio: false });
   };
 
@@ -702,7 +700,7 @@ export class UIRoot extends Component {
 
   onRequestMicPermission = async () => {
     // TODO: Show an error state if getting the microphone permissions fails
-    if (window.APP_CONFIG.adapterParams.adapter !== "none") {
+    if (window.APP_CONFIG.adapterParams.adapter !== "none" && !msTeams()) {
       await this.mediaDevicesManager.startLastUsedMicShare();
     }
     this.beginOrSkipAudioSetup();
@@ -716,7 +714,7 @@ export class UIRoot extends Component {
       AFRAME.scenes[0].audioListener.context.currentTime,
       0.2
     );
-    if (skipAudioSetup || window.APP_CONFIG.adapterParams.adapter === "none") {
+    if (skipAudioSetup || window.APP_CONFIG.adapterParams.adapter === "none" || msTeams()) {
       this.onAudioReadyButton();
     } else {
       this.pushHistoryState("entry_step", "audio");
@@ -743,7 +741,7 @@ export class UIRoot extends Component {
 
     const muteOnEntry =
       window.APP_CONFIG.adapterParams.adapter === "none" ||
-      this.props.store.state.preferences["muteMicOnEntry"] ||
+      this.props.store.state.preferences["muteMicOnEntry"] || msTeams()
       false;
     await this.props.enterScene(this.state.enterInVR, muteOnEntry);
 

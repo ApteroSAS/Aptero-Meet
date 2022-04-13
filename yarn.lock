@@ -8858,11 +8858,6 @@ github-slugger@^1.0.0:
   resolved "https://registry.yarnpkg.com/github-slugger/-/github-slugger-1.4.0.tgz#206eb96cdb22ee56fdc53a28d5a302338463444e"
   integrity sha512-w0dzqw/nt51xMVmlaV1+JRzN+oCa1KfcgGEWhxUG16wbdA+Xnt/yoFO8Z8x/V82ZcZ0wy6ln9QDup5avbhiDhQ==
 
-gl-matrix@^2.8.1:
-  version "2.8.1"
-  resolved "https://registry.yarnpkg.com/gl-matrix/-/gl-matrix-2.8.1.tgz#1c7873448eac61d2cd25803a074e837bd42581a3"
-  integrity sha512-0YCjVpE3pS5XWlN3J4X7AiAx65+nqAI54LndtVFnQZB6G/FVLkZH8y8V6R3cIoOQR4pUdfwQGd1iwyoXHJ4Qfw==
-
 gl-preserve-state@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/gl-preserve-state/-/gl-preserve-state-1.0.0.tgz#4ef710d62873f1470ed015c6546c37dacddd4198"
@@ -17447,14 +17442,6 @@ webvr-polyfill@^0.10.10:
   integrity sha512-trDJEVUQnRIVAnmImjEQ0BlL1NfuWl8+eaEdu+bs4g59c7OtETi/5tFkgEFDRaWEYwHntXs/uFF3OXZuutNGGA==
   dependencies:
     cardboard-vr-display "^1.0.19"
-
-webxr-polyfill@^2.0.3:
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/webxr-polyfill/-/webxr-polyfill-2.0.3.tgz#8248787e84bbc7b9ddc1fa67ca89a663259fe2fe"
-  integrity sha512-lgTKYVeD4HeTwWdJN+SeS6iflGx3epz/3dww9X4GyuuXmYGAV5p8l34jUM/HRGHn1jKS3oZNZRC/J9MlSk/Zhg==
-  dependencies:
-    cardboard-vr-display "^1.0.19"
-    gl-matrix "^2.8.1"
 
 well-known-symbols@^2.0.0:
   version "2.0.0"
