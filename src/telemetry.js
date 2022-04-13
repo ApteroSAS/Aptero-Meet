@@ -1,7 +1,11 @@
-import Raven from "raven-js";
 import configs from "./utils/configs";
+import * as Sentry from '@sentry/browser';
 
 const ga = window.ga;
+
+export function showReportDialog(){
+  throw new Error("sentry-report-dialog");
+}
 
 export default function registerTelemetry(trackedPage, trackedTitle) {
   const sentryDsn = configs.SENTRY_DSN;
@@ -9,11 +13,19 @@ export default function registerTelemetry(trackedPage, trackedTitle) {
 
   if (sentryDsn) {
     console.log("Tracking: Sentry DSN: " + sentryDsn);
-    //Aptero patch
-    Raven.config(sentryDsn,{
+    Sentry.init({
+      dsn:sentryDsn,
       environment:configs.SENTRY_ENV || "web_default",
-      release: process.env.BUILD_VERSION
-    }).install();
+      release: process.env.BUILD_VERSION,
+      beforeSend(event) {
+        // Check if it is an exception, and if so, show the report dialog
+        if (event.exception && event.exception.values[0].value === "sentry-report-dialog") {
+          Sentry.showReportDialog({ eventId: event.event_id });
+          console.log("report send");
+        }
+        return event;
+      },
+    });
   }
 
   if (ga && gaTrackingId) {

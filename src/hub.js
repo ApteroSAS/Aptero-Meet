@@ -258,7 +258,7 @@ import "./components/body-helper";
 import "./components/shape-helper";
 
 import registerNetworkSchemas from "./network-schemas";
-import registerTelemetry from "./telemetry";
+import registerTelemetry, { showReportDialog } from "./telemetry";
 
 import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY, ONLY_SCREEN_AVAILABLE } from "./utils/vr-caps-detect";
 import detectConcurrentLoad from "./utils/concurrent-load-detector";
@@ -273,6 +273,7 @@ import { ThemeProvider } from "./react-components/styles/theme";
 import { wait } from "./aptero/util/AsyncWaiter";
 import { networkService } from "./aptero/service/NetworkService";
 import { getEntryMode } from "./aptero/util/EntryMode";
+import { setupVersionComp } from "./aptero/util/Version";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -707,8 +708,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     return APP.dialog.lasyLoadingFinished;
   });
   console.log("lazy loading finished");
-  //end APTERO
-  document.getElementById("version").innerHTML = process.env.BUILD_VERSION;
+  setupVersionComp();
   if (isOAuthModal) {
     return;
   }
