@@ -25,8 +25,9 @@ export default class MediaDevicesManager {
     this._audioTrack = null;
     this.audioSystem = audioSystem;
     this._mediaStream = audioSystem.outboundStream;
-
-    navigator.mediaDevices.addEventListener("devicechange", this.onDeviceChange);
+    if(!msTeams()) {
+      navigator.mediaDevices.addEventListener("devicechange", this.onDeviceChange);
+    }
   }
 
   get deviceId() {
