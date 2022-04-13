@@ -1,5 +1,7 @@
 import configs from "./utils/configs";
 import * as Sentry from '@sentry/browser';
+//import { CaptureConsole } from '@sentry/integrations';
+import {CaptureConsoleSentry} from "./aptero/util/CaptureConsoleSentry";
 
 const ga = window.ga;
 
@@ -15,6 +17,14 @@ export default function registerTelemetry(trackedPage, trackedTitle) {
     console.log("Tracking: Sentry DSN: " + sentryDsn);
     Sentry.init({
       dsn:sentryDsn,
+      integrations: [
+        new CaptureConsoleSentry({
+          levels: ['log', 'info', 'warn', 'error']
+        }),
+        /*new CaptureConsole({
+          levels: ['log', 'info', 'warn', 'error']
+        })*/
+      ],
       environment:configs.SENTRY_ENV || "web_default",
       release: process.env.BUILD_VERSION,
       beforeSend(event) {

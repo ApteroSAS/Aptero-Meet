@@ -80,6 +80,8 @@
     "@novnc/novnc": "^1.2.0",
     "@popperjs/core": "^2.4.4",
     "@sentry/browser": "^6.19.6",
+    "@sentry/integrations": "^6.19.6",
+    "@sentry/utils": "^6.19.6",
     "aframe": "github:mozillareality/aframe#560c38311081fc5490931c369223f7e4da9f7f76",
     "aframe-rounded": "^1.0.3",
     "aframe-slice9-component": "github:takahirox/aframe-slice9-component#AlphaTest",

@@ -33,8 +33,8 @@ window.APP_PROPS = {
   REMOTE_VM_SERVICE:{ url:"meet.aptero.co"},
   WEBRTC_BRIDGE_URL:"http://localhost:8195",
 
-  SENTRY_DSN:"https://944afa0719c6473997fa1d6a06515c7e@o407192.ingest.sentry.io/5275835",
-  SENTRY_ENV:"web-local",
+  //SENTRY_DSN:"https://944afa0719c6473997fa1d6a06515c7e@o407192.ingest.sentry.io/5275835",
+  //SENTRY_ENV:"web-local",
 
   APP_CONFIG: {
     MICROSOFT_APP_ID: "c89c5d54-37ec-49d6-952a-befc9b770079",
