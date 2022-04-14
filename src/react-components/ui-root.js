@@ -664,10 +664,15 @@ export class UIRoot extends Component {
 
   performDirectEntryFlow = async enterInVR => {
     this.setState({ enterInVR, waitingOnAudio: true });
-    const hasGrantedMic = (await grantedMicLabels()).length > 0;
+    let hasGrantedMic = false;
+    if(msTeams()) {
+      hasGrantedMic = true;
+    }else{
+      hasGrantedMic = (await grantedMicLabels()).length > 0;
+    }
 
     if (hasGrantedMic || new URL(window.location.href).searchParams.get("offline2") || msTeams()) {
-      if (!this.mediaDevicesManager.isMicShared) {
+      if (!this.mediaDevicesManager.isMicShared && !msTeams()) {
         await this.mediaDevicesManager.startLastUsedMicShare();
       }
       this.beginOrSkipAudioSetup();
