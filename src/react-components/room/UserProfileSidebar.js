@@ -174,13 +174,14 @@ export function UserProfileSidebar({
                             <FormattedMessage id="user-profile-sidebar.demote-button" defaultMessage="Demote"/>
                         </Button>
                     )}
-                    <Button onClick={onToggleHidden}>
+                  {/* aptero remove
+                  <Button onClick={onToggleHidden}>
                         {isHidden ? (
                             <FormattedMessage id="user-profile-sidebar.unhide-button" defaultMessage="Unhide"/>
                         ) : (
                             <FormattedMessage id="user-profile-sidebar.hide-button" defaultMessage="Hide"/>
                         )}
-                    </Button>
+                    </Button>*/}
                     <Button
                         type="button"
                         preset="basic"
@@ -206,11 +207,13 @@ export function UserProfileSidebar({
                             <FormattedMessage id="user-profile-sidebar.mute-button" defaultMessage="Mute"/>
                         </Button>
                     )}
-                    {canKick && (
+                    {/*
+                    aptero remove
+                    canKick && (
                         <Button preset="cancel" onClick={onKick}>
                             <FormattedMessage id="user-profile-sidebar.kick-button" defaultMessage="Kick"/>
                         </Button>
-                    )}
+                    )*/}
                     {!microsoftUserId &&
                         <Button preset="basic" onClick={() => toggleChatSidebar("chat", userId, null)}>
                             <FormattedMessage id="user-profile-sidebar.chat-button" defaultMessage="Chat"/>
