@@ -6,6 +6,7 @@ import { faCog } from "@fortawesome/free-solid-svg-icons/faCog";
 import maskEmail from "../../utils/mask-email";
 import styles from "./Header.scss";
 import { Container } from "./Container";
+import { msTeams } from "../../aptero/service/MicrosoftIntegration/MsTeams";
 export function Header({
   appName,
   appLogo,
@@ -24,6 +25,7 @@ export function Header({
 }) {
   return (
     <header>
+      {!msTeams() &&
       <Container as="div" className={styles.container}>
         <nav>
           <ul>
@@ -78,27 +80,27 @@ export function Header({
             )}
           </ul>
         </nav>
-        <div className={styles.signIn}>
-          {isSignedIn ? (
-            <div>
-              <span>
-                <FormattedMessage
-                  id="header.signed-in-as"
-                  defaultMessage="Signed in as {email}"
-                  values={{ email: maskEmail(email) }}
-                />
-              </span>{" "}
-              <a href="#" onClick={onSignOut}>
-                <FormattedMessage id="header.sign-out" defaultMessage="Sign Out" />
+          <div className={styles.signIn}>
+            {isSignedIn ? (
+              <div>
+                <span>
+                  <FormattedMessage
+                    id="header.signed-in-as"
+                    defaultMessage="Signed in as {email}"
+                    values={{ email: maskEmail(email) }}
+                  />
+                </span>{" "}
+                <a href="#" onClick={onSignOut}>
+                  <FormattedMessage id="header.sign-out" defaultMessage="Sign Out" />
+                </a>
+              </div>
+            ) : (
+              <a href="/signin" rel="noreferrer noopener">
+                <FormattedMessage id="header.sign-in" defaultMessage="Sign In" />
               </a>
-            </div>
-          ) : (
-            <a href="/signin" rel="noreferrer noopener">
-              <FormattedMessage id="header.sign-in" defaultMessage="Sign In" />
-            </a>
-          )}
-        </div>
-      </Container>
+            )}
+          </div>
+      </Container>}
     </header>
   );
 }
