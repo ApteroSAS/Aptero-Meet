@@ -24,6 +24,11 @@ import { testServiceNotifySceneEntered, startSelfTest, testTick } from "./servic
 import { setlistenerEndShareVideo } from "./adapter/adapter-config";
 import { remoteControlServiceV2 } from "./service/RemoteControlServiceV2";
 import { wait } from "./util/AsyncWaiter";
+import { initAxolotisPlayer } from "./axolotis/AxolotisSystem";
+
+declare let window:any;
+declare let AFRAME:any;
+
 //event handling for iframe #morgane
 window.focus();
 window.addEventListener(
@@ -69,6 +74,7 @@ function sendIframeMessage(type, data) {
 
 export class ApteroServices {
   thirdPersonService = new ThirdPersonService();
+  private audioSettingsSystem: any;
   constructor() {
     startSelfTest();
     roomParameters.getRoomParameters(); //called as soon as possible
@@ -85,6 +91,7 @@ export class ApteroServices {
   start(audioSettingsSystem) {
     this.audioSettingsSystem = audioSettingsSystem;
     waitForDOMContentLoaded().then(async () => {
+      await initAxolotisPlayer();
       await networkService.start();
       await new SoundSystem(networkService).start();
       //await new DistributedSoundSystem(networkService).start();

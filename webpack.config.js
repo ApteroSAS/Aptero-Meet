@@ -351,6 +351,9 @@ module.exports = async (env, argv) => {
         return !/\.(map|png|jpg|gif|glb|webm)$/.test(assetFilename);
       }
     },
+    resolve: {
+      extensions: ['*', '.js', '.jsx', '.tsx', '.ts', ".json"],
+    },
     module: {
       rules: [
         {
@@ -391,7 +394,7 @@ module.exports = async (env, argv) => {
           }
         },
         {
-          test: /\.js$/,
+          test: /\.(js|jsx|tsx|ts)$/,
           include: [path.resolve(__dirname, "src")],
           // Exclude JS assets in node_modules because they are already transformed and often big.
           exclude: [path.resolve(__dirname, "node_modules")],
