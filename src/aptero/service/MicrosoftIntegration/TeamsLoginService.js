@@ -19,6 +19,11 @@ export const startLoginPageUrl = window.location.origin + "/auth-start.html";
 export const functionEndpoint = window.location.origin + "/auth-start.html";//process.env.REACT_APP_FUNC_ENDPOINT;
 export const clientId = configs.APP_CONFIG.MICROSOFT_APP_ID; //process.env.REACT_APP_CLIENT_ID;
 
+
+//To test and revoke application auth
+// https://myapplications.microsoft.com/
+// https://portal.office.com/account/?ref=MeControl#apps
+
 function initTeamsFx(authorityHost) {
   /*loadConfiguration({
       authentication: {
@@ -100,7 +105,6 @@ export class TeamsLoginService {
   }
 
   async userInteractionAuth(consentNeeded) {
-    //To test and revok application auth => https://myapplications.microsoft.com/
     console.log("userInteractionAuth");
     const cred = await this.initBasicInfo();
     cred.login(getScopes());//Trigger authorization popup

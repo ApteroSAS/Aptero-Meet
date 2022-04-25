@@ -4,11 +4,17 @@ export const startLoginPageUrl = window.location.origin;
 export const functionEndpoint = window.location.origin + "/auth-start.html";//process.env.REACT_APP_FUNC_ENDPOINT;
 export const clientId = configs.APP_CONFIG.MICROSOFT_APP_ID; //process.env.REACT_APP_CLIENT_ID;
 
-export function getScopes(){
-  //const neededScopes = MgtPersonCard.getScopes();
-  //must be the same as permision.json
+export function getScopesLight(){
+  //must be the same as permission.json
   //import perm from "../../../../permissions.json"
-  //return perm[0].delegated;
+  //Try to avoid admin consent for authorization
+  return [
+    // Teams app permission
+    "User.ReadBasic.All", // Use for basic email, call and chat call to action, Avatar image and name - Mandatory
+  ]
+}
+
+export function getScopes(){
   //Try to avoid admin consent for authorization
   return [
     // Teams app permission
