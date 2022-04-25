@@ -1,4 +1,5 @@
-![CircleCI](https://img.shields.io/circleci/build/github/ApteroSAS/axolotis-core-plugins/main?token=31ab90ba9847874df906492621e7b6861e360ef4) ![GitHub file size in bytes](https://img.shields.io/github/size/ApteroSAS/axolotis-core-plugins/build/index.js) ![Codecov](https://img.shields.io/codecov/c/github/ApteroSAS/axolotis-core-plugins?token=KLLGS2TVNE)
+![CircleCI](https://img.shields.io/circleci/build/github/ApteroSAS/Aptero-Meet/main?token=31ab90ba9847874df906492621e7b6861e360ef4)
+![Codecov](https://img.shields.io/codecov/c/github/ApteroSAS/Aptero-Meet?token=KLLGS2TVNE)
 
 # [Aptero Hubs](https://hubs.Aptero.com/)
 
