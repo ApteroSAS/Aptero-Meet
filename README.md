@@ -1,5 +1,5 @@
-![CircleCI](https://img.shields.io/circleci/build/github/ApteroSAS/Aptero-Meet/main?token=31ab90ba9847874df906492621e7b6861e360ef4)
-![Codecov](https://img.shields.io/codecov/c/github/ApteroSAS/Aptero-Meet?token=KLLGS2TVNE)
+![CircleCI](https://img.shields.io/circleci/build/github/ApteroSAS/Aptero-Meet/master?token=8805dc1c4f2cce3d06bfbdb53044026c8d0650ab)
+![Codecov](https://img.shields.io/codecov/c/github/ApteroSAS/Aptero-Meet?token=WFBtLwuv97)
 
 # [Aptero Hubs](https://hubs.Aptero.com/)
 
