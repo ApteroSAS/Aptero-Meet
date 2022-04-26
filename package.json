@@ -35,7 +35,7 @@
     "ci:test": "cross-env NODE_ENV=development npx playwright test",
     "ci:test:debug": "cross-env NODE_ENV=development npx playwright test --headed",
     "ci:coverage:serve": "cross-env NODE_ENV=development USE_BABEL_PLUGIN_ISTANBUL=1 webpack --stats-error-details --config webpack.config.js && npx http-server dist -p 9080 --ssl --cert ./certs/cert.pem --key ./certs/key.pem",
-    "ci:coverage": "cross-env NODE_ENV=development npx playwright test && nyc --no-clean yarn --version",
+    "ci:coverage": "cross-env NODE_ENV=development PLAYWRIGHT_JUNIT_OUTPUT_NAME=junit.xml npx playwright test --reporter=junit && nyc --no-clean yarn --version",
     "ci": "cross-env CI=true START_SERVER_AND_TEST_INSECURE=1 start-server-and-test ci:coverage:serve https://127.0.0.1:9080 ci:coverage"
   },
   "scripts-info": {

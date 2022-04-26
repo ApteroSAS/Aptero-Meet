@@ -6,7 +6,7 @@
     "packageName": "com.microsoft.teams.extension",
     "localizationInfo": {
         "defaultLanguageTag": "en"
-    },   
+    },
     "developer": {
         "name": "Aptero Local",
         "websiteUrl": "https://www.aptero.co",
