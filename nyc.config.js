@@ -3,7 +3,7 @@ module.exports = {
     "all": true,
     //"check-coverage":true,
     "include":["src/**/*.ts","src/**/*.js"],
-    "exclude":["src/workers/pdfjs-dist@2.1.266/build/pdf.worker.js"],
+    "exclude":["src/workers/**/*.js","src/vendor/**/*.js","src/loaders/**/*.js","src/assets/**/*.js"],
     "reporter":['lcov','text','html'],
     //"extension":['.ts']
 };
