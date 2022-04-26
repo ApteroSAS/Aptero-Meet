@@ -33,10 +33,11 @@
     "intl-extract": "node ./src/assets/locales/intl-extract.js",
     "intl-extract-en-locale": "node ./src/assets/locales/intl-extract.js en",
     "ci:test": "cross-env NODE_ENV=development npx playwright test",
-    "ci:test:debug": "cross-env NODE_ENV=development npx playwright test --headed",
+    "ci:debug:serve": "cross-env NODE_ENV=development PW_PORT=53000 yarn run dev",
+    "ci:debug:run": "cross-env CI=true PW_PORT=53000 NODE_ENV=development PWDEBUG=console npx playwright test --headed",
     "ci:coverage:serve": "cross-env NODE_ENV=development USE_BABEL_PLUGIN_ISTANBUL=1 webpack --stats-error-details --config webpack.config.js && npx http-server dist -p 9080 --ssl --cert ./certs/cert.pem --key ./certs/key.pem",
-    "ci:coverage": "cross-env NODE_ENV=development PLAYWRIGHT_JUNIT_OUTPUT_NAME=junit.xml npx playwright test --reporter=junit && nyc --no-clean yarn --version",
-    "ci": "cross-env CI=true START_SERVER_AND_TEST_INSECURE=1 start-server-and-test ci:coverage:serve https://127.0.0.1:9080 ci:coverage"
+    "ci:coverage:run": "cross-env NODE_ENV=development PLAYWRIGHT_JUNIT_OUTPUT_NAME=junit.xml npx playwright test --reporter=junit && nyc --no-clean yarn --version",
+    "ci": "cross-env CI=true START_SERVER_AND_TEST_INSECURE=1 start-server-and-test ci:coverage:serve https://127.0.0.1:9080 ci:coverage:run"
   },
   "scripts-info": {
     "start": "Run the client against your Hubs Cloud instance, or Mozilla's developer infrastructure,\n  using application configs pulled from the server",

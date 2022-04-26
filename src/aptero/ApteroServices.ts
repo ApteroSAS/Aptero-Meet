@@ -29,6 +29,8 @@ import { initAxolotisPlayer } from "./axolotis/AxolotisSystem";
 declare let window:any;
 declare let AFRAME:any;
 
+export const ENTERED_EVENT = 'apt:room:entered';
+
 //event handling for iframe #morgane
 window.focus();
 window.addEventListener(
@@ -124,6 +126,7 @@ export class ApteroServices {
       return this.audioSettingsSystem;
     });
     await roomParameters.applyDefaultAudioSettingsSystem(this.audioSettingsSystem);
+    window.document.dispatchEvent(new Event(ENTERED_EVENT))
   }
 
   tick() {

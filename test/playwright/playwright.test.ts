@@ -19,23 +19,39 @@ test('microsoft settings html', async ({ page }) => {
     await page.waitForLoadState('networkidle');
     await page.waitForLoadState('domcontentloaded');
     await page.waitForLoadState('load');
-    await page.screenshot({ path: './coverage/store/playwright-test-1.png' });
+    await page.screenshot({ path: './coverage/store/microsoft.png' });
 });
 
 test('playwright-test-1 html', async ({ page }) => {
-    await page.goto('hub.html?hub_id=EVa7SjZ/playwright-test-1');
+    test.setTimeout(120000);
+    await page.goto('hub.html?hub_id=EVa7SjZ&vr_entry_type=2d_now')
+    await page.context().grantPermissions(['camera', 'microphone']);
+    await page.evaluate(async () => {
+        await new Promise(resolve => {
+            window.document.addEventListener('apt:room:entered', resolve);
+        })
+    });
     await page.waitForLoadState('networkidle');
     await page.waitForLoadState('domcontentloaded');
     await page.waitForLoadState('load');
+    await page.bringToFront();//important for microphone authorization
+    await new Promise(resolve => setTimeout(resolve,5000));//TODO find a better event
     await page.screenshot({ path: './coverage/store/playwright-test-1.png' });
 });
 
-https://alphahub.aptero.co/EVa7SjZ/playwright-test-1
-
-test('get.webgl.org', async ({ page }) => {
-    await page.goto('https://get.webgl.org/');
+test('teams mode', async ({ page }) => {
+    test.setTimeout(120000);
+    await page.goto('hub.html?hub_id=EVa7SjZ&vr_entry_type=2d_now&msteams=true');
+    await page.context().grantPermissions(['camera', 'microphone']);
+    await page.evaluate(async () => {
+        await new Promise(resolve => {
+            window.document.addEventListener('apt:room:entered', resolve);
+        })
+    });
     await page.waitForLoadState('networkidle');
     await page.waitForLoadState('domcontentloaded');
     await page.waitForLoadState('load');
-    await page.screenshot({ path: './coverage/store/webgl.png' });
+    await page.bringToFront();//important for microphone authorization
+    await new Promise(resolve => setTimeout(resolve,5000));//TODO find a better event
+    await page.screenshot({ path: './coverage/store/teams.png' });
 });

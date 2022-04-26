@@ -8,7 +8,7 @@ const config = {
     webServer: {
         ignoreHTTPSErrors: true,
         command: 'yarn run ci:coverage:serve',
-        url: 'https://localhost:9080',
+        url: 'https://localhost:'+(process.env.PW_PORT||"9080"),
         reuseExistingServer: !!process.env.CI,
         timeout: 120 * 1000
     },
@@ -16,8 +16,9 @@ const config = {
         timeout: 2*60*1000,
     },
     use: {
+        screenshot: 'only-on-failure',
         ignoreHTTPSErrors: true,
-        baseURL: 'https://localhost:9080',
+        baseURL: 'https://localhost:'+(process.env.PW_PORT||"9080"),
     }
 };
 module.exports = config;
