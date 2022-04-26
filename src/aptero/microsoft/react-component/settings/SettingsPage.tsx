@@ -1,27 +1,31 @@
-import React, {useCallback, useContext, useEffect, useState} from "react";
+import * as React from "react";
+import {useCallback, useContext, useEffect, useState} from "react";
 import {FormattedMessage} from "react-intl";
+// @ts-ignore
 import styles from "./SettingsPage.scss";
 import {
     connectToReticulum,
     createAndRedirectToNewHub,
     fetchReticulumAuthenticated,
     getReticulumFetchUrl, isLocalClient
-} from "../../../utils/phoenix-utils";
-import {MediaGrid} from "../../../react-components/room/MediaGrid";
-import {MediaTile} from "../../../react-components/room/MediaTiles";
-import {PageContainer} from "../../../react-components/layout/PageContainer";
-import {scaledThumbnailUrlFor} from "../../../utils/media-url-utils";
-import {Column} from "../../../react-components/layout/Column";
-import {Container} from "../../../react-components/layout/Container";
-import {changeUrlSettings} from "../../service/MicrosoftIntegration/MsTeams";
-import {AuthContext} from "../../../react-components/auth/AuthContext";
-import {usePaginatedAPI} from "../../../react-components/home/usePaginatedAPI";
+} from "../../../../utils/phoenix-utils";
+import {MediaGrid} from "../../../../react-components/room/MediaGrid";
+import {MediaTile} from "../../../../react-components/room/MediaTiles";
+import {PageContainer} from "../../../../react-components/layout/PageContainer";
+import {scaledThumbnailUrlFor} from "../../../../utils/media-url-utils";
+import {Column} from "../../../../react-components/layout/Column";
+import {Container} from "../../../../react-components/layout/Container";
+import {changeUrlSettings} from "../../service/MsTeams";
+import {AuthContext} from "../../../../react-components/auth/AuthContext";
+import {usePaginatedAPI} from "../../../../react-components/home/usePaginatedAPI";
 import Button from "@material-ui/core/Button";
-import {generateHubName} from "../../../utils/name-generation";
-import Store from "../../../storage/store";
+import {generateHubName} from "../../../../utils/name-generation";
+import Store from "../../../../storage/store";
 import Cookies from "js-cookie";
-import {createHubChannelParams} from "../../../utils/hub-utils";
-import {propertiesService} from "../../properties/propertiesService";
+import {createHubChannelParams} from "../../../../utils/hub-utils";
+import {propertiesService} from "../../../properties/propertiesService";
+
+declare const window;
 
 export function useSpokeProject() {
     const auth = useContext(AuthContext); // Re-render when you log in/out.
@@ -62,8 +66,8 @@ async function setFavorite(hubId){
     const socket = await connectToReticulum(false);
     socket.onClose(() => {});
     // Reticulum global channel
-    APP.retChannel = socket.channel(`ret`, { hub_id: hubId });
-    APP.retChannel
+    window.APP.retChannel = socket.channel(`ret`, { hub_id: hubId });
+    window.APP.retChannel
         .join()
         .receive("ok", () => {
             const OAUTH_FLOW_PERMS_TOKEN_KEY = "ret-oauth-flow-perms-token";
@@ -95,15 +99,15 @@ async function setFavorite(hubId){
         });
 }
 
-export async function createAndSelect(sceneId, name) {
+export async function createAndSelect(sceneId, name=undefined) {
     const createUrl = getReticulumFetchUrl("/api/v1/hubs");
-    const payload = { hub: { name: name || generateHubName() } };
+    const payload:any = { hub: { name: name || generateHubName() } };
 
     if (sceneId) {
         payload.hub.scene_id = sceneId;
     }
 
-    const headers = { "content-type": "application/json" };
+    const headers:any = { "content-type": "application/json" };
     const store = new Store();
     if (store.state && store.state.credentials.token) {
         headers.authorization = `bearer ${store.state.credentials.token}`;
@@ -196,16 +200,10 @@ export function SettingsPage() {
     const {results: favoriteRooms} = useFavoriteRooms();
     const {results: spokeProject} = useSpokeProject();
 
-    //https://meet.aptero.co/scenes/pywjaKD
-    //https://meet.aptero.co/files/b84ea235-b3cf-4d5c-a3bf-76f89d3f94c1.jpg
-    //https://meet.aptero.co/scenes/ttQn7dJ
-    //https://meet.aptero.co/files/5894d964-620c-4cc9-8376-1f243e5dcae4.jpg
-    //https://meet.aptero.co/scenes/HkZhZjU
-    //https://meet.aptero.co/files/352a32d7-f46f-4b8e-8c7b-555875e624e4.jpg
     const sortedFeaturedScene = [
-        createRoomEntry("Room 1","pywjaKD","https://meet.aptero.co/files/b84ea235-b3cf-4d5c-a3bf-76f89d3f94c1.jpg"),
-        createRoomEntry("Room 2","ttQn7dJ","https://meet.aptero.co/files/5894d964-620c-4cc9-8376-1f243e5dcae4.jpg"),
-        createRoomEntry("Room 3","HkZhZjU","https://meet.aptero.co/files/352a32d7-f46f-4b8e-8c7b-555875e624e4.jpg"),
+        createRoomEntry("Room 1","pywjaKD","https://meet.aptero.co/files/20c63c61-0eb1-4945-a0dc-82e041983d17.jpg"),
+        createRoomEntry("Room 2","ttQn7dJ","https://meet.aptero.co/files/b3b8c2c8-3508-4916-a70e-4928eb23d380.jpg"),
+        createRoomEntry("Room 3","HkZhZjU","https://meet.aptero.co/files/9574cccb-5241-4900-b2f5-4af780ec714d.jpg"),
     ];
     const sortedFavoriteRooms = Array.from(favoriteRooms).sort((a, b) => b.member_count - a.member_count);
     const sortedSpokeProject = Array.from(spokeProject).sort((a, b) => b.member_count - a.member_count);
@@ -229,25 +227,41 @@ export function SettingsPage() {
         }
     }, []);
 
+    const mySceneDisplay = sortedSpokeProject.length > 0;
+    const myRoomDisplay = sortedFavoriteRooms.length > 0;
+    const featuredDisplay = myRoomDisplay || mySceneDisplay;
+    const Column2:any = Column;
     return (<>
             <div style={{padding: 10, display: "flex", justifyContent: "space-evenly"}}>
-                <Button style={{margin: 10}} variant="contained" disableElevation={currentTab === "featured"}
-                        onClick={() => {
-                            setTab("featured")
-                        }}><FormattedMessage id="microsoft-settings-page.featured" defaultMessage="Featured"/></Button>
-                <Button style={{margin: 10}} variant="contained" disableElevation={currentTab === "my-scene"}
-                        onClick={() => {
-                            setTab("my-scene")
-                        }}><FormattedMessage id="microsoft-settings-page.create" defaultMessage="My Scene"/></Button>
-                <Button style={{margin: 10}} variant="contained" disableElevation={currentTab === "my-room"}
-                        onClick={() => {
-                            setTab("my-room")
-                        }}><FormattedMessage id="microsoft-settings-page.my-scene" defaultMessage="My Room"/></Button>
-            </div>
+                {featuredDisplay &&
+                    <Button style={{margin: 10}} variant="contained" disableElevation={currentTab === "featured"}
+                            onClick={() => {
+                                setTab("featured")
+                            }}><FormattedMessage id="microsoft-settings-page.featured"
+                                                 defaultMessage="Featured"/>
+                    </Button>
+                }
+                {mySceneDisplay &&
+                    <Button style={{margin: 10}} variant="contained" disableElevation={currentTab === "my-scene"}
+                            onClick={() => {
+                                setTab("my-scene")
+                            }}><FormattedMessage id="microsoft-settings-page.create"
+                                                 defaultMessage="My Scene"/>
+                    </Button>
+                }
+                {myRoomDisplay &&
+                    <Button style={{margin: 10}} variant="contained" disableElevation={currentTab === "my-room"}
+                            onClick={() => {
+                                setTab("my-room")
+                            }}><FormattedMessage id="microsoft-settings-page.my-scene"
+                                                 defaultMessage="My Room"/>
+                    </Button>
+                }
+                </div>
             {currentTab === "featured" && sortedFeaturedScene.length > 0 && (
-                <Container className={styles.roomsContainer}>
-                    <Column grow padding className={styles.rooms}>
-                        <MediaGrid center>
+                <Container className={styles.roomsContainer} as={undefined}>
+                    <Column2 grow padding className={styles.rooms}>
+                        <MediaGrid center className={undefined} isVariableWidth={undefined} sm={undefined}>
                             {sortedFeaturedScene.map(room => {
                                 return (
                                     <MediaTile
@@ -257,24 +271,22 @@ export function SettingsPage() {
                                         }}
                                         onEdit={(event) => {
                                             event.preventDefault();
-                                            console.log("edit : "+room.id);
+                                            console.log("edit : " + room.id);
                                         }}
                                         key={room.id}
                                         entry={room}
-                                        processThumbnailUrl={(entry, width, height) =>
-                                            scaledThumbnailUrlFor(entry.images.preview.url, width, height)
-                                        }
-                                    />
+                                        processThumbnailUrl={(entry, width, height) => scaledThumbnailUrlFor(entry.images.preview.url, width, height)}
+                                        onShowSimilar={undefined} onCopy={undefined} onInfo={undefined}                                    />
                                 );
                             })}
                         </MediaGrid>
-                    </Column>
+                    </Column2>
                 </Container>
             )}
             {currentTab === "my-scene" && sortedSpokeProject.length > 0 && (
-                <Container className={styles.roomsContainer}>
-                    <Column grow padding className={styles.rooms}>
-                        <MediaGrid center>
+                <Container className={styles.roomsContainer} as={undefined}>
+                    <Column2 grow padding className={styles.rooms}>
+                        <MediaGrid center className={undefined} isVariableWidth={undefined} sm={undefined}>
                             {sortedSpokeProject.map(room => {
                                 return (
                                     <MediaTile
@@ -284,46 +296,43 @@ export function SettingsPage() {
                                         }}
                                         onEdit={(event) => {
                                             event.preventDefault();
-                                            console.log("edit : "+room.id);
+                                            console.log("edit : " + room.id);
                                         }}
                                         key={room.id}
                                         entry={room}
-                                        processThumbnailUrl={(entry, width, height) =>
-                                            scaledThumbnailUrlFor(entry.images.preview.url, width, height)
-                                        }
-                                    />
+                                        processThumbnailUrl={(entry, width, height) => scaledThumbnailUrlFor(entry.images.preview.url, width, height)}
+                                        onShowSimilar={undefined} onCopy={undefined} onInfo={undefined}                                    />
                                 );
                             })}
                         </MediaGrid>
-                    </Column>
+                    </Column2>
                 </Container>
             )}
             {currentTab === "my-room" && sortedFavoriteRooms.length > 0 && (
-                <Container className={styles.roomsContainer}>
-                    <Column grow padding className={styles.rooms}>
-                        <MediaGrid center>
+                <Container className={styles.roomsContainer} as={undefined}>
+                    <Column2 grow padding className={styles.rooms}>
+                        <MediaGrid center className={undefined} isVariableWidth={undefined} sm={undefined}>
                             {sortedFavoriteRooms.map(room => {
                                 return (
                                     <MediaTile
                                         onClick={(event) => {
                                             event.preventDefault();
-                                            let roomurl = ((propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER) || window.location.origin)+ "/" + room.id
-                                            if(window.location.origin.startsWith("https://localhost")){
-                                                roomurl = window.location.origin+"/hub.html?hub_id="+room.id;
+                                            let roomurl = ((propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER) || window.location.origin) + "/" + room.id;
+                                            if (window.location.origin.startsWith("https://localhost")) {
+                                                roomurl = window.location.origin + "/hub.html?hub_id=" + room.id;
                                             }
                                             console.log(roomurl);
                                             changeUrlSettings(roomurl);
                                         }}
                                         key={room.id}
                                         entry={room}
-                                        processThumbnailUrl={(entry, width, height) =>
-                                            scaledThumbnailUrlFor(entry.images.preview.url, width, height)
-                                        }
-                                    />
+                                        processThumbnailUrl={(entry, width, height) => scaledThumbnailUrlFor(entry.images.preview.url, width, height)}
+                                        onEdit={undefined} onShowSimilar={undefined} onCopy={undefined}
+                                        onInfo={undefined} />
                                 );
                             })}
                         </MediaGrid>
-                    </Column>
+                    </Column2>
                 </Container>
             )}
         <PageContainer className={styles.homePage} style={{backgroundColor:"#f3f2f1"}}>

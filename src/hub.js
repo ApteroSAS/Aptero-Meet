@@ -1,5 +1,5 @@
 
-import { getContext, msTeams } from "./aptero/service/MicrosoftIntegration/MsTeams";
+import { getContext, msTeams } from "./aptero/microsoft/service/MsTeams";
 if(msTeams()) {
   getContext((context)=>{
     if(context.frameContext === "sidePanel") {
@@ -204,7 +204,7 @@ import { sleep } from "./utils/async-utils";
 import { platformUnsupported } from "./support";
 
 //aptero service
-import { microsoftUrlService } from "./aptero/service/MicrosoftIntegration/MicrosoftUrlService";
+import { microsoftUrlService } from "./aptero/microsoft/service/MicrosoftUrlService";
 import { apteroService } from "./aptero/ApteroServices";
 import { roomController } from "./aptero/service/api/RoomController";
 import { minimumQualityService } from "./aptero/service/MinimumQualityService";

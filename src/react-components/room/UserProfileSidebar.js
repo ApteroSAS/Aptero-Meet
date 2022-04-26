@@ -10,7 +10,7 @@ import {rotateInPlaceAroundWorldUp, affixToWorldUp} from "../../utils/three-util
 import {Spinner} from "../misc/Spinner";
 import {UserProfileVisitCardContainer} from "./UserProfileVisitCardContainer";
 import {PeopleSidebarContainer, usePeopleList} from "./PeopleSidebarContainer";
-import { processDeepLink } from "../../aptero/service/MicrosoftIntegration/MsTeams";
+import { processDeepLink } from "../../aptero/microsoft/service/MsTeams";
 
 function useGoToSelectedAvatar(entity) {
     const targetMatrix = new THREE.Matrix4();

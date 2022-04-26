@@ -1,5 +1,5 @@
 import { createTrack } from "../aptero/adapter/adapter-config";
-import {msTeams} from "../aptero/service/MicrosoftIntegration/MsTeams";
+import {msTeams} from "../aptero/microsoft/service/MsTeams";
 
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();

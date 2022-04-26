@@ -14,6 +14,14 @@ test('index.html', async ({ page }) => {
     await page.screenshot({ path: './coverage/store/index.png' });
 });
 
+test('microsoft settings html', async ({ page }) => {
+    await page.goto('microsoft-settings.html?msteams=true');
+    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForLoadState('load');
+    await page.screenshot({ path: './coverage/store/playwright-test-1.png' });
+});
+
 test('playwright-test-1 html', async ({ page }) => {
     await page.goto('hub.html?hub_id=EVa7SjZ/playwright-test-1');
     await page.waitForLoadState('networkidle');

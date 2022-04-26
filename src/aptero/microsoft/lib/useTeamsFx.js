@@ -1,7 +1,7 @@
 import { loadConfiguration, ResourceType, LogLevel, setLogLevel, setLogFunction } from "@microsoft/teamsfx";
 import { useData } from "./useData";
 import { useTeams } from "msteams-react-base-component";
-import {functionEndpoint, startLoginPageUrl, clientId} from "../MicrosoftLoginService";
+import {functionEndpoint, startLoginPageUrl, clientId} from "../service/MicrosoftLoginService";
 
 // TODO fix this when the SDK stops hiding global state!
 let initialized = false;

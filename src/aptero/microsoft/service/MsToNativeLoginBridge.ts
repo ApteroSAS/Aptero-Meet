@@ -1,6 +1,7 @@
 import AuthChannel from "../../../utils/auth-channel";
 import { connectToReticulum } from "../../../utils/phoenix-utils";
 import uuid from "uuid/v4";
+declare const window;
 
 export class MsToNativeLoginBridge {
 
@@ -83,7 +84,7 @@ export class MsToNativeLoginBridge {
                                                }) => {
             channel.on("auth_credentials", async ({ credentials: token, payload: payload }) => {
               await this.setCredential(payload.email, token);
-              resolve();
+              resolve(true);
             });
             channel.push("auth_verified", { token: auth_token, payload: auth_payload });
           });

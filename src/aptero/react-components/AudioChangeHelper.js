@@ -1,7 +1,7 @@
 import { MicSetupModalContainer } from "../../react-components/room/MicSetupModalContainer";
 import React, { Component } from "react";
 import configs from "../../utils/configs";
-import {msTeams} from "../service/MicrosoftIntegration/MsTeams";
+import {msTeams} from "../microsoft/service/MsTeams";
 
 window.audioChangeHelperController = {};
 window.audioChangeHelperController.spawn = () => {

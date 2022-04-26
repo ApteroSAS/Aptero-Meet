@@ -1,11 +1,11 @@
-import React from "react";
+import * as React from "react";
 import {Button } from "@fluentui/react-northstar";
-import {useGraph} from "../../service/MicrosoftIntegration/lib/useGraph";
+import {useGraph} from "../lib/useGraph";
 import {Login} from "@microsoft/mgt-react";
 import {LightProfileCard} from "./LightProfileCard";
 import {FormattedMessage} from "react-intl";
-import {microsoftLoginService} from "../../service/MicrosoftIntegration/MicrosoftLoginService";
-import { getScopes } from "../../service/MicrosoftIntegration/scope";
+import {microsoftLoginService} from "../service/MicrosoftLoginService";
+import { getScopes } from "../service/scope";
 
 export function AccountAuth(props) {
 

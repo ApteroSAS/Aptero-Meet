@@ -258,7 +258,7 @@ module.exports = async (env, argv) => {
       fs: "empty"
     },
     entry: {
-      "microsoft-settings": path.join(__dirname, "src/aptero/page/microsoft", "microsoft-settings.js"),
+      "microsoft-settings": path.join(__dirname, "src/aptero/microsoft/page", "microsoft-settings.tsx"),
       support: path.join(__dirname, "src", "support.js"),
       index: path.join(__dirname, "src", "index.js"),
       hub: path.join(__dirname, "src", "hub.js"),
@@ -523,7 +523,7 @@ module.exports = async (env, argv) => {
       // Each output page needs a HTMLWebpackPlugin entry
       new HTMLWebpackPlugin({
         filename: "microsoft-settings.html",
-        template: path.join(__dirname, "src/aptero/page/microsoft", "microsoft-settings.html"),
+        template: path.join(__dirname, "src/aptero/microsoft/page", "microsoft-settings.html"),
         chunks: ["microsoft-settings"],
         chunksSortMode: "manual",
         minify: {
@@ -654,13 +654,13 @@ module.exports = async (env, argv) => {
     ]),
       new CopyWebpackPlugin([
         {
-          from: "src/aptero/page/microsoft/auth-start.html",
+          from: "src/aptero/microsoft/page/auth-start.html",
           to: "auth-start.html"
         }
       ]),
       new CopyWebpackPlugin([
         {
-          from: "src/aptero/page/microsoft/auth-end.html",
+          from: "src/aptero/microsoft/page/auth-end.html",
           to: "auth-end.html"
         }
       ]),

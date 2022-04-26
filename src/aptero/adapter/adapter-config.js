@@ -1,7 +1,7 @@
 import configs from "../../utils/configs";
 import { lazyLoad } from "./adapterRegistrer";
 import { propertiesService } from "../properties/propertiesService";
-import { msTeams } from "../service/MicrosoftIntegration/MsTeams";
+import { msTeams } from "../microsoft/service/MsTeams";
 
 let defaultAdapter = configs.APP_CONFIG.adapterParams.adapter;
 

@@ -1,26 +1,27 @@
 import { PublicClientApplication } from "@azure/msal-browser";
 import configs from "../../../utils/configs";
 import { getScopes } from "./scope";
+import {MicrosoftGraphService} from "./MicrosoftGraphService";
+import {MsToNativeLoginBridge} from "./MsToNativeLoginBridge";
 let graph = require("@microsoft/microsoft-graph-client");
 
+declare const window;
 
 export class MicrosoftOauthLoginService {
   accessToken = null;
+  private publicClientApplication: PublicClientApplication | undefined;
 
-  constructor(microsoftGraphService, msToNativeLoginBridge) {
-    this.microsoftGraphService = microsoftGraphService;
-    this.msToNativeLoginBridge = msToNativeLoginBridge;
-  }
+  constructor(private microsoftGraphService:MicrosoftGraphService, private msToNativeLoginBridge:MsToNativeLoginBridge) {}
+
 
   getPublicClientApplication() {
     if (!this.publicClientApplication) {
       this.publicClientApplication = new PublicClientApplication({
         auth: {
           clientId: configs.APP_CONFIG.MICROSOFT_APP_ID,
-          redirectUrl: window.location.origin + "/signin",
+          redirectUri: window.location.origin + "/signin",
           // to allow only AAD accounts: authority:https://login.microsoftonline.com/organizations
           authority: configs.APP_CONFIG.MICROSOFT_APP_AUTHORITY || "https://login.microsoftonline.com/common",
-          scopes: getScopes()
         },
         cache: {
           cacheLocation: "sessionStorage",

@@ -69,16 +69,6 @@ export class MicrosoftUrlService {
     });
   }
 
-  handleError(error) {
-    if (error.errorCode === "consent_required"
-      || error.errorCode === "interaction_required"
-      || error.errorCode === "login_required") {
-      this.loginWithRedirect();
-      return;
-    }
-    console.warn(error);
-  }
-
 }
 
 export const microsoftUrlService = new MicrosoftUrlService();

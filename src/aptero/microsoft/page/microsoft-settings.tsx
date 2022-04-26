@@ -1,35 +1,37 @@
-import React from "react";
+import * as React from "react";
 import ReactDOM from "react-dom";
 import { WrappedIntlProvider } from "../../../react-components/wrapped-intl-provider";
-import registerTelemetry from "./../../../telemetry";
-import Store from "./../../../storage/store";
-import "./../../../utils/theme";
-import { SettingsPage } from "../../react-components/settings/SettingsPage";
+import registerTelemetry from "../../../telemetry";
+import Store from "../../../storage/store";
+import "../../../utils/theme";
+import { SettingsPage } from "../react-component/settings/SettingsPage";
 import { AuthContextProvider } from "../../../react-components/auth/AuthContext";
 import { ThemeProvider } from "../../../react-components/styles/theme";
 import {
   microsoftLoginService
-} from "../../service/MicrosoftIntegration/MicrosoftLoginService";
+} from "../service/MicrosoftLoginService";
 
 
 import * as microsoftTeams from "@microsoft/teams-js";
-import { AccountAuth } from "../../react-components/msft/AccountAuth";
+import { AccountAuth } from "../react-component/AccountAuth";
 import { Button, Input, Loader } from "@fluentui/react-northstar";//https://fluentsite.z22.web.core.windows.net/0.60.1
-import { roomService } from "../../service/MicrosoftIntegration/RoomService";
+import { roomService } from "../service/RoomService";
 import { FormattedMessage } from "react-intl";
-import { CHANGE_SETTINGS_URL, getMSEvents } from "../../service/MicrosoftIntegration/MsTeams";
+import { CHANGE_SETTINGS_URL, getMSEvents } from "../service/MsTeams";
 
 registerTelemetry("/microsoft-settings", "microsoft-settings");
 import { Provider, teamsTheme } from "@fluentui/react-northstar";
 import {
   getAuthEvents,
   SIGN_IN_COMPLETE
-} from "../../service/MicrosoftIntegration/AuthEvent";
-import { getCredential } from "../../service/MicrosoftIntegration/TeamsLoginService";
-import { MeetingSidePanel } from "../../react-components/msft/MeetingSidePanel";
+} from "../service/AuthEvent";
+import { getCredential } from "../service/TeamsLoginService";
+import { MeetingSidePanel } from "../react-component/MeetingSidePanel";
 
 const store = new Store();
+declare const window;
 window.APP = { store };
+const WrappedIntlProviderAny:any = WrappedIntlProvider;
 
 try {
   microsoftLoginService.passiveLogin();
@@ -144,7 +146,7 @@ class TabConfig extends React.Component {
     }
     return (
       <Provider theme={teamsTheme}>
-        <WrappedIntlProvider>
+        <WrappedIntlProviderAny>
           <AuthContextProvider store={store}>
             <ThemeProvider store={store}>
               <div style={{ margin: "8px" }}>
@@ -161,7 +163,7 @@ class TabConfig extends React.Component {
                       fluid
                       value={this.state.suggestedDisplayName}
                       onChange={(value) => {
-                        this.setState({ suggestedDisplayName: value.target.value });
+                        this.setState({ suggestedDisplayName: (value.target as any).value });
                       }}
                     />
                     <Input
@@ -170,7 +172,7 @@ class TabConfig extends React.Component {
                       fluid
                       value={roomUrl}
                       onChange={(value) => {
-                        this.setState({ url: value.target.value });
+                        this.setState({ url: (value.target as any).value });
                       }}
                     />
                     <Button fluid onClick={() => {
@@ -198,7 +200,7 @@ class TabConfig extends React.Component {
               </div>
             </ThemeProvider>
           </AuthContextProvider>
-        </WrappedIntlProvider>
+        </WrappedIntlProviderAny>
       </Provider>
     );
   }
@@ -208,13 +210,13 @@ let url = new URL(window.location.href);
 if (url.searchParams.get("sidePanel")) {
   ReactDOM.render(
     <Provider theme={teamsTheme}>
-      <WrappedIntlProvider>
+      <WrappedIntlProviderAny>
         <AuthContextProvider store={store}>
           <ThemeProvider store={store}>
             <MeetingSidePanel/>
           </ThemeProvider>
         </AuthContextProvider>
-      </WrappedIntlProvider>
+      </WrappedIntlProviderAny>
     </Provider>, document.getElementById("home-root"));
 } else {
   ReactDOM.render(<TabConfig/>, document.getElementById("home-root"));

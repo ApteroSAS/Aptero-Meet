@@ -1,11 +1,14 @@
 import { Buffer } from "buffer";
 import axios from "axios";
+import {Client} from "@microsoft/microsoft-graph-client";
 
 Buffer.from("anything", "base64");
 
 export class MicrosoftGraphService{
+  client: Client;
+  private accessToken: String;
 
-  init(client,token){
+  init(client,token=""){
     this.accessToken = token;//TODO find this from client
     this.client = client;
   }

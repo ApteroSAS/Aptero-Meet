@@ -1,7 +1,7 @@
+import * as React from "react";
 import { Avatar, Flex, Segment, Text } from "@fluentui/react-northstar";
-import React from "react";
-import { useData } from "../../service/MicrosoftIntegration/lib/useData";
-import { getCredential } from "../../service/MicrosoftIntegration/TeamsLoginService";
+import { useData } from "../lib/useData";
+import { getCredential } from "../service/TeamsLoginService";
 
 export function LightProfileCard() {
   const userProfile = useData(async () => {

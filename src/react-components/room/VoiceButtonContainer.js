@@ -5,7 +5,7 @@ import { ReactComponent as MicrophoneMutedIcon } from "../icons/MicrophoneMuted.
 import { ToolbarButton } from "../input/ToolbarButton";
 import { useMicrophone } from "./useMicrophone";
 import { FormattedMessage } from "react-intl";
-import {msTeams} from "../../aptero/service/MicrosoftIntegration/MsTeams";
+import {msTeams} from "../../aptero/microsoft/service/MsTeams";
 
 export function VoiceButtonContainer({ scene, microphoneEnabled }) {
   if(window.APP_CONFIG.adapterParams.adapter === "none" || msTeams()){

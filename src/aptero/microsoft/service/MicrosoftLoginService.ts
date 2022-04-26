@@ -10,7 +10,7 @@ export class MicrosoftLoginService {
   msGraphService = new MicrosoftGraphService();
   msToNativeLoginBridge = new MsToNativeLoginBridge();
   microsoftOauthLoginService = new MicrosoftOauthLoginService(this.msGraphService,this.msToNativeLoginBridge);
-  teamsLoginService = new TeamsLoginService(this.msGraphService,this.msToNativeLoginBridge);;
+  teamsLoginService = new TeamsLoginService(this.msGraphService,this.msToNativeLoginBridge);
 
   async passiveLogin() {
     if(!this.authInProgress) {

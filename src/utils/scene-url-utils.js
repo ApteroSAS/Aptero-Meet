@@ -1,5 +1,5 @@
 import { isLocalHubsSceneUrl, proxiedUrlFor } from "../utils/media-url-utils";
-import { microsoftUrlService } from "../aptero/service/MicrosoftIntegration/MicrosoftUrlService";
+import { microsoftUrlService } from "../aptero/microsoft/service/MicrosoftUrlService";
 
 export async function isValidGLB(url) {
   url = await microsoftUrlService.preFetchConvertMicrosoftUrl(url);
