@@ -2,11 +2,11 @@ import {EventEmitter} from "eventemitter3";
 
 export const LOGGED_BASIC_INFO = "ms-auth-basic-info";
 export const TOKEN_RECEIVED = "ms-auth-basic-info";
-export const SIGN_IN_COMPLETE = "ms-auth-sign-in-complete";
+export const AUTH_SERVICE_INITIALIZE = "ms-auth-service-initialized";
 let events = new EventEmitter();
 
-events.on(SIGN_IN_COMPLETE,()=>{
-  console.log("SIGN_IN_COMPLETE");
+events.on(AUTH_SERVICE_INITIALIZE,()=>{
+  console.log("AUTH_SERVICE_INITIALIZE");
 });
 
 export function getAuthEvents(){

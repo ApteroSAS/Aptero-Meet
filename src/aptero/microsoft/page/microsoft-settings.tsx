@@ -4,7 +4,7 @@ import { WrappedIntlProvider } from "../../../react-components/wrapped-intl-prov
 import registerTelemetry from "../../../telemetry";
 import Store from "../../../storage/store";
 import "../../../utils/theme";
-import { SettingsPage } from "../react-component/settings/SettingsPage";
+import { RoomSection } from "../react-component/settings/RoomSection";
 import { AuthContextProvider } from "../../../react-components/auth/AuthContext";
 import { ThemeProvider } from "../../../react-components/styles/theme";
 import {
@@ -13,8 +13,7 @@ import {
 
 
 import * as microsoftTeams from "@microsoft/teams-js";
-import { AccountAuth } from "../react-component/AccountAuth";
-import { Button, Input, Loader } from "@fluentui/react-northstar";//https://fluentsite.z22.web.core.windows.net/0.60.1
+import { Loader } from "@fluentui/react-northstar";//https://fluentsite.z22.web.core.windows.net/0.60.1
 import { roomService } from "../service/RoomService";
 import { FormattedMessage } from "react-intl";
 import { CHANGE_SETTINGS_URL, getMSEvents } from "../service/MsTeams";
@@ -23,21 +22,23 @@ registerTelemetry("/microsoft-settings", "microsoft-settings");
 import { Provider, teamsTheme } from "@fluentui/react-northstar";
 import {
   getAuthEvents,
-  SIGN_IN_COMPLETE
+  AUTH_SERVICE_INITIALIZE
 } from "../service/AuthEvent";
 import { getCredential } from "../service/TeamsLoginService";
 import { MeetingSidePanel } from "../react-component/MeetingSidePanel";
+import { Login } from "@microsoft/mgt-react";
 
 const store = new Store();
 declare const window;
 window.APP = { store };
-const WrappedIntlProviderAny:any = WrappedIntlProvider;
+const WrappedIntlProviderAny: any = WrappedIntlProvider;
 
 try {
   microsoftLoginService.passiveLogin();
-}catch (e) {
+} catch (e) {
   console.error(e);
 }
+
 /**
  * The 'Config' component is used to display your group tabs
  * user configuration options.  Here you will allow the user to
@@ -52,7 +53,7 @@ class TabConfig extends React.Component {
     //url:"https://alphahub.aptero.co/fTj63Hg",
     url: "",
     size: { width: "100%", height: "2000px" },
-    logged: null,
+    initialized: null,
     suggestedDisplayName: "Virtual Meeting"
   };
   removeListeners = () => {
@@ -81,17 +82,17 @@ class TabConfig extends React.Component {
     };
     getMSEvents().on(CHANGE_SETTINGS_URL, callbackUrl);
 
-    const onLogged = () => {
-      console.log("onLogged");
-      this.setState({ logged: true });
-    };
-
-    getAuthEvents().on(SIGN_IN_COMPLETE, onLogged);
-
     this.removeListeners = () => {
       getMSEvents().off(CHANGE_SETTINGS_URL, callbackUrl);
-      getAuthEvents().off(SIGN_IN_COMPLETE, onLogged);
     };
+    const onInitialized = () => {
+      console.log("onInitialized");
+      getAuthEvents().off(AUTH_SERVICE_INITIALIZE, onInitialized);
+      this.setState({ initialized: true });
+    };
+
+    getAuthEvents().on(AUTH_SERVICE_INITIALIZE, onInitialized);
+
     /**
      * When the user clicks "Save", save the url for your configured tab.
      * This allows for the addition of query string parameters based on
@@ -144,47 +145,49 @@ class TabConfig extends React.Component {
     } catch (e) {
       //ignore error
     }
+
     return (
       <Provider theme={teamsTheme}>
         <WrappedIntlProviderAny>
           <AuthContextProvider store={store}>
             <ThemeProvider store={store}>
               <div style={{ margin: "8px" }}>
-                {!this.state.logged && <Loader/>}
-                {this.state.logged && <>
+                {!this.state.initialized && <Loader/>}
+                {this.state.initialized && <>
                   <h2><FormattedMessage id="microsoft.settings.identity" defaultMessage="Identity"/>
                   </h2>
-                  <AccountAuth/>
-                  <h2><FormattedMessage id="microsoft.settings.room" defaultMessage="Room"/></h2>
-                  {this.state.url && <>
-                    <Input
-                      label={<FormattedMessage id="microsoft.settings.room-display-name"
-                                               defaultMessage="Room Display Name"/>}
-                      fluid
-                      value={this.state.suggestedDisplayName}
-                      onChange={(value) => {
-                        this.setState({ suggestedDisplayName: (value.target as any).value });
-                      }}
-                    />
-                    <Input
-                      label={<FormattedMessage id="microsoft.settings.selected-room"
-                                               defaultMessage="Selected Room"/>}
-                      fluid
-                      value={roomUrl}
-                      onChange={(value) => {
-                        this.setState({ url: (value.target as any).value });
-                      }}
-                    />
-                    <Button fluid onClick={() => {
-                      microsoftTeams.settings.setValidityState(false);
-                      this.setState({ url: "" });
-                    }}><FormattedMessage id="microsoft.settings.change-scene"
-                                         defaultMessage="Change Scene"/></Button>
-                  </>
-                  }
-                  {!this.state.url &&
-                  <SettingsPage/>
-                  }
+                  <Login
+                    loginInitiated={async () => {
+                      try {
+                        this.setState({ initialized: false });
+                        await microsoftLoginService.login();
+                      } catch (e) {
+                        await microsoftLoginService.logout();
+                      }
+                      this.setState({ initialized: true });
+                    }}
+                    logoutInitiated={async () => {
+                      this.setState({ initialized: false });
+                      await microsoftLoginService.logout();
+                      this.setState({ initialized: true });
+                    }}
+                    loginFailed={async () => {
+                      await microsoftLoginService.logout();
+                      this.setState({ initialized: true });
+                    }}
+                  />
+                  <RoomSection roomUrl={roomUrl}
+                               suggestedDisplayName={this.state.suggestedDisplayName}
+                               onChangeRoomUrl={text => {
+                                 if (!text) {
+                                   microsoftTeams.settings.setValidityState(false);
+                                 }
+                                 this.setState({ url: text });
+                               }}
+                               onChangeSuggestedDisplayName={text => {
+                                 this.setState({ suggestedDisplayName: text });
+                               }}
+                  />
                 </>}
                 <span onClick={() => {
                   window.location.reload();

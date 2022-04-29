@@ -5,9 +5,9 @@ import {Login} from "@microsoft/mgt-react";
 import {LightProfileCard} from "./LightProfileCard";
 import {FormattedMessage} from "react-intl";
 import {microsoftLoginService} from "../service/MicrosoftLoginService";
-import { getScopes } from "../service/scope";
+import { getScopes, getScopesLight } from "../service/scope";
 
-export function AccountAuth(props) {
+export function AccountAuthV2(props) {
 
     const {loading, error, data, reload} = useGraph(
         async (graph) => {
@@ -22,11 +22,12 @@ export function AccountAuth(props) {
             }
             return {profile, photoUrl};
         },
-        {scope: getScopes()}
+        {scope: getScopesLight()}
     );
 
     const requestAuth = async () => {
-        await microsoftLoginService.login()
+        await microsoftLoginService.login();
+        reload();
     };
 
     console.log("user id :" + data?.profile.id);
@@ -42,7 +43,7 @@ export function AccountAuth(props) {
                                                        defaultMessage="Failed to authorize. Please contact the support at admin@aptero.co and past the following error detail:"/>
                             <br/> {error.toString()}</p>}
                         {!error && <p><FormattedMessage id="microsoft.settings.account-auth.authorize2"
-                                                        defaultMessage="(Optional) Authorize this app to acces advanced features."/>
+                                                        defaultMessage="(Optional) Authorize this app to access advanced features."/>
                         </p>}
                         <Button primary content="Authorize" disabled={loading} onClick={requestAuth}
                                 style={{height: "auto"}}/>

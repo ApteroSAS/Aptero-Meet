@@ -1,6 +1,6 @@
 import { PublicClientApplication } from "@azure/msal-browser";
 import configs from "../../../utils/configs";
-import { getScopes } from "./scope";
+import { getScopes, getScopesLight } from "./scope";
 import {MicrosoftGraphService} from "./MicrosoftGraphService";
 import {MsToNativeLoginBridge} from "./MsToNativeLoginBridge";
 let graph = require("@microsoft/microsoft-graph-client");
@@ -38,7 +38,7 @@ export class MicrosoftOauthLoginService {
         //  try silent login
         const account = this.getPublicClientApplication().getAllAccounts()[0];
         const accessTokenRequest = {
-          scopes: getScopes(),
+          scopes: getScopesLight(),
           account: account
         };
         let authenticationResult = await this.getPublicClientApplication().acquireTokenSilent(accessTokenRequest);
@@ -92,7 +92,7 @@ export class MicrosoftOauthLoginService {
   async login() {
     try {
       const loginRequest = {
-        scopes: getScopes()
+        scopes: getScopesLight()
       };
       let response = await this.getPublicClientApplication().loginPopup(loginRequest);
       await this.initWithToken(response.accessToken);

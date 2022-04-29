@@ -10,7 +10,7 @@ import {rotateInPlaceAroundWorldUp, affixToWorldUp} from "../../utils/three-util
 import {Spinner} from "../misc/Spinner";
 import {UserProfileVisitCardContainer} from "./UserProfileVisitCardContainer";
 import {PeopleSidebarContainer, usePeopleList} from "./PeopleSidebarContainer";
-import { processDeepLink } from "../../aptero/microsoft/service/MsTeams";
+import { msTeams, processDeepLink } from "../../aptero/microsoft/service/MsTeams";
 
 function useGoToSelectedAvatar(entity) {
     const targetMatrix = new THREE.Matrix4();
@@ -202,7 +202,7 @@ export function UserProfileSidebar({
                     >
                         <FormattedMessage id="avatar-teleport" defaultMessage="Go to"/>
                     </Button>
-                    {canMute && (
+                    {(canMute && !msTeams()) && (
                         <Button preset="cancel" onClick={onMute}>
                             <FormattedMessage id="user-profile-sidebar.mute-button" defaultMessage="Mute"/>
                         </Button>

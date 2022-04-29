@@ -12,7 +12,7 @@ import {
 } from "@microsoft/teamsfx";
 import * as microsoftTeams from "@microsoft/teams-js";
 import {getAuthEvents, LOGGED_BASIC_INFO} from "./AuthEvent";
-import {getScopes} from "./scope";
+import { getScopes, getScopesLight } from "./scope";
 import {MicrosoftGraphService} from "./MicrosoftGraphService";
 import {MsToNativeLoginBridge} from "./MsToNativeLoginBridge";
 
@@ -89,10 +89,10 @@ export class TeamsLoginService {
         Providers.globalProvider = provider;
     }
 
-    async initGraph() {
+    async initGraph(scopes) {
         try {
-            const graph = createMicrosoftGraphClient(credential, getScopes());
-            const token = await credential?.getToken(getScopes());
+            const graph = createMicrosoftGraphClient(credential, scopes);
+            const token = await credential?.getToken(scopes);
             this.microsoftGraphService.init(graph, token);
         } catch (e) {
             if (e.toString().indexOf("please login first") !== -1) {
@@ -103,39 +103,66 @@ export class TeamsLoginService {
         }
     }
 
-    async userInteractionAuth(consentNeeded) {
+    async userInteractionAuth() {
         console.log("userInteractionAuth");
         const cred = await this.initBasicInfo();
-        cred.login(getScopes());//Trigger authorization popup
+        await this.initTeamsFxProvider(cred, getScopesLight());
+        await new Promise(async (resolve, reject) => {
+            await this.checkIsConsentNeeded(()=>{
+                cred.login(getScopesLight());//Trigger authorization popup
+                resolve(true);
+            });
+        })
         //await teamsAuth();
-        await this.initGraph();
-        await this.initTeamsFxProvider(cred, getScopes());
+        await this.initGraph(getScopesLight());
         const userInfo = await cred.getUserInfo();
         await this.initBasic(userInfo, true);
-        await this.checkIsConsentNeeded(consentNeeded);
+        Providers.globalProvider.setState(ProviderState.SignedIn);
+        return cred;
+    }
+
+    async upgrade(){
+        console.log("upgrade");
+        let scope = getScopes();
+        const cred = await this.initBasicInfo();
+        await this.initTeamsFxProvider(cred, scope);
+        await new Promise(async (resolve, reject) => {
+            await this.checkIsConsentNeeded(()=>{
+                cred.login(scope);//Trigger authorization popup
+                resolve(true);
+            });
+        })
+        //await teamsAuth();
+        await this.initGraph(scope);
+        const userInfo = await cred.getUserInfo();
+        await this.initBasic(userInfo, true);
         return cred;
     }
 
     async passiveLogin() {
+        if(!msTeams()){
+            throw new Error("not in teams");
+        }
+        try {
+            await microsoftTeams.initialize();
+        } catch (e) {
+            console.warn("microsoftTeams.initialize failed (probably not in teams so we skip it)", e);
+        }
+        if(!this.msToNativeLoginBridge.isLogged()){
+            return;
+        }
         try {
             //if msteams
             // log using token from msteams
             //if cookie oauth microsoft
-            if (msTeams()) {
-                try {
-                    // Initialize the Microsoft Teams SDK
-                    await microsoftTeams.initialize();
-                    const cred = await this.initBasicInfo();
-                    await this.initTeamsFxProvider(cred, getScopes());
-                    const userInfo = await cred.getUserInfo();
-                    console.log("passiveAuth (basic):", cred);
-                    await this.initGraph();
-                    await this.initBasic(userInfo, false);
-                    Providers.globalProvider.setState(ProviderState.SignedIn);
-                } catch (e) {
-                    console.warn("microsoftTeams.initialize failed (probably not in teams so we skip it)", e);
-                }
-            }
+            // Initialize the Microsoft Teams SDK
+            const cred = await this.initBasicInfo();
+            await this.initTeamsFxProvider(cred, getScopesLight());
+            const userInfo = await cred.getUserInfo();
+            console.log("passiveAuth (basic):", cred);
+            await this.initGraph(getScopesLight());
+            await this.initBasic(userInfo, false);
+            Providers.globalProvider.setState(ProviderState.SignedIn);
         } catch (e) {
             //passive login should never fail - just ignore
             console.warn("passive login failed", e);
@@ -192,7 +219,7 @@ export class TeamsLoginService {
             //ignore
         }
         try {
-            token = await credential?.getToken(getScopes());
+            token = await credential?.getToken(getScopesLight());
         } catch (e) {
             //ignore
         }
@@ -210,9 +237,7 @@ export class TeamsLoginService {
 
     async login() {
         try {
-            this.userInteractionAuth(() => {
-                console.warn("consent is needed");
-            });
+            await this.userInteractionAuth();
         } catch (error) {
             console.log("error", error);
         }
@@ -232,13 +257,12 @@ export class TeamsLoginService {
     }
 
     async logout() {
-        this.msToNativeLoginBridge.clearProfile();
+        await this.msToNativeLoginBridge.logout();
         if (Providers.globalProvider.state === ProviderState.SignedIn) {
             if (Providers.globalProvider && Providers.globalProvider.logout) {
                 await Providers.globalProvider.logout();
             }
             Providers.globalProvider.setState(ProviderState.SignedOut);
-            //meetVsTeamsBridge.sendIframeMessage(RELOAD);//Commented this because I suspect it cause a reload loop
         }
     }
 

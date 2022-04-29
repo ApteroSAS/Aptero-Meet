@@ -3,7 +3,7 @@ import { MicrosoftGraphService } from "./MicrosoftGraphService";
 import { MicrosoftOauthLoginService } from "./MicrosoftOauthLoginService";
 import { TeamsLoginService } from "./TeamsLoginService";
 import { MsToNativeLoginBridge } from "./MsToNativeLoginBridge";
-import { getAuthEvents, SIGN_IN_COMPLETE } from "./AuthEvent";
+import { getAuthEvents, AUTH_SERVICE_INITIALIZE } from "./AuthEvent";
 
 export class MicrosoftLoginService {
   authInProgress = false;
@@ -25,7 +25,7 @@ export class MicrosoftLoginService {
           await this.microsoftOauthLoginService.passiveLogin();
           this.authInProgress = false;
         }
-        getAuthEvents().emit(SIGN_IN_COMPLETE);
+        getAuthEvents().emit(AUTH_SERVICE_INITIALIZE);
     }
   }
 
@@ -42,7 +42,6 @@ export class MicrosoftLoginService {
         await this.microsoftOauthLoginService.login();
         this.authInProgress = false;
       }
-      getAuthEvents().emit(SIGN_IN_COMPLETE);
     }
   }
 
@@ -73,6 +72,10 @@ export class MicrosoftLoginService {
 
   displayProfilePhoto() {
     return this.msToNativeLoginBridge.displayProfilePhoto();
+  }
+
+  isSignedIn() {
+    return this.msToNativeLoginBridge.isLogged();
   }
 }
 

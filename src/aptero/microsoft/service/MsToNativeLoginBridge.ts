@@ -4,18 +4,35 @@ import uuid from "uuid/v4";
 declare const window;
 
 export class MsToNativeLoginBridge {
-
+  isLogged(){
+    try {
+      return !!window.APP.store.state.credentials.token;
+    }catch (e){
+      return false;
+    }
+  }
 
   clearProfile(){
     window.APP.store.update({
       profile: {
         phoneNumber: null,
+        displayName:"Teams Guest",
+        email:null,
         jobTitle: null,
         companyName: null,
         microsoftUserprofilePicture: null,
         microsoftUser: null
       }, activity: {hasChangedName: false, hasChangedPicture: false}
     });
+  }
+
+  async logout(){
+    if (window.APP.hubChannel) {
+      await window.APP.hubChannel.signOut(window.APP.hubChannel);
+      console.log("Native signOut");
+    }
+    window.APP.store.update({ credentials: { token: null, email: null } });
+    await this.clearProfile();
   }
 
   /*{

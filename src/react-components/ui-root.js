@@ -1503,9 +1503,16 @@ export class UIRoot extends Component {
               icon: SettingsIcon,
               onClick: () => this.setState({showPrefs: true})
             },
-            {
+            microsoftLoginService.isSignedIn()?{
               id: "authorize",
-              label: "Authorize",
+              label: "Sign Out",
+              icon: SettingsIcon,
+              onClick: () => {
+                microsoftLoginService.logout();
+              }
+            }:{
+              id: "authorize",
+              label: "Sign In",
               icon: SettingsIcon,
               onClick: () => {
                 microsoftLoginService.login();

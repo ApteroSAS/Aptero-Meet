@@ -10,7 +10,7 @@ export function getScopesLight(){
   //Try to avoid admin consent for authorization
   return [
     // Teams app permission
-    "User.ReadBasic.All", // Use for basic email, call and chat call to action, Avatar image and name - Mandatory
+    "User.Read", // Use for basic email, call and chat call to action, Avatar image and name
   ]
 }
 
@@ -22,7 +22,7 @@ export function getScopes(){
     //"Presence.Read.All", //use for visit card
     //"People.Read", //use for visit card
     "User.Read", //organisation info  / profile info
-    "User.ReadBasic.All", // Use for basic email, call and chat call to action, Avatar image and name - Mandatory
+    "User.ReadBasic.All", // Use for basic email, call and chat call to action, Avatar image and name
     //Permission for the web part
     "profile",//Avatar image and name - Mandatory
     "openid",//Avatar image and name - Mandatory
