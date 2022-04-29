@@ -27,6 +27,7 @@ import {
 import { getCredential } from "../service/TeamsLoginService";
 import { MeetingSidePanel } from "../react-component/MeetingSidePanel";
 import { Login } from "@microsoft/mgt-react";
+import { LoginButton } from "../react-component/LoginButton";
 
 const store = new Store();
 declare const window;
@@ -156,26 +157,7 @@ class TabConfig extends React.Component {
                 {this.state.initialized && <>
                   <h2><FormattedMessage id="microsoft.settings.identity" defaultMessage="Identity"/>
                   </h2>
-                  <Login
-                    loginInitiated={async () => {
-                      try {
-                        this.setState({ initialized: false });
-                        await microsoftLoginService.login();
-                      } catch (e) {
-                        await microsoftLoginService.logout();
-                      }
-                      this.setState({ initialized: true });
-                    }}
-                    logoutInitiated={async () => {
-                      this.setState({ initialized: false });
-                      await microsoftLoginService.logout();
-                      this.setState({ initialized: true });
-                    }}
-                    loginFailed={async () => {
-                      await microsoftLoginService.logout();
-                      this.setState({ initialized: true });
-                    }}
-                  />
+                  <LoginButton/>
                   <RoomSection roomUrl={roomUrl}
                                suggestedDisplayName={this.state.suggestedDisplayName}
                                onChangeRoomUrl={text => {
