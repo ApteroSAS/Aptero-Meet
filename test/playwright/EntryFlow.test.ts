@@ -2,7 +2,7 @@ import { expect, test } from "./lib/baseFixtures";
 import { waitInitialSceneLoad, waitPageLoadedAll } from "./lib/TestCommon";
 
 test('entry flow', async ({ page }) => {
-  test.setTimeout(120000);
+  test.setTimeout(240000);
   // Go to https://alphahub.aptero.co/EVa7SjZ/playwright-test-1
   await page.goto('hub.html?hub_id=EVa7SjZ')
   await page.context().grantPermissions(['camera', 'microphone']);
