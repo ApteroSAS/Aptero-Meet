@@ -33,6 +33,7 @@
     "intl-extract": "node ./src/assets/locales/intl-extract.js",
     "intl-extract-en-locale": "node ./src/assets/locales/intl-extract.js en",
     "ci:test": "cross-env NODE_ENV=development npx playwright test",
+    "ci:debug:run:one": "cross-env CI=true PW_PORT=53000 PWDEBUG=1 PW_TEST_DIR=./test/ npx playwright test ./test/playwright-load-test/LoadTestLimitePlayer.test.ts --headed",
     "ci:debug:serve": "cross-env NODE_ENV=development PW_PORT=53000 yarn run dev",
     "ci:debug:run": "cross-env CI=true PW_PORT=53000 NODE_ENV=development PWDEBUG=console npx playwright test --headed",
     "ci:coverage:serve": "cross-env NODE_ENV=development USE_BABEL_PLUGIN_ISTANBUL=1 webpack --stats-error-details --config webpack.config.js && npx http-server dist -p 9080 --ssl --cert ./certs/cert.pem --key ./certs/key.pem",

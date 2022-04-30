@@ -4,7 +4,7 @@
 // @ts-check
 
 const config = {
-    testDir:"./test/playwright",
+    testDir:process.env.PW_TEST_DIR || "./test/playwright",
     webServer: {
         ignoreHTTPSErrors: true,
         command: 'yarn run ci:coverage:serve',
