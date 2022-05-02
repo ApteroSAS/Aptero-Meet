@@ -75,3 +75,7 @@ src/assets/locales/extracted-messages.json
 /build/appPackage/manifest.local.json
 /tabs/.env.teamsfx.local
 /junit.xml
+
+.fx/configs/config.local.json
+.fx/states/state.local.json
+.backup
