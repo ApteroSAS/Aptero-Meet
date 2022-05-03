@@ -1,12 +1,5 @@
-
-import { getContext, msTeams } from "./aptero/microsoft/service/MsTeams";
-if(msTeams()) {
-  getContext((context)=>{
-    if(context.frameContext === "sidePanel") {
-      window.location.replace(window.location.origin + "/microsoft-settings.html?sidePanel=true");
-    }
-  });
-}
+import { redirectToTeamsSidePanel } from "./aptero/microsoft/service/RedirectToSidePage";
+redirectToTeamsSidePanel();
 
 import {
   getCurrentHubId,
@@ -258,7 +251,7 @@ import "./components/body-helper";
 import "./components/shape-helper";
 
 import registerNetworkSchemas from "./network-schemas";
-import registerTelemetry, { showReportDialog } from "./telemetry";
+import registerTelemetry from "./telemetry";
 
 import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY, ONLY_SCREEN_AVAILABLE } from "./utils/vr-caps-detect";
 import detectConcurrentLoad from "./utils/concurrent-load-detector";
@@ -274,6 +267,7 @@ import { wait } from "./aptero/util/AsyncWaiter";
 import { networkService } from "./aptero/service/NetworkService";
 import { getEntryMode } from "./aptero/util/EntryMode";
 import { setupVersionComp } from "./aptero/util/Version";
+import { msTeams } from "./aptero/microsoft/service/MsTeams";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;

@@ -1,28 +1,27 @@
 import * as React from "react";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { FormattedMessage } from "react-intl";
-// @ts-ignore
-import styles from "./SettingsPage.scss";
+
 import {
   connectToReticulum,
   createAndRedirectToNewHub,
   fetchReticulumAuthenticated,
   getReticulumFetchUrl, isLocalClient
-} from "../../../../utils/phoenix-utils";
-import { MediaGrid } from "../../../../react-components/room/MediaGrid";
-import { MediaTile } from "../../../../react-components/room/MediaTiles";
-import { PageContainer } from "../../../../react-components/layout/PageContainer";
-import { scaledThumbnailUrlFor } from "../../../../utils/media-url-utils";
-import { Column } from "../../../../react-components/layout/Column";
-import { Container } from "../../../../react-components/layout/Container";
-import { changeUrlSettings } from "../../service/MsTeams";
-import { AuthContext } from "../../../../react-components/auth/AuthContext";
-import { usePaginatedAPI } from "../../../../react-components/home/usePaginatedAPI";
-import { generateHubName } from "../../../../utils/name-generation";
-import Store from "../../../../storage/store";
+} from "../../../utils/phoenix-utils";
+import { MediaGrid } from "../../../react-components/room/MediaGrid";
+import { MediaTile } from "../../../react-components/room/MediaTiles";
+import { PageContainer } from "../../../react-components/layout/PageContainer";
+import { scaledThumbnailUrlFor } from "../../../utils/media-url-utils";
+import { Column } from "../../../react-components/layout/Column";
+import { Container } from "../../../react-components/layout/Container";
+import { changeUrlSettings } from "../service/MsTeams";
+import { AuthContext } from "../../../react-components/auth/AuthContext";
+import { usePaginatedAPI } from "../../../react-components/home/usePaginatedAPI";
+import { generateHubName } from "../../../utils/name-generation";
+import Store from "../../../storage/store";
 import Cookies from "js-cookie";
-import { createHubChannelParams } from "../../../../utils/hub-utils";
-import { propertiesService } from "../../../properties/propertiesService";
+import { createHubChannelParams } from "../../../utils/hub-utils";
+import { propertiesService } from "../../properties/propertiesService";
 import { Button, Input } from "@fluentui/react-northstar";//https://fluentsite.z22.web.core.windows.net/0.60.1
 
 declare const window;
@@ -294,8 +293,8 @@ export function RoomSection(props:{
             }
           </div>
           {currentTab === "featured" && sortedFeaturedScene.length > 0 && (
-            <Container className={styles.roomsContainer} as={undefined}>
-              <Column2 grow padding className={styles.rooms}>
+            <Container as={undefined} className={undefined}>
+              <Column2 grow padding>
                 <MediaGrid center className={undefined} isVariableWidth={undefined} sm={undefined}>
                   {sortedFeaturedScene.map(room => {
                     return (
@@ -319,8 +318,8 @@ export function RoomSection(props:{
             </Container>
           )}
           {currentTab === "my-scene" && sortedSpokeProject.length > 0 && (
-            <Container className={styles.roomsContainer} as={undefined}>
-              <Column2 grow padding className={styles.rooms}>
+            <Container as={undefined} className={undefined}>
+              <Column2 grow padding >
                 <MediaGrid center className={undefined} isVariableWidth={undefined} sm={undefined}>
                   {sortedSpokeProject.map(room => {
                     return (
@@ -344,8 +343,8 @@ export function RoomSection(props:{
             </Container>
           )}
           {currentTab === "my-room" && sortedFavoriteRooms.length > 0 && (
-            <Container className={styles.roomsContainer} as={undefined}>
-              <Column2 grow padding className={styles.rooms}>
+            <Container className={undefined} as={undefined}>
+              <Column2 grow padding>
                 <MediaGrid center className={undefined} isVariableWidth={undefined} sm={undefined}>
                   {sortedFavoriteRooms.map(room => {
                     return (
@@ -370,7 +369,7 @@ export function RoomSection(props:{
               </Column2>
             </Container>
           )}
-          <PageContainer className={styles.homePage} style={{ backgroundColor: "#f3f2f1" }}>
+          <PageContainer className={undefined} style={{ backgroundColor: "#f3f2f1" }}>
           </PageContainer>
         </>
       }
