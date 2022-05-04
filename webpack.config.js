@@ -263,14 +263,9 @@ module.exports = async (env, argv) => {
       index: path.join(__dirname, "src", "index.js"),
       hub: path.join(__dirname, "src", "hub.js"),
       scene: path.join(__dirname, "src", "scene.js"),
-      avatar: path.join(__dirname, "src", "avatar.js"),
       link: path.join(__dirname, "src", "link.js"),
-      discord: path.join(__dirname, "src", "discord.js"),
-      cloud: path.join(__dirname, "src", "cloud.js"),
       signin: path.join(__dirname, "src", "signin.js"),
       verify: path.join(__dirname, "src", "verify.js"),
-      tokens: path.join(__dirname, "src", "tokens.js"),
-      "whats-new": path.join(__dirname, "src", "whats-new.js"),
     },
     output: {
       filename: "assets/js/[name]-[chunkhash].js",
@@ -560,16 +555,6 @@ module.exports = async (env, argv) => {
         }
       }),
       new HTMLWebpackPlugin({
-        filename: "avatar.html",
-        template: path.join(__dirname, "src", "avatar.html"),
-        chunks: ["support", "avatar"],
-        chunksSortMode: "manual",
-        inject: "head",
-        minify: {
-          removeComments: false
-        }
-      }),
-      new HTMLWebpackPlugin({
         filename: "link.html",
         template: path.join(__dirname, "src", "link.html"),
         chunks: ["support", "link"],
@@ -579,51 +564,9 @@ module.exports = async (env, argv) => {
         }
       }),
       new HTMLWebpackPlugin({
-        filename: "discord.html",
-        template: path.join(__dirname, "src", "discord.html"),
-        chunks: ["discord"],
-        minify: {
-          removeComments: false
-        }
-      }),
-      new HTMLWebpackPlugin({
-        filename: "whats-new.html",
-        template: path.join(__dirname, "src", "whats-new.html"),
-        chunks: ["whats-new"],
-        inject: "head",
-        minify: {
-          removeComments: false
-        }
-      }),
-      new HTMLWebpackPlugin({
-        filename: "cloud.html",
-        template: path.join(__dirname, "src", "cloud.html"),
-        chunks: ["cloud"],
-        inject: "head",
-        minify: {
-          removeComments: false
-        }
-      }),
-      new HTMLWebpackPlugin({
         filename: "signin.html",
         template: path.join(__dirname, "src", "signin.html"),
         chunks: ["signin"],
-        minify: {
-          removeComments: false
-        }
-      }),
-      new HTMLWebpackPlugin({
-        filename: "verify.html",
-        template: path.join(__dirname, "src", "verify.html"),
-        chunks: ["verify"],
-        minify: {
-          removeComments: false
-        }
-      }),
-      new HTMLWebpackPlugin({
-        filename: "tokens.html",
-        template: path.join(__dirname, "src", "tokens.html"),
-        chunks: ["tokens"],
         minify: {
           removeComments: false
         }

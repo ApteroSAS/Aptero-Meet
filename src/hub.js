@@ -1,5 +1,6 @@
 import { redirectToTeamsSidePanel } from "./aptero/microsoft/service/RedirectToSidePage";
 redirectToTeamsSidePanel();
+console.log(`App version: ${process.env.BUILD_VERSION || "?"}`);
 
 import {
   getCurrentHubId,
@@ -11,9 +12,6 @@ import "./utils/debug-log";
 import configs from "./utils/configs";
 import "./utils/theme";
 import "@babel/polyfill";
-
-console.log(`App version: ${process.env.BUILD_VERSION || "?"}`);
-
 import "./react-components/styles/global.scss";
 import "./assets/stylesheets/globals.scss";
 import "./assets/stylesheets/hub.scss";
