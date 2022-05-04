@@ -4,7 +4,7 @@ import { test } from "./lib/baseFixtures";
 import { waitInitialSceneLoad, waitPageLoadedAll } from "./lib/TestCommon";
 
 export async function runMultiplayer(playersNumber,page){
-  test.setTimeout((playersNumber*30*1000)+2*60*1000);
+  test.setTimeout((playersNumber*60*1000)+4*60*1000);
   const context = page.context();
 
   await page.goto('hub.html?hub_id=bxmhkMb&vr_entry_type=2d_now')
