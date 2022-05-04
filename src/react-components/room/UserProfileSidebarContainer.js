@@ -1,9 +1,10 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { PromoteClientModal } from "./PromoteClientModal";
 import { UserProfileSidebar } from "./UserProfileSidebar.js";
 import { SignInMessages } from "../auth/SignInModal";
 import {usePeopleList} from "./PeopleSidebarContainer";
+import { getAvatarThumbnailUrl } from "../../utils/avatar-utils";
 export function UserProfileSidebarContainer({
   mySessionId,
   user,
@@ -23,13 +24,19 @@ export function UserProfileSidebarContainer({
   
 }) {
   const micUpdateFrequency = 500;
+  const [avatarThumbnailUrl, setAvatarThumbnailUrl] = useState();
   const people = usePeopleList(presences, mySessionId, micUpdateFrequency);
-  var   avatarPreview="";
   const {
     id: userId,
     profile: { displayName, identityName, avatarId },
     roles
   } = user;
+  useEffect(() => {
+    if (avatarId) {
+      getAvatarThumbnailUrl(avatarId).then(avatarThumbnailUrl => setAvatarThumbnailUrl(avatarThumbnailUrl));
+    }
+  }, []);
+  let avatarPreview=avatarThumbnailUrl;//default url
   const mayKick = hubChannel.canOrWillIfCreator("kick_users");
   const mayMute = user.micPresence && !user.micPresence.muted && hubChannel.canOrWillIfCreator("mute_users");
   const [isOwner, setIsOwner] = useState(!!roles.owner);

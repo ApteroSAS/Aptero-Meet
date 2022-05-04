@@ -4,7 +4,6 @@ import { PeopleSidebar } from "./PeopleSidebar";
 import { getMicrophonePresences } from "../../utils/microphone-presence";
 import ProfileEntryPanel from "../profile-entry-panel";
 import { UserProfileSidebarContainer } from "./UserProfileSidebarContainer";
-import { media } from "@microsoft/teams-js";
 var selectedId;
 var selectedName;
 export function userFromPresence(sessionId, presence, micPresences, mySessionId) {

@@ -11,6 +11,7 @@ import {Spinner} from "../misc/Spinner";
 import {UserProfileVisitCardContainer} from "./UserProfileVisitCardContainer";
 import {PeopleSidebarContainer, usePeopleList} from "./PeopleSidebarContainer";
 import { msTeams, processDeepLink } from "../../aptero/microsoft/service/MsTeams";
+import { ReactComponent as AcountIcon } from "../icons/Acount.svg";
 
 function useGoToSelectedAvatar(entity) {
     const targetMatrix = new THREE.Matrix4();
@@ -121,11 +122,13 @@ export function UserProfileSidebar({
                             userId={userId}
                             presences={presences}
                         />}
-                    {!microsoftUserId &&
+                    {!microsoftUserId &&<>
+                      {avatarPreview == null && <AcountIcon style={{marginLeft:0}} className="acount-icon"/>}
+                      {avatarPreview != null &&
                         <div className={styles.avatarPreviewContainer}>
-                        {avatarPreview == null && (<div className="div_spinner"><Spinner/></div>)}
-                        {avatarPreview != null && <img src={avatarPreview}/>}
-                        </div>
+                         <img src={avatarPreview}/>
+                        </div>}
+                      </>
                     }
 
                     {canPromote && (
