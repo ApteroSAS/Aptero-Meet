@@ -6,7 +6,7 @@ import configs from "../../utils/configs";
 import jwtDecode from "jwt-decode";
 import AuthChannel from "../../utils/auth-channel";
 import { connectToReticulum } from "../../utils/phoenix-utils";
-import { microsoftLoginService } from "../../aptero/microsoft/service/MicrosoftLoginService";
+import { microsoftLoginService } from "../../aptero/module/microsoft/service/MicrosoftLoginService";
 
 export const AuthContext = createContext();
 

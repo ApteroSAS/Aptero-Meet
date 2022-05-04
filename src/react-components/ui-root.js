@@ -46,7 +46,7 @@ import { ToolbarButton } from "./input/ToolbarButton";
 import { RoomEntryModal } from "./room/RoomEntryModal";
 import { EnterOnDeviceModal } from "./room/EnterOnDeviceModal";
 import { MicPermissionsModal } from "./room/MicPermissionsModal";
-import { FallbackModal } from "../aptero/react-components/FallbackModal";
+import { FallbackModal } from "../aptero/module/Fallback/FallbackModal";
 import { MicSetupModalContainer } from "./room/MicSetupModalContainer";
 import { InvitePopoverContainer } from "./room/InvitePopoverContainer";
 import { MoreMenuPopoverButton, CompactMoreMenuButton, MoreMenuContextProvider } from "./room/MoreMenuPopover";
@@ -77,7 +77,6 @@ import { ObjectMenuContainer } from "./room/ObjectMenuContainer";
 import { useCssBreakpoints } from "react-use-css-breakpoints";
 import { PlacePopoverContainer } from "./room/PlacePopoverContainer";
 import { SharePopoverContainer } from "./room/SharePopoverContainer";
-import { DropDownChatList } from "./room/DropDownChatList";
 import { VoiceButtonContainer } from "./room/VoiceButtonContainer";
 import { ReactionPopoverContainer } from "./room/ReactionPopoverContainer";
 import { SafariMicModal } from "./room/SafariMicModal";
@@ -95,18 +94,18 @@ import { TweetModalContainer } from "./room/TweetModalContainer";
 import { TipContainer, FullscreenTip } from "./room/TipContainer";
 import { SpectatingLabel } from "./room/SpectatingLabel";
 import { SignInMessages } from "./auth/SignInModal";
-import { minimumQualityService } from "../aptero/service/MinimumQualityService";
 import { apteroService } from "../aptero/ApteroServices";
-import { CustomSidebarContainer } from "../aptero/react-components/CustomSidebarContainer";
-import { customMenuService } from "../aptero/service/CustomMenuService";
-import AptRoot from "../aptero/react-components/AptRoot";
+import { CustomSidebarContainer } from "../aptero/module/CustomPanel/react-component/CustomSidebarContainer";
+import { customMenuService } from "../aptero/module/CustomPanel/CustomMenuService";
 import { getSelectedPersonName } from "./room/PeopleSidebarContainer";
 import { Promise } from "core-js";
 import { UserProfileVisitCardContainer } from "./room/UserProfileVisitCardContainer";
 import axios from "axios";
-import { getContext, msTeams } from "../aptero/microsoft/service/MsTeams";
-import { propertiesService } from "../aptero/properties/propertiesService";
-import { microsoftLoginService } from "../aptero/microsoft/service/MicrosoftLoginService";
+import { msTeams } from "../aptero/module/microsoft/service/MsTeams";
+import { propertiesService } from "../aptero/module/properties/propertiesService";
+import { microsoftLoginService } from "../aptero/module/microsoft/service/MicrosoftLoginService";
+import AptRoot from "../aptero/module/HubsBridge/AptRoot";
+import { minimumQualityService } from "../aptero/module/perf/MinimumQualityService";
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 const IN_ROOM_MODAL_ROUTER_PATHS = ["/media"];
 const IN_ROOM_MODAL_QUERY_VARS = ["media_source"];
@@ -315,14 +314,15 @@ export class UIRoot extends Component {
 
   componentDidMount() {
     
-    this.props.scene.addEventListener("join", e => {
+    this.props.scene.addEventListener("join", () => {
       if(!!this.props.store.state.credentials && !!this.props.store.state.credentials.token && !this.props.store.state.profile.microsoftUser ){
+        // eslint-disable-next-line no-use-before-define
         getUserProfile(this.props.store);
       }
-      let people = usePeopleList(this.props.presences, this.props.sessionId);
       const useFetch = async avatarId => {
         var data;
         const fetchData = async () => {
+          // eslint-disable-next-line no-use-before-define
           data = await getUrl(avatarId);
         };
         await fetchData();
@@ -348,6 +348,7 @@ export class UIRoot extends Component {
       const useFetch = async avatarId => {
         var data;
         const fetchData = async () => {
+          // eslint-disable-next-line no-use-before-define
           data = await getUrl(avatarId);
         };
         await fetchData();
@@ -1863,9 +1864,6 @@ export class UIRoot extends Component {
                           history={this.props.history}
                           mySessionId={this.props.sessionId}
                           presences={this.props.presences}
-                          onClose={() => this.setSidebar(null)}
-                          onCloseDialog={() => this.closeDialog()}
-                          performConditionalSignIn={this.props.performConditionalSignIn}
                           toggleChatSidebar={(type, userid,onBack) => this.toggleSidebar(type, userid,onBack)}
                         />
                       )}
@@ -1876,7 +1874,6 @@ export class UIRoot extends Component {
                           userId={this.state.userId}
                           store={this.props.store}
                           hubChannel={this.props.hubChannel}
-                          presences={this.props.presences}
                           performConditionalSignIn={this.props.performConditionalSignIn}
                           onClose={() => this.setSidebar(null)}
                           onCloseDialog={() => this.closeDialog()}
@@ -2026,7 +2023,7 @@ function usePeopleList(presences, mySessionId) {
   return people;
 }
 function getUrl(avatarGlb) {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function(resolve) {
     const params = {
       model: avatarGlb,
       scene: "halfbody-portrait-v1",

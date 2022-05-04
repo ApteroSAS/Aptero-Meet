@@ -8,12 +8,9 @@ const HTMLWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
-const TOML = require("@iarna/toml");
-const fetch = require("node-fetch");
 const packageLock = require("./webpack-package-lock-info.json");
 const versionJson = require("./version.json");
 const request = require("request");
-const internalIp = require("internal-ip");
 
 const PORT = 53000;//Teams needs port 53000
 
@@ -101,94 +98,6 @@ function deepModuleDependencyTest(modulesArr) {
   };
 }
 
-function createDefaultAppConfig() {
-  const schemaPath = path.join(__dirname, "src", "schema.toml");
-  const schemaString = fs.readFileSync(schemaPath).toString();
-
-  let appConfigSchema;
-
-  try {
-    appConfigSchema = TOML.parse(schemaString);
-  } catch (e) {
-    console.error("Error parsing schema.toml on line " + e.line + ", column " + e.column + ": " + e.message);
-    throw e;
-  }
-
-  const appConfig = {};
-
-  for (const [categoryName, category] of Object.entries(appConfigSchema)) {
-    appConfig[categoryName] = {};
-
-    // Enable all features with a boolean type
-    if (categoryName === "features") {
-      for (const [key, schema] of Object.entries(category)) {
-        if (key === "require_account_for_join" || key === "disable_room_creation") {
-          appConfig[categoryName][key] = false;
-        } else {
-          appConfig[categoryName][key] = schema.type === "boolean" ? true : null;
-        }
-      }
-    }
-  }
-
-  const themesPath = path.join(__dirname, "themes.json");
-
-  if (fs.existsSync(themesPath)) {
-    const themesString = fs.readFileSync(themesPath).toString();
-    const themes = JSON.parse(themesString);
-    appConfig.themes = themes;
-  }
-
-  return appConfig;
-}
-
-async function fetchAppConfigAndEnvironmentVars() {
-  if (!fs.existsSync(".ret.credentials")) {
-    throw new Error("Not logged in to Hubs Cloud. Run `npm run login` first.");
-  }
-
-  const { host, token } = JSON.parse(fs.readFileSync(".ret.credentials"));
-
-  const headers = {
-    Authorization: `Bearer ${token}`,
-    "Content-Type": "application/json"
-  };
-
-  // Load the Hubs Cloud instance's app config in development
-  const appConfigsResponse = await fetch(`https://${host}/api/v1/app_configs`, { headers });
-
-  if (!appConfigsResponse.ok) {
-    throw new Error(`Error fetching Hubs Cloud config "${appConfigsResponse.statusText}"`);
-  }
-
-  const appConfig = await appConfigsResponse.json();
-
-  // dev.reticulum.io doesn't run ita
-  if (host === "dev.reticulum.io") {
-    return appConfig;
-  }
-
-  const hubsConfigsResponse = await fetch(`https://${host}/api/ita/configs/hubs`, { headers });
-
-  const hubsConfigs = await hubsConfigsResponse.json();
-
-  if (!hubsConfigsResponse.ok) {
-    throw new Error(`Error fetching Hubs Cloud config "${hubsConfigsResponse.statusText}"`);
-  }
-
-  const { shortlink_domain, thumbnail_server } = hubsConfigs.general;
-
-  const localIp = process.env.HOST_IP || (await internalIp.v4()) || "localhost";
-
-  process.env.RETICULUM_SERVER = host;
-  process.env.SHORTLINK_DOMAIN = shortlink_domain;
-  process.env.CORS_PROXY_SERVER = `${localIp}:${PORT}/cors-proxy`;
-  process.env.THUMBNAIL_SERVER = thumbnail_server;
-  process.env.NON_CORS_PROXY_DOMAINS = `${localIp},localhost`;
-
-  return appConfig;
-}
-
 module.exports = async (env, argv) => {
   env = env || {};
 
@@ -198,26 +107,11 @@ module.exports = async (env, argv) => {
   dotenv.config({ path: ".env" });
   dotenv.config({ path: ".defaults.env" });
 
-  let appConfig = undefined;
-
   /**
    * Initialize the Webpack build envrionment for the provided environment.
    */
 
   if (argv.mode !== "production" || env.bundleAnalyzer) {
-    if (env.loadAppConfig || process.env.LOAD_APP_CONFIG) {
-      if (!env.localDev) {
-        // Load and set the app config and environment variables from the remote server.
-        // A Hubs Cloud server or dev.reticulum.io can be used.
-        appConfig = await fetchAppConfigAndEnvironmentVars();
-      }
-    } else {
-      if (!env.localDev) {
-        // Use the default app config with all features enabled.
-        appConfig = createDefaultAppConfig();
-      }
-    }
-
     if (env.localDev) {
       // Local Dev Environment (npm run local)
       Object.assign(process.env, {
@@ -258,7 +152,7 @@ module.exports = async (env, argv) => {
       fs: "empty"
     },
     entry: {
-      "microsoft-settings": path.join(__dirname, "src/aptero/microsoft/page", "microsoft-settings.tsx"),
+      "microsoft-settings": path.join(__dirname, "src/aptero/module/microsoft/page", "microsoft-settings.tsx"),
       support: path.join(__dirname, "src", "support.js"),
       index: path.join(__dirname, "src", "index.js"),
       hub: path.join(__dirname, "src", "hub.js"),
@@ -518,7 +412,7 @@ module.exports = async (env, argv) => {
       // Each output page needs a HTMLWebpackPlugin entry
       new HTMLWebpackPlugin({
         filename: "microsoft-settings.html",
-        template: path.join(__dirname, "src/aptero/microsoft/page", "microsoft-settings.html"),
+        template: path.join(__dirname, "src/aptero/module/microsoft/page", "microsoft-settings.html"),
         chunks: ["microsoft-settings"],
         chunksSortMode: "manual",
         minify: {
@@ -585,7 +479,7 @@ module.exports = async (env, argv) => {
       ]),
     new CopyWebpackPlugin([
       {
-        from: "src/aptero/properties/properties.js",
+        from: "src/aptero/module/properties/properties.js",
         to: "properties.js"
       }
     ]),
@@ -597,13 +491,13 @@ module.exports = async (env, argv) => {
     ]),
       new CopyWebpackPlugin([
         {
-          from: "src/aptero/microsoft/page/auth-start.html",
+          from: "src/aptero/module/microsoft/page/auth-start.html",
           to: "auth-start.html"
         }
       ]),
       new CopyWebpackPlugin([
         {
-          from: "src/aptero/microsoft/page/auth-end.html",
+          from: "src/aptero/module/microsoft/page/auth-end.html",
           to: "auth-end.html"
         }
       ]),

@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import { processResponse } from "../../aptero/service/EntryAPI";
+import { processResponse } from "../../aptero/module/HubsBridge/service/EntryAPI";
 
 export function usePaginatedAPI(apiCallback) {
   const curApiCallback = useRef(apiCallback);

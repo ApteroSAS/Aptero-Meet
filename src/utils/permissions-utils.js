@@ -1,6 +1,7 @@
 // Brief overview of client authorization can be found in the wiki:
 // https://github.com/mozilla/hubs/wiki/Hubs-authorization
-import { roomParameters } from "../aptero/service/RoomParameters";
+
+import { roomParameters } from "../aptero/module/HubsBridge/service/RoomParameters";
 
 export function showHoverEffect(el) {
   const isFrozen = el.sceneEl.is("frozen");

@@ -24,7 +24,7 @@ import HubsTextureLoader from "../loaders/HubsTextureLoader";
 import { MixerType } from "../systems/audio-system";
 
 import qsTruthy from "../utils/qs_truthy";
-import { IN_APP_WEB_BROWSER_PROTOCOL, remoteWebBrowser } from "../aptero/react-components/media-utils-lib";
+import { IN_APP_WEB_BROWSER_PROTOCOL, remoteWebBrowser } from "../aptero/module/HubsBridge/react-components/media-utils-lib";
 
 /**
  * Warning! This require statement is fragile!

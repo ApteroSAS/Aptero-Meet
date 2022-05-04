@@ -22,9 +22,9 @@ import { ObjectContentOrigins } from "./object-types";
 import { getAvatarSrc, getAvatarType } from "./utils/avatar-utils";
 import { SOUND_ENTER_SCENE } from "./systems/sound-effects-system";
 //aptero
-import { mediaViewEventEmitter, lastVideoShareData } from "./aptero/service/ChangeVideoService";
-import { networkService } from "./aptero/service/NetworkService";
-import { searchService } from "./aptero/service/SearchService";
+import { mediaViewEventEmitter, lastVideoShareData } from "./aptero/module/ButtonAPI/service/ChangeVideoService";
+import { searchService } from "./aptero/module/ButtonAPI/service/SearchService";
+import { networkService } from "./aptero/module/HubsBridge/service/NetworkService";
 
 const isIOS = AFRAME.utils.device.isIOS();
 

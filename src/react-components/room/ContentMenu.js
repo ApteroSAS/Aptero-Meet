@@ -6,7 +6,7 @@ import styles from "./ContentMenu.scss";
 import { ReactComponent as ObjectsIcon } from "../icons/Objects.svg";
 import { ReactComponent as PeopleIcon } from "../icons/People.svg";
 import { FormattedMessage } from "react-intl";
-import { customMenuService } from "../../aptero/service/CustomMenuService";
+import { customMenuService } from "../../aptero/module/CustomPanel/CustomMenuService";
 
 export function ContentMenuButton({ active, children, ...props }) {
   return (

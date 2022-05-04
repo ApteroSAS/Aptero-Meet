@@ -17,7 +17,7 @@ import { fetchReticulumAuthenticated, getReticulumFetchUrl } from "../utils/phoe
 import { proxiedUrlFor, scaledThumbnailUrlFor } from "../utils/media-url-utils";
 import { CreateTile, MediaTile } from "./room/MediaTiles";
 import { SignInMessages } from "./auth/SignInModal";
-import { createAvatarCustomTileV2, MediaTilesLib, mlHandleEntryClicked } from "../aptero/react-components/media-tiles-lib";
+import { createAvatarCustomTileV2, MediaTilesLib, mlHandleEntryClicked } from "../aptero/module/HubsBridge/react-components/media-tiles-lib";
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
 

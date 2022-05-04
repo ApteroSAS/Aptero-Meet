@@ -10,7 +10,7 @@ import {rotateInPlaceAroundWorldUp, affixToWorldUp} from "../../utils/three-util
 import {Spinner} from "../misc/Spinner";
 import {UserProfileVisitCardContainer} from "./UserProfileVisitCardContainer";
 import {PeopleSidebarContainer, usePeopleList} from "./PeopleSidebarContainer";
-import { msTeams, processDeepLink } from "../../aptero/microsoft/service/MsTeams";
+import { msTeams, processDeepLink } from "../../aptero/module/microsoft/service/MsTeams";
 import { ReactComponent as AcountIcon } from "../icons/Acount.svg";
 
 function useGoToSelectedAvatar(entity) {

@@ -1,30 +1,30 @@
-import { liveStream } from "./service/LiveStream";
-import { networkService } from "./service/NetworkService";
-import { video360Service } from "./service/Video360Service";
+import { liveStream } from "./module/video360/LiveStream";
+import { video360Service } from "./module/video360/Video360Service";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 
-import "./component/custom-controller-button";
-import "./component/rtmp-auto-refresh";
-import "./component/media-limiter";
-import "./component/open-iframe-button";
-import "./component/stop-share-screen-on-destroy";
-import "./component/release-media-frame-on-destroy";
-import "./component/trigger";
-import { gltfExtensionProcessorService } from "./service/api/GLTFExtensionProcessorService";
-import { roomParameters } from "./service/RoomParameters";
+import "./module/ButtonAPI/component/custom-controller-button";
+import "./module/HubsBridge/component/rtmp-auto-refresh";
+import "./module/ButtonAPI/component/media-limiter";
+import "./module/CustomPanel/component/open-iframe-button";
+import "./module/ButtonAPI/component/stop-share-screen-on-destroy";
+import "./module/ButtonAPI/component/release-media-frame-on-destroy";
+import "./module/AudioZone/component/trigger";
+import { gltfExtensionProcessorService } from "./module/ButtonAPI/api/GLTFExtensionProcessorService";
 //import DistributedSoundSystem from "./service/DistributedSoundSystem";
-import SoundSystem from "./service/SoundSystem";
+import SoundSystem from "./module/DistributedSound/SoundSystem";
 
 //adapter
-import "./adapter/adapter-config";
-import { ThirdPersonService } from "./service/ThirdPersonService";
-import { aptLogger } from "./service/log/Logger";
-import { minimumQualityService } from "./service/MinimumQualityService";
-import { testServiceNotifySceneEntered, startSelfTest, testTick } from "./service/SelfTestService.loader";
-import { setlistenerEndShareVideo } from "./adapter/adapter-config";
-import { remoteControlServiceV2 } from "./service/RemoteControlServiceV2";
+import "./module/webRTCadapter/adapter-config";
+import { ThirdPersonService } from "./module/ThirdPerson/ThirdPersonService";
+import { aptLogger } from "./module/telemetry/log/Logger";
+import { minimumQualityService } from "./module/perf/MinimumQualityService";
+import { testServiceNotifySceneEntered, startSelfTest, testTick } from "./module/TestHelper/SelfTestService.loader";
+import { setlistenerEndShareVideo } from "./module/webRTCadapter/adapter-config";
+import { remoteControlServiceV2 } from "./module/RemoteScreen/RemoteControlServiceV2";
 import { wait } from "./util/AsyncWaiter";
-import { initAxolotisPlayer } from "./axolotis/AxolotisSystem";
+import { initAxolotisPlayer } from "./module/axolotis/AxolotisSystem";
+import { networkService } from "./module/HubsBridge/service/NetworkService";
+import { roomParameters } from "./module/HubsBridge/service/RoomParameters";
 
 declare let window:any;
 declare let AFRAME:any;

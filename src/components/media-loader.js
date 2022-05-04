@@ -24,8 +24,8 @@ import { cloneObject3D, setMatrixWorld } from "../utils/three-utils";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 
 import { SHAPE } from "three-ammo/constants";
-import { MICROSOFT_AUTH_ERROR, microsoftUrlService } from "../aptero/microsoft/service/MicrosoftUrlService";
-import { IN_APP_WEB_BROWSER_PROTOCOL } from "../aptero/react-components/media-utils-lib";
+import { MICROSOFT_AUTH_ERROR, microsoftUrlService } from "../aptero/module/microsoft/service/MicrosoftUrlService";
+import { IN_APP_WEB_BROWSER_PROTOCOL } from "../aptero/module/HubsBridge/react-components/media-utils-lib";
 
 let loadingObjectEnvMap;
 let loadingObject;

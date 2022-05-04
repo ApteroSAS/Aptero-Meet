@@ -14,9 +14,8 @@ import { MediaTile } from "../room/MediaTiles";
 import { PageContainer } from "../layout/PageContainer";
 import { scaledThumbnailUrlFor } from "../../utils/media-url-utils";
 import { Column } from "../layout/Column";
-import { Button } from "../input/Button";
 import { Container } from "../layout/Container";
-import { HaveRoomCodeButton } from "../../aptero/react-components/HaveRoomCodeButton";
+import { HaveRoomCodeButton } from "../../aptero/module/HubsBridge/react-components/HaveRoomCodeButton";
 
 export function HomePage() {
   const auth = useContext(AuthContext);

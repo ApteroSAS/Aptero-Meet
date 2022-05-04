@@ -1,7 +1,7 @@
 import { paths } from "../systems/userinput/paths";
 import { sets } from "../systems/userinput/sets";
 import { getLastWorldPosition } from "../utils/three-utils";
-import {remoteControlServiceV2} from "../aptero/service/RemoteControlServiceV2";
+import {remoteControlServiceV2} from "../aptero/module/RemoteScreen/RemoteControlServiceV2";
 
 
 const HIGHLIGHT = new THREE.Color(23 / 255, 64 / 255, 118 / 255);

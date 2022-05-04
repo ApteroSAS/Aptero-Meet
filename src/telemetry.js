@@ -1,7 +1,7 @@
 import configs from "./utils/configs";
 import * as Sentry from '@sentry/browser';
 //import { CaptureConsole } from '@sentry/integrations';
-import {CaptureConsoleSentry} from "./aptero/util/CaptureConsoleSentry";
+import {CaptureConsoleSentry} from "./aptero/module/telemetry/CaptureConsoleSentry";
 
 const ga = window.ga;
 

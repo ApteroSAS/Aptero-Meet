@@ -8,7 +8,7 @@ import { TextInputField } from "../input/TextInputField";
 import { Column } from "../layout/Column";
 import { LegalMessage } from "./LegalMessage";
 import { PublicClientApplication } from "@azure/msal-browser";
-import { microsoftLoginService } from "../../aptero/microsoft/service/MicrosoftLoginService";
+import { microsoftLoginService } from "../../aptero/module/microsoft/service/MicrosoftLoginService";
 
 export const SignInStep = {
   submit: "submit",

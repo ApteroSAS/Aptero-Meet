@@ -1,4 +1,4 @@
-import { getMediaVideoComponent } from "./aptero/util/network-schemas-lib";
+import { getMediaVideoComponent } from "./aptero/module/HubsBridge/utils/network-schemas-lib";
 
 function registerNetworkSchemas() {
   const vectorRequiresUpdate = epsilon => {

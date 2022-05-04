@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { defineMessages, FormattedMessage, useIntl } from "react-intl";
 import { LoadingScreenLayout } from "../layout/LoadingScreenLayout";
 import { Button } from "../input/Button";
-import { comboFallbackButton } from "../../aptero/react-components/FallbackModal";
+import { comboFallbackButton } from "../../aptero/module/Fallback/FallbackModal";
 
 export const ExitReason = {
   exited: "exited",

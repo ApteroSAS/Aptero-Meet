@@ -1,5 +1,5 @@
 import { LogMessageType } from "../react-components/room/ChatSidebar";
-import { getAdapterConfig } from "../aptero/adapter/adapter-config";
+import { getAdapterConfig } from "../aptero/module/webRTCadapter/adapter-config";
 import { GAIN_TIME_CONST } from "../components/audio-params";
 
 export const MixerType = Object.freeze({

@@ -2,7 +2,7 @@ import { EventTarget } from "event-target-shim";
 import configs from "../utils/configs";
 import { getReticulumFetchUrl, fetchReticulumAuthenticated, hasReticulumServer } from "../utils/phoenix-utils";
 import { pushHistoryPath, sluglessPath, withSlug } from "../utils/history";
-import { processResponse } from "../aptero/service/EntryAPI";
+import { processResponse } from "../aptero/module/HubsBridge/service/EntryAPI";
 
 const EMPTY_RESULT = { entries: [], meta: {} };
 

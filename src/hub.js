@@ -1,4 +1,4 @@
-import { redirectToTeamsSidePanel } from "./aptero/microsoft/service/RedirectToSidePage";
+import { redirectToTeamsSidePanel } from "./aptero/module/microsoft/service/RedirectToSidePage";
 redirectToTeamsSidePanel();
 console.log(`App version: ${process.env.BUILD_VERSION || "?"}`);
 
@@ -195,12 +195,11 @@ import { sleep } from "./utils/async-utils";
 import { platformUnsupported } from "./support";
 
 //aptero service
-import { microsoftUrlService } from "./aptero/microsoft/service/MicrosoftUrlService";
+import { microsoftUrlService } from "./aptero/module/microsoft/service/MicrosoftUrlService";
 import { apteroService } from "./aptero/ApteroServices";
-import { roomController } from "./aptero/service/api/RoomController";
-import { minimumQualityService } from "./aptero/service/MinimumQualityService";
-import { fetchICEservers } from "./aptero/adapter/adapter-config";
-import { AdapterWarpper } from "./aptero/adapter/AdapterWrapper";
+import { roomController } from "./aptero/module/ButtonAPI/api/RoomController";
+import { fetchICEservers } from "./aptero/module/webRTCadapter/adapter-config";
+import { AdapterWarpper } from "./aptero/module/webRTCadapter/AdapterWrapper";
 //aptero service end
 
 window.APP = new App();
@@ -262,10 +261,11 @@ import { OAuthScreenContainer } from "./react-components/auth/OAuthScreenContain
 import { SignInMessages } from "./react-components/auth/SignInModal";
 import { ThemeProvider } from "./react-components/styles/theme";
 import { wait } from "./aptero/util/AsyncWaiter";
-import { networkService } from "./aptero/service/NetworkService";
-import { getEntryMode } from "./aptero/util/EntryMode";
-import { setupVersionComp } from "./aptero/util/Version";
-import { msTeams } from "./aptero/microsoft/service/MsTeams";
+import { setupVersionComp } from "./aptero/module/HubsBridge/utils/Version";
+import { msTeams } from "./aptero/module/microsoft/service/MsTeams";
+import { minimumQualityService } from "./aptero/module/perf/MinimumQualityService";
+import { networkService } from "./aptero/module/HubsBridge/service/NetworkService";
+import { getEntryMode } from "./aptero/module/HubsBridge/utils/EntryMode";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;

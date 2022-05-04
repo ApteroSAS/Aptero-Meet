@@ -7,7 +7,7 @@ import { AvatarSettingsSidebar } from "./room/AvatarSettingsSidebar";
 import { AvatarSetupModal } from "./room/AvatarSetupModal";
 import AvatarPreview from "./avatar-preview";
 import axios from "axios";
-import { propertiesService } from "../aptero/properties/propertiesService";
+import { propertiesService } from "../aptero/module/properties/propertiesService";
 
 export default class ProfileEntryPanel extends Component {
   static propTypes = {

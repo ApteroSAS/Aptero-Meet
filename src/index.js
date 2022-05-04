@@ -8,7 +8,7 @@ import { HomePage } from "./react-components/home/HomePage";
 import { AuthContextProvider } from "./react-components/auth/AuthContext";
 import "./react-components/styles/global.scss";
 import { ThemeProvider } from "./react-components/styles/theme";
-import { setupVersionComp } from "./aptero/util/Version";
+import { setupVersionComp } from "./aptero/module/HubsBridge/utils/Version";
 
 registerTelemetry("/home", "Hubs Home Page");
 
