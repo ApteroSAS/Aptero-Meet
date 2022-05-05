@@ -50,19 +50,32 @@ export class MicrosoftLoginService {
     }
   }
 
-  async login() {
+  private async loginInternal(){
     if(!this.authInProgress) {
       this.authInProgress = true;
       setTimeout(()=>{
         this.authInProgress = false;
-      },20000);
+      },10000);
       if(msTeams()){
-        await this.teamsLoginService.login();
+        await this.teamsLoginService.userInteractionAuth();
         this.authInProgress = false;
       }else{
         await this.microsoftOauthLoginService.login();
         this.authInProgress = false;
       }
+    }
+  }
+
+  async login(nofail=true) {
+    if(nofail) {
+      try {
+        return await this.loginInternal();
+      }catch (e){
+        //avoid any throw
+        console.error(e);
+      }
+    }else{
+      return await this.loginInternal();
     }
   }
 

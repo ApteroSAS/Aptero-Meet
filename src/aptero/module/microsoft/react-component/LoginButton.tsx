@@ -9,28 +9,20 @@ import { getScopes, getScopesLight } from "../service/scope";
 import { useState } from "react";
 
 export function LoginButton(props) {
-  const [loading2, setLoading2] = useState(false);
-  const { loading1, error, data, reload } = useGraph(
-    async (graph) => {
-      //await microsoftLoginService.passiveLogin();
-      const profile = await graph.api("/me").get();
-      let photoUrl = "";
-      try {
-        const photo = await graph.api("/me/photo/$value").get();
-        photoUrl = URL.createObjectURL(photo);
-      } catch {
-        // Could not fetch photo from user's profile, return empty string as placeholder.
-      }
-      return { profile, photoUrl };
-    },
-    { scope: getScopesLight() }
-  );
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const requestAuth = async () => {
-    await microsoftLoginService.login();
+      try {
+          setLoading(true);
+          setError(null);
+          await microsoftLoginService.login(false);
+          setLoading(false);
+      }catch (e){
+          setError(e);
+          setLoading(false);
+      }
   };
-  const loading = loading1 || loading2;
-  console.log("user id :" + data?.profile.id);
   //https://docs.microsoft.com/en-us/graph/toolkit/components/person-card
   return (
     <>
@@ -51,17 +43,21 @@ export function LoginButton(props) {
           {!microsoftLoginService.isSignedIn() &&
             <Button primary content="Sign In" disabled={loading} onClick={
               async () => {
-                setLoading2(true);
                 await requestAuth();
-                setLoading2(false);
               }} style={{ height: "auto" }}/>}
 
           {microsoftLoginService.isSignedIn() &&
             <Button primary content="Sign Out" disabled={loading} onClick={
               async () => {
-                setLoading2(true);
-                await microsoftLoginService.logout();
-                setLoading2(false);
+                  try {
+                      setLoading(true);
+                      setError(null);
+                      await microsoftLoginService.logout();
+                      setLoading(false);
+                  }catch (e) {
+                      setError(e);
+                      setLoading(false);
+                  }
               }} style={{ height: "auto" }}/>
           }
         </div>

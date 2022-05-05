@@ -108,9 +108,13 @@ export class TeamsLoginService {
         const cred = await this.initBasicInfo();
         await this.initTeamsFxProvider(cred, getScopesLight());
         await new Promise(async (resolve, reject) => {
-            await this.checkIsConsentNeeded(()=>{
-                cred.login(getScopesLight());//Trigger authorization popup
-                resolve(true);
+            await this.checkIsConsentNeeded(async ()=>{
+                try {
+                    await cred.login(getScopesLight());//Trigger authorization popup
+                    resolve(true);
+                }catch (e){
+                    reject(e);
+                }
             });
         })
         //await teamsAuth();
@@ -233,15 +237,6 @@ export class TeamsLoginService {
             microsoftUser: user.id
         });
         await this.msToNativeLoginBridge.nativeLogin(user.email, token);
-    }
-
-    async login() {
-        try {
-            await this.userInteractionAuth();
-        } catch (error) {
-            console.log("error", error);
-        }
-
     }
 
     async checkIsConsentNeeded(consentNeeded) {
