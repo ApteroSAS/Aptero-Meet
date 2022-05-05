@@ -465,6 +465,14 @@ module.exports = async (env, argv) => {
           removeComments: false
         }
       }),
+      new HTMLWebpackPlugin({
+        filename: "verify.html",
+        template: path.join(__dirname, "src", "verify.html"),
+        chunks: ["verify"],
+        minify: {
+          removeComments: false
+        }
+      }),
       new CopyWebpackPlugin([
         {
           from: "src/hub.service.js",
