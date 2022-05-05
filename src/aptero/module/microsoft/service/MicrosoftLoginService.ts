@@ -11,6 +11,27 @@ export class MicrosoftLoginService {
   msToNativeLoginBridge = new MsToNativeLoginBridge();
   microsoftOauthLoginService = new MicrosoftOauthLoginService(this.msGraphService,this.msToNativeLoginBridge);
   teamsLoginService = new TeamsLoginService(this.msGraphService,this.msToNativeLoginBridge);
+  private initialized: boolean = false;
+
+  constructor() {
+    this.onReady().then(()=>{
+      this.initialized= true;
+    });
+  }
+
+  async onReady(){
+    if(this.initialized){
+      return Promise.resolve(true);
+    }else{
+      return new Promise<boolean>((resolve) => {
+        const onInitialized = () => {
+          getAuthEvents().off(AUTH_SERVICE_INITIALIZE, onInitialized);
+          resolve(true);
+        };
+        getAuthEvents().on(AUTH_SERVICE_INITIALIZE, onInitialized);
+      })
+    }
+  }
 
   async passiveLogin() {
     if(!this.authInProgress) {

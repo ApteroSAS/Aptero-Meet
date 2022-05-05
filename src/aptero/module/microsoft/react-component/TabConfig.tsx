@@ -12,6 +12,7 @@ import {
   AUTH_SERVICE_INITIALIZE
 } from "../service/AuthEvent";
 import { getCredential } from "../service/TeamsLoginService";
+import {microsoftLoginService} from "../service/MicrosoftLoginService";
 
 declare const window;
 
@@ -61,13 +62,10 @@ export class TabConfig extends React.Component {
     this.removeListeners = () => {
       getMSEvents().off(CHANGE_SETTINGS_URL, callbackUrl);
     };
-    const onInitialized = () => {
-      console.log("onInitialized");
-      getAuthEvents().off(AUTH_SERVICE_INITIALIZE, onInitialized);
-      this.setState({ initialized: true });
-    };
 
-    getAuthEvents().on(AUTH_SERVICE_INITIALIZE, onInitialized);
+    microsoftLoginService.onReady().then(value => {
+      this.setState({ initialized: true });
+    })
 
     /**
      * When the user clicks "Save", save the url for your configured tab.
