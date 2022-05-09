@@ -1,14 +1,10 @@
 import configs from "../../../../utils/configs";
-import {AUTH_TOKEN, msTeams, sendAuthToken} from "./MsTeams";
-import {Providers, ProviderState} from "@microsoft/mgt-react";
-import {TeamsFxProvider} from "@microsoft/mgt-teamsfx-provider";
+import { msTeams} from "./MsTeams";
 import {
-    loadConfiguration,
     TeamsUserCredential,
-    ResourceType,
     LogLevel,
     setLogLevel,
-    setLogFunction, createMicrosoftGraphClient
+    setLogFunction, createMicrosoftGraphClient, TeamsFx, IdentityType
 } from "@microsoft/teamsfx";
 import * as microsoftTeams from "@microsoft/teams-js";
 import {getAuthEvents, LOGGED_BASIC_INFO} from "./AuthEvent";
@@ -16,7 +12,7 @@ import { getScopes, getScopesLight } from "./scope";
 import {MicrosoftGraphService} from "./MicrosoftGraphService";
 import {MsToNativeLoginBridge} from "./MsToNativeLoginBridge";
 
-let credential;
+let credential:TeamsFx | null = null;
 export const startLoginPageUrl = window.location.origin + "/auth-start.html";
 export const functionEndpoint = window.location.origin + "/auth-start.html";//process.env.REACT_APP_FUNC_ENDPOINT;
 export const clientId = configs.APP_CONFIG.MICROSOFT_APP_ID; //process.env.REACT_APP_CLIENT_ID;
@@ -27,40 +23,18 @@ declare const window;
 // https://portal.office.com/account/?ref=MeControl#apps
 
 function initTeamsFx(authorityHost) {
-    /*loadConfiguration({
-        authentication: {
-            initiateLoginEndpoint: process.env.REACT_APP_START_LOGIN_PAGE_URL,
-            clientId: process.env.REACT_APP_CLIENT_ID
-        }
-    });*/
-    /*if (process.env.NODE_ENV === "development") {
-        setLogLevel(LogLevel.Verbose);
-        setLogFunction((leve: LogLevel, message: string) => { console.log(message); });
-    }*/
     if (process.env.NODE_ENV === "development") {
         setLogLevel(LogLevel.Warn);
         setLogFunction((leve, message) => {
             console.warn(message);
         });
     }
-    loadConfiguration({
-        authentication: {
+    credential = new TeamsFx(IdentityType.User,{
             authorityHost,
             initiateLoginEndpoint: startLoginPageUrl,
             //simpleAuthEndpoint: teamsfxEndpoint,//https://github.com/OfficeDev/TeamsFx/wiki/How-Authentication-Works-in-TeamsFx-Tab-Template
             clientId: clientId
-        },
-        resources: [
-            {
-                type: ResourceType.API,
-                name: "default",
-                properties: {
-                    endpoint: functionEndpoint
-                }
-            }
-        ]
-    });
-    credential = new TeamsUserCredential();
+        });
 }
 
 export function getCredential() {
@@ -84,16 +58,13 @@ export class TeamsLoginService {
         return cred;
     }
 
-    initTeamsFxProvider(credential, scope) {
-        const provider = new TeamsFxProvider(credential, scope);
-        Providers.globalProvider = provider;
-    }
-
     async initGraph(scopes) {
         try {
             const graph = createMicrosoftGraphClient(credential, scopes);
-            const token = await credential?.getToken(scopes);
-            this.microsoftGraphService.init(graph, token);
+            if(!credential){
+                throw new Error();
+            }
+            this.microsoftGraphService.init(graph);
         } catch (e) {
             if (e.toString().indexOf("please login first") !== -1) {
                 console.info("app not authorized - no graph support")
@@ -106,22 +77,11 @@ export class TeamsLoginService {
     async userInteractionAuth() {
         console.log("userInteractionAuth");
         const cred = await this.initBasicInfo();
-        await this.initTeamsFxProvider(cred, getScopesLight());
-        await new Promise(async (resolve, reject) => {
-            await this.checkIsConsentNeeded(async ()=>{
-                try {
-                    await cred.login(getScopesLight());//Trigger authorization popup
-                    resolve(true);
-                }catch (e){
-                    reject(e);
-                }
-            });
-        })
+        await cred.login(getScopesLight());//Trigger authorization popup
         //await teamsAuth();
         await this.initGraph(getScopesLight());
-        const userInfo = await cred.getUserInfo();
+        const userInfo = await cred.getUserInfo();//may trigger authorization popup
         await this.initBasic(userInfo, true);
-        Providers.globalProvider.setState(ProviderState.SignedIn);
         return cred;
     }
 
@@ -129,13 +89,7 @@ export class TeamsLoginService {
         console.log("upgrade");
         let scope = getScopes();
         const cred = await this.initBasicInfo();
-        await this.initTeamsFxProvider(cred, scope);
-        await new Promise(async (resolve, reject) => {
-            await this.checkIsConsentNeeded(()=>{
-                cred.login(scope);//Trigger authorization popup
-                resolve(true);
-            });
-        })
+        await cred.login(scope);//Trigger authorization popup
         //await teamsAuth();
         await this.initGraph(scope);
         const userInfo = await cred.getUserInfo();
@@ -161,12 +115,10 @@ export class TeamsLoginService {
             //if cookie oauth microsoft
             // Initialize the Microsoft Teams SDK
             const cred = await this.initBasicInfo();
-            await this.initTeamsFxProvider(cred, getScopesLight());
             const userInfo = await cred.getUserInfo();
             console.log("passiveAuth (basic):", cred);
             await this.initGraph(getScopesLight());
             await this.initBasic(userInfo, false);
-            Providers.globalProvider.setState(ProviderState.SignedIn);
         } catch (e) {
             //passive login should never fail - just ignore
             console.warn("passive login failed", e);
@@ -212,21 +164,11 @@ export class TeamsLoginService {
             const user = await this.microsoftGraphService.getUserDetails();
             phoneNumber = user.mobilePhone;
             jobTitle = user.jobTitle;
-            profilePicture = await this.microsoftGraphService.getUserPhoto();
+            profilePicture = await this.microsoftGraphService.getUserPhotoAsBase64();
             organization = await this.microsoftGraphService.getUserOrganization();
         }
         const cred = await this.initBasicInfo();
         let token = user.id;
-        try {
-            token = cred.ssoToken.token;
-        } catch (e) {
-            //ignore
-        }
-        try {
-            token = await credential?.getToken(getScopesLight());
-        } catch (e) {
-            //ignore
-        }
         await this.msToNativeLoginBridge.setProfile({
             email: user.email,
             displayName: user.displayName,
@@ -239,26 +181,8 @@ export class TeamsLoginService {
         await this.msToNativeLoginBridge.nativeLogin(user.email, token);
     }
 
-    async checkIsConsentNeeded(consentNeeded) {
-        try {
-            const token = await credential?.getToken(getScopes());
-            Providers.globalProvider.setState(ProviderState.SignedIn);
-            getAuthEvents().emit(AUTH_TOKEN, {token: token});
-            sendAuthToken({token: token});
-        } catch (error) {
-            Providers.globalProvider.setState(ProviderState.SignedOut);
-            consentNeeded();
-        }
-    }
-
     async logout() {
         await this.msToNativeLoginBridge.logout();
-        if (Providers.globalProvider.state === ProviderState.SignedIn) {
-            if (Providers.globalProvider && Providers.globalProvider.logout) {
-                await Providers.globalProvider.logout();
-            }
-            Providers.globalProvider.setState(ProviderState.SignedOut);
-        }
     }
 
 }

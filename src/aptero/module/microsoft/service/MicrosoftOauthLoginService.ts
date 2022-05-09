@@ -69,7 +69,7 @@ export class MicrosoftOauthLoginService {
     let profilePicture = "";
     let organization = "";
     try {
-      profilePicture = await this.microsoftGraphService.getUserPhoto();
+      profilePicture = await this.microsoftGraphService.getUserPhotoAsBase64();
       organization = await this.microsoftGraphService.getUserOrganization();
     } catch (e) {
       //ignore error from beta organisation
