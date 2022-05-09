@@ -1,15 +1,12 @@
 import { Buffer } from "buffer";
-import axios from "axios";
 import {Client} from "@microsoft/microsoft-graph-client";
 
 Buffer.from("anything", "base64");
 
 export class MicrosoftGraphService{
   client: Client;
-  private accessToken: String;
 
-  init(client,token=""){
-    this.accessToken = token;//TODO find this from client
+  init(client){
     this.client = client;
   }
 
@@ -39,16 +36,19 @@ export class MicrosoftGraphService{
 
   }
 
-  async getUserPhoto() {
-    //const graphEndpoint = "https://graph.microsoft.com/v1.0/me/photo/";
-    const graphEndpoint = "https://graph.microsoft.com/v1.0/me/photo/$value";
+  blobToBase64(blob):Promise<string> {
+    return new Promise((resolve, _) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  async getUserPhotoAsBase64():Promise<string> {
     try {
-      // verifier si l'image exist
-      const response = await axios(graphEndpoint, {
-        headers: { Authorization: `Bearer ${this.accessToken}` },
-        responseType: "arraybuffer"
-      });
-      return new Buffer(response.data, "binary").toString("base64");
+      let profile = await this.client.api("https://graph.microsoft.com/v1.0/me/photo/$value").get();
+      let b64 = await this.blobToBase64(profile);
+      return b64;
     } catch (e) {
       console.log("profile photo not found");
     }

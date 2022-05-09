@@ -1,6 +1,5 @@
 const EventEmitter = require("eventemitter3");
 
-export const AUTH_TOKEN = "ms-teams-auth-token";
 export const CHANGE_SETTINGS_URL = "ms-teams-change-settings-url";
 export const PROCESS_DEEPLINK = "ms-teams-deep-link";
 import * as microsoftTeams from "@microsoft/teams-js";
@@ -19,10 +18,6 @@ export function getMSEvents(){
 
 export function changeUrlSettings(url){
   sendEvent(CHANGE_SETTINGS_URL,{url});
-}
-
-export function sendAuthToken(token){
-  sendEvent(AUTH_TOKEN, token);
 }
 
 export function msTeams(){
