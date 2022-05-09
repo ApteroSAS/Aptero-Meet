@@ -1,10 +1,11 @@
 import { test } from "./lib/baseFixtures";
-import { waitInitialSceneLoad } from "./lib/TestCommon";
+import { treatConsoleErrorAsError, waitInitialSceneLoad } from "./lib/TestCommon";
 
 test('playwright-test-1 html', async ({ page }) => {
   test.setTimeout(120000);
   //https://alphahub.aptero.co/EVa7SjZ/playwright-test-1
-  await page.goto('hub.html?hub_id=EVa7SjZ&vr_entry_type=2d_now')
+  await page.goto('hub.html?hub_id=EVa7SjZ&vr_entry_type=2d_now');
+  await treatConsoleErrorAsError(page);
   await page.context().grantPermissions(['camera', 'microphone']);
   await waitInitialSceneLoad(page);
   await page.screenshot({ path: './coverage/store/playwright-test-1.png' });
@@ -13,7 +14,8 @@ test('playwright-test-1 html', async ({ page }) => {
 test('playwright-test-2 html', async ({ page }) => {
   test.setTimeout(120000);
   //https://alphahub.aptero.co/y3UKjjo/playwright-test-2
-  await page.goto('hub.html?hub_id=y3UKjjo&vr_entry_type=2d_now')
+  await page.goto('hub.html?hub_id=y3UKjjo&vr_entry_type=2d_now');
+  await treatConsoleErrorAsError(page);
   await page.context().grantPermissions(['camera', 'microphone']);
   await waitInitialSceneLoad(page);
   await page.screenshot({ path: './coverage/store/playwright-test-2.png' });
