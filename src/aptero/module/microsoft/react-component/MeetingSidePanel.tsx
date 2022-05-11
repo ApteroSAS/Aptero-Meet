@@ -38,6 +38,7 @@ export function MeetingSidePanel() {
       {!loading &&
         <div className={classNames(styles.sidePanelBody)}>
           <img className={classNames(styles.fleche)} src="../../../../assets/aptero/microsoft/fleche.svg" alt="fleche"/>
+          <div style={{height:"100px"}}></div>
           <main className={classNames(styles.main)}>
             <div className={classNames(styles.cubes)}>
               <img className={classNames(styles.B)} src="../../../../assets/aptero/microsoft/cubeB.svg" alt="B"/>
