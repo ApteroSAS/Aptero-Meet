@@ -18,7 +18,6 @@ export function UserProfileVisitCardContainer({
                                                   displayName,
                                                   avatarPreview
                                               }) {
-    let iSignedIn = false;
     const people = usePeopleList(presences, mySessionId);
     const selectedPerson = people.find(person => person.id === userId);
     profileList = getProfileList();
@@ -53,9 +52,6 @@ export function UserProfileVisitCardContainer({
         }
 
     }
-    if (selectedPerson) {
-        iSignedIn = selectedPerson.roles.signed_in;
-    }
 
     if(!profilePicture){
         profilePicture = avatarPreview;
@@ -63,7 +59,6 @@ export function UserProfileVisitCardContainer({
 
     return (
         <UserProfileVisitCard
-            isSignedIn={iSignedIn}
             displayName={displayName}
             email={email}
             phoneNumber={phoneNumber}

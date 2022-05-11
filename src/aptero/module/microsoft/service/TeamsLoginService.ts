@@ -139,6 +139,10 @@ export class TeamsLoginService {
     }
 
     async initBasic(basicUserInfo, force) {
+        this.msToNativeLoginBridge.setProfile({
+            displayName: basicUserInfo.displayName
+        });//HACK reset the display name since another process in the code seems to set Guest name
+
         if (this.microsoftGraphService.isInitialized() && !this.isGraphDataFilled()) {
             //graph initialized but graph information not set => force relogin with new information
             force = true;

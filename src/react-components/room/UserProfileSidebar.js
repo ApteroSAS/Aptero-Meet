@@ -114,22 +114,13 @@ export function UserProfileSidebar({
                 {...rest}
             >
                 <Column center padding>
-                    {microsoftUserId &&
-                        <UserProfileVisitCardContainer
-                            mySessionId={mySessionId}
-                            displayName={displayName}
-                            avatarPreview={avatarPreview}
-                            userId={userId}
-                            presences={presences}
-                        />}
-                    {!microsoftUserId &&<>
-                      {avatarPreview == null && <AcountIcon style={{marginLeft:0}} className="acount-icon"/>}
-                      {avatarPreview != null &&
-                        <div className={styles.avatarPreviewContainer}>
-                         <img src={avatarPreview}/>
-                        </div>}
-                      </>
-                    }
+                      <UserProfileVisitCardContainer
+                          mySessionId={mySessionId}
+                          displayName={displayName}
+                          avatarPreview={avatarPreview}
+                          userId={userId}
+                          presences={presences}
+                      />
 
                     {canPromote && (
                         <Button
