@@ -1,11 +1,8 @@
 import * as React from "react";
 import { Button, Loader } from "@fluentui/react-northstar";
-import { useGraph } from "../lib/useGraph";
-import { Login } from "@microsoft/mgt-react";
 import { LightProfileCard } from "./LightProfileCard";
 import { FormattedMessage } from "react-intl";
 import { microsoftLoginService } from "../service/MicrosoftLoginService";
-import { getScopes, getScopesLight } from "../service/scope";
 import { useState } from "react";
 
 export function LoginButton(props) {

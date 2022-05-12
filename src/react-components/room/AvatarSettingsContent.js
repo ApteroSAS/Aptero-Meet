@@ -96,6 +96,7 @@ export function AvatarSettingsContent({
               })}
               //ref={displayNameInputRef}
             />
+            {isSignedIn &&
             <TextInputField
               className={styles.test}
               //disabled={disableDisplayNameInput}
@@ -109,7 +110,7 @@ export function AvatarSettingsContent({
                 id: "avatar-settings.email-placeholder",
                 defaultMessage: "Job email address"
               })}
-            />
+            />}
             <TextInputField
               className={styles.test}
               //disabled={disableDisplayNameInput}
@@ -128,16 +129,7 @@ export function AvatarSettingsContent({
 
           </div>
         </div>
-        {isSignedIn && (
-            <AcceptButton preset="accept" type="submit" onClick={submit_info} />
-        )
-        }
-        {
-          !isSignedIn && (
-            <AcceptButton preset="accept" type="submit" onClick={signedIn} />
-          )
-        }
-  
+        <AcceptButton preset="accept" type="submit" onClick={submit_info} />
       </Column>
     );
   }

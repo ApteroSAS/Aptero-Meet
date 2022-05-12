@@ -1,11 +1,12 @@
 import { test } from "./baseFixtures";
-import { waitInitialSceneLoad, waitPageLoadedAll } from "./TestCommon";
+import { treatConsoleErrorAsError, waitInitialSceneLoad, waitPageLoadedAll } from "./TestCommon";
 
 export async function runMultiplayer(playersNumber,page,url){
   test.setTimeout((playersNumber*60*1000)+4*60*1000);
   const context = page.context();
 
   await page.goto(url)
+  //await treatConsoleErrorAsError(page);//TODO deactivated to much error messages at startup to fix
   await page.context().grantPermissions(['camera', 'microphone']);
   await waitInitialSceneLoad(page);
 
@@ -30,6 +31,7 @@ export async function runMultiplayer(playersNumber,page,url){
   for (const page of allPages) {
     //https://alphahub.aptero.co/bxmhkMb/playwright-network
     await page.goto(url)
+    //await treatConsoleErrorAsError(page);//TODO deactivated to much error messages at startup to fix
     await waitPageLoadedAll(page);
   }
   await new Promise(resolve => setTimeout(resolve,2000));

@@ -9,6 +9,7 @@ import { Column } from "../layout/Column";
 import { LegalMessage } from "./LegalMessage";
 import { PublicClientApplication } from "@azure/msal-browser";
 import { microsoftLoginService } from "../../aptero/module/microsoft/service/MicrosoftLoginService";
+import { msTeams } from "../../aptero/module/microsoft/service/MsTeams";
 
 export const SignInStep = {
   submit: "submit",
@@ -115,36 +116,41 @@ export function SubmitEmail({ onSubmitEmail, onSubmitEmailMicrosoftLogin, initia
     [setEmail]
   );
 
-
-  return (
-    <Column center padding as="form" onSubmit={onSubmitForm}>
-      <p>
-        {message ? (
-          intl.formatMessage(message)
-        ) : (
-          <FormattedMessage id="sign-in-modal.prompt" defaultMessage="Please Sign In"/>
-        )}
-      </p>
-      <TextInputField
-        name="email"
-        type="email"
-        required
-        value={email}
-        onChange={onChangeEmail}
-        placeholder="example@example.com"
-      />
-      <p>
-        <small>
-          <LegalMessage termsUrl={termsUrl} privacyUrl={privacyUrl}/>
-        </small>
-      </p>
-      <NextButton type="submit"/>
-      <Button preset="basic" onClick={onSubmitEmailMicrosoft}>
-        <FormattedMessage id="sign-in-with-teams" defaultMessage="Sign in with teams"/>
-      </Button>
-      <img src={img}></img>
-    </Column>
-  );
+  if(msTeams()){
+    return <Button preset="basic" style={{margin:"auto"}} onClick={()=>{microsoftLoginService.login()}}>
+      <FormattedMessage id="sign-in-with-teams" defaultMessage="Sign in with teams"/>
+    </Button>
+  }else {
+    return (
+      <Column center padding as="form" onSubmit={onSubmitForm}>
+        <p>
+          {message ? (
+            intl.formatMessage(message)
+          ) : (
+            <FormattedMessage id="sign-in-modal.prompt" defaultMessage="Please Sign In"/>
+          )}
+        </p>
+        <TextInputField
+          name="email"
+          type="email"
+          required
+          value={email}
+          onChange={onChangeEmail}
+          placeholder="example@example.com"
+        />
+        <p>
+          <small>
+            <LegalMessage termsUrl={termsUrl} privacyUrl={privacyUrl}/>
+          </small>
+        </p>
+        <NextButton type="submit"/>
+        <Button preset="basic" onClick={onSubmitEmailMicrosoft}>
+          <FormattedMessage id="sign-in-with-teams" defaultMessage="Sign in with teams"/>
+        </Button>
+        <img src={img}></img>
+      </Column>
+    );
+  }
 }
 
 SubmitEmail.defaultProps = {

@@ -7,10 +7,10 @@ export async function redirectToTeamsSidePanel(){
       return;//do not redirect in this case
     }
     await getContext((context)=>{
-      if(context.frameContext === "sidePanel" && !(context.hostClientType === "android" || context.hostClientType === "ios")) {
+      if(context.frameContext === "sidePanel") {
         window.location.replace(window.location.origin + "/microsoft-settings.html?msteams=true");
       }
-      //else continue android ios or desktop content
+      //else continue
     });
   }
 }
