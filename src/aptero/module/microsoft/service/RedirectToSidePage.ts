@@ -1,4 +1,4 @@
-import { getContext, msTeams } from "./MsTeams";
+import {getContext, msTeams, MSTEAMS_QUERY_PARAM} from "./MsTeams";
 
 export async function redirectToTeamsSidePanel(){
   if(msTeams()) {
@@ -8,7 +8,7 @@ export async function redirectToTeamsSidePanel(){
     }
     await getContext((context)=>{
       if(context.frameContext === "sidePanel") {
-        window.location.replace(window.location.origin + "/microsoft-settings.html?msteams=true");
+        window.location.replace(window.location.origin + "/microsoft-settings.html?"+MSTEAMS_QUERY_PARAM+"=true");
       }
       //else continue
     });

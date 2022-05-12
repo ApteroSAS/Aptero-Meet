@@ -90,6 +90,7 @@ export class MicrosoftOauthLoginService {
   }
 
   async login() {
+    console.log("MicrosoftOauthLoginService : userInteractionAuth");
     try {
       const loginRequest = {
         scopes: getScopesLight()

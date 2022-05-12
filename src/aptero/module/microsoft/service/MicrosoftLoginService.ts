@@ -38,7 +38,7 @@ export class MicrosoftLoginService {
       this.authInProgress = true;
       setTimeout(()=>{
         this.authInProgress = false;
-      },20000);
+      },1000);
         if(msTeams()){
           await this.teamsLoginService.passiveLogin();
           this.authInProgress = false;
@@ -55,7 +55,7 @@ export class MicrosoftLoginService {
       this.authInProgress = true;
       setTimeout(()=>{
         this.authInProgress = false;
-      },10000);
+      },1000);
       if(msTeams()){
         await this.teamsLoginService.userInteractionAuth();
         this.authInProgress = false;
@@ -71,6 +71,7 @@ export class MicrosoftLoginService {
       try {
         return await this.loginInternal();
       }catch (e){
+        this.authInProgress = false;
         //avoid any throw
         console.error(e);
       }
@@ -92,7 +93,7 @@ export class MicrosoftLoginService {
       this.authInProgress = true;
       setTimeout(()=>{
         this.authInProgress = false;
-      },20000);
+      },1000);
       this.msToNativeLoginBridge.clearProfile();
       if(msTeams()){
         await this.teamsLoginService.logout();

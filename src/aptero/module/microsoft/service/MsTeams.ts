@@ -4,8 +4,9 @@ export const CHANGE_SETTINGS_URL = "ms-teams-change-settings-url";
 export const PROCESS_DEEPLINK = "ms-teams-deep-link";
 import * as microsoftTeams from "@microsoft/teams-js";
 
-let url = new URL(window.location.href);
-let msmode = !!url.searchParams.get("msteams");
+export const MSTEAMS_QUERY_PARAM = "msteams";
+const qs = new URLSearchParams(location.search);
+let msmode = !!qs.get(MSTEAMS_QUERY_PARAM);
 let eventListener = new EventEmitter();
 
 export function sendEvent(type, data) {

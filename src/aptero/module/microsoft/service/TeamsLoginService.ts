@@ -14,7 +14,6 @@ import {MsToNativeLoginBridge} from "./MsToNativeLoginBridge";
 
 let credential:TeamsFx | null = null;
 export const startLoginPageUrl = window.location.origin + "/auth-start.html";
-export const functionEndpoint = window.location.origin + "/auth-start.html";//process.env.REACT_APP_FUNC_ENDPOINT;
 export const clientId = configs.APP_CONFIG.MICROSOFT_APP_ID; //process.env.REACT_APP_CLIENT_ID;
 
 declare const window;
@@ -29,6 +28,7 @@ function initTeamsFx(authorityHost) {
             console.warn(message);
         });
     }
+    //https://docs.microsoft.com/en-us/microsoftteams/platform/toolkit/teamsfx-sdk
     credential = new TeamsFx(IdentityType.User,{
             authorityHost,
             initiateLoginEndpoint: startLoginPageUrl,
@@ -75,13 +75,15 @@ export class TeamsLoginService {
     }
 
     async userInteractionAuth() {
-        console.log("userInteractionAuth");
+        console.log("TeamsLoginService : userInteractionAuth");
         const cred = await this.initBasicInfo();
         await cred.login(getScopesLight());//Trigger authorization popup
-        //await teamsAuth();
         await this.initGraph(getScopesLight());
         const userInfo = await cred.getUserInfo();//may trigger authorization popup
         await this.initBasic(userInfo, true);
+        await this.msToNativeLoginBridge.setProfile({
+            displayName: userInfo.displayName
+        });//HACK reset the display name since another process in the code seems to set Guest name
         return cred;
     }
 
@@ -90,7 +92,6 @@ export class TeamsLoginService {
         let scope = getScopes();
         const cred = await this.initBasicInfo();
         await cred.login(scope);//Trigger authorization popup
-        //await teamsAuth();
         await this.initGraph(scope);
         const userInfo = await cred.getUserInfo();
         await this.initBasic(userInfo, true);
@@ -139,10 +140,6 @@ export class TeamsLoginService {
     }
 
     async initBasic(basicUserInfo, force) {
-        this.msToNativeLoginBridge.setProfile({
-            displayName: basicUserInfo.displayName
-        });//HACK reset the display name since another process in the code seems to set Guest name
-
         if (this.microsoftGraphService.isInitialized() && !this.isGraphDataFilled()) {
             //graph initialized but graph information not set => force relogin with new information
             force = true;
