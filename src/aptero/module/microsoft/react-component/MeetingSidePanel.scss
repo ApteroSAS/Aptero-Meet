@@ -9,6 +9,7 @@
   min-height: 99vh;
   font-size: 18px;
   font-weight: 600;
+  overflow-x: hidden;
 }
 
 :local(.fleche) {
@@ -19,7 +20,6 @@
 }
 
 :local(.main) {
-  width: fit-content;
   padding: 10px;
   top: 45%;
   left: 50%;
