@@ -78,6 +78,7 @@ export class ApteroServices {
   thirdPersonService = new ThirdPersonService();
   private audioSettingsSystem: any;
   constructor() {
+    initAxolotisPlayer();
     startSelfTest();
     roomParameters.getRoomParameters(); //called as soon as possible
     aptLogger.setProperties(window.APP_CONFIG.LOGGER);
@@ -93,7 +94,6 @@ export class ApteroServices {
   start(audioSettingsSystem) {
     this.audioSettingsSystem = audioSettingsSystem;
     waitForDOMContentLoaded().then(async () => {
-      await initAxolotisPlayer();
       await networkService.start();
       await new SoundSystem(networkService).start();
       //await new DistributedSoundSystem(networkService).start();

@@ -4,14 +4,12 @@ import {Sidebar} from "../sidebar/Sidebar";
 import {BackButton} from "../input/BackButton";
 import {Button} from "../input/Button";
 import {Column} from "../layout/Column";
-import styles from "./UserProfileSidebar.scss";
 import {FormattedMessage, useIntl} from "react-intl";
 import {rotateInPlaceAroundWorldUp, affixToWorldUp} from "../../utils/three-utils";
-import {Spinner} from "../misc/Spinner";
 import {UserProfileVisitCardContainer} from "./UserProfileVisitCardContainer";
 import {PeopleSidebarContainer, usePeopleList} from "./PeopleSidebarContainer";
-import { msTeams, processDeepLink } from "../../aptero/module/microsoft/service/MsTeams";
-import { ReactComponent as AcountIcon } from "../icons/Acount.svg";
+import { msTeams } from "../../aptero/module/microsoft/MsTeams";
+import { MICROSOFT_SERVICE, getService } from "../../aptero/module/axolotis/AxolotisSystem";
 
 function useGoToSelectedAvatar(entity) {
     const targetMatrix = new THREE.Matrix4();
@@ -47,11 +45,15 @@ export function UserProfileSidebar({
                                        onPromote,
                                        canDemote,
                                        onDemote,
+                                     // eslint-disable-next-line no-unused-vars
                                        isHidden,
+                                     // eslint-disable-next-line no-unused-vars
                                        onToggleHidden,
                                        canMute,
                                        onMute,
+                                     // eslint-disable-next-line no-unused-vars
                                        canKick,
+                                     // eslint-disable-next-line no-unused-vars
                                        onKick,
                                        showBackButton,
                                        onBack,
@@ -215,13 +217,13 @@ export function UserProfileSidebar({
                     }
                     {microsoftUserId &&
                         <>
-                            <Button preset="basic" onClick={() =>{
-                                processDeepLink("https://teams.microsoft.com/l/chat/0/0?users="+microsoftUserEmail);
+                            <Button preset="basic" onClick={async () =>{
+                                (await getService(MICROSOFT_SERVICE)).getLoginService().processDeepLink("https://teams.microsoft.com/l/chat/0/0?users="+microsoftUserEmail);
                             }}>
                                 <FormattedMessage id="user-profile-sidebar.chat-button" defaultMessage="Chat"/>
                             </Button>
-                            <Button preset="basic" onClick={() => {
-                                processDeepLink("https://teams.microsoft.com/l/call/0/0?users="+microsoftUserEmail);
+                            <Button preset="basic" onClick={async () => {
+                              (await getService(MICROSOFT_SERVICE)).getLoginService().processDeepLink("https://teams.microsoft.com/l/call/0/0?users="+microsoftUserEmail);
                             }}>
                                 <FormattedMessage id="user-profile-sidebar.call-button" defaultMessage="Call"/>
                             </Button>

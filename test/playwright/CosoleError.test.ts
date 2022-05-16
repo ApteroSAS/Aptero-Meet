@@ -1,10 +1,10 @@
-import { expect, test } from "./lib/baseFixtures";
+import { expect, test } from "../playwright-lib/baseFixtures";
 import {
   treatConsoleErrorAsError, treatConsoleWarnAndErrorAsError,
   treatConsoleWarnAsError,
   waitInitialSceneLoad,
   waitPageLoadedAll
-} from "./lib/TestCommon";
+} from "../playwright-lib/TestCommon";
 
 test('console error', async ({ page }) => {
   await page.goto('index.html')

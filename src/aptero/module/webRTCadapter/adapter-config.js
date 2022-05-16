@@ -1,10 +1,11 @@
 import configs from "../../../utils/configs";
 import { lazyLoad } from "./adapterRegistrer";
 import { propertiesService } from "../properties/propertiesService";
-import { msTeams } from "../microsoft/service/MsTeams";
+import { msTeams } from "../microsoft/MsTeams";
 
 let defaultAdapter = configs.APP_CONFIG.adapterParams.adapter;
 
+// eslint-disable-next-line no-unused-vars
 let forceTurnGlobal = false;
 let forceTcpGlobal = false;
 let profile = null;

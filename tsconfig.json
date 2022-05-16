@@ -5,6 +5,8 @@
       "module": "esnext",
       "target": "ES5",
       "allowJs": true,
+      "resolveJsonModule": true,
+      "allowSyntheticDefaultImports": true,
       "sourceMap": true,
       "declaration": true,
       "emitDeclarationOnly": true,

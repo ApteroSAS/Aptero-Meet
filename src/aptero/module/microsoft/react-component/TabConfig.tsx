@@ -3,7 +3,8 @@ import * as microsoftTeams from "@microsoft/teams-js";
 import { Loader } from "@fluentui/react-northstar";//https://fluentsite.z22.web.core.windows.net/0.60.1
 import { roomService } from "../service/RoomService";
 import { FormattedMessage } from "react-intl";
-import {CHANGE_SETTINGS_URL, getMSEvents, MSTEAMS_QUERY_PARAM} from "../service/MsTeams";
+import {CHANGE_SETTINGS_URL, getMSEvents} from "../service/MsTeams";
+import {MSTEAMS_QUERY_PARAM} from "../MsTeams";
 import { LoginButton } from "./LoginButton";
 import { RoomSection } from "./RoomSection";
 

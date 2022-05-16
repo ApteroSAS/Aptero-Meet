@@ -1,12 +1,18 @@
 import uuid from "uuid/v4";
-import { microsoftLoginService } from "../aptero/module/microsoft/service/MicrosoftLoginService";
+import { MICROSOFT_SERVICE, getService } from "../aptero/module/axolotis/AxolotisSystem";
+import { msPassiveLoginCheckNeeded } from "../aptero/module/microsoft/MsTeams";
 
 export default class AuthChannel {
   constructor(store) {
     this.store = store;
     this.socket = null;
     this._signedIn = !!this.store.state.credentials.token;
-    microsoftLoginService.passiveLogin();
+    if(msPassiveLoginCheckNeeded()) {
+      getService(MICROSOFT_SERVICE).then(async service => {
+        await service.getLoginService().passiveLogin();
+        this.microsoftLoginService = service;
+      })
+    }
   }
 
   setSocket = socket => {
@@ -15,7 +21,7 @@ export default class AuthChannel {
 
 
   get email() {
-    return (microsoftLoginService.getUserAccount() && (microsoftLoginService.getUserAccount().mail)) || this.store.state.credentials.email;
+    return (this.microsoftLoginService && (this.microsoftLoginService.getUserAccount() && (this.microsoftLoginService.getUserAccount().mail))) || this.store.state.credentials.email;
   }
 
 
@@ -30,7 +36,9 @@ export default class AuthChannel {
     this.store.update({ credentials: { token: null, email: null } });
     await this.store.resetToRandomDefaultAvatar();
     this._signedIn = false;
-    microsoftLoginService.logout();
+    if(this.microsoftLoginService) {
+      this.microsoftLoginService.logout();
+    }
   };
 
   verifyAuthentication(authTopic, authToken, authPayload) {

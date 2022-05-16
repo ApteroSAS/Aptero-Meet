@@ -1,5 +1,5 @@
-import { expect, test } from "./lib/baseFixtures";
-import { treatConsoleErrorAsError, waitInitialSceneLoad, waitPageLoadedAll } from "./lib/TestCommon";
+import { expect, test } from "../playwright-lib/baseFixtures";
+import { treatConsoleErrorAsError, waitInitialSceneLoad, waitPageLoadedAll } from "../playwright-lib/TestCommon";
 
 test('entry flow', async ({ page }) => {
   test.setTimeout(240000);

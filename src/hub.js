@@ -1,5 +1,3 @@
-import { redirectToTeamsSidePanel } from "./aptero/module/microsoft/service/RedirectToSidePage";
-redirectToTeamsSidePanel();
 console.log(`App version: ${process.env.BUILD_VERSION || "?"}`);
 
 import {
@@ -195,12 +193,19 @@ import { sleep } from "./utils/async-utils";
 import { platformUnsupported } from "./support";
 
 //aptero service
-import { microsoftUrlService } from "./aptero/module/microsoft/service/MicrosoftUrlService";
 import { apteroService } from "./aptero/ApteroServices";
 import { roomController } from "./aptero/module/ButtonAPI/api/RoomController";
 import { fetchICEservers } from "./aptero/module/webRTCadapter/adapter-config";
 import { AdapterWarpper } from "./aptero/module/webRTCadapter/AdapterWrapper";
 //aptero service end
+
+import { MICROSOFT_SERVICE, getService } from "./aptero/module/axolotis/AxolotisSystem";
+import { msTeams } from "./aptero/module/microsoft/MsTeams";
+if(msTeams()) {
+  (getService(MICROSOFT_SERVICE)).then(async service =>{
+    await service.redirectToTeamsSidePanel();
+  })
+}
 
 window.APP = new App();
 window.APP.dialog = new AdapterWarpper();
@@ -262,7 +267,6 @@ import { SignInMessages } from "./react-components/auth/SignInModal";
 import { ThemeProvider } from "./react-components/styles/theme";
 import { wait } from "./aptero/util/AsyncWaiter";
 import { setupVersionComp } from "./aptero/module/HubsBridge/utils/Version";
-import { msTeams } from "./aptero/module/microsoft/service/MsTeams";
 import { minimumQualityService } from "./aptero/module/perf/MinimumQualityService";
 import { networkService } from "./aptero/module/HubsBridge/service/NetworkService";
 import { getEntryMode } from "./aptero/module/HubsBridge/utils/EntryMode";
@@ -394,7 +398,7 @@ export async function getSceneUrlForHub(hub) {
   }
 
   //aptero
-  await microsoftUrlService.preFetchConvertMicrosoftUrl(sceneUrl);
+  //await microsoftUrlService.preFetchConvertMicrosoftUrl(sceneUrl);
 
   if (isLegacyBundle) {
     // Deprecated

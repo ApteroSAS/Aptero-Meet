@@ -32,16 +32,21 @@
     "deploy-storybook": "storybook-to-ghpages",
     "intl-extract": "node ./src/assets/locales/intl-extract.js",
     "intl-extract-en-locale": "node ./src/assets/locales/intl-extract.js en",
-    "ci:test": "cross-env NODE_ENV=development npx playwright test",
-    "ci:load:run:one": "cross-env PW_TEST_DIR=./test/ npx playwright test ./test/playwright-load-test/LoadTestTeamsPlayer.test.ts",
-    "ci:debug:run:one": "cross-env CI=true PW_PORT=53000 PWDEBUG=1 PW_TEST_DIR=./test/ npx playwright test ./test/playwright/EntryFlow.test.ts --headed",
+    "ci:test": "cross-env NODE_ENV=development npx playwright test --config ./test/playwright.config.js",
+    "ci:load:run:one": "cross-env npx playwright test --config ./test/playwright-load.config.js ./test/playwright-load-test/LoadTestTeamsPlayer.test.ts",
+    "ci:debug:run:one": "cross-env CI=true PW_PORT=53000 PWDEBUG=1 npx playwright test --config ./test/playwright-teams.config.js ./test/playwright-teams/Page.test.ts --headed",
     "ci:debug:serve": "cross-env NODE_ENV=development PW_PORT=53000 yarn run dev",
-    "ci:debug:run": "cross-env CI=true PW_PORT=53000 NODE_ENV=development PWDEBUG=console npx playwright test --headed",
+    "ci:debug:run": "cross-env CI=true PW_PORT=53000 NODE_ENV=development PWDEBUG=console npx playwright --config ./test/playwright.config.js test --headed",
     "ci:coverage:serve": "cross-env NODE_ENV=development USE_BABEL_PLUGIN_ISTANBUL=1 webpack --stats-error-details --config webpack.config.js && npx http-server dist -p 9080 --ssl --cert ./certs/cert.pem --key ./certs/key.pem",
-    "ci:coverage:run": "cross-env NODE_ENV=development PLAYWRIGHT_JUNIT_OUTPUT_NAME=junit.xml npx playwright test --workers=1 --reporter=junit && nyc --no-clean yarn --version",
+    "ci:coverage:run": "cross-env NODE_ENV=development PLAYWRIGHT_JUNIT_OUTPUT_NAME=junit.xml npx playwright test --config ./test/playwright.config.js --workers=1 --reporter=junit && nyc --no-clean yarn --version",
     "ci:coverage:serve:run": "cross-env CI=true START_SERVER_AND_TEST_INSECURE=1 start-server-and-test ci:coverage:serve https://127.0.0.1:9080 ci:coverage:run",
     "ci": "cross-env yarn run clean && yarn run ci:coverage:serve:run",
-    "clean" : "rimraf .nyc_output coverage junit.xml dist"
+
+    "ci:coverage:teams:serve":"cross-env npx @microsoft/teamsfx-cli preview --env=local --remote --interactive=false && yarn run dev",
+    "ci:coverage:teams:run":"cross-env NODE_ENV=development PLAYWRIGHT_JUNIT_OUTPUT_NAME=junit.xml npx playwright test --config ./test/playwright-teams.config.js --workers=1 --reporter=junit",
+    "ci:coverage:teams:serve:run": "cross-env CI=true START_SERVER_AND_TEST_INSECURE=1 start-server-and-test ci:teams:serve https://127.0.0.1:53000 ci:teams:run",
+
+    "clean": "rimraf .nyc_output coverage junit.xml dist"
   },
   "scripts-info": {
     "start": "Run the client against your Hubs Cloud instance, or Mozilla's developer infrastructure,\n  using application configs pulled from the server",
@@ -70,7 +75,7 @@
     ]
   },
   "dependencies": {
-    "@aptero/axolotis-player": "git+https://github.com/ApteroSAS/axolotis-player.git",
+    "@aptero/axolotis-player": "git+https://github.com/ApteroSAS/axolotis-player.git#f9ef15be031980ccc3749a66b67e76a7d0463019",
     "@azure/msal-browser": "2.16.1",
     "@braintree/sanitize-url": "^5.0.0",
     "@fluentui/react-northstar": "^0.61.0",
@@ -186,6 +191,7 @@
     "@formatjs/cli": "^2.13.15",
     "@iarna/toml": "^2.2.3",
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
+    "@microsoft/teamsfx-cli": "^0.14.0",
     "@playwright/test": "^1.21.1",
     "@storybook/addon-actions": "^6.0.12",
     "@storybook/addon-essentials": "^6.0.12",

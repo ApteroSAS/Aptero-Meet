@@ -1,4 +1,4 @@
-import React, { Component, useEffect, useState } from "react";
+import React, { Component, useEffect } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import copy from "copy-to-clipboard";
@@ -101,11 +101,11 @@ import { getSelectedPersonName } from "./room/PeopleSidebarContainer";
 import { Promise } from "core-js";
 import { UserProfileVisitCardContainer } from "./room/UserProfileVisitCardContainer";
 import axios from "axios";
-import { msTeams } from "../aptero/module/microsoft/service/MsTeams";
+import { msTeams } from "../aptero/module/microsoft/MsTeams";
 import { propertiesService } from "../aptero/module/properties/propertiesService";
-import { microsoftLoginService } from "../aptero/module/microsoft/service/MicrosoftLoginService";
 import AptRoot from "../aptero/module/HubsBridge/AptRoot";
 import { minimumQualityService } from "../aptero/module/perf/MinimumQualityService";
+import { MICROSOFT_SERVICE, getService } from "../aptero/module/axolotis/AxolotisSystem";
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 const IN_ROOM_MODAL_ROUTER_PATHS = ["/media"];
 const IN_ROOM_MODAL_QUERY_VARS = ["media_source"];
@@ -213,7 +213,8 @@ export class UIRoot extends Component {
     objectSrc: "",
     sidebarId: null,
     userId: null,
-    presenceCount: 0
+    presenceCount: 0,
+    microsoftService:null
   };
 
   constructor(props) {
@@ -224,6 +225,11 @@ export class UIRoot extends Component {
     // An exit handler that discards event arguments and can be cleaned up.
     this.exitEventHandler = () => this.props.exitScene();
     this.mediaDevicesManager = window.APP.mediaDevicesManager;
+    if(msTeams()){
+      getService(MICROSOFT_SERVICE).then(service =>{
+        this.setState({microsoftLoginService:service});
+      })
+    }
   }
 
   componentDidUpdate(prevProps) {
@@ -343,10 +349,10 @@ export class UIRoot extends Component {
     this.setSidebar("display_user_panel", { selectedUserId: e.detail})
     });
   
-    this.props.scene.addEventListener("avatarChanged", e => {
+    this.props.scene.addEventListener("avatarChanged", () => {
       console.log("has changed avatar");
       const useFetch = async avatarId => {
-        var data;
+        let data;
         const fetchData = async () => {
           // eslint-disable-next-line no-use-before-define
           data = await getUrl(avatarId);
@@ -355,7 +361,7 @@ export class UIRoot extends Component {
         return data;
       };
         useFetch(this.props.store.state.profile.avatarId).then(resp=>{
-          var profilePictureUrl=resp;
+          let profilePictureUrl=resp;
           if(resp!=null){
             profilePictureUrl = profilePictureUrl.replace('"', "");
             profilePictureUrl= profilePictureUrl.replace('"', "");
@@ -510,39 +516,7 @@ export class UIRoot extends Component {
       onClose: onContinueAfterSignIn || this.closeDialog
     });
   };
-  /*
-  showContextualMicrosoftSignInDialog = () => {
-    
-    const { signInMessage, authChannel, onContinueAfterSignIn } = this.props;
 
-    this.showNonHistoriedDialog(RoomSignInModalContainer, {
-      step: SignInStep.submit,
-      message: signInMessage,
-      onSubmitEmailMicrosoftLogin: async user => {
-        
-        
-          const { authComplete } = await authChannel.convertToHubToken(user, this.props.hubChannel);
-          //onSubmitEmailMicrosoftLogin(user);
-     
-        this.showNonHistoriedDialog(RoomSignInModalContainer, {
-          step: SignInStep.waitForVerification,
-          onClose: onContinueAfterSignIn || this.closeDialog
-        });
-
-        await authComplete;
-
-        this.setState({ signedIn: true });
-        this.showNonHistoriedDialog(RoomSignInModalContainer, {
-          step: SignInStep.complete,
-          onClose: onContinueAfterSignIn || this.closeDialog,
-          onContinue: onContinueAfterSignIn || this.closeDialog
-        });
-      },
-      onClose: onContinueAfterSignIn || this.closeDialog
-    });
-    
-  };
-*/
   updateSubscribedState = () => {
     const isSubscribed = this.props.subscriptions && this.props.subscriptions.isSubscribed();
     this.setState({ isSubscribed });
@@ -1484,7 +1458,7 @@ export class UIRoot extends Component {
       }
     ];
 
-    if(msTeams()){
+    if(msTeams() && this.state.microsoftService ){
       moreMenu = [
         {
           id: "user",
@@ -1504,19 +1478,19 @@ export class UIRoot extends Component {
               icon: SettingsIcon,
               onClick: () => this.setState({showPrefs: true})
             },
-            microsoftLoginService.isSignedIn()?{
+            this.state.microsoftService.getLoginService().isSignedIn()?{
               id: "authorize",
               label: "Sign Out",
               icon: SettingsIcon,
               onClick: () => {
-                microsoftLoginService.logout();
+                this.state.microsoftService.getLoginService().logout();
               }
             }:{
               id: "authorize",
               label: "Sign In",
               icon: SettingsIcon,
               onClick: () => {
-                microsoftLoginService.login();
+                this.state.microsoftService.getLoginService().login();
               }
             }
           ].filter(item => item)
@@ -2009,6 +1983,9 @@ export class UIRoot extends Component {
   }
 }
 function usePeopleList(presences, mySessionId) {
+  if(!presences || !mySessionId){
+    return [];
+  }
   let people;
 
   const micPresences = getMicrophonePresences();
@@ -2116,10 +2093,7 @@ export async function  getUserProfile(mail,userId) {
 function UIRootHooksWrapper(props) {
   useAccessibleOutlineStyle();
   const breakpoint = useCssBreakpoints();
-  var people = [];
-  if (props.presences != null && props.sessionId != null) {
-    people = usePeopleList(props.presences, props.sessionId);
-  }
+  let people = usePeopleList(props.presences, props.sessionId);
   useEffect(() => {
     const el = document.getElementById("preload-overlay");
     el.classList.add("loaded");
@@ -2155,7 +2129,9 @@ function UIRootHooksWrapper(props) {
 UIRootHooksWrapper.propTypes = {
   scene: PropTypes.object.isRequired,
   messageDispatch: PropTypes.object,
-  store: PropTypes.object.isRequired
+  store: PropTypes.object.isRequired,
+  presences: PropTypes.object,
+  sessionId: PropTypes.string,
 };
 
 export default UIRootHooksWrapper;

@@ -4,8 +4,8 @@ import {createWorld, Entity, LazyEntity, registerLocalModule} from "@aptero/axol
 
 //const { test, expect } = require('@playwright/test');
 //https://dev.to/anishkny/code-coverage-for-a-nextjs-app-using-playwright-tests-18n7
-import { test, expect } from './lib/baseFixtures';
-import { treatConsoleErrorAsError, waitInitialSceneLoad, waitPageLoadedAll } from "./lib/TestCommon";
+import { test, expect } from '../playwright-lib/baseFixtures';
+import { treatConsoleErrorAsError, waitInitialSceneLoad, waitPageLoadedAll } from "../playwright-lib/TestCommon";
 
 test('index.html', async ({ page }) => {
     await page.goto('index.html');

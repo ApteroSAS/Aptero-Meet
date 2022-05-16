@@ -1,4 +1,5 @@
-import {getContext, msTeams, MSTEAMS_QUERY_PARAM} from "./MsTeams";
+import {getContext} from "./MsTeams";
+import {msTeams, MSTEAMS_QUERY_PARAM} from "../MsTeams";
 
 export async function redirectToTeamsSidePanel(){
   if(msTeams()) {

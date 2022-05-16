@@ -1,5 +1,5 @@
-import { test } from "./lib/baseFixtures";
-import { treatConsoleErrorAsError, waitInitialSceneLoad } from "./lib/TestCommon";
+import { test } from "../playwright-lib/baseFixtures";
+import { treatConsoleErrorAsError, waitInitialSceneLoad } from "../playwright-lib/TestCommon";
 
 test('teams mode', async ({ page }) => {
   test.setTimeout(120000);

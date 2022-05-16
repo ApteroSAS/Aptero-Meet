@@ -1,12 +1,11 @@
+import { msTeams as msTeams2} from "../MsTeams";//TODO cleaning
+
 const EventEmitter = require("eventemitter3");
 
 export const CHANGE_SETTINGS_URL = "ms-teams-change-settings-url";
 export const PROCESS_DEEPLINK = "ms-teams-deep-link";
 import * as microsoftTeams from "@microsoft/teams-js";
 
-export const MSTEAMS_QUERY_PARAM = "msteams";
-const qs = new URLSearchParams(location.search);
-let msmode = !!qs.get(MSTEAMS_QUERY_PARAM);
 let eventListener = new EventEmitter();
 
 export function sendEvent(type, data) {
@@ -17,12 +16,12 @@ export function getMSEvents(){
   return eventListener;
 }
 
-export function changeUrlSettings(url){
-  sendEvent(CHANGE_SETTINGS_URL,{url});
+export function msTeams(){
+  return msTeams2();
 }
 
-export function msTeams(){
-  return msmode;
+export function changeUrlSettings(url){
+  sendEvent(CHANGE_SETTINGS_URL,{url});
 }
 
 export async function getContext(callback){
