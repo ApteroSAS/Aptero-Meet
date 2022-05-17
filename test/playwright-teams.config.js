@@ -2,6 +2,8 @@
 // @ts-check
 /** @type {import('@playwright/test').PlaywrightTestConfig} */
 // @ts-check
+//https://playwright.dev/docs/test-configuration#global-configuration
+// https://playwright.dev/docs/api/class-testoptions
 
 const config = {
     testDir:process.env.PW_TEST_DIR || "./playwright-teams",
@@ -16,6 +18,10 @@ const config = {
         timeout: 2*60*1000,
     },
     use: {
+        browserName: 'chromium',
+        launchOptions: {
+            args:["--disable-web-security"],
+        },
         screenshot: 'only-on-failure',
         ignoreHTTPSErrors: true,
         baseURL: 'https://localhost:'+(process.env.PW_PORT||"53000"),

@@ -6,7 +6,7 @@ export async function runMultiplayer(playersNumber,page,url){
   const context = page.context();
 
   await page.goto(url)
-  //await treatConsoleErrorAsError(page);//TODO deactivated to much error messages at startup to fix
+  //await defaultErrorAssert(page);//TODO deactivated to much error messages at startup to fix
   await page.context().grantPermissions(['camera', 'microphone']);
   await waitInitialSceneLoad(page);
 

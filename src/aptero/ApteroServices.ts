@@ -31,6 +31,12 @@ declare let AFRAME:any;
 
 export const ENTERED_EVENT = 'apt:room:entered';
 
+function sendIframeMessage(type, data) {
+  if (window.parent && window.parent.postMessage) {
+    window.parent.postMessage(JSON.stringify({type, data}), "*");
+  }
+}
+
 //event handling for iframe #morgane
 window.focus();
 window.addEventListener(
@@ -67,12 +73,6 @@ if (new URL(window.location.href).searchParams.get("hideui")) {
 /*window.addEventListener("scroll", function(e) {
   e.preventDefault();
 });*/
-
-function sendIframeMessage(type, data) {
-  if (window.top) {
-    window.top.postMessage(JSON.stringify({ type, data }), "*");
-  }
-}
 
 export class ApteroServices {
   thirdPersonService = new ThirdPersonService();
@@ -127,6 +127,7 @@ export class ApteroServices {
     });
     await roomParameters.applyDefaultAudioSettingsSystem(this.audioSettingsSystem);
     window.document.dispatchEvent(new Event(ENTERED_EVENT))
+    sendIframeMessage(ENTERED_EVENT,{});
   }
 
   tick() {

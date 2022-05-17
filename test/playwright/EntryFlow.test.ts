@@ -5,7 +5,7 @@ test('entry flow', async ({ page }) => {
   test.setTimeout(240000);
   // Go to https://alphahub.aptero.co/EVa7SjZ/playwright-test-1
   await page.goto('hub.html?hub_id=EVa7SjZ');
-  //await treatConsoleErrorAsError(page);//TODO deactivated to much error messages at startup to fix
+  //await defaultInit(page);//TODO deactivated to much error messages at startup to fix
   await page.context().grantPermissions(['camera', 'microphone']);
 
   await waitInitialSceneLoad(page);

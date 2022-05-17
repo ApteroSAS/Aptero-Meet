@@ -4,6 +4,7 @@ import { microsoftLoginService } from "./service/MicrosoftLoginService";
 import { redirectToTeamsSidePanel } from "./service/RedirectToSidePage";
 import { microsoftUrlService } from "./service/MicrosoftUrlService";
 import { processDeepLink } from "./service/MsTeams";
+import "./service/TeamsTestHelper";
 
 export class MicrosoftService implements Component{
   constructor() {
