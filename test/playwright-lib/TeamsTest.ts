@@ -60,7 +60,7 @@ export function treatConsoleWarnAsErrorInFrame(page) {
             });
         });
     }).catch(async e => {
-        await page.pause();
+        //await page.pause();
         throw new Error(e);
     });
 }
@@ -81,7 +81,7 @@ export function treatConsoleErrorAsErrorInFrame(page) {
             });
         });
     }).catch(async e => {
-        await page.pause();
+        //await page.pause();
         throw new Error(e);
     });
 }
@@ -172,5 +172,7 @@ export async function initialConnexion(page, withHint = false) {
     await page.waitForNavigation(/*{ url: 'https://teams.microsoft.com/_' }*/)
     //only if page is headed it seems
     // Click [aria-label="Dismiss"]
-    page.locator('[aria-label="Dismiss"]').click()
+    const dismissLocator = page.locator('[aria-label="Dismiss"]').click().catch(e=>{
+        /* ignore since this is an optional click*/
+    })
 }

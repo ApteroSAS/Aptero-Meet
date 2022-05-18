@@ -21,6 +21,7 @@ import {
  * Create a tab
  */
 test('teams setting up', async ({ page }) => {
+    test.setTimeout(4*60*1000);
     await page.goto('https://teams.microsoft.com/l/app/'+localTeamsAppId+'?installAppPackage=true&webjoin=true&appTenantId='+tenant+'&login_hint='+accountHint);
     await initialConnexion(page,true);
     await startErrorWatchTeams(page);//after initial connexion to avoid reload page
@@ -81,6 +82,7 @@ test('teams sign in / sign out', async ({ page }) => {
  * Remove Tab
  */
 test('teams cleanup', async ({ page }) => {
+    test.setTimeout(4*60*1000);
     await page.goto('https://teams.microsoft.com/');
     await initialConnexion(page);
     await startErrorWatchTeams(page);//after initial connexion to avoid reload page

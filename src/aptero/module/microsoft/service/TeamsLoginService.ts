@@ -74,12 +74,15 @@ export class TeamsLoginService {
         }
     }
 
+    //store the tenant
+    //id
+    // JWT decripting of the token
     async userInteractionAuth() {
         console.log("TeamsLoginService : userInteractionAuth");
         const cred = await this.initBasicInfo();
         await cred.login(getScopesLight());//Trigger authorization popup
         await this.initGraph(getScopesLight());
-        const userInfo = await cred.getUserInfo();//may trigger authorization popup
+        const userInfo = await cred.getUserInfo();//confirmed by stephano no user popup
         await this.initBasic(userInfo, true);
         await this.msToNativeLoginBridge.setProfile({
             displayName: userInfo.displayName

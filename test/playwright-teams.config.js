@@ -18,10 +18,6 @@ const config = {
         timeout: 2*60*1000,
     },
     use: {
-        browserName: 'chromium',
-        launchOptions: {
-            args:["--disable-web-security"],
-        },
         screenshot: 'only-on-failure',
         ignoreHTTPSErrors: true,
         baseURL: 'https://localhost:'+(process.env.PW_PORT||"53000"),
