@@ -6,8 +6,8 @@
         "indexPath": "/index.html#",
         "endpoint": "https://localhost:53000",
         "domain": "localhost",
-        "sslCertFile": "C:/Users/pierr/.fx/certificate/localhost.crt",
-        "sslKeyFile": "C:/Users/pierr/.fx/certificate/localhost.key"
+        "sslCertFile": "./certs/cert.pem",
+        "sslKeyFile": "./certs/key.pem"
     },
     "fx-resource-aad-app-for-teams": {
         "clientId": "2168c5ad-3d42-4903-b88b-23c21dfd67aa",
