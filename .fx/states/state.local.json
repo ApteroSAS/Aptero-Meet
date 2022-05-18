@@ -6,22 +6,22 @@
         "indexPath": "/index.html#",
         "endpoint": "https://localhost:53000",
         "domain": "localhost",
-        "sslCertFile": "./cert/cert.pem",
-        "sslKeyFile": "./cert/key.pem"
+        "sslCertFile": "C:/Users/pierr/.fx/certificate/localhost.crt",
+        "sslKeyFile": "C:/Users/pierr/.fx/certificate/localhost.key"
     },
     "fx-resource-aad-app-for-teams": {
-        "clientId": "88c28ea2-f65b-4325-b50f-676d3f16cf83",
+        "clientId": "2168c5ad-3d42-4903-b88b-23c21dfd67aa",
         "clientSecret": "{{fx-resource-aad-app-for-teams.clientSecret}}",
-        "objectId": "0d8e58c1-565f-49cb-a46a-892694427928",
-        "oauth2PermissionScopeId": "bdc71b01-8a15-4948-93c4-f7c719d07630",
+        "objectId": "7539ca71-5d22-458f-9448-cbcbfd25a718",
+        "oauth2PermissionScopeId": "34621367-9c99-44de-95c1-f136e4d98ff3",
         "tenantId": "48caed5d-d20d-40ce-b0cd-9261fc5d8f83",
         "oauthHost": "https://login.microsoftonline.com",
         "oauthAuthority": "https://login.microsoftonline.com/48caed5d-d20d-40ce-b0cd-9261fc5d8f83",
-        "applicationIdUris": "api://localhost/88c28ea2-f65b-4325-b50f-676d3f16cf83"
+        "applicationIdUris": "api://localhost/2168c5ad-3d42-4903-b88b-23c21dfd67aa"
     },
     "fx-resource-simple-auth": {},
     "fx-resource-appstudio": {
-        "teamsAppUpdatedAt": 1652711667558,
-        "teamsAppId": "88c28ea2-f65b-4325-b50f-676d3f16cf83"
+        "teamsAppUpdatedAt": 1652869555893,
+        "teamsAppId": "ff2a2edd-2025-488d-9410-87b6af2dd2c2"
     }
 }
