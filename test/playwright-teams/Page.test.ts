@@ -11,7 +11,7 @@ import {
     initialConnexion,
     localTeamsAppId,
     navigateToTab,
-    startErrorWatchTeams, stopErrorWatch,
+    startErrorWatchTeams, stopErrorWatchTeams,
     tenant, waitInitialSceneLoadIframe
 } from "../playwright-lib/TeamsTest";
 
@@ -60,7 +60,7 @@ test('teams setting up', async ({ page }) => {
     await page.frameLocator('iframe[name="embedded-page-container"]').locator('[aria-label="More"]').click();
 
 
-    await stopErrorWatch(page);
+    await stopErrorWatchTeams(page);
 
 });
 
@@ -75,7 +75,7 @@ test('teams sign in / sign out', async ({ page }) => {
     await navigateToTab(page);
     await waitInitialSceneLoadIframe(page);
     //TODO sign in sign out
-    await stopErrorWatch(page);
+    await stopErrorWatchTeams(page);
 })
 
 /**
@@ -93,7 +93,7 @@ test('teams cleanup', async ({ page }) => {
     await page.locator('button:has-text("Remove")').click();
     // Click button:has-text("Remove")
     await page.locator('button:has-text("Remove")').click();
-    await stopErrorWatch(page);
+    await stopErrorWatchTeams(page);
 });
 
 

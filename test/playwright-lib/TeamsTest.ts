@@ -60,7 +60,9 @@ export function treatConsoleWarnAsErrorInFrame(page) {
             });
         });
     }).catch(async e => {
-        //await page.pause();
+        if(process.env.PWDEBUG) {
+            await page.pause();
+        }
         throw new Error(e);
     });
 }
@@ -81,7 +83,9 @@ export function treatConsoleErrorAsErrorInFrame(page) {
             });
         });
     }).catch(async e => {
-        //await page.pause();
+        if(process.env.PWDEBUG) {
+            await page.pause();
+        }
         throw new Error(e);
     });
 }
@@ -102,19 +106,23 @@ export function notifyErrorInFrame(page) {
             });
         });
     }).catch(async e => {
-        await page.pause();
+        if(process.env.PWDEBUG) {
+            await page.pause();
+        }
         throw new Error(e);
     });
 }
 
-export async function stopErrorWatch(page){
+export async function stopErrorWatchTeams(page){
     await page.evaluate(async () => {
         // @ts-ignore
         for(const cancel of window.onCancelPlayWrightEvaluate){
             cancel();
         }
     });
-    await page.pause();
+    if(process.env.PWDEBUG) {
+        await page.pause();
+    }
 }
 
 export function startErrorWatchTeams(page){

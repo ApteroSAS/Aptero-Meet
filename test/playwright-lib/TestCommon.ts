@@ -1,9 +1,3 @@
-export async function waitPageLoadedAll(page) {
-    await page.waitForLoadState('networkidle');
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForLoadState('load');
-    await page.bringToFront();//important for microphone authorization
-}
 
 export async function waitInitialSceneLoad(page) {
     await page.evaluate(async () => {
@@ -11,7 +5,8 @@ export async function waitInitialSceneLoad(page) {
             window.document.addEventListener('apt:room:entered', resolve);
         })
     });
-    await waitPageLoadedAll(page);
+    //await waitPageLoadedAll(page);
+    await page.bringToFront();//important for microphone authorization
     await new Promise(resolve => setTimeout(resolve, 5000));//TODO find a better event
 }
 
@@ -21,13 +16,15 @@ export function treatConsoleWarnAsError(page) {
             // @ts-ignore
             window.onCancelPlayWrightEvaluate ? window.onCancelPlayWrightEvaluate.push(resolve): window.onCancelPlayWrightEvaluate = [resolve];
             const oldWarn = console.warn;
-            console.warn = (...args) => {
+            console.warn = (a,...args) => {
                 oldWarn(args);
-                reject("playwright console warn reporter");
+                reject("playwright console warn reporter " + JSON.stringify(args));
             }
         });
     }).catch(async e => {
-        await page.pause();
+        if(process.env.PWDEBUG) {
+            await page.pause();
+        }
         throw new Error(e);
     });
 }
@@ -38,13 +35,15 @@ export function treatConsoleErrorAsError(page) {
             // @ts-ignore
             window.onCancelPlayWrightEvaluate ? window.onCancelPlayWrightEvaluate.push(resolve): window.onCancelPlayWrightEvaluate = [resolve];
             const oldError = console.error;
-            console.error = (...args) => {
-                oldError(args);
-                reject("playwright console error reporter");
+            console.error = (a,...args) => {
+                oldError(a,args);
+                reject("playwright console error reporter " + JSON.stringify(args));
             }
         });
     }).catch(async e => {
-        await page.pause();
+        if(process.env.PWDEBUG) {
+            await page.pause();
+        }
         throw new Error(e);
     });
 }
@@ -56,17 +55,19 @@ export function failsTheTestOnUnhandledError(page) {
             window.onCancelPlayWrightEvaluate ? window.onCancelPlayWrightEvaluate.push(resolve): window.onCancelPlayWrightEvaluate = [resolve];
             const oldOnerror = window.onerror
             window.onerror = (...args) => {
-                reject("playwright console error reporter");
+                reject("playwright error reporter " + JSON.stringify(args));
                 return oldOnerror(...args);
             }
         });
     }).catch(async e => {
-        await page.pause();
+        if(process.env.PWDEBUG) {
+            await page.pause();
+        }
         throw new Error(e);
     });
 }
 
-export function startErrorWatchTeams(page){
+export function startErrorWatch(page){
   failsTheTestOnUnhandledError(page);
   treatConsoleErrorAsError(page);
 }

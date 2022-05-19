@@ -3,7 +3,7 @@
 import { test, expect } from '../playwright-lib/baseFixtures';
 import { treatConsoleErrorAsError, waitInitialSceneLoad, waitPageLoadedAll } from "../playwright-lib/TestCommon";
 import {
-    stopErrorWatch,
+    stopErrorWatchTeams,
     initialConnexion,
     notifyErrorInFrame, startErrorWatchTeams,
     treatConsoleErrorAsErrorInFrame,
@@ -31,6 +31,6 @@ test('static tab', async ({ page }) => {
     await startErrorWatchTeams(page);//after initial connexion to avoid reload page
     await navigateToTab(page,"Static");
     await waitInitialSceneLoadIframe(page);
-    await stopErrorWatch(page);
+    await stopErrorWatchTeams(page);
 })
 

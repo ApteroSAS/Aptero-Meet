@@ -16,6 +16,16 @@ const config = {
         timeout: 2*60*1000,
     },
     use: {
+        permissions: ['microphone', 'camera'],
+        browserOptions:{
+            args:[
+                //"--no-sandbox",
+                //"--disable-setuid-sandbox",
+                "--use-fake-device-for-media-stream",
+                "--use-fake-ui-for-media-stream",
+                //"--use-file-for-fake-video-capture=./data/fakeCameraCapureDP.y4m"
+            ]
+        },
         screenshot: 'only-on-failure',
         ignoreHTTPSErrors: true,
         baseURL: 'https://localhost:'+(process.env.PW_PORT||"9080"),

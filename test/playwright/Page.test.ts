@@ -6,21 +6,18 @@ import {createWorld, Entity, LazyEntity, registerLocalModule} from "@aptero/axol
 //https://dev.to/anishkny/code-coverage-for-a-nextjs-app-using-playwright-tests-18n7
 import { test, expect } from '../playwright-lib/baseFixtures';
 import {
-    startErrorWatchTeams,
-    waitPageLoadedAll
+    startErrorWatch, stopErrorWatch,
 } from "../playwright-lib/TestCommon";
 
 test('index.html', async ({ page }) => {
     await page.goto('index.html');
-    await waitPageLoadedAll(page);
-    await startErrorWatchTeams(page);
+    await page.waitForNavigation();
     await page.screenshot({ path: './coverage/store/index.png' });
 });
 
 test('microsoft settings html', async ({ page }) => {
     await page.goto('microsoft-settings.html?msteams=true');
-    await waitPageLoadedAll(page);
-    await startErrorWatchTeams(page);
+    await page.waitForNavigation();
     await page.screenshot({ path: './coverage/store/microsoft.png' });
 });
 
