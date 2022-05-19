@@ -1,5 +1,4 @@
 import localJson from './../../.fx/states/state.local.json';
-import {failsTheTestOnUnhandledError, treatConsoleErrorAsError, waitPageLoadedAll} from "./TestCommon";
 
 export const localTeamsAppId = localJson["fx-resource-appstudio"].teamsAppId;
 export const tenant = "48caed5d-d20d-40ce-b0cd-9261fc5d8f83";
@@ -144,7 +143,6 @@ export async function waitInitialSceneLoadIframe(page) {
             });
         });
     });
-    await waitPageLoadedAll(page);
     await new Promise(resolve => setTimeout(resolve, 5000));//TODO find a better event
 }
 
