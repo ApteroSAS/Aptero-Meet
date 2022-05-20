@@ -1,7 +1,6 @@
 //const { test, expect } = require('@playwright/test');
 //https://dev.to/anishkny/code-coverage-for-a-nextjs-app-using-playwright-tests-18n7
 import { test, expect } from '../playwright-lib/baseFixtures';
-import { treatConsoleErrorAsError, waitInitialSceneLoad, waitPageLoadedAll } from "../playwright-lib/TestCommon";
 import {
     stopErrorWatchTeams,
     initialConnexion,

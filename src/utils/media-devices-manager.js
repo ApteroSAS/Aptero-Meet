@@ -206,7 +206,7 @@ export default class MediaDevicesManager {
       return true;
     } catch (e) {
       // Error fetching audio track, most likely a permission denial.
-      console.error("Error during getUserMedia: ", e);
+      console.warn("Error during getUserMedia: ", e);
       this.audioTrack = null;
       return false;
     }

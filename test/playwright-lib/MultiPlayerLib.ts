@@ -10,6 +10,7 @@ export async function runMultiplayer(playersNumber,page,url){
   const context = page.context();
 
   await page.goto(url);
+  await startErrorWatch(page);
   await waitInitialSceneLoad(page);
   await page.context().grantPermissions(['camera', 'microphone']);
 
@@ -25,6 +26,7 @@ export async function runMultiplayer(playersNumber,page,url){
   //await page.locator('div:nth-child(11) .preferences-screen__row__24y1Q input').check();
   // Click [aria-label="Close Preferences Menu"]
   await page.locator('[aria-label="Close Preferences Menu"]').click();
+  await stopErrorWatch(page);
 
   //Start network test
   for (let i = 0; i < playersNumber-1; i++) {
@@ -34,10 +36,9 @@ export async function runMultiplayer(playersNumber,page,url){
   for (const page of allPages) {
     //https://alphahub.aptero.co/bxmhkMb/playwright-network
     await page.goto(url)
-    await page.waitForNavigation();
     await startErrorWatch(page);
     await waitInitialSceneLoad(page);
+    await stopErrorWatch(page);
   }
   await new Promise(resolve => setTimeout(resolve,2000));
-  await stopErrorWatch(page);
 }

@@ -11,13 +11,9 @@ import {
 
 test('index.html', async ({ page }) => {
     await page.goto('index.html');
-    await page.waitForNavigation();
-    await page.screenshot({ path: './coverage/store/index.png' });
 });
 
 test('microsoft settings html', async ({ page }) => {
     await page.goto('microsoft-settings.html?msteams=true');
-    await page.waitForNavigation();
-    await page.screenshot({ path: './coverage/store/microsoft.png' });
 });
 

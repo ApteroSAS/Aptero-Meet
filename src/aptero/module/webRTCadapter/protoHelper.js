@@ -4,7 +4,8 @@ import { getAdapterConfig } from "./adapter-config";
 export class ProtooHelper {
   async init(urlWithParams) {
     let protooTransport;
-    if (getAdapterConfig().transport && getAdapterConfig().transport === "WebSocketTransport") {
+    let adapterConfig = getAdapterConfig();
+    if (adapterConfig.transport && adapterConfig.transport === "WebSocketTransport") {
       protooTransport = new protooClient.WebSocketTransport(urlWithParams.toString());
     } else {
       protooTransport = new protooClient.WebSocketIOTransport(urlWithParams.toString());

@@ -9,7 +9,6 @@ test('playwright-test-1 html', async ({ page }) => {
   test.setTimeout(120000);
   //https://alphahub.aptero.co/EVa7SjZ/playwright-test-1
   await page.goto('hub.html?hub_id=EVa7SjZ&vr_entry_type=2d_now');
-  await page.waitForNavigation();
   await startErrorWatch(page);
   await page.context().grantPermissions(['camera', 'microphone']);
   await waitInitialSceneLoad(page);
@@ -21,7 +20,6 @@ test('playwright-test-2 html', async ({ page }) => {
   test.setTimeout(120000);
   //https://alphahub.aptero.co/y3UKjjo/playwright-test-2
   await page.goto('hub.html?hub_id=y3UKjjo&vr_entry_type=2d_now');
-  await page.waitForNavigation();
   await startErrorWatch(page);
   await page.context().grantPermissions(['camera', 'microphone']);
   await waitInitialSceneLoad(page);

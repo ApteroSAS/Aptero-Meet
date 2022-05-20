@@ -11,7 +11,7 @@ import { minimumQualityService } from "../perf/MinimumQualityService";
 
 export function fallbackVMButton(){
   return <>
-    <Button preset="green" onClick={async ()=>{
+    <Button preset="accept" onClick={async ()=>{
       window.location.href = await remoteControlServiceV2.generateFallBackUrl();
     }
     }>
@@ -24,7 +24,7 @@ export function fallbackTCPButton(){
   const tcpUrl = new URL(window.location.toString());
   tcpUrl.searchParams.set("force_tcp", true);
   return <>
-    <Button preset="green" onClick={async ()=>{
+    <Button preset="accept" onClick={async ()=>{
       window.location.href = tcpUrl.toString();
     }
     }>
@@ -77,7 +77,7 @@ export function FallbackModal({ className, onEnterRoom, onBack, ...rest }) {
             fallbackVMButton()
           }
           <>
-            <Button preset="green" onClick={onEnterRoom}>
+            <Button preset="accept" onClick={onEnterRoom}>
               <FormattedMessage id="fallback-modal.enter-room-button-anyway" defaultMessage="Enter Room Anyway"/>
             </Button>
           </>

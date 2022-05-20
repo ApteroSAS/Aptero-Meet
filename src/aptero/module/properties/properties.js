@@ -48,6 +48,7 @@ window.APP_PROPS = {
     },
     adapterParams: {
       adapter: "twilio",//dialog,dialog-io,janus,twilio,agora,default,none,socketio
+      transport:"WebSocketTransport"
     },
     turn:{
       twilio:{
