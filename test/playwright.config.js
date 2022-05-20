@@ -16,7 +16,7 @@ const config = {
         timeout: 2*60*1000,
     },
     use: {
-        channel:"chrome",
+        //channel:"chrome",
         permissions: ['microphone', 'camera'],
         browserOptions:{
             args:[
