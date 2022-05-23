@@ -5,7 +5,6 @@ import {createWorld, Entity, LazyEntity, registerLocalModule} from "@aptero/axol
 //const { test, expect } = require('@playwright/test');
 //https://dev.to/anishkny/code-coverage-for-a-nextjs-app-using-playwright-tests-18n7
 import { test, expect } from '../playwright-lib/baseFixtures';
-import { treatConsoleErrorAsError, waitInitialSceneLoad, waitPageLoadedAll } from "../playwright-lib/TestCommon";
 import {
     accountHint,
     initialConnexion,
@@ -67,14 +66,13 @@ test('teams setting up', async ({ page }) => {
 /**
  * Sign in sign out in tab
  */
-test('teams sign in / sign out', async ({ page }) => {
+test('navigate to tab', async ({ page }) => {
     test.setTimeout(4*60*1000);
     await page.goto('https://teams.microsoft.com/');
     await initialConnexion(page);
     await startErrorWatchTeams(page);//after initial connexion to avoid reload page
     await navigateToTab(page);
     await waitInitialSceneLoadIframe(page);
-    //TODO sign in sign out
     await stopErrorWatchTeams(page);
 })
 

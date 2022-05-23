@@ -9,14 +9,14 @@ export const password = "Lub09002";
 //See TeamsTestHelper for sther side
 //import {ERROR_LOG_NOTIFICATION} from "../../src/aptero/module/microsoft/service/TeamsTestHelper";
 
-export async function navigateToTab(page) {
+export async function navigateToTab(page,tabName = "Virtual Meeting"){
     // Click [aria-label="Teams Toolbar"]
     await page.locator('[aria-label="Teams Toolbar"]').click();
     // Click [aria-label="Your teams"] ng-include div:has-text("General")
     await page.locator('[aria-label="Your teams"] ng-include div:has-text("General")').click();
     // assert.equal(page3.url(), 'https://teams.microsoft.com/_#/conversations/General?threadId=19:LsdNx7OQvs6oxFE2Ro5hLOMTC1lHYmaE_Ee-Kpr_6PI1@thread.tacv2&ctx=channel');
     // Click [aria-label="Virtual Meeting Press Enter to select or press Shift\+F10 for more options"] >> text=Virtual Meeting
-    await page.locator('[aria-label="Virtual Meeting Press Enter to select or press Shift\\+F10 for more options"] >> text=Virtual Meeting').click();
+    await page.locator('[aria-label="'+tabName+' Press Enter to select or press Shift\\+F10 for more options"] >> text='+tabName).click();
     // assert.equal(page3.url(), 'https://teams.microsoft.com/_#/tab::3f6f4050-ae56-40d2-9a8a-6e4f143ddf42/General?threadId=19:LsdNx7OQvs6oxFE2Ro5hLOMTC1lHYmaE_Ee-Kpr_6PI1@thread.tacv2&ctx=channel');
 }
 
