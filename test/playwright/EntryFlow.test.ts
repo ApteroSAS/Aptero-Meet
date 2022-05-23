@@ -30,7 +30,7 @@ test('entry flow', async ({ page }) => {
 
   await new Promise(resolve => setTimeout(resolve,2000));
   await stopErrorWatch(page);
-  await page.screenshot({ path: './coverage/store/entry-flow.png' });
+  //await page.screenshot({ path: './coverage/store/entry-flow.png' });
   if(process.env.PWDEBUG) {
     await page.pause();
   }

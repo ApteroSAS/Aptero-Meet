@@ -6,6 +6,6 @@ test('teams mode', async ({ page }) => {
   await page.goto('hub.html?hub_id=EVa7SjZ&vr_entry_type=2d_now&msteams=true');
   await startErrorWatch(page);
   await waitInitialSceneLoad(page);
-  await page.screenshot({ path: './coverage/store/teams.png' });
+  //await page.screenshot({ path: './coverage/store/teams.png' });
   await stopErrorWatch(page);
 });

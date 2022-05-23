@@ -12,7 +12,7 @@ test('playwright-test-1 html', async ({ page }) => {
   await startErrorWatch(page);
   await page.context().grantPermissions(['camera', 'microphone']);
   await waitInitialSceneLoad(page);
-  await page.screenshot({ path: './coverage/store/playwright-test-1.png' });
+  //await page.screenshot({ path: './coverage/store/playwright-test-1.png' });
   await stopErrorWatch(page);
 });
 
@@ -23,6 +23,6 @@ test('playwright-test-2 html', async ({ page }) => {
   await startErrorWatch(page);
   await page.context().grantPermissions(['camera', 'microphone']);
   await waitInitialSceneLoad(page);
-  await page.screenshot({ path: './coverage/store/playwright-test-2.png' });
+  //await page.screenshot({ path: './coverage/store/playwright-test-2.png' });
   await stopErrorWatch(page);
 });
