@@ -35,7 +35,7 @@ export function treatConsoleErrorAsError(page) {
       window.onCancelPlayWrightEvaluate ? window.onCancelPlayWrightEvaluate.push(resolve) : window.onCancelPlayWrightEvaluate = [resolve];
       const oldError = console.error;
       console.error = (a, ...args) => {
-        oldError(a, args);
+        oldError(a, ...args);
         reject("playwright console error reporter " + a + " " + JSON.stringify(args));
       };
     });

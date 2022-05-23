@@ -16,7 +16,9 @@ const config = {
         timeout: 2*60*1000,
     },
     use: {
-        //channel:"chrome",
+        channel:"chrome", //chrome is needed for MP4 video decoding
+        // see Error DEMUXER_ERROR_NO_SUPPORTED_STREAMS: FFmpegDemuxer: no supported streams
+        //https://playwright.dev/docs/browsers#when-to-use-google-chrome--microsoft-edge-and-when-not-to
         permissions: ['microphone', 'camera'],
         browserOptions:{
             args:[

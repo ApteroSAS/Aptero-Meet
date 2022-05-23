@@ -762,6 +762,7 @@ AFRAME.registerComponent("media-video", {
         if (resolved) return;
         resolved = true;
         clearTimeout(pollTimeout);
+        console.error(e);
         reject(e);
       };
 
