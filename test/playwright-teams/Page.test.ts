@@ -14,7 +14,47 @@ import {
     tenant, waitInitialSceneLoadIframe
 } from "../playwright-lib/TeamsTest";
 
+/**
+ * Remove Tab
+ */
+test('teams initial cleanup (no fail)', async ({ page }) => {
+    test.setTimeout(4*60*1000);
+    await page.goto('https://teams.microsoft.com/');
+    await initialConnexion(page);
+    // Click [aria-label="Teams Toolbar"]
+    await page.locator('[aria-label="Teams Toolbar"]').click();
+    // Click [aria-label="Your teams"] ng-include div:has-text("General")
+    await page.locator('[aria-label="Your teams"] ng-include div:has-text("General")').click();
+    await page.locator('[aria-label="Files"] >> text=Files').click();//to avoid having all the chat log
 
+    try {
+        const locator = page.locator('button[role="tab"]:has-text("more")');
+        await locator.waitFor({ state: 'visible',timeout:5000 });
+        if(await locator.count()>0) {
+            await locator.click();
+        }
+    }catch (e){
+        /* optional ignore*/
+    }
+
+
+    // Click text=PostsFilesWikiVirtual Meeting >> svg[role="presentation"] >> nth=2
+    const locator = page.locator('text=Virtual Meeting').first();
+    try {
+        await locator.waitFor({ state: 'visible',timeout:5000 });
+    }catch (e){
+        /* optional ignore*/
+    }
+    if(await locator.count()>0) {
+        await page.locator('text=Virtual Meeting').first().click();
+        await page.locator('text=Virtual Meeting').first().click();
+        // Click button:has-text("Remove")
+        await page.locator('button:has-text("Remove")').click();
+        // Click button:has-text("Remove")
+        await page.locator('button:has-text("Remove")').click();
+        await locator.waitFor({state:'detached',timeout:5000});
+    }
+});
 
 /**
  * Create a tab
@@ -84,13 +124,30 @@ test('teams cleanup', async ({ page }) => {
     await page.goto('https://teams.microsoft.com/');
     await initialConnexion(page);
     await startErrorWatchTeams(page);//after initial connexion to avoid reload page
-    await navigateToTab(page);
+    // Click [aria-label="Teams Toolbar"]
+    await page.locator('[aria-label="Teams Toolbar"]').click();
+    // Click [aria-label="Your teams"] ng-include div:has-text("General")
+    await page.locator('[aria-label="Your teams"] ng-include div:has-text("General")').click();
+    await page.locator('[aria-label="Files"] >> text=Files').click();//to avoid having all the chat log
+
+    try {
+        const locator = page.locator('button[role="tab"]:has-text("more")');
+        await locator.waitFor({ state: 'visible',timeout:5000 });
+        if(await locator.count()>0) {
+            await locator.click();
+        }
+    }catch (e){
+        /* optional ignore*/
+    }
+
     // Click text=PostsFilesWikiVirtual Meeting >> svg[role="presentation"] >> nth=2
-    await page.locator('text=PostsFilesWikiVirtual Meeting >> svg[role="presentation"]').nth(2).click();
+    await page.locator('text=Virtual Meeting').first().click();
+    await page.locator('text=Virtual Meeting').first().click();
     // Click button:has-text("Remove")
     await page.locator('button:has-text("Remove")').click();
     // Click button:has-text("Remove")
     await page.locator('button:has-text("Remove")').click();
+    await page.locator('[aria-label="Virtual Meeting Press Enter to select or press Shift\+F10 for more options"] >> text=Virtual Meeting').waitFor({state:'detached',timeout:5000});
     await stopErrorWatchTeams(page);
 });
 

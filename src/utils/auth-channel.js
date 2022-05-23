@@ -37,7 +37,7 @@ export default class AuthChannel {
     await this.store.resetToRandomDefaultAvatar();
     this._signedIn = false;
     if(this.microsoftLoginService) {
-      this.microsoftLoginService.logout();
+      this.microsoftLoginService.getLoginService().logout();
     }
   };
 

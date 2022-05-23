@@ -218,12 +218,12 @@ export function UserProfileSidebar({
                     {microsoftUserId &&
                         <>
                             <Button preset="basic" onClick={async () =>{
-                                (await getService(MICROSOFT_SERVICE)).getLoginService().processDeepLink("https://teams.microsoft.com/l/chat/0/0?users="+microsoftUserEmail);
+                                (await getService(MICROSOFT_SERVICE)).processDeepLink("https://teams.microsoft.com/l/chat/0/0?users="+microsoftUserEmail);
                             }}>
                                 <FormattedMessage id="user-profile-sidebar.chat-button" defaultMessage="Chat"/>
                             </Button>
                             <Button preset="basic" onClick={async () => {
-                              (await getService(MICROSOFT_SERVICE)).getLoginService().processDeepLink("https://teams.microsoft.com/l/call/0/0?users="+microsoftUserEmail);
+                              (await getService(MICROSOFT_SERVICE)).processDeepLink("https://teams.microsoft.com/l/call/0/0?users="+microsoftUserEmail);
                             }}>
                                 <FormattedMessage id="user-profile-sidebar.call-button" defaultMessage="Call"/>
                             </Button>
