@@ -19,12 +19,12 @@ module.exports = {
     // https://github.com/prettier/eslint-plugin-prettier
     "prettier/prettier": "off",
 
-    "prefer-const": "off",
+    "prefer-const": "warn",
     "no-use-before-define": "error",
-    "no-var": "off",
+    "no-var": "warn",
     "no-throw-literal": "error",
     // Light console usage is useful but remove debug logs before merging to master.
-    "no-console": "off",
+    "no-console": "warn",
 
     // https://www.npmjs.com/package/eslint-plugin-react-hooks
     "react-hooks/rules-of-hooks": "error",
