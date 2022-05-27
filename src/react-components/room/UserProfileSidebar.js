@@ -8,8 +8,7 @@ import {FormattedMessage, useIntl} from "react-intl";
 import {rotateInPlaceAroundWorldUp, affixToWorldUp} from "../../utils/three-utils";
 import {UserProfileVisitCardContainer} from "./UserProfileVisitCardContainer";
 import {PeopleSidebarContainer, usePeopleList} from "./PeopleSidebarContainer";
-import { msTeams } from "../../aptero/module/microsoft/MsTeams";
-import { MICROSOFT_SERVICE, getService } from "../../aptero/module/axolotis/AxolotisSystem";
+import {microsoftService,msTeamsService} from "@aptero/axolotis-module-teams";
 
 function useGoToSelectedAvatar(entity) {
     const targetMatrix = new THREE.Matrix4();
@@ -192,13 +191,14 @@ export function UserProfileSidebar({
                                     }
                                 }
                             }
+                            // eslint-disable-next-line react-hooks/rules-of-hooks
                             useGoToSelectedAvatar(entity1);
 
                         }}
                     >
                         <FormattedMessage id="avatar-teleport" defaultMessage="Go to"/>
                     </Button>
-                    {(canMute && !msTeams()) && (
+                    {(canMute && !msTeamsService().msTeamsService().msTeams()) && (
                         <Button preset="cancel" onClick={onMute}>
                             <FormattedMessage id="user-profile-sidebar.mute-button" defaultMessage="Mute"/>
                         </Button>
@@ -218,12 +218,12 @@ export function UserProfileSidebar({
                     {microsoftUserId &&
                         <>
                             <Button preset="basic" onClick={async () =>{
-                                (await getService(MICROSOFT_SERVICE)).processDeepLink("https://teams.microsoft.com/l/chat/0/0?users="+microsoftUserEmail);
+                                (await microsoftService()).processDeepLink("https://teams.microsoft.com/l/chat/0/0?users="+microsoftUserEmail);
                             }}>
                                 <FormattedMessage id="user-profile-sidebar.chat-button" defaultMessage="Chat"/>
                             </Button>
                             <Button preset="basic" onClick={async () => {
-                              (await getService(MICROSOFT_SERVICE)).processDeepLink("https://teams.microsoft.com/l/call/0/0?users="+microsoftUserEmail);
+                              (await microsoftService()).processDeepLink("https://teams.microsoft.com/l/call/0/0?users="+microsoftUserEmail);
                             }}>
                                 <FormattedMessage id="user-profile-sidebar.call-button" defaultMessage="Call"/>
                             </Button>

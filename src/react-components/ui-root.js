@@ -101,7 +101,7 @@ import { getSelectedPersonName } from "./room/PeopleSidebarContainer";
 import { Promise } from "core-js";
 import { UserProfileVisitCardContainer } from "./room/UserProfileVisitCardContainer";
 import axios from "axios";
-import { msTeams } from "../aptero/module/microsoft/MsTeams";
+import {msTeamsService} from "@aptero/axolotis-module-teams";
 import { propertiesService } from "../aptero/module/properties/propertiesService";
 import AptRoot from "../aptero/module/HubsBridge/AptRoot";
 import { minimumQualityService } from "../aptero/module/perf/MinimumQualityService";
@@ -227,7 +227,7 @@ export class UIRoot extends Component {
     // An exit handler that discards event arguments and can be cleaned up.
     this.exitEventHandler = () => this.props.exitScene();
     this.mediaDevicesManager = window.APP.mediaDevicesManager;
-    if (msTeams()) {
+    if (msTeamsService().msTeams()) {
       getService(MICROSOFT_SERVICE).then(service => {
         this.setState({ microsoftService: service });
       });
@@ -644,14 +644,14 @@ export class UIRoot extends Component {
   performDirectEntryFlow = async enterInVR => {
     this.setState({ enterInVR, waitingOnAudio: true });
     let hasGrantedMic = false;
-    if (msTeams()) {
+    if (msTeamsService().msTeams()) {
       hasGrantedMic = true;
     } else {
       hasGrantedMic = (await grantedMicLabels()).length > 0;
     }
 
-    if (hasGrantedMic || new URL(window.location.href).searchParams.get("offline2") || msTeams()) {
-      if (!this.mediaDevicesManager.isMicShared && !msTeams()) {
+    if (hasGrantedMic || new URL(window.location.href).searchParams.get("offline2") || msTeamsService().msTeams()) {
+      if (!this.mediaDevicesManager.isMicShared && !msTeamsService().msTeams()) {
         await this.mediaDevicesManager.startLastUsedMicShare();
       }
       this.beginOrSkipAudioSetup();
@@ -684,7 +684,7 @@ export class UIRoot extends Component {
 
   onRequestMicPermission = async () => {
     // TODO: Show an error state if getting the microphone permissions fails
-    if (window.APP_CONFIG.adapterParams.adapter !== "none" && !msTeams()) {
+    if (window.APP_CONFIG.adapterParams.adapter !== "none" && !msTeamsService().msTeams()) {
       await this.mediaDevicesManager.startLastUsedMicShare();
     }
     this.beginOrSkipAudioSetup();
@@ -698,7 +698,7 @@ export class UIRoot extends Component {
       AFRAME.scenes[0].audioListener.context.currentTime,
       0.2
     );
-    if (skipAudioSetup || window.APP_CONFIG.adapterParams.adapter === "none" || msTeams()) {
+    if (skipAudioSetup || window.APP_CONFIG.adapterParams.adapter === "none" || msTeamsService().msTeams()) {
       this.onAudioReadyButton();
     } else {
       this.pushHistoryState("entry_step", "audio");
@@ -725,7 +725,7 @@ export class UIRoot extends Component {
 
     const muteOnEntry =
       window.APP_CONFIG.adapterParams.adapter === "none" ||
-      this.props.store.state.preferences["muteMicOnEntry"] || msTeams();
+      this.props.store.state.preferences["muteMicOnEntry"] || msTeamsService().msTeams();
     false;
     await this.props.enterScene(this.state.enterInVR, muteOnEntry);
 
@@ -1463,7 +1463,7 @@ export class UIRoot extends Component {
       }
     ];
 
-    if (msTeams() && this.state.microsoftService) {
+    if (msTeamsService().msTeams() && this.state.microsoftService) {
       moreMenu = [
         {
           id: "user",
@@ -1906,7 +1906,7 @@ export class UIRoot extends Component {
                 toolbarCenter={
                   !aptGuiVisible ? null : (
                     <>
-                      {(!msTeams()) && <>
+                      {(!msTeamsService().msTeams()) && <>
                         {watching && (
                           <>
                             <ToolbarButton

@@ -1,7 +1,7 @@
 import { MicSetupModalContainer } from "../../../react-components/room/MicSetupModalContainer";
 import React, { Component } from "react";
 import configs from "../../../utils/configs";
-import { msTeams } from "../microsoft/MsTeams";
+import {msTeamsService} from "@aptero/axolotis-module-teams";
 
 window.audioChangeHelperController = {};
 window.audioChangeHelperController.spawn = () => {
@@ -16,7 +16,7 @@ export default class AudioChangeHelper extends Component {
 
   componentDidMount() {
     //TODO use a listener
-    if(configs.APP_CONFIG.adapterParams.adapter === "none" || msTeams()){
+    if(configs.APP_CONFIG.adapterParams.adapter === "none" || msTeamsService().msTeams()){
       this.setState({ micShareOk: false });
     }
     window.audioChangeHelperController.spawn = () => {
@@ -41,7 +41,7 @@ export default class AudioChangeHelper extends Component {
           selectedMicrophone={window.APP.store.state.settings.lastUsedMicDeviceId}
           microphoneOptions={window.APP.mediaDevicesManager.micDevices}
           onChangeMicrophone={deviceId => {
-            if (!msTeams()) {
+            if (!msTeamsService().msTeams()) {
               window.APP.mediaDevicesManager.startMicShare(deviceId);
             }
             this.setState({ micShareOk: true });
@@ -50,7 +50,7 @@ export default class AudioChangeHelper extends Component {
           microphoneMuted={muteOnEntry}
           onChangeMicrophoneMuted={() => window.APP.store.update({ preferences: { muteMicOnEntry: !muteOnEntry } })}
           onEnterRoom={() => {
-            if (!msTeams()) {
+            if (!msTeamsService().msTeams()) {
               window.APP.mediaDevicesManager.startMicShare(window.APP.store.state.settings.lastUsedMicDeviceId);
             }
             this.setState({ micShareOk: true });

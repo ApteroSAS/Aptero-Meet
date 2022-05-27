@@ -25,7 +25,7 @@ import { waitForDOMContentLoaded } from "../utils/async-utils";
 
 import { SHAPE } from "three-ammo/constants";
 import { IN_APP_WEB_BROWSER_PROTOCOL } from "../aptero/module/HubsBridge/react-components/media-utils-lib";
-import { MICROSOFT_AUTH_ERROR, preFetchConvertMicrosoftUrl } from "../aptero/module/microsoft/MsTeams";
+import {msTeamsService} from "@aptero/axolotis-module-teams";
 
 let loadingObjectEnvMap;
 let loadingObject;
@@ -358,7 +358,7 @@ AFRAME.registerComponent("media-loader", {
     const srcChanged = oldData.src !== src;
     const versionChanged = !!(oldData.version && oldData.version !== version);
 
-    src = await preFetchConvertMicrosoftUrl(src);
+    src = await msTeamsService().preFetchConvertMicrosoftUrl(src);
     if (versionChanged) {
       this.el.emit("media_refreshing");
 
@@ -439,14 +439,14 @@ AFRAME.registerComponent("media-loader", {
       // todo: we don't need to proxy for many things if the canonical URL has permissive CORS headers
       accessibleUrl = proxiedUrlFor(canonicalUrl);
       //Aptero microsoft integration feature TODO service
-      if(accessibleUrl.endsWith(MICROSOFT_AUTH_ERROR)){
+      if(accessibleUrl.endsWith(msTeamsService().MICROSOFT_AUTH_ERROR)){
         if (this.el.components["position-at-border__freeze"]) {
           this.el.setAttribute("position-at-border__freeze", { isFlat: true });
         }
         if (this.el.components["position-at-border__freeze-unprivileged"]) {
           this.el.setAttribute("position-at-border__freeze-unprivileged", { isFlat: true });
         }
-        this.onError(MICROSOFT_AUTH_ERROR);
+        this.onError(msTeamsService().MICROSOFT_AUTH_ERROR);
         return;
       }
 

@@ -3,15 +3,11 @@ import ReactDOM from "react-dom";
 import registerTelemetry from "../../../../telemetry";
 import Store from "../../../../storage/store";
 import "../../../../utils/theme";
-import {
-  microsoftLoginService
-} from "../service/MicrosoftLoginService";
 import { Provider, Loader, teamsTheme } from "@fluentui/react-northstar";//https://fluentsite.z22.web.core.windows.net/0.60.1
 
 
 registerTelemetry("/microsoft-settings", "microsoft-settings");
-import { TabConfig } from "../react-component/TabConfig";
-import { getContext, msTeams } from "../service/MsTeams";
+import {microsoftService, msTeamsService, MeetingSidePanel, TabConfig} from "@aptero/axolotis-module-teams";
 
 const store = new Store();
 declare const window;
@@ -20,15 +16,16 @@ window.APP = { store };
 import { AuthContextProvider } from "../../../../react-components/auth/AuthContext";
 import { ThemeProvider } from "../../../../react-components/styles/theme";
 import { WrappedIntlProvider } from "../../../../react-components/wrapped-intl-provider";
-import { MeetingSidePanel } from "../react-component/MeetingSidePanel";
 
 const WrappedIntlProviderAny: any = WrappedIntlProvider;
 
-try {
-  microsoftLoginService.passiveLogin();
-} catch (e) {
-  console.error(e);
-}
+(async ()=> {
+  try {
+    (await microsoftService()).getLoginService().passiveLogin();
+  } catch (e) {
+    console.error(e);
+  }
+})()
 let url = new URL(window.location.href);
 export class MicrosoftSettings extends React.Component<any, { page: string }> {
   state = {
@@ -38,7 +35,7 @@ export class MicrosoftSettings extends React.Component<any, { page: string }> {
   constructor(props) {
     super(props);
     if (this.state.page === "loading") {
-      if (msTeams()) {
+      if (msTeamsService().msTeams()) {
         getContext((context) => {
           //https://docs.microsoft.com/en-us/microsoftteams/platform/tabs/how-to/access-teams-context
           if (context.frameContext === "sidePanel") {

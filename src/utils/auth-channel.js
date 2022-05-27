@@ -1,13 +1,13 @@
 import uuid from "uuid/v4";
 import { MICROSOFT_SERVICE, getService } from "../aptero/module/axolotis/AxolotisSystem";
-import { msPassiveLoginCheckNeeded } from "../aptero/module/microsoft/MsTeams";
+import {msTeamsService} from "@aptero/axolotis-module-teams";
 
 export default class AuthChannel {
   constructor(store) {
     this.store = store;
     this.socket = null;
     this._signedIn = !!this.store.state.credentials.token;
-    if(msPassiveLoginCheckNeeded()) {
+    if(msTeamsService().msPassiveLoginCheckNeeded()) {
       getService(MICROSOFT_SERVICE).then(async service => {
         await service.getLoginService().passiveLogin();
         this.microsoftLoginService = service;
