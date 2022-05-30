@@ -6,7 +6,7 @@ import configs from "../../utils/configs";
 import jwtDecode from "jwt-decode";
 import AuthChannel from "../../utils/auth-channel";
 import { connectToReticulum } from "../../utils/phoenix-utils";
-import { MICROSOFT_SERVICE, getService } from "../../aptero/module/axolotis/AxolotisSystem";
+import { microsoftService } from "@aptero/axolotis-module-teams";
 
 export const AuthContext = createContext();
 
@@ -91,7 +91,8 @@ export function AuthContextProvider({ children, store }) {
   );
   const signInMicrosoft = useCallback(
     async () =>{
-      (await getService(MICROSOFT_SERVICE)).getLoginService().login();
+      let service = await microsoftService();
+      await service.getLoginService().login();
     }
   );
   const verify = useCallback(

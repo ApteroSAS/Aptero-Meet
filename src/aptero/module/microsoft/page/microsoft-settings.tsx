@@ -36,7 +36,7 @@ export class MicrosoftSettings extends React.Component<any, { page: string }> {
     super(props);
     if (this.state.page === "loading") {
       if (msTeamsService().msTeams()) {
-        getContext((context) => {
+        msTeamsService().getContext((context) => {
           //https://docs.microsoft.com/en-us/microsoftteams/platform/tabs/how-to/access-teams-context
           if (context.frameContext === "sidePanel") {
             this.setState({ page: "sidePanel" });

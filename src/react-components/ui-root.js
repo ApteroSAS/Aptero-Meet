@@ -105,7 +105,7 @@ import {msTeamsService} from "@aptero/axolotis-module-teams";
 import { propertiesService } from "../aptero/module/properties/propertiesService";
 import AptRoot from "../aptero/module/HubsBridge/AptRoot";
 import { minimumQualityService } from "../aptero/module/perf/MinimumQualityService";
-import { MICROSOFT_SERVICE, getService } from "../aptero/module/axolotis/AxolotisSystem";
+import { microsoftService } from "@aptero/axolotis-module-teams";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 const IN_ROOM_MODAL_ROUTER_PATHS = ["/media"];
@@ -228,7 +228,7 @@ export class UIRoot extends Component {
     this.exitEventHandler = () => this.props.exitScene();
     this.mediaDevicesManager = window.APP.mediaDevicesManager;
     if (msTeamsService().msTeams()) {
-      getService(MICROSOFT_SERVICE).then(service => {
+      microsoftService().then(service => {
         this.setState({ microsoftService: service });
       });
     }

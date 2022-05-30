@@ -198,7 +198,7 @@ export function UserProfileSidebar({
                     >
                         <FormattedMessage id="avatar-teleport" defaultMessage="Go to"/>
                     </Button>
-                    {(canMute && !msTeamsService().msTeamsService().msTeams()) && (
+                    {(canMute && !msTeamsService().msTeams()) && (
                         <Button preset="cancel" onClick={onMute}>
                             <FormattedMessage id="user-profile-sidebar.mute-button" defaultMessage="Mute"/>
                         </Button>

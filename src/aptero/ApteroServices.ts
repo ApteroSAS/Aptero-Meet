@@ -22,7 +22,7 @@ import { testServiceNotifySceneEntered, startSelfTest, testTick } from "./module
 import { setlistenerEndShareVideo } from "./module/webRTCadapter/adapter-config";
 import { remoteControlServiceV2 } from "./module/RemoteScreen/RemoteControlServiceV2";
 import { wait } from "./util/AsyncWaiter";
-import { initAxolotisPlayer } from "./module/axolotis/AxolotisSystem";
+import "./module/axolotis/AxolotisSystem";
 import { networkService } from "./module/HubsBridge/service/NetworkService";
 import { roomParameters } from "./module/HubsBridge/service/RoomParameters";
 
@@ -78,7 +78,6 @@ export class ApteroServices {
   thirdPersonService = new ThirdPersonService();
   private audioSettingsSystem: any;
   constructor() {
-    initAxolotisPlayer();
     startSelfTest();
     roomParameters.getRoomParameters(); //called as soon as possible
     aptLogger.setProperties(window.APP_CONFIG.LOGGER);

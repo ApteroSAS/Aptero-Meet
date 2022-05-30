@@ -165,7 +165,7 @@ module.exports = async (env, argv) => {
       filename: "assets/js/[name]-[chunkhash].js",
       publicPath: process.env.BASE_ASSETS_PATH || "/"
     },
-    devtool: argv.mode === "production" ? "source-map" : "source-map",
+    devtool: argv.mode === "production" ? "source-map" : "eval-source-map",
     devServer: {
       https: createHTTPSConfig(),//Comment for ngrok http <port>
       host: "0.0.0.0",
@@ -499,13 +499,13 @@ module.exports = async (env, argv) => {
     ]),
       new CopyWebpackPlugin([
         {
-          from: "src/aptero/module/microsoft/page/auth-start.html",
+          from: "node_modules/@aptero/axolotis-module-teams/src/lib/modules/microsoft/page/auth-start.html",
           to: "auth-start.html"
         }
       ]),
       new CopyWebpackPlugin([
         {
-          from: "src/aptero/module/microsoft/page/auth-end.html",
+          from: "node_modules/@aptero/axolotis-module-teams/src/lib/modules/microsoft/page/auth-end.html",
           to: "auth-end.html"
         }
       ]),
@@ -535,18 +535,7 @@ module.exports = async (env, argv) => {
       // Define process.env variables in the browser context.
       new webpack.DefinePlugin({
         "process.env": JSON.stringify({
-          /*NODE_ENV: argv.mode,
-          SHORTLINK_DOMAIN: process.env.SHORTLINK_DOMAIN,
-          RETICULUM_SERVER: process.env.RETICULUM_SERVER,
-          RETICULUM_SOCKET_SERVER: process.env.RETICULUM_SOCKET_SERVER,
-          THUMBNAIL_SERVER: process.env.THUMBNAIL_SERVER,
-          CORS_PROXY_SERVER: process.env.CORS_PROXY_SERVER,
-          NON_CORS_PROXY_DOMAINS: process.env.NON_CORS_PROXY_DOMAINS,*/
-          BUILD_VERSION: versionJson.version,
-          /*SENTRY_DSN: process.env.SENTRY_DSN,
-          GA_TRACKING_ID: process.env.GA_TRACKING_ID,
-          POSTGREST_SERVER: process.env.POSTGREST_SERVER,
-          APP_CONFIG: appConfig*/
+          BUILD_VERSION: versionJson.version
         })
       })
     ]

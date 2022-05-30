@@ -8,7 +8,7 @@ import { FormattedMessage } from "react-intl";
 import {msTeamsService} from "@aptero/axolotis-module-teams";
 
 export function VoiceButtonContainer({ scene, microphoneEnabled }) {
-  if(window.APP_CONFIG.adapterParams.adapter === "none" || msTeamsService().msTeamsService().msTeams()){
+  if(window.APP_CONFIG.adapterParams.adapter === "none" || msTeamsService().msTeams()){
     return <></>
   }
 

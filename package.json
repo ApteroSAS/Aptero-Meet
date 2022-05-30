@@ -70,7 +70,8 @@
     ]
   },
   "dependencies": {
-    "@aptero/axolotis-player": "git+https://github.com/ApteroSAS/axolotis-player.git#f9ef15be031980ccc3749a66b67e76a7d0463019",
+    "@aptero/axolotis-module-teams": "git+https://github.com/ApteroSAS/teams-module.git#ff4b9aefbd9362b8833fb3e9eab1f84d9f15c586",
+    "@aptero/axolotis-player": "git+https://github.com/ApteroSAS/axolotis-player.git#311d94a5ef0771bf7eebc5af2bed8072c5c2f539",
     "@azure/msal-browser": "2.16.1",
     "@braintree/sanitize-url": "^5.0.0",
     "@fluentui/react-northstar": "^0.61.0",

@@ -113,7 +113,7 @@ export function SubmitEmail({ onSubmitEmail, onSubmitEmailMicrosoftLogin, initia
     [setEmail]
   );
 
-  if(msTeamsService().msTeamsService().msTeams()){
+  if(msTeamsService().msTeams()){
     return <Button preset="basic" style={{margin:"auto"}} onClick={onSubmitEmailMicrosoft}>
       <FormattedMessage id="sign-in-with-teams" defaultMessage="Sign in with teams"/>
     </Button>

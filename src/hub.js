@@ -200,12 +200,7 @@ import { AdapterWarpper } from "./aptero/module/webRTCadapter/AdapterWrapper";
 //aptero service end
 
 import {msTeamsService} from "@aptero/axolotis-module-teams";
-
-if(msTeamsService().msTeams()) {
-  (getService(MICROSOFT_SERVICE)).then(async service =>{
-    await service.redirectToTeamsSidePanel();
-  })
-}
+msTeamsService().redirectToTeamsSidePanel();
 
 window.APP = new App();
 window.APP.dialog = new AdapterWarpper();

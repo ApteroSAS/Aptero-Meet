@@ -1,4 +1,5 @@
 const qs = new URLSearchParams(location.search);
+import "./../../axolotis/AxolotisSystem";
 import {msTeamsService} from "@aptero/axolotis-module-teams";
 
 export function addEntryModeIfNotExist(entryMode){

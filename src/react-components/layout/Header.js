@@ -25,7 +25,7 @@ export function Header({
 }) {
   return (
     <header>
-      {!msTeamsService().msTeamsService().msTeams() &&
+      {!msTeamsService().msTeams() &&
       <Container as="div" className={styles.container}>
         <nav>
           <ul>
