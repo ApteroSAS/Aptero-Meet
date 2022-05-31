@@ -7,6 +7,7 @@ import { Provider, Loader, teamsTheme } from "@fluentui/react-northstar";//https
 
 
 registerTelemetry("/microsoft-settings", "microsoft-settings");
+import "./../../axolotis/AxolotisSystem"
 import {microsoftService, msTeamsService, MeetingSidePanel, TabConfig} from "@aptero/axolotis-module-teams";
 
 const store = new Store();
@@ -52,13 +53,14 @@ export class MicrosoftSettings extends React.Component<any, { page: string }> {
   }
 
   render() {
-    return <Provider theme={teamsTheme}>
-      <WrappedIntlProviderAny>
+    return <WrappedIntlProviderAny>
         <AuthContextProvider store={store}>
           <ThemeProvider store={store}>
+            <Provider theme={teamsTheme}>
             {this.state.page === "loading" && <Loader/>}
             {this.state.page === "sidePanel" && <MeetingSidePanel/>}
             {this.state.page === "settings" && <TabConfig/>}
+            </Provider>
             <span onClick={() => {
               window.location.reload();
             }} id="version" style={{
@@ -72,8 +74,7 @@ export class MicrosoftSettings extends React.Component<any, { page: string }> {
             }}>{process.env.BUILD_VERSION}</span>
           </ThemeProvider>
         </AuthContextProvider>
-      </WrappedIntlProviderAny>
-    </Provider>;
+      </WrappedIntlProviderAny>;
   }
 
 }
