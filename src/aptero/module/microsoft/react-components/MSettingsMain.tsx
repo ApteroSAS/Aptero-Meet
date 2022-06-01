@@ -1,0 +1,44 @@
+import * as React from "react";
+import {microsoftService, msTeamsService} from "@aptero/axolotis-module-teams";
+import { Provider, Loader, teamsTheme } from "@fluentui/react-northstar";//https://fluentsite.z22.web.core.windows.net/0.60.1
+import { MeetingSidePanel } from "./MeetingSidePanel";
+import { TabConfig } from "./TabConfig";
+
+(async ()=> {
+  try {
+    (await microsoftService()).getLoginService().passiveLogin();
+  } catch (e) {
+    console.error(e);
+  }
+})()
+
+export class MSettingsMain extends React.Component {
+  url = new URL(window.location.href);
+  state = {
+    page: this.url.searchParams.get("mode") || "loading"
+  };
+
+  constructor(props) {
+    super(props);
+    if (this.state.page === "loading") {
+      if (msTeamsService().msTeams()) {
+        msTeamsService().getContext((context) => {
+          //https://docs.microsoft.com/en-us/microsoftteams/platform/tabs/how-to/access-teams-context
+          if (context.frameContext === "sidePanel") {
+            this.setState({ page: "sidePanel" });
+          } else {
+            this.setState({ page: "settings" });
+          }
+        });
+      }
+    }
+  }
+
+  render() {
+    return <Provider theme={teamsTheme}>
+      {this.state.page === "loading" && <Loader/>}
+      {this.state.page === "sidePanel" && <MeetingSidePanel/>}
+      {this.state.page === "settings" && <TabConfig/>}
+    </Provider>
+}
+}

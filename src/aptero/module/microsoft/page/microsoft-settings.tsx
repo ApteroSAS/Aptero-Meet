@@ -8,7 +8,7 @@ import { Provider, Loader, teamsTheme } from "@fluentui/react-northstar";//https
 
 registerTelemetry("/microsoft-settings", "microsoft-settings");
 import "./../../axolotis/AxolotisSystem"
-import {microsoftService, msTeamsService, MeetingSidePanel, TabConfig} from "@aptero/axolotis-module-teams";
+import {microsoftService, msTeamsService} from "@aptero/axolotis-module-teams";
 
 const store = new Store();
 declare const window;
@@ -17,6 +17,8 @@ window.APP = { store };
 import { AuthContextProvider } from "../../../../react-components/auth/AuthContext";
 import { ThemeProvider } from "../../../../react-components/styles/theme";
 import { WrappedIntlProvider } from "../../../../react-components/wrapped-intl-provider";
+import { MeetingSidePanel } from "../react-components/MeetingSidePanel";
+import { TabConfig } from "../react-components/TabConfig";
 
 const WrappedIntlProviderAny: any = WrappedIntlProvider;
 
