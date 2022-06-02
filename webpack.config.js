@@ -7,7 +7,6 @@ const HTMLWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const versionJson = require("./version.json");
-const request = require("request");
 
 const PORT = 53000;//Teams needs port 53000
 
@@ -168,9 +167,8 @@ module.exports = async (env, argv) => {
         },
         {
           test: /\.(js|jsx|tsx|ts)$/,
-          include: [path.resolve(__dirname, "src")],
           // Exclude JS assets in node_modules because they are already transformed and often big.
-          exclude: [path.resolve(__dirname, "node_modules")],
+          exclude: /node_modules/,
           loader: "babel-loader"
         },
         {
@@ -303,11 +301,15 @@ module.exports = async (env, argv) => {
           { from: "src/aptero/module/properties/properties.js", to: "properties.js" },
           { from: "src/assets/images/favicon.ico", to: "favicon.ico" },
           {
-            from: "node_modules/@aptero/axolotis-module-teams/src/lib/modules/microsoft/page/auth-start.html",
+            from: "node_modules/@aptero/axolotis-module-teams/build/library/",
+            to: "library"
+          },
+          {
+            from: "node_modules/@aptero/axolotis-module-teams/build/library/@aptero/axolotis-module-teams/assets/auth-start.html",
             to: "auth-start.html"
           },
           {
-            from: "node_modules/@aptero/axolotis-module-teams/src/lib/modules/microsoft/page/auth-end.html",
+            from: "node_modules/@aptero/axolotis-module-teams/build/library/@aptero/axolotis-module-teams/assets/auth-end.html",
             to: "auth-end.html"
           },
           { from: "src/assets/manifest.webmanifest", to: "manifest.webmanifest" },

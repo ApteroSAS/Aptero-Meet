@@ -1,0 +1,16 @@
+export function getAbsoluteUrl(baseUrl: any, relativeUrl: any): URL;
+export function getAbsoluteHref(baseUrl: any, relativeUrl: any): string;
+export function scaledThumbnailUrlFor(url: any, width: any, height: any): any;
+export function isNonCorsProxyDomain(hostname: any): any;
+export function proxiedUrlFor(url: any): any;
+export function rewriteBasisTranscoderUrls(url: any): any;
+export function getCustomGLTFParserURLResolver(gltfUrl: any): (url: any) => any;
+export function guessContentType(url: any): any;
+export function isLocalHubsUrl(url: any): Promise<boolean>;
+export function isHubsSceneUrl(url: any): Promise<boolean>;
+export function isLocalHubsSceneUrl(url: any): Promise<boolean>;
+export function isHubsAvatarUrl(url: any): Promise<boolean>;
+export function isLocalHubsAvatarUrl(url: any): Promise<boolean>;
+export function isHubsRoomUrl(url: any): Promise<any>;
+export function isHubsDestinationUrl(url: any): Promise<any>;
+export function idForAvatarUrl(url: any): any;

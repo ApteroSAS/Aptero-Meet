@@ -6,8 +6,8 @@
         "indexPath": "/index.html#",
         "endpoint": "https://localhost:53000",
         "domain": "localhost",
-        "sslCertFile": "./certs/cert.pem",
-        "sslKeyFile": "./certs/key.pem"
+        "sslCertFile": "C:/Users/Pierre-HenriFRICOT/.fx/certificate/localhost.crt",
+        "sslKeyFile": "C:/Users/Pierre-HenriFRICOT/.fx/certificate/localhost.key"
     },
     "fx-resource-aad-app-for-teams": {
         "clientId": "2168c5ad-3d42-4903-b88b-23c21dfd67aa",
@@ -17,11 +17,12 @@
         "tenantId": "48caed5d-d20d-40ce-b0cd-9261fc5d8f83",
         "oauthHost": "https://login.microsoftonline.com",
         "oauthAuthority": "https://login.microsoftonline.com/48caed5d-d20d-40ce-b0cd-9261fc5d8f83",
-        "applicationIdUris": "api://localhost/2168c5ad-3d42-4903-b88b-23c21dfd67aa"
+        "applicationIdUris": "api://localhost/2168c5ad-3d42-4903-b88b-23c21dfd67aa",
+        "frontendEndpoint": "https://localhost"
     },
     "fx-resource-simple-auth": {},
     "fx-resource-appstudio": {
-        "teamsAppUpdatedAt": 1652869555893,
-        "teamsAppId": "ff2a2edd-2025-488d-9410-87b6af2dd2c2"
+        "teamsAppUpdatedAt": 1654167864695,
+        "teamsAppId": "020d9ef7-e38e-4371-a4b0-a7bf6e941e39"
     }
 }

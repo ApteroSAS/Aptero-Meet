@@ -1,18 +1,15 @@
 import * as React from "react";
-import { useCallback, useContext, useEffect, useState } from "react";
-import { FormattedMessage } from "react-intl";
+import {useCallback, useContext, useEffect, useState} from "react";
+import {FormattedMessage} from "react-intl";
 
-import { changeUrlSettings } from "@aptero/axolotis-module-teams/modules/microsoft/service/MsTeams";
-import { Button, Input } from "@fluentui/react-northstar";
-import { MediaGrid } from "./hubs/react-components/room/MediaGrid";
-import { MediaTile } from "./hubs/react-components/room/MediaTiles";
-import { usePaginatedAPI } from "./hubs/react-components/home/usePaginatedAPI";
-import { AuthContext } from "./hubs/react-components/auth/AuthContext";
-import { Container } from "./hubs/react-components/layout/Container";
-import { Column } from "./hubs/react-components/layout/Column";
-import { getServiceSync } from "@aptero/axolotis-player";
-import { RoomService } from "@aptero/axolotis-module-teams/modules/roomAPI/RoomService";
-import { ROOM_SERVICE } from "@aptero/axolotis-module-teams";
+import {Button, Input} from "@fluentui/react-northstar";
+import {MediaGrid} from "./hubs/react-components/room/MediaGrid";
+import {MediaTile} from "./hubs/react-components/room/MediaTiles";
+import {usePaginatedAPI} from "./hubs/react-components/home/usePaginatedAPI";
+import {AuthContext} from "./hubs/react-components/auth/AuthContext";
+import {Container} from "./hubs/react-components/layout/Container";
+import {Column} from "./hubs/react-components/layout/Column";
+import {ROOM_SERVICE, roomService} from "@aptero/axolotis-module-teams";
 
 //https://fluentsite.z22.web.core.windows.net/0.60.1
 
@@ -20,15 +17,22 @@ declare const window;
 
 function useSpokeProject() {
   const auth: any = useContext(AuthContext); // Re-render when you log in/out.
-  getServiceSync<RoomService>(ROOM_SERVICE);
-  const getMoreRooms = useCallback(getServiceSync<RoomService>(ROOM_SERVICE).fetchSpokeProject(auth.userId), [auth.userId]);
-  return usePaginatedAPI(getMoreRooms);
+  if (auth) {
+    const getMoreRooms = useCallback(roomService().fetchSpokeProject(auth.userId), [auth.userId]);
+    return usePaginatedAPI(getMoreRooms);
+  } else {
+    return {results:[]}
+  }
 }
 
 function useFavoriteRooms() {
   const auth = useContext(AuthContext); // Re-render when you log in/out.
-  const getMoreRooms = useCallback(getServiceSync<RoomService>(ROOM_SERVICE).fetchFavoriteRoom(auth.userId), [auth.userId]);
-  return usePaginatedAPI(getMoreRooms);
+  if (auth) {
+    const getMoreRooms = useCallback(roomService().fetchFavoriteRoom(auth.userId), [auth.userId]);
+    return usePaginatedAPI(getMoreRooms);
+  } else {
+    return {results:[]}
+  }
 }
 
 export function RoomSection(props: {
@@ -39,13 +43,13 @@ export function RoomSection(props: {
 }) {
   const auth: any = useContext(AuthContext); // Re-render when you log in/out.
   const [currentTab, setTab] = useState("featured");
-  const { results: favoriteRooms } = useFavoriteRooms();
-  const { results: spokeProject } = useSpokeProject();
+  const {results: favoriteRooms} = useFavoriteRooms();
+  const {results: spokeProject} = useSpokeProject();
 
   const sortedFeaturedScene = [
-    getServiceSync<RoomService>(ROOM_SERVICE).createRoomEntry("Room 1", "pywjaKD", "https://meet.aptero.co/files/20c63c61-0eb1-4945-a0dc-82e041983d17.jpg"),
-    getServiceSync<RoomService>(ROOM_SERVICE).createRoomEntry("Room 2", "ttQn7dJ", "https://meet.aptero.co/files/b3b8c2c8-3508-4916-a70e-4928eb23d380.jpg"),
-    getServiceSync<RoomService>(ROOM_SERVICE).createRoomEntry("Room 3", "HkZhZjU", "https://meet.aptero.co/files/9574cccb-5241-4900-b2f5-4af780ec714d.jpg"),
+    roomService().createRoomEntry("Room 1", "pywjaKD", "https://meet.aptero.co/files/20c63c61-0eb1-4945-a0dc-82e041983d17.jpg"),
+    roomService().createRoomEntry("Room 2", "ttQn7dJ", "https://meet.aptero.co/files/b3b8c2c8-3508-4916-a70e-4928eb23d380.jpg"),
+    roomService().createRoomEntry("Room 3", "HkZhZjU", "https://meet.aptero.co/files/9574cccb-5241-4900-b2f5-4af780ec714d.jpg"),
   ];
   const sortedFavoriteRooms = Array.from(favoriteRooms).sort((a, b) => b.member_count - a.member_count);
   const sortedSpokeProject = Array.from(spokeProject).sort((a, b) => b.member_count - a.member_count);
@@ -65,7 +69,7 @@ export function RoomSection(props: {
     }
 
     if (qs.has("new")) {
-      getServiceSync<RoomService>(ROOM_SERVICE).createAndRedirectToNewHub(null, null, true);
+      roomService().createAndRedirectToNewHub(null, null, true);
     }
   }, []);
 
@@ -75,16 +79,17 @@ export function RoomSection(props: {
   const Column2: any = Column;
   return (
     <>
-      {!auth.userId && <FormattedMessage id="microsoft.settings.room-display-sign-in" defaultMessage="Please Sign In to create your first 3d space." />}
-      {auth.userId && (
+      {auth && !auth.userId && <FormattedMessage id="microsoft.settings.room-display-sign-in"
+                                         defaultMessage="Please Sign In to create your first 3d space."/>}
+      {auth && auth.userId && (
         <>
           <h2>
-            <FormattedMessage id="microsoft.settings.room" defaultMessage="Room" />
+            <FormattedMessage id="microsoft.settings.room" defaultMessage="Room"/>
           </h2>
           {props.roomUrl && (
             <>
               <Input
-                label={<FormattedMessage id="microsoft.settings.room-display-name" defaultMessage="Room Display Name" />}
+                label={<FormattedMessage id="microsoft.settings.room-display-name" defaultMessage="Room Display Name"/>}
                 fluid
                 value={props.suggestedDisplayName}
                 onChange={(value) => {
@@ -92,7 +97,7 @@ export function RoomSection(props: {
                 }}
               />
               <Input
-                label={<FormattedMessage id="microsoft.settings.selected-room" defaultMessage="Selected Room" />}
+                label={<FormattedMessage id="microsoft.settings.selected-room" defaultMessage="Selected Room"/>}
                 fluid
                 value={props.roomUrl}
                 onChange={(value) => {
@@ -105,44 +110,44 @@ export function RoomSection(props: {
                   props.onChangeRoomUrl("");
                 }}
               >
-                <FormattedMessage id="microsoft.settings.change-scene" defaultMessage="Change Scene" />
+                <FormattedMessage id="microsoft.settings.change-scene" defaultMessage="Change Scene"/>
               </Button>
             </>
           )}
           {!props.roomUrl && (
             <>
-              <div style={{ padding: 10, display: "flex", justifyContent: "space-evenly" }}>
+              <div style={{padding: 10, display: "flex", justifyContent: "space-evenly"}}>
                 {featuredDisplay && (
                   <Button
-                    style={{ margin: 10 }}
+                    style={{margin: 10}}
                     primary={currentTab === "featured"}
                     onClick={() => {
                       setTab("featured");
                     }}
                   >
-                    <FormattedMessage id="microsoft-settings-page.featured" defaultMessage="Featured" />
+                    <FormattedMessage id="microsoft-settings-page.featured" defaultMessage="Featured"/>
                   </Button>
                 )}
                 {mySceneDisplay && (
                   <Button
-                    style={{ margin: 10 }}
+                    style={{margin: 10}}
                     primary={currentTab === "my-scene"}
                     onClick={() => {
                       setTab("my-scene");
                     }}
                   >
-                    <FormattedMessage id="microsoft-settings-page.create" defaultMessage="My Scene" />
+                    <FormattedMessage id="microsoft-settings-page.create" defaultMessage="My Scene"/>
                   </Button>
                 )}
                 {myRoomDisplay && (
                   <Button
-                    style={{ margin: 10 }}
+                    style={{margin: 10}}
                     primary={currentTab === "my-room"}
                     onClick={() => {
                       setTab("my-room");
                     }}
                   >
-                    <FormattedMessage id="microsoft-settings-page.my-scene" defaultMessage="My Room" />
+                    <FormattedMessage id="microsoft-settings-page.my-scene" defaultMessage="My Room"/>
                   </Button>
                 )}
               </div>
@@ -155,7 +160,7 @@ export function RoomSection(props: {
                           <MediaTile
                             onClick={(event) => {
                               event.preventDefault();
-                              getServiceSync<RoomService>(ROOM_SERVICE).createRoom(room.id);
+                              roomService().createRoom(room.id);
                             }}
                             onEdit={(event) => {
                               event.preventDefault();
@@ -186,7 +191,7 @@ export function RoomSection(props: {
                           <MediaTile
                             onClick={(event) => {
                               event.preventDefault();
-                              getServiceSync<RoomService>(ROOM_SERVICE).createRoom(room.id);
+                              roomService().createRoom(room.id);
                             }}
                             onEdit={(event) => {
                               event.preventDefault();
@@ -219,7 +224,7 @@ export function RoomSection(props: {
                                 roomurl = window.location.origin + "/hub.html?hub_id=" + room.id;
                               }
                               console.log(roomurl);
-                              changeUrlSettings(roomurl);
+                              roomService().changeUrlSettings(roomurl);
                             }}
                             key={room.id}
                             entry={room}

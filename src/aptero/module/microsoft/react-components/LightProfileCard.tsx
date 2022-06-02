@@ -1,16 +1,16 @@
 import * as React from "react";
 import { Avatar, Flex, Segment, Text } from "@fluentui/react-northstar";
-import { getCredential } from "@aptero/axolotis-module-teams/modules/microsoft/service/TeamsLoginService";
 import { useEffect, useState } from "react";
+import {msTeamsAPI} from "@aptero/axolotis-module-teams";
 
 export function LightProfileCard() {
   const [userProfile, setUserProfile] = useState(null);
   useEffect(() => {
-    getCredential()
-      .getUserInfo()
-      .then((value) => {
-        setUserProfile(value);
-      });
+    // Similar to componentDidMount and componentDidUpdate:
+    ( async ()=>{
+      let value = await (await msTeamsAPI()).getLoginService().getCredential().getUserInfo();
+      setUserProfile(value);
+    })()
   });
   const userName = userProfile ? userProfile.data?.displayName : "Guest";
   //const preferedUserName = userProfile ? userProfile.data?.preferredUserName : "";

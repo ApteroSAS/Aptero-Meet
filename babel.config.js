@@ -8,7 +8,11 @@ const plugins = [
   // Samsung Internet on the Oculus Go version is stuck at version 5.2, which is a
   // Chromium 51, as of this writing. It needs babel to transpile async/await.
   "@babel/plugin-transform-async-to-generator",
-  "@babel/plugin-proposal-optional-chaining"
+  "@babel/plugin-proposal-optional-chaining",
+  ["@babel/plugin-transform-typescript",{
+    //https://babeljs.io/docs/en/babel-plugin-transform-typescript
+    isTSX:true
+  }]
 ];
 
 // Instrument for code coverage in development mode
@@ -22,7 +26,7 @@ if (process.env.USE_BABEL_PLUGIN_ISTANBUL) {
 module.exports = {
   presets:  [
     "@babel/react",
-    "@babel/typescript",
+    "@babel/preset-typescript",
     ["@babel/env",
       {
         "loose": true,

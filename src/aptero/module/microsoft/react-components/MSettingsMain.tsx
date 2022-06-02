@@ -1,16 +1,13 @@
 import * as React from "react";
-import {microsoftService, msTeamsService} from "@aptero/axolotis-module-teams";
-import { Provider, Loader, teamsTheme } from "@fluentui/react-northstar";//https://fluentsite.z22.web.core.windows.net/0.60.1
-import { MeetingSidePanel } from "./MeetingSidePanel";
-import { TabConfig } from "./TabConfig";
+//import {msTeamsAPI, msTeamsAPILight} from "@aptero/axolotis-module-teams/build/index";//Note this cause browser error cf react-dom
+import {msTeamsAPI, msTeamsAPILight} from "@aptero/axolotis-module-teams";
+console.log(msTeamsAPI)
+console.log(msTeamsAPILight)
+import {Provider, Loader, teamsTheme} from "@fluentui/react-northstar";//https://fluentsite.z22.web.core.windows.net/0.60.1
+import {MeetingSidePanel} from "./MeetingSidePanel";
+import {TabConfig} from "./TabConfig";
 
-(async ()=> {
-  try {
-    (await microsoftService()).getLoginService().passiveLogin();
-  } catch (e) {
-    console.error(e);
-  }
-})()
+
 
 export class MSettingsMain extends React.Component {
   url = new URL(window.location.href);
@@ -20,18 +17,26 @@ export class MSettingsMain extends React.Component {
 
   constructor(props) {
     super(props);
-    if (this.state.page === "loading") {
-      if (msTeamsService().msTeams()) {
-        msTeamsService().getContext((context) => {
-          //https://docs.microsoft.com/en-us/microsoftteams/platform/tabs/how-to/access-teams-context
-          if (context.frameContext === "sidePanel") {
-            this.setState({ page: "sidePanel" });
-          } else {
-            this.setState({ page: "settings" });
+    (async () => {
+      try {
+        await (await msTeamsAPI()).getLoginService().passiveLogin();
+      } catch (e) {
+        console.error(e);
+      } finally {
+        if (this.state.page === "loading") {
+          if (msTeamsAPILight().msTeams()) {
+            msTeamsAPILight().getContext((context) => {
+              //https://docs.microsoft.com/en-us/microsoftteams/platform/tabs/how-to/access-teams-context
+              if (context.frameContext === "sidePanel") {
+                this.setState({page: "sidePanel"});
+              } else {
+                this.setState({page: "settings"});
+              }
+            });
           }
-        });
+        }
       }
-    }
+    })()
   }
 
   render() {
@@ -40,5 +45,5 @@ export class MSettingsMain extends React.Component {
       {this.state.page === "sidePanel" && <MeetingSidePanel/>}
       {this.state.page === "settings" && <TabConfig/>}
     </Provider>
-}
+  }
 }

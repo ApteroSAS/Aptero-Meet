@@ -2,18 +2,27 @@ import * as React from "react";
 import { Button, Loader } from "@fluentui/react-northstar";
 import { LightProfileCard } from "./LightProfileCard";
 import { FormattedMessage } from "react-intl";
-import { microsoftLoginService } from "@aptero/axolotis-module-teams/modules/microsoft/service/MicrosoftLoginService";
-import { useState } from "react";
+import {useEffect, useState} from "react";
+import {msTeamsAPI} from "@aptero/axolotis-module-teams";
+import type { MicrosoftLoginService} from "@aptero/axolotis-module-teams/build/modules/microsoft/service/MicrosoftLoginService";
 
 export function LoginButton(props) {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [service, setService] = useState<MicrosoftLoginService>(null);
   const [error, setError] = useState(null);
+  useEffect( () => {
+    // Similar to componentDidMount and componentDidUpdate:
+    (async ()=>{
+      setService(await (await msTeamsAPI()).getLoginService());
+      setLoading(false);
+    })();
+  });
 
   const requestAuth = async () => {
     try {
       setLoading(true);
       setError(null);
-      await microsoftLoginService.login(false);
+      await service.login(false);
       setLoading(false);
     } catch (e) {
       setError(e);
@@ -25,7 +34,7 @@ export function LoginButton(props) {
     <>
       {!loading && (
         <div style={{ margin: "8px" }}>
-          {microsoftLoginService.isSignedIn() && <LightProfileCard />}
+          {service && service.isSignedIn() && <LightProfileCard />}
           {error && (
             <p>
               <FormattedMessage
@@ -42,7 +51,7 @@ export function LoginButton(props) {
             style={{height: "auto"}}/></>
           */}
           <br />
-          {!microsoftLoginService.isSignedIn() && (
+          {service && !service.isSignedIn() && (
             <Button
               primary
               content="Sign In"
@@ -54,7 +63,7 @@ export function LoginButton(props) {
             />
           )}
 
-          {microsoftLoginService.isSignedIn() && (
+          {service && service.isSignedIn() && (
             <Button
               primary
               content="Sign Out"
@@ -63,7 +72,7 @@ export function LoginButton(props) {
                 try {
                   setLoading(true);
                   setError(null);
-                  await microsoftLoginService.logout();
+                  await service.logout();
                   setLoading(false);
                 } catch (e) {
                   setError(e);

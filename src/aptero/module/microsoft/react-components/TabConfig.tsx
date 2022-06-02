@@ -2,16 +2,14 @@ import * as React from "react";
 import * as microsoftTeams from "@microsoft/teams-js";
 import { Loader } from "@fluentui/react-northstar"; //https://fluentsite.z22.web.core.windows.net/0.60.1
 import { FormattedMessage } from "react-intl";
-import { CHANGE_SETTINGS_URL, getMSEvents } from "@aptero/axolotis-module-teams/modules/microsoft/service/MsTeams";
-import { MSTEAMS_QUERY_PARAM } from "@aptero/axolotis-module-teams/modules/microsoft/MsTeams";
 import { LoginButton } from "./LoginButton";
 import { RoomSection } from "./RoomSection";
-
-import { getCredential } from "@aptero/axolotis-module-teams/modules/microsoft/service/TeamsLoginService";
-import { microsoftLoginService } from "@aptero/axolotis-module-teams/modules/microsoft/service/MicrosoftLoginService";
-import { getServiceSync } from "@aptero/axolotis-player";
-import { RoomService } from "@aptero/axolotis-module-teams/modules/roomAPI/RoomService";
-import { ROOM_SERVICE } from "@aptero/axolotis-module-teams";
+import {
+  roomService,
+  MSTEAMS_QUERY_PARAM,
+  CHANGE_SETTINGS_URL,
+  msTeamsAPI
+} from "@aptero/axolotis-module-teams";
 
 /**
  * The 'Config' component is used to display your group tabs
@@ -33,57 +31,63 @@ export class TabConfig extends React.Component {
   removeListeners = () => {};
 
   componentDidMount() {
-    microsoftTeams.settings.setValidityState(false);
-    microsoftTeams.settings.getSettings((instanceSettings) => {
-      if (instanceSettings.websiteUrl) {
+    (async ()=>{
+      await (await msTeamsAPI()).getLoginService().onReady();
+      try {
+        await microsoftTeams.initialize();
+      } catch (e) {
+        console.log("microsoftTeams.initialize failed (probably not in teams so we skip it)", e);
+      }
+      microsoftTeams.settings.setValidityState(false);
+      microsoftTeams.settings.getSettings((instanceSettings) => {
+        if (instanceSettings.websiteUrl) {
+          try {
+            new URL(instanceSettings.websiteUrl); //test url valide
+            this.setState({ url: instanceSettings.websiteUrl });
+          } catch (ex) {
+            console.error(ex);
+          }
+        }
+      });
+      const callbackUrl = (msg) => {
         try {
-          new URL(instanceSettings.websiteUrl); //test url valide
-          this.setState({ url: instanceSettings.websiteUrl });
+          new URL(msg.url); //test url valide
+          this.setState({ url: msg.url });
         } catch (ex) {
           console.error(ex);
         }
-      }
-    });
-    const callbackUrl = (msg) => {
-      try {
-        new URL(msg.url); //test url valide
-        this.setState({ url: msg.url });
-      } catch (ex) {
-        console.error(ex);
-      }
-    };
-    getMSEvents().on(CHANGE_SETTINGS_URL, callbackUrl);
+      };
+      (await msTeamsAPI()).getMSEvents().on(CHANGE_SETTINGS_URL, callbackUrl);
 
-    this.removeListeners = () => {
-      getMSEvents().off(CHANGE_SETTINGS_URL, callbackUrl);
-    };
-
-    microsoftLoginService.onReady().then((value) => {
-      this.setState({ initialized: true });
-    });
-
-    /**
-     * When the user clicks "Save", save the url for your configured tab.
-     * This allows for the addition of query string parameters based on
-     * the settings selected by the user.
-     */
-    microsoftTeams.settings.registerOnSaveHandler(async (saveEvent) => {
-      let config = { ...this.state };
-      const roomurl = new URL(config.url);
-      const teamsParams = btoa(encodeURIComponent(JSON.stringify(await getCredential().getUserInfo())));
-      roomurl.searchParams.append(MSTEAMS_QUERY_PARAM, teamsParams);
-      let data = getServiceSync<RoomService>(ROOM_SERVICE).parseUrl(roomurl.toString());
-      let token = await getServiceSync<RoomService>(ROOM_SERVICE).getEmbedToken(data.roomSID, data.origin);
-      roomurl.searchParams.append("embed_token", token);
-      config.url = roomurl.toString();
-      microsoftTeams.settings.setSettings({
-        suggestedDisplayName: this.state.suggestedDisplayName,
-        entityId: "sceneConfig",
-        contentUrl: config.url,
-        websiteUrl: config.url,
+      this.removeListeners = async () => {
+        (await msTeamsAPI()).getMSEvents().off(CHANGE_SETTINGS_URL, callbackUrl);
+      };
+      /**
+       * When the user clicks "Save", save the url for your configured tab.
+       * This allows for the addition of query string parameters based on
+       * the settings selected by the user.
+       */
+      microsoftTeams.settings.registerOnSaveHandler(async (saveEvent) => {
+        let config = { ...this.state };
+        const roomurl = new URL(config.url);
+        const teamsParams = btoa(encodeURIComponent(JSON.stringify(await (await msTeamsAPI()).getLoginService().getCredential().getUserInfo())));
+        roomurl.searchParams.append(MSTEAMS_QUERY_PARAM, teamsParams);
+        let data = roomService().parseUrl(roomurl.toString());
+        let token = await roomService().getEmbedToken(data.roomSID, data.origin);
+        roomurl.searchParams.append("embed_token", token);
+        config.url = roomurl.toString();
+        microsoftTeams.settings.setSettings({
+          suggestedDisplayName: this.state.suggestedDisplayName,
+          entityId: "sceneConfig",
+          contentUrl: config.url,
+          websiteUrl: config.url,
+        });
+        saveEvent.notifySuccess();
       });
-      saveEvent.notifySuccess();
-    });
+      this.setState({ initialized: true });
+    })();
+
+
   }
 
   componentWillUnmount() {
