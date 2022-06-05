@@ -70,6 +70,15 @@ module.exports = async (env, argv) => {
 
   const liveReload = !!process.env.LIVE_RELOAD || false;
 
+  const legacyBabelConfig = {
+    presets: ["@babel/react", ["@babel/env", { targets: { ie: 11 } }]],
+    plugins: [
+      "@babel/proposal-class-properties",
+      "@babel/proposal-object-rest-spread",
+      "@babel/plugin-transform-async-to-generator",
+      "@babel/plugin-proposal-optional-chaining"
+    ]
+  };
   return {
     mode: "production",
     /*node: {
@@ -101,7 +110,8 @@ module.exports = async (env, argv) => {
       headers: {
         "Access-Control-Allow-Origin": "*"
       },
-      hot: liveReload,
+      hot:false,
+      liveReload: liveReload,
       historyApiFallback: {
         rewrites: [
           { from: /^\/signin/, to: "/signin.html" },
@@ -152,7 +162,8 @@ module.exports = async (env, argv) => {
             path.resolve(__dirname, "src", "utils", "i18n.js"),
             path.resolve(__dirname, "src", "support.js")
           ],
-          loader: "babel-loader"
+          loader: "babel-loader",
+          options: legacyBabelConfig
         },
         // Some JS assets are loaded at runtime and should be coppied unmodified and loaded using file-loader
         {
@@ -302,7 +313,7 @@ module.exports = async (env, argv) => {
           { from: "src/assets/images/favicon.ico", to: "favicon.ico" },
           {
             from: "node_modules/@aptero/axolotis-module-teams/build/library/",
-            to: "library"
+            to: "assets/js/library"
           },
           {
             from: "node_modules/@aptero/axolotis-module-teams/build/library/@aptero/axolotis-module-teams/assets/auth-start.html",

@@ -8,7 +8,7 @@ export function LightProfileCard() {
   useEffect(() => {
     // Similar to componentDidMount and componentDidUpdate:
     ( async ()=>{
-      let value = await (await msTeamsAPI()).getLoginService().getCredential().getUserInfo();
+      let value = await (await msTeamsAPI()).getLoginService().getCredential().getUserInfo();//TODO use standard API get Account
       setUserProfile(value);
     })()
   });

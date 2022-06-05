@@ -4,7 +4,7 @@
   "description": "Aptero",
   "main": "src/index.js",
   "scripts": {
-    "dev:teamsfx": "echo \"cureently there is a bug launch manualy teamsfx2\"",
+    "dev:teamsfx": "echo \"execute the server on manualy on port 53000 'yarn dev:teamsfx2' \"",
     "dev:teamsfx2": "cross-env-shell \"env-cmd --silent -f ./tabs/.env.teamsfx.local yarn run start\"",
     "build:teamsfx": "cross-env-shell \"env-cmd -f ./tabs/.env.teamsfx.${TEAMS_FX_ENV} yarn run build\"",
     "build:teamsfx:dev": "cross-env TEAMS_FX_ENV=dev npm run build:teamsfx",
@@ -65,7 +65,7 @@
     ]
   },
   "dependencies": {
-    "@aptero/axolotis-module-teams": "git+https://github.com/ApteroSAS/teams-module.git#8c1b778d00e30390241c1a8ad536be875f048a7b",
+    "@aptero/axolotis-module-teams": "git+https://github.com/ApteroSAS/teams-module.git#ad402cb6038837463be952f2115c2b0cad6ea5f3",
     "@aptero/axolotis-player": "git+https://github.com/ApteroSAS/axolotis-player.git#semver:^1.x.x",
     "@braintree/sanitize-url": "^5.0.0",
     "@fluentui/react-northstar": "^0.61.0",

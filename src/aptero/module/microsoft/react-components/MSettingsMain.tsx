@@ -1,8 +1,5 @@
 import * as React from "react";
-//import {msTeamsAPI, msTeamsAPILight} from "@aptero/axolotis-module-teams/build/index";//Note this cause browser error cf react-dom
-import {msTeamsAPI, msTeamsAPILight} from "@aptero/axolotis-module-teams";
-console.log(msTeamsAPI)
-console.log(msTeamsAPILight)
+import { msTeamsAPILight , msTeamsAPI} from "@aptero/axolotis-module-teams";
 import {Provider, Loader, teamsTheme} from "@fluentui/react-northstar";//https://fluentsite.z22.web.core.windows.net/0.60.1
 import {MeetingSidePanel} from "./MeetingSidePanel";
 import {TabConfig} from "./TabConfig";
@@ -25,12 +22,12 @@ export class MSettingsMain extends React.Component {
       } finally {
         if (this.state.page === "loading") {
           if (msTeamsAPILight().msTeams()) {
-            msTeamsAPILight().getContext((context) => {
+            await (await msTeamsAPI()).getContext((context) => {
               //https://docs.microsoft.com/en-us/microsoftteams/platform/tabs/how-to/access-teams-context
               if (context.frameContext === "sidePanel") {
-                this.setState({page: "sidePanel"});
+                this.setState({ page: "sidePanel" });
               } else {
-                this.setState({page: "settings"});
+                this.setState({ page: "settings" });
               }
             });
           }
