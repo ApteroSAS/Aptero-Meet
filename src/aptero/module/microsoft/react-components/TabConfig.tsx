@@ -70,7 +70,7 @@ export class TabConfig extends React.Component {
       microsoftTeams.settings.registerOnSaveHandler(async (saveEvent) => {
         let config = { ...this.state };
         const roomurl = new URL(config.url);
-        const teamsParams = btoa(encodeURIComponent(JSON.stringify(await (await msTeamsAPI()).getLoginService().getCredential().getUserInfo())));
+        const teamsParams = btoa(encodeURIComponent(JSON.stringify(await (await msTeamsAPI()).getLoginService().getTeamsLoginService().getCredential().getUserInfo())));
         roomurl.searchParams.append(MSTEAMS_QUERY_PARAM, teamsParams);
         let data = roomService().parseUrl(roomurl.toString());
         let token = await roomService().getEmbedToken(data.roomSID, data.origin);

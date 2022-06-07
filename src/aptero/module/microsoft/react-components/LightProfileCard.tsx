@@ -7,12 +7,14 @@ export function LightProfileCard() {
   const [userProfile, setUserProfile] = useState(null);
   useEffect(() => {
     // Similar to componentDidMount and componentDidUpdate:
-    ( async ()=>{
-      let value = await (await msTeamsAPI()).getLoginService().getCredential().getUserInfo();//TODO use standard API get Account
-      setUserProfile(value);
-    })()
-  });
-  const userName = userProfile ? userProfile.data?.displayName : "Guest";
+    if(!userProfile) {
+      (async () => {
+        let value = await (await msTeamsAPI()).getLoginService().getTeamsLoginService().getCredential().getUserInfo();
+        setUserProfile(value);
+      })()
+    }
+  },[userProfile]);
+  const userName = userProfile ? userProfile.displayName : "Guest";
   //const preferedUserName = userProfile ? userProfile.data?.preferredUserName : "";
   return (
     <Segment style={{ padding: "3px 10px 3px 10px", width: "fit-content" }}>

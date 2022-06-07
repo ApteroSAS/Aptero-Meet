@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import * as microsoftTeams from "@microsoft/teams-js";
 import { Button, Loader } from "@fluentui/react-northstar";
 import { FormattedMessage } from "react-intl";
-import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
+import {msTeamsAPI, msTeamsAPILight} from "@aptero/axolotis-module-teams";
 
 //https://fluentsite.z22.web.core.windows.net/0.60.1
 
@@ -23,18 +23,21 @@ export function MeetingSidePanel() {
     });
   };
   useEffect(() => {
-    if (msTeamsAPILight().msTeams()) {
-      msTeamsAPILight().getContext((context) => {
-        if (context.frameContext === "sidePanel" && (context.hostClientType === "android" || context.hostClientType === "ios")) {
-          setContext("mobile");
-          //switchToRoom();//This is just in case but it will not occure here since the sidepage loaded initially is hub.html
-        } else {
-          setContext("desktop");
-        }
-        setLoading(false);
-      });
-    }
-  }, []);
+    (async ()=>{
+    if(loading) {
+      if (msTeamsAPILight().msTeams()) {
+        await (await msTeamsAPI()).getContext((context) => {
+          if (context.frameContext === "sidePanel" && (context.hostClientType === "android" || context.hostClientType === "ios")) {
+            setContext("mobile");
+            //switchToRoom();//This is just in case but it will not occure here since the sidepage loaded initially is hub.html
+          } else {
+            setContext("desktop");
+          }
+          setLoading(false);
+        });
+      }
+    }})()
+  }, [loading]);
 
   return (
     <>

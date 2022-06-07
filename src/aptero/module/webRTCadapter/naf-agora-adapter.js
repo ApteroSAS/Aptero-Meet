@@ -1,4 +1,3 @@
-import { debug as newDebug } from "debug";
 import { AgoraAdapter } from "./agora";
 import EventEmitter from "eventemitter3";
 import { ProtooHelper } from "./protoHelper";
@@ -13,12 +12,6 @@ import AdapterUserListener from "./AdapterUserListener";
 let debug = console.log;
 let error = console.error;
 let info = console.log;
-if(newDebug){
-  debug = newDebug("twilio-adapter:debug");
-  //const warn = newDebug("naf-dialog-adapter:warn");
-  error = newDebug("twilio-adapter:error");
-  info = newDebug("twilio-adapter:info");
-}
 
 export const DIALOG_CONNECTION_ERROR_FATAL = "dialog-connection-error-fatal";
 export default class NafTwilioAdapter extends EventEmitter {

@@ -7,7 +7,7 @@ import { CancelButton, NextButton, ContinueButton, Button } from "../input/Butto
 import { TextInputField } from "../input/TextInputField";
 import { Column } from "../layout/Column";
 import { LegalMessage } from "./LegalMessage";
-import {msTeamsService} from "@aptero/axolotis-module-teams";
+import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
 
 export const SignInStep = {
   submit: "submit",
@@ -113,7 +113,7 @@ export function SubmitEmail({ onSubmitEmail, onSubmitEmailMicrosoftLogin, initia
     [setEmail]
   );
 
-  if(msTeamsService().msTeams()){
+  if(msTeamsAPILight().msTeams()){
     return <Button preset="basic" style={{margin:"auto"}} onClick={onSubmitEmailMicrosoft}>
       <FormattedMessage id="sign-in-with-teams" defaultMessage="Sign in with teams"/>
     </Button>

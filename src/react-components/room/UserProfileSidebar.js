@@ -8,7 +8,7 @@ import {FormattedMessage, useIntl} from "react-intl";
 import {rotateInPlaceAroundWorldUp, affixToWorldUp} from "../../utils/three-utils";
 import {UserProfileVisitCardContainer} from "./UserProfileVisitCardContainer";
 import {PeopleSidebarContainer, usePeopleList} from "./PeopleSidebarContainer";
-import {microsoftService,msTeamsService} from "@aptero/axolotis-module-teams";
+import {microsoftService,msTeamsAPILight} from "@aptero/axolotis-module-teams";
 
 function useGoToSelectedAvatar(entity) {
     const targetMatrix = new THREE.Matrix4();
@@ -198,7 +198,7 @@ export function UserProfileSidebar({
                     >
                         <FormattedMessage id="avatar-teleport" defaultMessage="Go to"/>
                     </Button>
-                    {(canMute && !msTeamsService().msTeams()) && (
+                    {(canMute && !msTeamsAPILight().msTeams()) && (
                         <Button preset="cancel" onClick={onMute}>
                             <FormattedMessage id="user-profile-sidebar.mute-button" defaultMessage="Mute"/>
                         </Button>

@@ -4,12 +4,12 @@ import {FormattedMessage} from "react-intl";
 
 import {Button, Input} from "@fluentui/react-northstar";
 import {MediaGrid} from "./hubs/react-components/room/MediaGrid";
-import {MediaTile} from "./hubs/react-components/room/MediaTiles";
 import {usePaginatedAPI} from "./hubs/react-components/home/usePaginatedAPI";
-import {AuthContext} from "./hubs/react-components/auth/AuthContext";
 import {Container} from "./hubs/react-components/layout/Container";
 import {Column} from "./hubs/react-components/layout/Column";
-import {ROOM_SERVICE, roomService} from "@aptero/axolotis-module-teams";
+import {roomService} from "@aptero/axolotis-module-teams";
+import {AuthContext} from "../../../../react-components/auth/AuthContext";
+import {MediaTile} from "../../../../react-components/room/MediaTiles";
 
 //https://fluentsite.z22.web.core.windows.net/0.60.1
 

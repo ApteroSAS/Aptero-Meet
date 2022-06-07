@@ -1,8 +1,8 @@
 import { isLocalHubsSceneUrl, proxiedUrlFor } from "../utils/media-url-utils";
-import {msTeamsService} from "@aptero/axolotis-module-teams";
+import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
 
 export async function isValidGLB(url) {
-  url = await msTeamsService().preFetchConvertMicrosoftUrl(url);
+  url = msTeamsAPILight().preFetchConvertMicrosoftUrl(url);
   return fetch(url).then(async r => {
     const reader = r.body.getReader();
     let header = "";

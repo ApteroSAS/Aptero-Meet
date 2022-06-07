@@ -1,6 +1,5 @@
 import * as mediasoupClient from "mediasoup-client";
 import protooClient from "protoo-client";
-import { debug as newDebug } from "debug";
 import EventEmitter from "eventemitter3";
 import { addIceServers, getAdapterConfig } from "./adapter-config";
 import AdapterUserListener from "./AdapterUserListener";
@@ -23,12 +22,6 @@ import AdapterUserListener from "./AdapterUserListener";
 let debug = console.log;
 let error = console.error;
 let info = console.log;
-if (newDebug) {
-  debug = newDebug("naf-dialog-adapter:debug");
-  //const warn = newDebug("naf-dialog-adapter:warn");
-  error = newDebug("naf-dialog-adapter:error");
-  info = newDebug("naf-dialog-adapter:info");
-}
 
 const PC_PROPRIETARY_CONSTRAINTS = {
   optional: [{ googDscp: true }]

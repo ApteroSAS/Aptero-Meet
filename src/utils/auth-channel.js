@@ -1,13 +1,13 @@
 import uuid from "uuid/v4";
 import "../aptero/module/axolotis/AxolotisSystem";
-import {msTeamsService} from "@aptero/axolotis-module-teams";
+import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
 
 export default class AuthChannel {
   constructor(store) {
     this.store = store;
     this.socket = null;
     this._signedIn = !!this.store.state.credentials.token;
-    msTeamsService().passiveLogIn();
+    msTeamsAPILight().passiveLogIn();
   }
 
   setSocket = socket => {
@@ -31,7 +31,7 @@ export default class AuthChannel {
     this.store.update({ credentials: { token: null, email: null } });
     await this.store.resetToRandomDefaultAvatar();
     this._signedIn = false;
-    await msTeamsService().logout();
+    await msTeamsAPILight().logout();
   };
 
   verifyAuthentication(authTopic, authToken, authPayload) {

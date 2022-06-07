@@ -36,10 +36,21 @@ window.APP_PROPS = {
   //SENTRY_DSN:"https://944afa0719c6473997fa1d6a06515c7e@o407192.ingest.sentry.io/5275835",
   //SENTRY_ENV:"web-local",
 
-  APP_CONFIG: {
+  "@aptero/axolotis-module-room":{
+    ROOM_TOKEN_SERVICE: "https://alphahub.aptero.co"
+  },
+  "@aptero/axolotis-module-teams":{
     MICROSOFT_APP_ID: "c89c5d54-37ec-49d6-952a-befc9b770079",
     //MICROSOFT_APP_AUTHORITY: "https://login.microsoftonline.com/apteroco.onmicrosoft.com",
     MICROSOFT_APP_AUTHORITY:"https://login.microsoftonline.com/common",
+  },
+  "@aptero/axolotis-module-phoenix-auth":{
+    RETICULUM_SERVER: "alphahub.aptero.co",
+    RETICULUM_SOCKET_PROTOCOL: "",
+    RETICULUM_SOCKET_SERVER: ""
+  },
+
+  APP_CONFIG: {
     GLOBAL_ASSETS_PATH: "https://hub.aptero.co/data/global/",
     LOGGER:{
       URL:"https://aptero.co/tracking",

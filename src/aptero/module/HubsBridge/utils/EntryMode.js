@@ -1,9 +1,9 @@
 const qs = new URLSearchParams(location.search);
 import "./../../axolotis/AxolotisSystem";
-import {msTeamsService} from "@aptero/axolotis-module-teams";
+import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
 
 export function addEntryModeIfNotExist(entryMode){
-  if(msTeamsService().msTeams()){
+  if(msTeamsAPILight().msTeams()){
     return;
   }
   const urlToConstruct = new URL(location.href);
@@ -15,7 +15,7 @@ export function addEntryModeIfNotExist(entryMode){
 
 export function getEntryMode(){
   let qsVREntryType = qs.get("vr_entry_type");
-  if(msTeamsService().msTeams()){
+  if(msTeamsAPILight().msTeams()){
     qsVREntryType="2d_now";
   }
   return qsVREntryType;

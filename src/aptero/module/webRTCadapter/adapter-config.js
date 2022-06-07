@@ -1,7 +1,7 @@
 import configs from "../../../utils/configs";
 import { lazyLoad } from "./adapterRegistrer";
 import { propertiesService } from "../properties/propertiesService";
-import {msTeamsService} from "@aptero/axolotis-module-teams";
+import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
 
 let defaultAdapter = configs.APP_CONFIG.adapterParams.adapter;
 
@@ -45,7 +45,7 @@ export async function choseAdapterAuto() {
     adapter = defaultAdapter;
   }
 
-  if(msTeamsService().msTeams()){
+  if(msTeamsAPILight().msTeams()){
     adapter = "none"
   }
 

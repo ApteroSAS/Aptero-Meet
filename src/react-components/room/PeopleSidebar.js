@@ -14,7 +14,7 @@ import { ReactComponent as VolumeHighIcon } from "../icons/VolumeHigh.svg";
 import { ReactComponent as VolumeMutedIcon } from "../icons/VolumeMuted.svg";
 import { List, ButtonListItem } from "../layout/List";
 import { FormattedMessage, useIntl } from "react-intl";
-import {msTeamsService} from "@aptero/axolotis-module-teams";
+import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
 
 function getDeviceLabel(ctx, intl) {
   if (ctx) {
@@ -104,7 +104,7 @@ export function PeopleSidebar({ people, onSelectPerson, onClose, showMuteAll, on
       }
       beforeTitle={<CloseButton onClick={onClose} />}
       afterTitle={
-        showMuteAll && !msTeamsService().msTeams()? (
+        showMuteAll && !msTeamsAPILight().msTeams()? (
           <IconButton onClick={onMuteAll}>
             <FormattedMessage id="people-sidebar.mute-all-button" defaultMessage="Mute All" />
           </IconButton>

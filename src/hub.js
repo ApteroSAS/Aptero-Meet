@@ -199,8 +199,8 @@ import { fetchICEservers } from "./aptero/module/webRTCadapter/adapter-config";
 import { AdapterWarpper } from "./aptero/module/webRTCadapter/AdapterWrapper";
 //aptero service end
 
-import {msTeamsService} from "@aptero/axolotis-module-teams";
-msTeamsService().redirectToTeamsSidePanel();
+import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
+msTeamsAPILight().redirectToTeamsSidePanel();
 
 window.APP = new App();
 window.APP.dialog = new AdapterWarpper();
@@ -535,7 +535,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data,
 
   // Turn off NAF for embeds as an optimization, so the user's browser isn't getting slammed
   // with NAF traffic on load.
-  if (isEmbed && !msTeamsService().msTeams()) {
+  if (isEmbed && !msTeamsAPILight().msTeams()) {
     hubChannel.allowNAFTraffic(false);
   }
 
@@ -655,7 +655,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data,
     updateUIForHub(hub, hubChannel);
     scene.emit("hub_updated", { hub });
     const hideui = new URL(window.location.href).searchParams.get("hideui");
-    if (!isEmbed || hideui || msTeamsService().msTeams()) {
+    if (!isEmbed || hideui || msTeamsAPILight().msTeams()) {
       loadEnvironmentAndConnect();
     } else {
       remountUI({
@@ -714,7 +714,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  if(!msTeamsService().msTeams()) {
+  if(!msTeamsAPILight().msTeams()) {
     const detectedOS = detectOS(navigator.userAgent);
     const browser = detect();
     // HACK - it seems if we don't initialize the mic track up-front, voices can drop out on iOS
@@ -842,7 +842,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   remountUI({
     performConditionalSignIn,
     embed: isEmbed,
-    showPreload: isEmbed && !hideui && !msTeamsService().msTeams()
+    showPreload: isEmbed && !hideui && !msTeamsAPILight().msTeams()
   });
   entryManager.performConditionalSignIn = performConditionalSignIn;
   entryManager.init();

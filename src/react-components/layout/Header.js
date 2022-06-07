@@ -6,7 +6,7 @@ import { faCog } from "@fortawesome/free-solid-svg-icons/faCog";
 import maskEmail from "../../utils/mask-email";
 import styles from "./Header.scss";
 import { Container } from "./Container";
-import {msTeamsService} from "@aptero/axolotis-module-teams";
+import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
 export function Header({
   appName,
   appLogo,
@@ -25,7 +25,7 @@ export function Header({
 }) {
   return (
     <header>
-      {!msTeamsService().msTeams() &&
+      {!msTeamsAPILight().msTeams() &&
       <Container as="div" className={styles.container}>
         <nav>
           <ul>
