@@ -131,10 +131,21 @@ module.exports = async (env, argv) => {
     },
     resolve: {
       fallback: {
-        "stream": false, // for react-dom dep
+        //https://gist.github.com/ef4/d2cf5672a93cf241fd47c020b9b3066a
+        "stream": require.resolve('stream-browserify'), // for react-dom dep
         'fs': false, // for ammo.js dep
-        'path': false, // for ammo.js dep
+        'path': require.resolve('path-browserify'), // for ammo.js dep
+        'process': require.resolve("process/browser"),
+        'zlib': require.resolve('browserify-zlib'),
+        'util': require.resolve('util/'),
+        'events': require.resolve('events/')
       },
+      /*alias: {
+        process: "process/browser",
+        stream: "stream-browserify",
+        zlib: "browserify-zlib",
+        util: 'util'
+      },*/
       extensions: ["*", ".js", ".jsx", ".tsx", ".ts", ".json"]
     },
     module: {
@@ -256,6 +267,9 @@ module.exports = async (env, argv) => {
       minimize: argv.mode === "production",
     },
     plugins: [
+      new webpack.ProvidePlugin({
+        process: 'process/browser',//for debug.js
+      }),
       // Each output page needs a HTMLWebpackPlugin entry
       new HTMLWebpackPlugin({
         filename: "microsoft-settings.html",

@@ -7,7 +7,7 @@ export default class AuthChannel {
     this.store = store;
     this.socket = null;
     this._signedIn = !!this.store.state.credentials.token;
-    msTeamsAPILight().passiveLogIn();
+    msTeamsAPILight().conditionalPassiveLogIn();
   }
 
   setSocket = socket => {

@@ -2156,6 +2156,10 @@
   resolved "https://registry.yarnpkg.com/@mozillareality/easing-functions/-/easing-functions-0.1.1.tgz#de7994336412b02e7d58e8391d0c230df8b79ad2"
   integrity sha512-rApZ0OOqreMULwHZOy+fB9wRLnikelE8pMbqUmtLBhT6OSKp5dz/7pA/EjnFXJDQBR/EgZUa3vwbFlTZnUgSlw==
 
+"@mozillareality/three-batch-manager@github:mozillareality/three-batch-manager":
+  version "0.1.10"
+  resolved "https://codeload.github.com/mozillareality/three-batch-manager/tar.gz/b223bddc344fa961ffb31eb135b4b39713d0430c"
+
 "@mrmlnc/readdir-enhanced@^2.2.1":
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/@mrmlnc/readdir-enhanced/-/readdir-enhanced-2.2.1.tgz#524af240d1a360527b730475ecfa1344aa540dde"
@@ -4288,9 +4292,9 @@ aframe-rounded@^1.0.3:
   version "1.0.0"
   resolved "https://codeload.github.com/takahirox/aframe-slice9-component/tar.gz/2ec0810cbf23f487a10c767d24dee6d5b7ede77f"
 
-"aframe@github:mozillareality/aframe#deba2d4eedda664bb7d87bf4b3c9fcf25f5298e1":
+"aframe@github:mozillareality/aframe#560c38311081fc5490931c369223f7e4da9f7f76":
   version "1.0.3"
-  resolved "https://codeload.github.com/mozillareality/aframe/tar.gz/deba2d4eedda664bb7d87bf4b3c9fcf25f5298e1"
+  resolved "https://codeload.github.com/mozillareality/aframe/tar.gz/560c38311081fc5490931c369223f7e4da9f7f76"
   dependencies:
     custom-event-polyfill "^1.0.6"
     debug ngokevin/debug#noTimestamp
@@ -4743,6 +4747,11 @@ async-each@^1.0.1:
   resolved "https://registry.yarnpkg.com/async-each/-/async-each-1.0.3.tgz#b727dbf87d7651602f06f4d4ac387f47d91b0cbf"
   integrity sha512-z/WhQ5FPySLdvREByI2vZiTWwCnF0moMJ1hK9YQwDTHKh6I7/uSckMetoRGb5UBZPC1z0jlw+n/XCgjeH7y1AQ==
 
+async@0.2.x, async@~0.2.9:
+  version "0.2.10"
+  resolved "https://registry.yarnpkg.com/async/-/async-0.2.10.tgz#b6bbe0b0674b9d719708ca38de8c237cb526c3d1"
+  integrity sha512-eAkdoKxU6/LkKDBzLpT+t6Ff5EtfSF4wx1WfJiPEEV7WNLnDaRXk0oVysiEPm262roaachGexwUv94WhSgN5TQ==
+
 async@2.6.1:
   version "2.6.1"
   resolved "https://registry.yarnpkg.com/async/-/async-2.6.1.tgz#b245a23ca71930044ec53fa46aa00a3e87c6a610"
@@ -4756,11 +4765,6 @@ async@^2.6.3:
   integrity sha512-mzo5dfJYwAn29PeiJ0zvwTo04zj8HDJj0Mn8TD7sno7q12prdbnasKJHhkm2c1LgrhlJ0teaea8860oxi51mGA==
   dependencies:
     lodash "^4.17.14"
-
-async@~0.2.9:
-  version "0.2.10"
-  resolved "https://registry.yarnpkg.com/async/-/async-0.2.10.tgz#b6bbe0b0674b9d719708ca38de8c237cb526c3d1"
-  integrity sha512-eAkdoKxU6/LkKDBzLpT+t6Ff5EtfSF4wx1WfJiPEEV7WNLnDaRXk0oVysiEPm262roaachGexwUv94WhSgN5TQ==
 
 asynckit@^0.4.0:
   version "0.4.0"
@@ -5567,12 +5571,7 @@ buffer@^6.0.3:
     base64-js "^1.3.1"
     ieee754 "^1.2.1"
 
-"buffered-interpolation@github:Infinitelee/buffered-interpolation#5bb18421ebf2bf11664645cdc7a15bd77ee2156b":
-  version "0.2.5"
-  uid "5bb18421ebf2bf11664645cdc7a15bd77ee2156b"
-  resolved "https://codeload.github.com/Infinitelee/buffered-interpolation/tar.gz/5bb18421ebf2bf11664645cdc7a15bd77ee2156b"
-
-"buffered-interpolation@github:infinitelee/buffered-interpolation#5bb18421ebf2bf11664645cdc7a15bd77ee2156b":
+buffered-interpolation@^0.2.5, "buffered-interpolation@github:infinitelee/buffered-interpolation#5bb18421ebf2bf11664645cdc7a15bd77ee2156b":
   version "0.2.5"
   resolved "https://codeload.github.com/infinitelee/buffered-interpolation/tar.gz/5bb18421ebf2bf11664645cdc7a15bd77ee2156b"
 
@@ -6224,6 +6223,11 @@ colorette@^2.0.10, colorette@^2.0.14:
   version "2.0.17"
   resolved "https://registry.yarnpkg.com/colorette/-/colorette-2.0.17.tgz#5dd4c0d15e2984b7433cb4a9f2ead45063b80c47"
   integrity sha512-hJo+3Bkn0NCHybn9Tu35fIeoOKGOk5OCC32y4Hz2It+qlCO2Q3DeQ1hRn/tDDMQKRYUEzqsl7jbF6dYKjlE60g==
+
+colors@*:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/colors/-/colors-1.4.0.tgz#c50491479d4c1bdaed2c9ced32cf7c7dc2360f78"
+  integrity sha512-a+UqTh4kgZg/SlGvfbzDHpgRu7AAQOmmqRHJnxhRZICKFUT91brVhNNt58CMWU9PsBbv3PDCZUHbVxuDiH2mtA==
 
 colors@1.3.2:
   version "1.3.2"
@@ -6947,7 +6951,7 @@ debug@2.6.9, debug@^2.2.0, debug@^2.3.3, debug@^2.6.0:
   dependencies:
     ms "2.0.0"
 
-debug@4, debug@^4.0.0, debug@^4.0.1, debug@^4.1.0, debug@^4.1.1, debug@^4.3.1, debug@^4.3.2, debug@^4.3.4, debug@~4.3.1, debug@~4.3.2:
+debug@4, debug@^4.0.0, debug@^4.0.1, debug@^4.1.0, debug@^4.1.1, debug@^4.3.1, debug@^4.3.4, debug@~4.3.1, debug@~4.3.2:
   version "4.3.4"
   resolved "https://registry.yarnpkg.com/debug/-/debug-4.3.4.tgz#1319f6579357f2338d3337d2cdd4914bb5dcc865"
   integrity sha512-PRWFHuSU3eDtQJPvnNY7Jcket1j0t5OuOsFzPPzsekD52Zl8qUfFIPEiswXqIvHWGVHOgX+7G/vCNNhehwxfkQ==
@@ -7498,6 +7502,15 @@ duplexify@^3.4.2, duplexify@^3.6.0:
     inherits "^2.0.1"
     readable-stream "^2.0.0"
     stream-shift "^1.0.0"
+
+easyrtc@1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/easyrtc/-/easyrtc-1.1.0.tgz#f44937f7132cb8b5ba8e0bc1cc3e3ccc472a3ef4"
+  integrity sha512-VFZhIkTpYTMag2bMto1e1FIqWk11rFSbR9rIkGaDztBJKo2ST7QgIIQIY9KccEk0qKkKVVz+9JMVHtufrQHPKw==
+  dependencies:
+    async "0.2.x"
+    colors "*"
+    underscore "1.5.x"
 
 ecc-jsbn@~0.1.1:
   version "0.1.2"
@@ -10013,7 +10026,7 @@ inflight@^1.0.4:
     once "^1.3.0"
     wrappy "1"
 
-inherits@2, inherits@2.0.4, inherits@^2.0.0, inherits@^2.0.1, inherits@^2.0.3, inherits@^2.0.4, inherits@~2.0.1, inherits@~2.0.3:
+inherits@2, inherits@2.0.4, inherits@^2.0.0, inherits@^2.0.1, inherits@^2.0.3, inherits@^2.0.4, inherits@~2.0.1, inherits@~2.0.3, inherits@~2.0.4:
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/inherits/-/inherits-2.0.4.tgz#0fa2c64f932917c3433a0ded55363aae37416b7c"
   integrity sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==
@@ -12366,11 +12379,12 @@ nested-error-stacks@^2.0.0, nested-error-stacks@^2.1.0:
   resolved "https://registry.yarnpkg.com/nested-error-stacks/-/nested-error-stacks-2.1.1.tgz#26c8a3cee6cc05fbcf1e333cd2fc3e003326c0b5"
   integrity sha512-9iN1ka/9zmX1ZvLV9ewJYEk9h7RyRRtqdK0woXcqohu8EWIerfPUjYJPg0ULy0UqP7cslmdGc8xKDJcojlKiaw==
 
-"networked-aframe@github:mozillareality/networked-aframe#50184f495ff1f77d0e6fe3777d73092784e3aee3":
+"networked-aframe@github:mozillareality/networked-aframe#ae8ca30fcded2369c8702686b07cce46dfc16306":
   version "0.6.1"
-  resolved "https://codeload.github.com/mozillareality/networked-aframe/tar.gz/50184f495ff1f77d0e6fe3777d73092784e3aee3"
+  resolved "https://codeload.github.com/mozillareality/networked-aframe/tar.gz/ae8ca30fcded2369c8702686b07cce46dfc16306"
   dependencies:
-    buffered-interpolation "github:Infinitelee/buffered-interpolation#5bb18421ebf2bf11664645cdc7a15bd77ee2156b"
+    buffered-interpolation "^0.2.5"
+    easyrtc "1.1.0"
 
 next-tick@^1.1.0:
   version "1.1.0"
@@ -13198,6 +13212,11 @@ path-browserify@0.0.1:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/path-browserify/-/path-browserify-0.0.1.tgz#e6c4ddd7ed3aa27c68a20cc4e50e1a4ee83bbc4a"
   integrity sha512-BapA40NHICOS+USX9SN4tyhq+A2RrN/Ws5F0Z5aMHDp98Fl86lX8Oti8B7uN93L4Ifv4fHOEA+pQw87gmMO/lQ==
+
+path-browserify@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/path-browserify/-/path-browserify-1.0.1.tgz#d98454a9c3753d5790860f16f68867b9e46be1fd"
+  integrity sha512-b7uo2UCUOYZcnF/3ID0lulOJi/bafxa1xPe7ZPsammBSpjSWQkjNxlt635YGS2MiR9GjvuXCtz2emr3jbsz98g==
 
 path-dirname@^1.0.0:
   version "1.0.2"
@@ -14382,7 +14401,7 @@ readable-stream@1.1:
     isarray "0.0.1"
     string_decoder "~0.10.x"
 
-readable-stream@^3.0.6, readable-stream@^3.1.1, readable-stream@^3.4.0, readable-stream@^3.6.0:
+readable-stream@^3.0.6, readable-stream@^3.1.1, readable-stream@^3.4.0, readable-stream@^3.5.0, readable-stream@^3.6.0:
   version "3.6.0"
   resolved "https://registry.yarnpkg.com/readable-stream/-/readable-stream-3.6.0.tgz#337bbda3adc0706bd3e024426a286d4b4b2c9198"
   integrity sha512-BViHy7LKeTz4oNnkcLJ+lVSL6vpiFeX6/d3oSH8zCW7UxP2onchk+vTGB143xuFjHS3deTgkKoXXymXqymiIdA==
@@ -15790,6 +15809,14 @@ stream-browserify@^2.0.1:
     inherits "~2.0.1"
     readable-stream "^2.0.2"
 
+stream-browserify@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/stream-browserify/-/stream-browserify-3.0.0.tgz#22b0a2850cdf6503e73085da1fc7b7d0c2122f2f"
+  integrity sha512-H73RAHsVBapbim0tU2JwwOiXUj+fikfiaoYAKHF3VJfA0pe2BCzkhAHBlLG6REzE+2WNZcxOXjK7lkso+9euLA==
+  dependencies:
+    inherits "~2.0.4"
+    readable-stream "^3.5.0"
+
 stream-combiner@~0.0.4:
   version "0.0.4"
   resolved "https://registry.yarnpkg.com/stream-combiner/-/stream-combiner-0.0.4.tgz#4d5e433c185261dde623ca3f44c586bcf5c4ad14"
@@ -16462,7 +16489,7 @@ text-table@^0.2.0:
   resolved "https://registry.yarnpkg.com/text-table/-/text-table-0.2.0.tgz#7f5ee823ae805207c00af2df4a84ec3fcfa570b4"
   integrity sha1-f17oI66AUgfACvLfSoTsP8+lcLQ=
 
-"three-ammo@github:infinitelee/three-ammo#db3ad1104b258d963ca66165f9fbed4013faa32a":
+"three-ammo@github:infinitelee/three-ammo":
   version "1.0.12"
   resolved "https://codeload.github.com/infinitelee/three-ammo/tar.gz/db3ad1104b258d963ca66165f9fbed4013faa32a"
 
@@ -16480,9 +16507,10 @@ three-pathfinding@^0.14.1:
   version "1.0.0"
   resolved "https://codeload.github.com/infinitelee/three-to-ammo/tar.gz/9e68a3bbe500988f2dc0096f78c12dabbdaf5548"
 
-"three@github:mozillareality/three.js#b907b3c1cab8b416ef63b290aa603b540dd881b8":
-  version "0.133.1"
-  resolved "https://codeload.github.com/mozillareality/three.js/tar.gz/b907b3c1cab8b416ef63b290aa603b540dd881b8"
+three@^0.128.0:
+  version "0.128.0"
+  resolved "https://registry.yarnpkg.com/three/-/three-0.128.0.tgz#884dacca6a330e45600a09ec5439283f50b76aa6"
+  integrity sha512-i0ap/E+OaSfzw7bD1TtYnPo3VEplkl70WX5fZqZnfZsE3k3aSFudqrrC9ldFZfYFkn1zwDmBcdGfiIm/hnbyZA==
 
 through2@^2.0.0:
   version "2.0.5"
@@ -16874,15 +16902,15 @@ unbox-primitive@^1.0.2:
     has-symbols "^1.0.3"
     which-boxed-primitive "^1.0.2"
 
+underscore@1.5.x, underscore@~1.5.2:
+  version "1.5.2"
+  resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.5.2.tgz#1335c5e4f5e6d33bbb4b006ba8c86a00f556de08"
+  integrity sha1-EzXF5PXm0zu7SwBrqMhqAPVW3gg=
+
 "underscore@>= 1.3.1":
   version "1.13.4"
   resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.13.4.tgz#7886b46bbdf07f768e0052f1828e1dcab40c0dee"
   integrity sha512-BQFnUDuAQ4Yf/cYY5LNrK9NCJFKriaRbD9uR1fTeXnBeoa97W0i41qkZfGO9pSo8I5KzjAcSY2XYtdf0oKd7KQ==
-
-underscore@~1.5.2:
-  version "1.5.2"
-  resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.5.2.tgz#1335c5e4f5e6d33bbb4b006ba8c86a00f556de08"
-  integrity sha1-EzXF5PXm0zu7SwBrqMhqAPVW3gg=
 
 unfetch@^4.2.0:
   version "4.2.0"

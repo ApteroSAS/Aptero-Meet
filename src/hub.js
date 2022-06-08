@@ -131,7 +131,6 @@ import "./components/track-pose";
 import "./components/replay";
 import "./components/visibility-by-path";
 import "./components/tags";
-import "./components/hubs-text";
 import "./components/billboard";
 import "./components/periodic-full-syncs";
 import "./components/inspect-button";

@@ -12,11 +12,11 @@
     "declaration": true,
     "emitDeclarationOnly": true,
     "suppressImplicitAnyIndexErrors": true,
-    "lib": [
-      "es2018",
-      "dom"
+    "lib": [ //https://www.typescriptlang.org/tsconfig#lib
+      "ESNext",
+      "DOM"
     ],
-    "moduleResolution": "node",
+    "moduleResolution": "node",//https://www.typescriptlang.org/docs/handbook/module-resolution.html
     "baseUrl": "./",
     // Ensure that Babel can safely transpile files in the TypeScript project
     "isolatedModules": true,
