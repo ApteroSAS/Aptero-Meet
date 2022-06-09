@@ -1,0 +1,62 @@
+{
+    "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.11/MicrosoftTeams.schema.json",
+    "manifestVersion": "1.11",
+    "version": "2.0.13",
+    "id": "ee9b474a-d36a-4e93-a08b-84bd25f10f68",
+    "packageName": "com.microsoft.teams.extension",
+    "localizationInfo": {
+        "defaultLanguageTag": "en"
+    },
+    "developer": {
+        "name": "Aptero",
+        "websiteUrl": "https://www.aptero.co",
+        "privacyUrl": "https://www.aptero.co/legal/privacy.html",
+        "termsOfUseUrl": "https://www.aptero.co/legal/termsofuse.html"
+    },
+    "icons": {
+        "color": "resources/color.png",
+        "outline": "resources/outline.png"
+    },
+    "name": {
+        "short": "Aptero (CI)",
+        "full": "Aptero - 3D Spaces (CI)"
+    },
+    "description": {
+        "short": "Micro metaverse for business",
+        "full": "Your events and immersive training in 3D. Create your immersive 3D rooms with your company's DNA. Organize your meetings, events and training in a fun way remotely. Compatible with any device, personalize and broadcast your content."
+    },
+    "accentColor": "#FFFFFF",
+    "bots": [],
+    "composeExtensions": [],
+    "configurableTabs": [
+        {
+            "configurationUrl": "https://localhost:53000/microsoft-settings.html?msteams=true",
+            "canUpdateConfiguration": true,
+            "scopes": [
+                "team",
+                "groupchat"
+            ],
+            "context": [
+                "channelTab",
+                "privateChatTab",
+                "meetingChatTab",
+                "meetingDetailsTab",
+                "meetingSidePanel",
+                "meetingStage"
+            ]
+        }
+    ],
+    "permissions": [
+        "identity",
+        "messageTeamMembers"
+    ],
+    "validDomains": [
+        "*.aptero.co",
+        "*.axolotis.com",
+        "localhost"
+    ],
+    "webApplicationInfo": {
+        "id": "d8f6f4fa-b00d-46c2-af48-196e6861bb50",
+        "resource": "api://localhost/d8f6f4fa-b00d-46c2-af48-196e6861bb50"
+    }
+}

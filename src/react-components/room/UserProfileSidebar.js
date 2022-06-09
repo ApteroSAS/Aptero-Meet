@@ -8,7 +8,7 @@ import {FormattedMessage, useIntl} from "react-intl";
 import {rotateInPlaceAroundWorldUp, affixToWorldUp} from "../../utils/three-utils";
 import {UserProfileVisitCardContainer} from "./UserProfileVisitCardContainer";
 import {PeopleSidebarContainer, usePeopleList} from "./PeopleSidebarContainer";
-import {microsoftService,msTeamsAPILight} from "@aptero/axolotis-module-teams";
+import {msTeamsAPI,msTeamsAPILight} from "@aptero/axolotis-module-teams";
 
 function useGoToSelectedAvatar(entity) {
     const targetMatrix = new THREE.Matrix4();
@@ -218,12 +218,12 @@ export function UserProfileSidebar({
                     {microsoftUserId &&
                         <>
                             <Button preset="basic" onClick={async () =>{
-                                (await microsoftService()).processDeepLink("https://teams.microsoft.com/l/chat/0/0?users="+microsoftUserEmail);
+                                await (await msTeamsAPI()).processDeepLink("https://teams.microsoft.com/l/chat/0/0?users=" + microsoftUserEmail);
                             }}>
                                 <FormattedMessage id="user-profile-sidebar.chat-button" defaultMessage="Chat"/>
                             </Button>
                             <Button preset="basic" onClick={async () => {
-                              (await microsoftService()).processDeepLink("https://teams.microsoft.com/l/call/0/0?users="+microsoftUserEmail);
+                              await (await msTeamsAPI()).processDeepLink("https://teams.microsoft.com/l/call/0/0?users=" + microsoftUserEmail);
                             }}>
                                 <FormattedMessage id="user-profile-sidebar.call-button" defaultMessage="Call"/>
                             </Button>

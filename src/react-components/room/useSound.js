@@ -22,28 +22,31 @@ export function useSound({ webmSrc, mp3Src, oggSrc, wavSrc }) {
       audioElRef.current = audioEl;
 
       return () => {
-        audioEl.pause();
+          if(soundPlaying){
+              audioEl.pause();
+          }
         audioEl.currentTime = 0;
         clearTimeout(soundTimeoutRef.current);
       };
     },
-    [webmSrc, mp3Src, oggSrc, wavSrc]
+    [webmSrc, mp3Src, oggSrc, wavSrc, soundPlaying]
   );
 
   const playSound = useCallback(
     () => {
+        (async ()=>{
       const audioEl = audioElRef.current;
 
       if (audioEl) {
         audioEl.currentTime = 0;
         clearTimeout(soundTimeoutRef.current);
-        audioEl.play();
+        await audioEl.play();
         setSoundPlaying(true);
 
         soundTimeoutRef.current = setTimeout(() => {
           setSoundPlaying(false);
         }, 1393);
-      }
+      }})()
     },
     [audioElRef, setSoundPlaying]
   );

@@ -16,7 +16,7 @@ import {
 
 /**
  * Remove Tab
- */
+ *//*
 test('teams initial cleanup (no fail)', async ({ page }) => {
     test.setTimeout(4*60*1000);
     await page.goto('https://teams.microsoft.com/');
@@ -24,7 +24,7 @@ test('teams initial cleanup (no fail)', async ({ page }) => {
     // Click [aria-label="Teams Toolbar"]
     await page.locator('[aria-label="Teams Toolbar"]').click();
     // Click [aria-label="Your teams"] ng-include div:has-text("General")
-    await page.locator('[aria-label="Your teams"] ng-include div:has-text("General")').click();
+    await page.locator('[aria-label="Your teams"] ng-include div:has-text("General")').first().click();
     await page.locator('[aria-label="Files"] >> text=Files').click();//to avoid having all the chat log
 
     try {
@@ -34,7 +34,7 @@ test('teams initial cleanup (no fail)', async ({ page }) => {
             await locator.click();
         }
     }catch (e){
-        /* optional ignore*/
+        // optional ignore
     }
 
 
@@ -43,7 +43,7 @@ test('teams initial cleanup (no fail)', async ({ page }) => {
     try {
         await locator.waitFor({ state: 'visible',timeout:5000 });
     }catch (e){
-        /* optional ignore*/
+        // optional ignore
     }
     if(await locator.count()>0) {
         await page.locator('text=Virtual Meeting').first().click();
@@ -54,40 +54,60 @@ test('teams initial cleanup (no fail)', async ({ page }) => {
         await page.locator('button:has-text("Remove")').click();
         await locator.waitFor({state:'detached',timeout:5000});
     }
-});
+});*/
 
 /**
  * Create a tab
  */
 test('teams setting up', async ({ page }) => {
     test.setTimeout(4*60*1000);
-    await page.goto('https://teams.microsoft.com/l/app/'+localTeamsAppId+'?installAppPackage=true&webjoin=true&appTenantId='+tenant+'&login_hint='+accountHint);
-    await initialConnexion(page,true);
+    await page.goto('https://teams.microsoft.com/');
+    await initialConnexion(page);
     await startErrorWatchTeams(page);//after initial connexion to avoid reload page
+    //Navigate to toolbar
+    // Click [aria-label="Teams Toolbar"]
+    await page.locator('[aria-label="Teams Toolbar"]').click();
+    // Click [aria-label="Your teams"] ng-include div:has-text("General")
+    await page.locator('[aria-label="Your teams"] ng-include div:has-text("General")').first().click();
+    //await page.locator('[aria-label="Files"] >> text=Files').click();//to avoid having all the chat log
 
-    // Click text=Add to a team
-    await page.locator('text=Add to a team').click();
-    // Click #tcp-input-id
-    await page.locator('#tcp-input-id').click();
-    // Fill text=Type a team or channel name General Ci Test >> [placeholder="Search"]
-    await page.locator('text=Type a team or channel name General Ci Test >> [placeholder="Search"]').fill('Ci test');
-    // Click button:has-text("General Ci Test")
-    await page.locator('button:has-text("General Ci Test")').click();
-    // Click text=Set up a tab
-    await page.locator('text=Set up a tab').click();
+    //Add the app
+    // Click #add-tab-button-v2
+    await page.locator('#add-tab-button-v2').click();
+    // Click text=Add a tab Turn your favorite apps and files into tabs at the top of the channel  >> [placeholder="Search"]
+    await page.locator('text=Add a tab Turn your favorite apps and files into tabs at the top of the channel  >> [placeholder="Search"]').click();
+    // Fill text=Add a tab Turn your favorite apps and files into tabs at the top of the channel  >> [placeholder="Search"]
+    await page.locator('text=Add a tab Turn your favorite apps and files into tabs at the top of the channel  >> [placeholder="Search"]').fill('aptero');
+
+    await new Promise(resolve => setTimeout(resolve, 500));
+    // Click text=Aptero (CI)
+    await page.locator('text=Aptero (CI)').first().click();
+
+    // Click text=Post to the channel about this tab Back Save >> path >> nth=1
+    await page.locator('text=Post to the channel about this tab Back Save >> path').nth(1).click();
 
     //https://playwright.dev/docs/api/class-framelocator
+
+    //const frame = page.frameLocator('iframe[name="embedded-page-container"]')
     const frame = page.frameLocator('iframe[name="embedded-page-container"]');
+
+    // Click button:has-text("Sign In")
     await frame.locator('button:has-text("Sign In")').click();
 
     // Click text=My Room
-    await page.frameLocator('iframe[name="embedded-page-container"]').locator('text=My Room').click();
+    await frame.locator('text=My Room').click();
     // Click text=StarPeople 0Playwright - EmptyJoined 3 minutes ago
-    await page.frameLocator('iframe[name="embedded-page-container"]').locator('img[alt="Playwright - Empty"]').click();
+    await frame.locator('img[alt="Playwright - Empty"]').click();
 
+    await new Promise(resolve => setTimeout(resolve, 500));
     await page.locator('[aria-label="Save"]').click();
-    await page.waitForLoadState('networkidle');
 
+    //NOTE this is a HACK since the first save does not work in localhost but the second work
+    await new Promise(resolve => setTimeout(resolve, 500));
+    await page.locator('[aria-label="Save"]').click();
+
+    await page.waitForLoadState('networkidle');//load the iframe containing the aptero app
+    await new Promise(resolve => setTimeout(resolve, 500));
     //Focus virtual meeting
     // Click text=Virtual Meeting
     await page.locator('text=Virtual Meeting').click();
@@ -97,7 +117,6 @@ test('teams setting up', async ({ page }) => {
 
     // Click [aria-label="More"]
     await page.frameLocator('iframe[name="embedded-page-container"]').locator('[aria-label="More"]').click();
-
 
     await stopErrorWatchTeams(page);
 
@@ -127,7 +146,7 @@ test('teams cleanup', async ({ page }) => {
     // Click [aria-label="Teams Toolbar"]
     await page.locator('[aria-label="Teams Toolbar"]').click();
     // Click [aria-label="Your teams"] ng-include div:has-text("General")
-    await page.locator('[aria-label="Your teams"] ng-include div:has-text("General")').click();
+    await page.locator('[aria-label="Your teams"] ng-include div:has-text("General")').first().click();
     await page.locator('[aria-label="Files"] >> text=Files').click();//to avoid having all the chat log
 
     try {

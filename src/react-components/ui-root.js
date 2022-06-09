@@ -101,11 +101,10 @@ import { getSelectedPersonName } from "./room/PeopleSidebarContainer";
 import { Promise } from "core-js";
 import { UserProfileVisitCardContainer } from "./room/UserProfileVisitCardContainer";
 import axios from "axios";
-import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
+import {msTeamsAPI, msTeamsAPILight} from "@aptero/axolotis-module-teams";
 import { propertiesService } from "../aptero/module/properties/propertiesService";
 import AptRoot from "../aptero/module/HubsBridge/AptRoot";
 import { minimumQualityService } from "../aptero/module/perf/MinimumQualityService";
-import { microsoftService } from "@aptero/axolotis-module-teams";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 const IN_ROOM_MODAL_ROUTER_PATHS = ["/media"];
@@ -216,7 +215,7 @@ export class UIRoot extends Component {
     sidebarId: null,
     userId: null,
     presenceCount: 0,
-    microsoftService: null
+    msTeamsAPI: null
   };
 
   constructor(props) {
@@ -228,8 +227,8 @@ export class UIRoot extends Component {
     this.exitEventHandler = () => this.props.exitScene();
     this.mediaDevicesManager = window.APP.mediaDevicesManager;
     if (msTeamsAPILight().msTeams()) {
-      microsoftService().then(service => {
-        this.setState({ microsoftService: service });
+      msTeamsAPI().then(service => {
+        this.setState({ msTeamsAPI: service });
       });
     }
   }
@@ -510,7 +509,7 @@ export class UIRoot extends Component {
           step: SignInStep.WaitForMicrosoftVerification,
           onClose: onContinueAfterSignIn || this.closeDialog
         });
-        await this.state.microsoftService.getLoginService().login();
+        await this.state.msTeamsAPI.getLoginService().login();
         this.showNonHistoriedDialog(RoomSignInModalContainer, {
           step: SignInStep.complete,
           onClose: onContinueAfterSignIn || this.closeDialog,
@@ -1463,7 +1462,7 @@ export class UIRoot extends Component {
       }
     ];
 
-    if (msTeamsAPILight().msTeams() && this.state.microsoftService) {
+    if (msTeamsAPILight().msTeams() && this.state.msTeamsAPI) {
       moreMenu = [
         {
           id: "user",
@@ -1483,19 +1482,19 @@ export class UIRoot extends Component {
               icon: SettingsIcon,
               onClick: () => this.setState({ showPrefs: true })
             },
-            this.state.microsoftService.getLoginService().isSignedIn() ? {
+            this.state.msTeamsAPI.getLoginService().isSignedIn() ? {
               id: "authorize",
               label: "Sign Out",
               icon: SettingsIcon,
               onClick: () => {
-                this.state.microsoftService.getLoginService().logout();
+                this.state.msTeamsAPI.getLoginService().logout();
               }
             } : {
               id: "authorize",
               label: "Sign In",
               icon: SettingsIcon,
               onClick: () => {
-                this.state.microsoftService.getLoginService().login();
+                this.state.msTeamsAPI.getLoginService().login();
               }
             }
           ].filter(item => item)

@@ -18,13 +18,13 @@ import {
  * their choices and communicate that to Teams to enable the save button.
  */
 export class TabConfig extends React.Component {
+  fullUrl = "";
   state = {
     //url:"https://meet.aptero.co/3NKS9NY?embed_token=ae766e3d6bb6394d2aa38f69d5f1aad9&adapter=none"
     //url:"https://meet.aptero.co/3S7yY8X/kpmg-eqho?embed_token=ed66cbb7892901957af4a85bd30f2cd1"
     //url:"https://fa02-2001-861-36c3-d030-3101-4f25-21aa-393e.ngrok.io/hub.html?hub_id=fTj63Hg&msteams=true&embed_token=846d38e7d0bc3c49716f5f5cb2577ff8"
     //url:"https://alphahub.aptero.co/fTj63Hg",
     url: "",
-    size: { width: "100%", height: "2000px" },
     initialized: null,
     suggestedDisplayName: "Virtual Meeting",
   };
@@ -49,10 +49,17 @@ export class TabConfig extends React.Component {
           }
         }
       });
-      const callbackUrl = (msg) => {
+      const callbackUrl = async (msg) => {
         try {
-          new URL(msg.url); //test url valide
-          this.setState({ url: msg.url });
+          let url=msg.url;
+          this.setState({ url: url });
+          const roomurl = new URL(url); //test url valide
+          const teamsParams = btoa(encodeURIComponent(JSON.stringify(await (await msTeamsAPI()).getLoginService().getTeamsLoginService().getCredential().getUserInfo())));
+          roomurl.searchParams.append(MSTEAMS_QUERY_PARAM, teamsParams);
+          let data = roomService().parseUrl(roomurl.toString());
+          let token = await roomService().getEmbedToken(data.roomSID, data.origin);
+          roomurl.searchParams.append("embed_token", token);
+          this.fullUrl = roomurl.toString();
         } catch (ex) {
           console.error(ex);
         }
@@ -67,20 +74,12 @@ export class TabConfig extends React.Component {
        * This allows for the addition of query string parameters based on
        * the settings selected by the user.
        */
-      microsoftTeams.settings.registerOnSaveHandler(async (saveEvent) => {
-        let config = { ...this.state };
-        const roomurl = new URL(config.url);
-        const teamsParams = btoa(encodeURIComponent(JSON.stringify(await (await msTeamsAPI()).getLoginService().getTeamsLoginService().getCredential().getUserInfo())));
-        roomurl.searchParams.append(MSTEAMS_QUERY_PARAM, teamsParams);
-        let data = roomService().parseUrl(roomurl.toString());
-        let token = await roomService().getEmbedToken(data.roomSID, data.origin);
-        roomurl.searchParams.append("embed_token", token);
-        config.url = roomurl.toString();
+      microsoftTeams.settings.registerOnSaveHandler((saveEvent) => {
         microsoftTeams.settings.setSettings({
           suggestedDisplayName: this.state.suggestedDisplayName,
           entityId: "sceneConfig",
-          contentUrl: config.url,
-          websiteUrl: config.url,
+          contentUrl: this.fullUrl,
+          websiteUrl: this.fullUrl,
         });
         saveEvent.notifySuccess();
       });
@@ -102,7 +101,7 @@ export class TabConfig extends React.Component {
      * dialog.
      */
     if (this.state.url) {
-      //form valisation
+      //form validation
       try {
         new URL(this.state.url);
         microsoftTeams.settings.setValidityState(true);

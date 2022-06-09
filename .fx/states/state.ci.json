@@ -1,0 +1,41 @@
+{
+    "solution": {
+        "teamsAppTenantId": "48caed5d-d20d-40ce-b0cd-9261fc5d8f83",
+        "subscriptionId": "ff4fdd30-08ff-40e8-9225-720c1f964f08",
+        "subscriptionName": "Azure subscription 1",
+        "tenantId": "48caed5d-d20d-40ce-b0cd-9261fc5d8f83",
+        "needCreateResourceGroup": false,
+        "resourceGroupName": "Aptero-alpha-rg",
+        "location": "westeurope",
+        "resourceNameSuffix": "bdf185",
+        "provisionSucceeded": true
+    },
+    "fx-resource-appstudio": {
+        "tenantId": "48caed5d-d20d-40ce-b0cd-9261fc5d8f83",
+        "teamsAppId": "ee9b474a-d36a-4e93-a08b-84bd25f10f68",
+        "teamsAppUpdatedAt": 1654776520258
+    },
+    "fx-resource-identity": {
+        "identityName": "apteroci925f15",
+        "identityResourceId": "/subscriptions/ff4fdd30-08ff-40e8-9225-720c1f964f08/resourceGroups/Aptero-alpha-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/apteroci925f15",
+        "identityClientId": "88b81409-e5cf-42cb-ba7d-a873163455a2"
+    },
+    "fx-resource-aad-app-for-teams": {
+        "clientId": "d8f6f4fa-b00d-46c2-af48-196e6861bb50",
+        "clientSecret": "{{fx-resource-aad-app-for-teams.clientSecret}}",
+        "objectId": "e2e949f4-45d8-46cd-b642-f7ca35403b09",
+        "oauth2PermissionScopeId": "55d6a59b-1ab4-4b24-9d1b-3cd562a0cee4",
+        "tenantId": "48caed5d-d20d-40ce-b0cd-9261fc5d8f83",
+        "oauthHost": "https://login.microsoftonline.com",
+        "oauthAuthority": "https://login.microsoftonline.com/common",
+        "applicationIdUris": "api://localhost/d8f6f4fa-b00d-46c2-af48-196e6861bb50",
+        "frontendEndpoint": "https://localhost"
+    },
+    "fx-resource-frontend-hosting": {
+        "indexPath": "/index.html#",
+        "endpoint": "https://localhost:53000",
+        "domain": "localhost",
+        "sslCertFile": "./certs/cert.pem",
+        "sslKeyFile": "./certs/key.pem"
+    }
+}

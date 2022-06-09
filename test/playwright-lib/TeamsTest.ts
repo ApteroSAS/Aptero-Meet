@@ -1,6 +1,6 @@
-import localJson from './../../.fx/states/state.local.json';
-
-export const localTeamsAppId = localJson["fx-resource-appstudio"].teamsAppId;
+//import localJson from './../../.fx/states/state.local.json';
+//export const localTeamsAppId = localJson["fx-resource-appstudio"].teamsAppId;
+export const localTeamsAppId = "b5fd758c-0623-4e51-ab03-a5898b9d0f0b";
 export const tenant = "48caed5d-d20d-40ce-b0cd-9261fc5d8f83";
 export const accountHint = "test1@aptero.co";
 export const password = "Lub09002";
@@ -8,7 +8,6 @@ export const password = "Lub09002";
 
 //See TeamsTestHelper for sther side
 //import {ERROR_LOG_NOTIFICATION} from "../../src/aptero/module/microsoft/service/TeamsTestHelper";
-
 export async function navigateToTab(page,tabName = "Virtual Meeting"){
     // Click [aria-label="Teams Toolbar"]
     await page.locator('[aria-label="Teams Toolbar"]').click();
@@ -19,7 +18,6 @@ export async function navigateToTab(page,tabName = "Virtual Meeting"){
     await page.locator('[aria-label="'+tabName+' Press Enter to select or press Shift\\+F10 for more options"] >> text='+tabName).click();
     // assert.equal(page3.url(), 'https://teams.microsoft.com/_#/tab::3f6f4050-ae56-40d2-9a8a-6e4f143ddf42/General?threadId=19:LsdNx7OQvs6oxFE2Ro5hLOMTC1lHYmaE_Ee-Kpr_6PI1@thread.tacv2&ctx=channel');
 }
-
 
 /*let browser = null;
 async function init(page){

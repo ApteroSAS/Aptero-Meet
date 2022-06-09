@@ -94,15 +94,11 @@
     ],
     "replyUrlsWithType": [
         {
-            "url": "{{state.fx-resource-aad-app-for-teams.frontendEndpoint}}/auth-end.html",
-            "type": "Web"
-        },
-        {
             "url": "{{state.fx-resource-aad-app-for-teams.frontendEndpoint}}/auth-end.html?clientId={{state.fx-resource-aad-app-for-teams.clientId}}",
             "type": "Spa"
         },
         {
-            "url": "{{state.fx-resource-aad-app-for-teams.frontendEndpoint}}/blank-auth-end.html",
+            "url": "{{state.fx-resource-aad-app-for-teams.frontendEndpoint}}/auth-end.html",
             "type": "Spa"
         }
     ]

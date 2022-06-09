@@ -1,0 +1,14 @@
+{
+    "$schema": "https://aka.ms/teamsfx-env-config-schema",
+    "description": "Your events and immersive training in 3D. Create your immersive 3D rooms with your company's DNA. Organize your meetings, events and training in a fun way remotely. Compatible with any device, personalize and broadcast your content.",
+    "manifest": {
+        "appName": {
+            "short": "Aptero (CI)",
+            "full": "Aptero - 3D Spaces (CI)"
+        },
+        "description": {
+            "short": "Micro metaverse for business",
+            "full": "Your events and immersive training in 3D. Create your immersive 3D rooms with your company's DNA. Organize your meetings, events and training in a fun way remotely. Compatible with any device, personalize and broadcast your content."
+        }
+    }
+}
