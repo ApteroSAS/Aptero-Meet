@@ -1,1 +1,0 @@
-export function lazyLoad(adapter: any): Promise<typeof import("./naf-twilio-adapter") | typeof import("./naf-dialog-io-adapter") | typeof import("./naf-dialog-io-data-only-adapter") | typeof import("./naf-agora-adapter") | typeof import("./naf-none-adapter") | typeof import("./naf-socketio-adapter")>;
