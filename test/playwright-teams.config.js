@@ -9,7 +9,7 @@ const config = {
     testDir:process.env.PW_TEST_DIR || "./playwright-teams",
     webServer: {
         ignoreHTTPSErrors: true,
-        command: 'yarn run ci:coverage:ci:coverage:teams:serve',
+        command: 'yarn run ci:coverage:teams:serve',
         url: 'https://localhost:'+(process.env.PW_PORT||"53000"),
         reuseExistingServer: !!process.env.CI,
         timeout: 120 * 1000

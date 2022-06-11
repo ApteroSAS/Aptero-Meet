@@ -16,7 +16,7 @@ import {
 
 /**
  * Remove Tab
- *//*
+ */
 test('teams initial cleanup (no fail)', async ({ page }) => {
     test.setTimeout(4*60*1000);
     await page.goto('https://teams.microsoft.com/');
@@ -54,7 +54,7 @@ test('teams initial cleanup (no fail)', async ({ page }) => {
         await page.locator('button:has-text("Remove")').click();
         await locator.waitFor({state:'detached',timeout:5000});
     }
-});*/
+});
 
 /**
  * Create a tab
