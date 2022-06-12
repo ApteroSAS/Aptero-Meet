@@ -83,3 +83,4 @@ src/assets/locales/extracted-messages.json
 /tabs/.env.teamsfx.local
 /.fx/states/local.userdata
 /.fx/states/state.local.json
+/build/

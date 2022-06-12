@@ -10,14 +10,14 @@
     "@jridgewell/gen-mapping" "^0.1.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@aptero/axolotis-module-teams@git+https://github.com/ApteroSAS/teams-module.git#ad402cb6038837463be952f2115c2b0cad6ea5f3":
+"@aptero/axolotis-module-teams@git+https://github.com/ApteroSAS/teams-module.git#8a4249bbf60ff25fd36b081205ec22ad40b85d48":
   version "1.0.0"
-  resolved "git+https://github.com/ApteroSAS/teams-module.git#ad402cb6038837463be952f2115c2b0cad6ea5f3"
+  resolved "git+https://github.com/ApteroSAS/teams-module.git#8a4249bbf60ff25fd36b081205ec22ad40b85d48"
   dependencies:
     "@aptero/axolotis-player" "git+https://github.com/ApteroSAS/axolotis-player.git#semver:^1"
-    "@azure/msal-browser" "2.16.1"
+    "@azure/msal-browser" "2.25.0"
     "@microsoft/microsoft-graph-client" "^3.0.2"
-    "@microsoft/teams-js" "^1.12.1"
+    "@microsoft/teams-js" "^2.0.0"
     "@microsoft/teamsfx" "^1.0.0"
     deepmerge "^4.2.2"
     event-target-shim "^6.0.2"
@@ -249,14 +249,7 @@
     uuid "^3.2.1"
     xml2js "^0.4.19"
 
-"@azure/msal-browser@2.16.1":
-  version "2.16.1"
-  resolved "https://registry.yarnpkg.com/@azure/msal-browser/-/msal-browser-2.16.1.tgz#4b41afc1654eb27e090892893a2a2600af589af7"
-  integrity sha512-PcYi4seUGdtu30mOIdwk4FvbOdHFQ+fKAptEqV0tcsrvor0Hox/R0Xr0GEiBMfKkJbagLOYX7ORPRCYhZrWeqw==
-  dependencies:
-    "@azure/msal-common" "^4.5.1"
-
-"@azure/msal-browser@^2.16.0", "@azure/msal-browser@^2.21.0":
+"@azure/msal-browser@2.25.0", "@azure/msal-browser@^2.16.0", "@azure/msal-browser@^2.21.0":
   version "2.25.0"
   resolved "https://registry.yarnpkg.com/@azure/msal-browser/-/msal-browser-2.25.0.tgz#bd80fc3407e88da2ce5bd513979a06a2c8f92858"
   integrity sha512-hXyqNqNO1pcGqfPLBFutqlsk4VvXXuj0SLXdFpV3dq/dPUgbXDj+9ZkY/Lm+GyqWKBjKuU2AXDOhL9qDjwAWVw==
@@ -2127,10 +2120,12 @@
   resolved "https://registry.yarnpkg.com/@microsoft/recognizers-text/-/recognizers-text-1.1.4.tgz#264530f748b2cad3fac54d53538f88ad2bf99b7e"
   integrity sha512-hlSVXcaX5i8JcjuUJpVxmy2Z/GxvFXarF0KVySCFop57wNEnrLWMHe4I4DjP866G19VyIKRw+vPA32pkGhZgTg==
 
-"@microsoft/teams-js@^1.12.1":
-  version "1.12.1"
-  resolved "https://registry.yarnpkg.com/@microsoft/teams-js/-/teams-js-1.12.1.tgz#b076867829e758f35b2c4a63c5dffce5775e0460"
-  integrity sha512-BRy6vZOseN9F/MG0NWTojYpenuo9XlZ4AfAvwnsG+C36UDPPgW0skWlZ6ub+7RBPhOHcxz8sNg2uHOdGRebWkQ==
+"@microsoft/teams-js@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@microsoft/teams-js/-/teams-js-2.0.0.tgz#385b19b7cf5f02def4efb3481644714c1e5f780f"
+  integrity sha512-13Mag9MkUplbZxK1qu55r8YSNkuOpmmZuha7P8Z26ef5ZnrYm9PM3JCoWgDvBqILxWF2e1Yo/5V2Ic9yD9rU0Q==
+  dependencies:
+    debug "4.3.3"
 
 "@microsoft/teamsfx@^1.0.0":
   version "1.0.0"
@@ -6962,6 +6957,13 @@ debug@4.3.2:
   version "4.3.2"
   resolved "https://registry.yarnpkg.com/debug/-/debug-4.3.2.tgz#f0a49c18ac8779e31d4a0c6029dfb76873c7428b"
   integrity sha512-mOp8wKcvj7XxC78zLgw/ZA+6TSgkoE2C/ienthhRD298T7UNwAg9diBpLRxC0mOezLl4B0xV7M0cCO6P/O0Xhw==
+  dependencies:
+    ms "2.1.2"
+
+debug@4.3.3:
+  version "4.3.3"
+  resolved "https://registry.yarnpkg.com/debug/-/debug-4.3.3.tgz#04266e0b70a98d4462e6e288e38259213332b664"
+  integrity sha512-/zxw5+vh1Tfv+4Qn7a5nsbcJKPaSvCDhojn6FEl9vupwK2VCSDtEiEtqr8DFtzYFOdz63LBkxec7DYuc2jon6Q==
   dependencies:
     ms "2.1.2"
 
