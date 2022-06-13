@@ -1,13 +1,12 @@
 import React, { Component } from "react";
 import { Modal } from "../../../../react-components/modal/Modal";
-import styles from "./ShareScreenModal.scss";
 import { BackButton } from "../../../../react-components/input/BackButton";
 import { FormattedMessage } from "react-intl";
 import { Column } from "../../../../react-components/layout/Column";
 import { ToolbarButton } from "../../../../react-components/input/ToolbarButton";
 import { ReactComponent as VideoIcon } from "../../../../react-components/icons/Video.svg";
 import { ReactComponent as DesktopIcon } from "../../../../react-components/icons/Desktop.svg";
-import { completeEntry, mlHandleEntryClicked } from "./media-tiles-lib";
+import { completeEntry } from "./media-tiles-lib";
 
 export class ShareScreenModal extends Component {
   state = {

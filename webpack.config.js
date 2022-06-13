@@ -4,7 +4,7 @@ const path = require("path");
 const selfsigned = require("selfsigned");
 const webpack = require("webpack");
 const HTMLWebpackPlugin = require("html-webpack-plugin");
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+//const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const versionJson = require("./version.json");
 
@@ -91,7 +91,7 @@ module.exports = async (env, argv) => {
       "microsoft-settings": path.join(__dirname, "src/aptero/module/microsoft/page", "microsoft-settings.tsx"),
       support: path.join(__dirname, "src", "support.js"),
       index: path.join(__dirname, "src", "index.js"),
-      hub: path.join(__dirname, "src", "hub.js"),
+      hub: path.join(__dirname, "src", "hub.async.ts"),
       scene: path.join(__dirname, "src", "scene.js"),
       link: path.join(__dirname, "src", "link.js"),
       signin: path.join(__dirname, "src", "signin.js"),
@@ -124,6 +124,8 @@ module.exports = async (env, argv) => {
       }
     },
     performance: {
+      //maxEntrypointSize: 500 * 1000,//500kb
+      maxAssetSize: 2 * 1000 * 1000,//2mb
       // Ignore media and sourcemaps when warning about file size.
       assetFilter(assetFilename) {
         return !/\.(map|png|jpg|gif|glb|webm)$/.test(assetFilename);
@@ -140,12 +142,6 @@ module.exports = async (env, argv) => {
         'util': require.resolve('util/'),
         'events': require.resolve('events/')
       },
-      /*alias: {
-        process: "process/browser",
-        stream: "stream-browserify",
-        zlib: "browserify-zlib",
-        util: 'util'
-      },*/
       extensions: ["*", ".js", ".jsx", ".tsx", ".ts", ".json"]
     },
     module: {
@@ -176,7 +172,7 @@ module.exports = async (env, argv) => {
           loader: "babel-loader",
           options: legacyBabelConfig
         },
-        // Some JS assets are loaded at runtime and should be coppied unmodified and loaded using file-loader
+        // Some JS assets are loaded at runtime and should be copied unmodified and loaded using file-loader
         {
           test: [
             path.resolve(__dirname, "node_modules", "three", "examples", "js", "libs", "basis", "basis_transcoder.js")
@@ -196,9 +192,7 @@ module.exports = async (env, argv) => {
         {
           test: /\.(scss|css)$/,
           use: [
-            {
-              loader: MiniCssExtractPlugin.loader
-            },
+            //MiniCssExtractPlugin.loader,
             {
               loader: "css-loader",
               options: {
@@ -264,7 +258,17 @@ module.exports = async (env, argv) => {
     },
 
     optimization: {
+      //https://webpack.js.org/plugins/split-chunks-plugin/
       minimize: argv.mode === "production",
+      splitChunks: {
+        chunks: 'all',
+        minSize: 20000,
+        minRemainingSize: 0,
+        minChunks: 1,
+        maxAsyncRequests: 30,
+        maxInitialRequests: 30,
+        enforceSizeThreshold: 50000,
+      },
     },
     plugins: [
       new webpack.ProvidePlugin({
@@ -275,29 +279,24 @@ module.exports = async (env, argv) => {
         filename: "microsoft-settings.html",
         template: path.join(__dirname, "src/aptero/module/microsoft/page", "microsoft-settings.html"),
         chunks: ["microsoft-settings"],
-        chunksSortMode: "manual",
         minify: { removeComments: false }
       }),
       new HTMLWebpackPlugin({
         filename: "index.html",
         template: path.join(__dirname, "src", "index.html"),
         chunks: ["support", "index"],
-        chunksSortMode: "manual",
         minify: { removeComments: false }
       }),
       new HTMLWebpackPlugin({
         filename: "hub.html",
         template: path.join(__dirname, "src", "hub.html"),
         chunks: ["support", "hub"],
-        chunksSortMode: "manual",
         inject: "head",
-        minify: { removeComments: false }
       }),
       new HTMLWebpackPlugin({
         filename: "scene.html",
         template: path.join(__dirname, "src", "scene.html"),
         chunks: ["support", "scene"],
-        chunksSortMode: "manual",
         inject: "head",
         minify: { removeComments: false }
       }),
@@ -305,7 +304,6 @@ module.exports = async (env, argv) => {
         filename: "link.html",
         template: path.join(__dirname, "src", "link.html"),
         chunks: ["support", "link"],
-        chunksSortMode: "manual",
         minify: { removeComments: false }
       }),
       new HTMLWebpackPlugin({
@@ -345,10 +343,10 @@ module.exports = async (env, argv) => {
           }]
       }),
       // Extract required css and add a content hash.
-      new MiniCssExtractPlugin({
+      /*new MiniCssExtractPlugin({
         filename: "assets/stylesheets/[name]-[contenthash].css",
-        disable: argv.mode !== "production"
-      }),
+        //disable: argv.mode !== "production"
+      }),*/
       // Define process.env variables in the browser context.
       new webpack.DefinePlugin({
         "process.env": JSON.stringify({

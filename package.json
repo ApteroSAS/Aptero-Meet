@@ -62,7 +62,7 @@
   },
   "dependencies": {
     "@aptero/axolotis-module-teams": "git+https://github.com/ApteroSAS/teams-module.git#8a4249bbf60ff25fd36b081205ec22ad40b85d48",
-    "@aptero/axolotis-player": "git+https://github.com/ApteroSAS/axolotis-player.git#semver:^1.x.x",
+    "@aptero/axolotis-player": "git+https://github.com/ApteroSAS/axolotis-player.git#semver:^1.1.0",
     "@braintree/sanitize-url": "^5.0.0",
     "@fluentui/react-northstar": "^0.61.0",
     "@formatjs/intl-locale": "^2.4.13",
@@ -216,7 +216,7 @@
     "jsdom": "^15.1.1",
     "localstorage-memory": "^1.0.3",
     "mediasoup-client": "^3.6.29",
-    "mini-css-extract-plugin": "^0.8.0",
+    "mini-css-extract-plugin": "^2.6.0",
     "ncp": "^2.0.0",
     "node-fetch": "^2.6.1",
     "npm-scripts-info": "0.3.9",

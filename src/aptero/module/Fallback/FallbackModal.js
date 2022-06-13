@@ -2,7 +2,6 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Modal } from "../../../react-components/modal/Modal";
 import { Button } from "../../../react-components/input/Button";
-import styles from "./FallbackModal.scss";
 import { BackButton } from "../../../react-components/input/BackButton";
 import { FormattedMessage } from "react-intl";
 import { Column } from "../../../react-components/layout/Column";

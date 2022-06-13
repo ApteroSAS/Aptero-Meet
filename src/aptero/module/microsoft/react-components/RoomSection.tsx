@@ -26,7 +26,7 @@ function useSpokeProject() {
 }
 
 function useFavoriteRooms() {
-  const auth = useContext(AuthContext); // Re-render when you log in/out.
+  const auth:any = useContext(AuthContext); // Re-render when you log in/out.
   if (auth) {
     const getMoreRooms = useCallback(roomService().fetchFavoriteRoom(auth.userId), [auth.userId]);
     return usePaginatedAPI(getMoreRooms);

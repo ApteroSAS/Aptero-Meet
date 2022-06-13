@@ -4,7 +4,7 @@
     "outDir": "build/types",
     "module": "esnext",
     "target": "ES5",
-    "allowJs": true,
+    "allowJs": false,
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
@@ -27,7 +27,7 @@
     "src/**/*.tsx"
   ],
   "exclude": [
-    "*.js",
+    "src/**/*.js",
     "node_modules/**"
   ]
 }
