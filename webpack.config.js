@@ -90,7 +90,7 @@ module.exports = async (env, argv) => {
     entry: {
       "microsoft-settings": path.join(__dirname, "src/aptero/module/microsoft/page", "microsoft-settings.tsx"),
       support: path.join(__dirname, "src", "support.js"),
-      index: path.join(__dirname, "src", "index.js"),
+      index: path.join(__dirname, "src", "index.async.ts"),
       hub: path.join(__dirname, "src", "hub.async.ts"),
       scene: path.join(__dirname, "src", "scene.js"),
       link: path.join(__dirname, "src", "link.js"),
@@ -192,17 +192,19 @@ module.exports = async (env, argv) => {
         {
           test: /\.(scss|css)$/,
           use: [
-            //MiniCssExtractPlugin.loader,
+            // Creates `style` nodes from JS strings
+            "style-loader",
+            // Translates CSS into CommonJS
             {
+              //https://stackoverflow.com/questions/59147277/styles-is-undefined-with-webpack-and-typescript
               loader: "css-loader",
               options: {
-                name: "[path][name]-[hash].[ext]",
-                localIdentName: "[name]__[local]__[hash:base64:5]",
-                camelCase: true
+                esModule: true
               }
             },
-            "sass-loader"
-          ]
+            // Compiles Sass to CSS
+            "sass-loader",
+          ],
         },
         {
           test: /\.svg$/,
