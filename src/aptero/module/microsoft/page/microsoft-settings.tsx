@@ -6,7 +6,6 @@ import "../../../../utils/theme";
 
 
 registerTelemetry("/microsoft-settings", "microsoft-settings");
-import "./../../axolotis/AxolotisSystem"
 
 const store = new Store();
 declare const window;

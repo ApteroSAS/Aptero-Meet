@@ -199,7 +199,9 @@ module.exports = async (env, argv) => {
               //https://stackoverflow.com/questions/59147277/styles-is-undefined-with-webpack-and-typescript
               loader: "css-loader",
               options: {
-                esModule: true
+                modules: {
+                  exportLocalsConvention:"camelCase"
+                }
               }
             },
             // Compiles Sass to CSS

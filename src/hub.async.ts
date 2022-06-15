@@ -1,4 +1,30 @@
+
+import "@babel/polyfill";
+
 import "aframe";
+// A-Frame hardcodes THREE.Cache.enabled = true
+// But we don't want to use THREE.Cache because
+// web browser cache should work well.
+// So we disable it here.
+THREE.Cache.enabled = false;
+
+import "./utils/logging";
+import { patchWebGLRenderingContext } from "./utils/webgl";
+patchWebGLRenderingContext();
+
+// It seems we need to use require to import modules
+// under the three/examples/js to avoid tree shaking
+// in webpack production mode.
+require("three/examples/js/loaders/GLTFLoader");
+
+import "networked-aframe/src/index";
+import "aframe-rounded";
+import "webrtc-adapter";
+import "aframe-slice9-component";
+import "./utils/threejs-positional-audio-updatematrixworld";
+import "./utils/threejs-world-update";
+import "./utils/threejs-raycast-patches";
+import "./phoenix-adapter";
 
 import "./components/scene-components";
 import "./components/scale-in-screen-space";
@@ -103,13 +129,51 @@ import "./systems/linked-media";
 import "./systems/audio-debug-system";
 import "./systems/audio-gain-system";
 
-//ax
-import {getService} from "@aptero/axolotis-player";
+import "./gltf-component-mappings";
 
+import { App } from "./App";
+import { AdapterWarpper } from "./aptero/module/webRTCadapter/AdapterWrapper";
+
+window.APP = new App();
+window.APP.dialog = new AdapterWarpper();
+window.APP.RENDER_ORDER = {
+  HUD_BACKGROUND: 1,
+  HUD_ICONS: 2,
+  CURSOR: 3
+}
+
+declare const THREE;
+THREE.Object3D.DefaultMatrixAutoUpdate = false;
+import "./components/owned-object-limiter";
+import "./components/owned-object-cleanup-timeout";
+import "./components/set-unowned-body-kinematic";
+import "./components/scalable-when-grabbed";
+import "./components/networked-counter";
+import "./components/event-repeater";
+import "./components/set-yxz-order";
+
+import "./components/cursor-controller";
+
+import "./components/nav-mesh-helper";
+
+import "./components/tools/pen";
+import "./components/tools/pen-laser";
+import "./components/tools/networked-drawing";
+import "./components/tools/drawing-manager";
+
+import "./components/body-helper";
+import "./components/shape-helper";
+
+//ax
+import {getService} from "@aptero/axolotis-player"
+
+
+declare const window;
 
 export {};
 (async () => {
-  await import("./aptero/module/axolotis/AxInit");
+  const {initAxolotisPlayer} = await import("./aptero/module/axolotis/AxInit");
+  await initAxolotisPlayer();
   const {PROPERTIES_SERVICE,MICROSOFT_STATIC_SERVICE} = await import("@aptero/axolotis-module-teams");
   await getService(PROPERTIES_SERVICE);
   await getService(MICROSOFT_STATIC_SERVICE);

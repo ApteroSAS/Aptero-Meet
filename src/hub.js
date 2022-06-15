@@ -9,14 +9,11 @@ import {
 import "./utils/debug-log";
 import configs from "./utils/configs";
 import "./utils/theme";
-import "@babel/polyfill";
 import "./react-components/styles/global.scss";
 import "./assets/stylesheets/globals.scss";
 import "./assets/stylesheets/hub.scss";
 import initialBatchImage from "./assets/images/warning_icon.png";
 import loadingEnvironment from "./assets/models/LoadingEnvironment.glb";
-
-import "aframe";
 
 // A-Frame hardcodes THREE.Cache.enabled = true
 // But we don't want to use THREE.Cache because
@@ -24,22 +21,6 @@ import "aframe";
 // So we disable it here.
 THREE.Cache.enabled = false;
 
-import "./utils/logging";
-import { patchWebGLRenderingContext } from "./utils/webgl";
-patchWebGLRenderingContext();
-
-// It seems we need to use require to import modules
-// under the three/examples/js to avoid tree shaking
-// in webpack production mode.
-require("three/examples/js/loaders/GLTFLoader");
-
-import "networked-aframe/src/index";
-import "aframe-rounded";
-import "webrtc-adapter";
-import "aframe-slice9-component";
-import "./utils/threejs-positional-audio-updatematrixworld";
-import "./utils/threejs-world-update";
-import "./utils/threejs-raycast-patches";
 import patchThreeAllocations from "./utils/threejs-allocation-patches";
 import { detectOS, detect } from "detect-browser";
 import {
@@ -53,7 +34,6 @@ import {
 } from "./utils/phoenix-utils";
 import { Presence } from "phoenix";
 import { emitter } from "./emitter";
-import "./phoenix-adapter";
 
 import nextTick from "./utils/next-tick";
 import { addAnimationComponents } from "./utils/animation";
@@ -81,9 +61,6 @@ import SceneEntryManager from "./scene-entry-manager";
 import Subscriptions from "./subscriptions";
 import { createInWorldLogMessage } from "./react-components/chat-message";
 
-import "./gltf-component-mappings";
-
-import { App } from "./App";
 import MediaDevicesManager from "./utils/media-devices-manager";
 import { sleep } from "./utils/async-utils";
 import { platformUnsupported } from "./support";
@@ -92,19 +69,11 @@ import { platformUnsupported } from "./support";
 import { apteroService } from "./aptero/ApteroServices";
 import { roomController } from "./aptero/module/ButtonAPI/api/RoomController";
 import { fetchICEservers } from "./aptero/module/webRTCadapter/adapter-config";
-import { AdapterWarpper } from "./aptero/module/webRTCadapter/AdapterWrapper";
 //aptero service end
 
 import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
 msTeamsAPILight().redirectToTeamsSidePanel();
 
-window.APP = new App();
-window.APP.dialog = new AdapterWarpper();
-window.APP.RENDER_ORDER = {
-  HUD_BACKGROUND: 1,
-  HUD_ICONS: 2,
-  CURSOR: 3
-};
 const store = window.APP.store;
 store.update({ preferences: { shouldPromptForRefresh: undefined } }); // Clear flag that prompts for refresh from preference screen
 const mediaSearchStore = window.APP.mediaSearchStore;
@@ -122,26 +91,6 @@ if (isEmbed && !qs.get("embed_token")) {
 }
 
 THREE.Object3D.DefaultMatrixAutoUpdate = false;
-
-import "./components/owned-object-limiter";
-import "./components/owned-object-cleanup-timeout";
-import "./components/set-unowned-body-kinematic";
-import "./components/scalable-when-grabbed";
-import "./components/networked-counter";
-import "./components/event-repeater";
-import "./components/set-yxz-order";
-
-import "./components/cursor-controller";
-
-import "./components/nav-mesh-helper";
-
-import "./components/tools/pen";
-import "./components/tools/pen-laser";
-import "./components/tools/networked-drawing";
-import "./components/tools/drawing-manager";
-
-import "./components/body-helper";
-import "./components/shape-helper";
 
 import registerNetworkSchemas from "./network-schemas";
 import registerTelemetry from "./telemetry";
@@ -586,7 +535,7 @@ async function runBotMode(scene, entryManager) {
   entryManager.enterSceneWhenLoaded(false);
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
+const init = async () => {
   //APTERO
   let iceServer = await fetchICEservers();
   await minimumQualityService.checkTurnServerAndSwitchToTCP(iceServer);
@@ -1292,4 +1241,5 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   authChannel.setSocket(socket);
   linkChannel.setSocket(socket);
-});
+}
+init();

@@ -1,12 +1,17 @@
-import { createWorldSync, WorldEntity } from "@aptero/axolotis-player";
-import { registerComponent } from "./StaticComponentDeclaration";
+import {
+  createWorld,
+  getGlobalStorageValue,
+  GLOBAL_WORLDS_ENTITY,
+  WorldEntity
+} from "@aptero/axolotis-player";
 
-function initAxolotisPlayer(){
-  if(!world) {
-    world = createWorldSync();
-    registerComponent(world);
-    console.log("Axolotis player : loaded");
+export async function initAxolotisPlayer(){
+  const worlds = getGlobalStorageValue<WorldEntity[]>(GLOBAL_WORLDS_ENTITY, false);
+  if ((worlds && worlds.length > 0)) {
+    throw new Error("Axolotis World already initialized");
   }
+  await createWorld();
+  const {register} = await import("@aptero/axolotis-module-teams");
+  register();
+  console.log("Axolotis player : loaded");
 }
-export let world:WorldEntity =null;
-initAxolotisPlayer();

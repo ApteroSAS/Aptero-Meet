@@ -50,7 +50,7 @@ export function FallbackModal({ className, onEnterRoom, onBack, ...rest }) {
           className={className}
           {...rest}
       >
-        <Column padding center className={styles.content}>
+        <Column padding center>
           {status["turn-udp-issue"] || status["turn-tcp-issue"] &&
           <div style={{ color: "red" }}>
             <FormattedMessage

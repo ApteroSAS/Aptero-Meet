@@ -1,5 +1,4 @@
 import uuid from "uuid/v4";
-import "../aptero/module/axolotis/AxolotisSystem";
 import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
 
 export default class AuthChannel {
