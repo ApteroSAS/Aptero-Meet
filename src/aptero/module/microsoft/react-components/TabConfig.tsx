@@ -1,5 +1,4 @@
 import * as React from "react";
-import * as microsoftTeams from "@microsoft/teams-js";
 import { Loader } from "@fluentui/react-northstar"; //https://fluentsite.z22.web.core.windows.net/0.60.1
 import { FormattedMessage } from "react-intl";
 import { LoginButton } from "./LoginButton";
@@ -32,29 +31,29 @@ export class TabConfig extends React.Component {
 
   componentDidMount() {
     (async ()=>{
-      await (await msTeamsAPI()).getLoginService().onReady();
+      let msTeamsAPI1 = await msTeamsAPI();
+      await msTeamsAPI1.getLoginService().onReady();
       try {
-        await microsoftTeams.initialize();
+        await msTeamsAPI1.getTeamsApp().app.initialize();
       } catch (e) {
         console.log("microsoftTeams.initialize failed (probably not in teams so we skip it)", e);
       }
-      microsoftTeams.settings.setValidityState(false);
-      microsoftTeams.settings.getSettings((instanceSettings) => {
-        if (instanceSettings.websiteUrl) {
-          try {
-            new URL(instanceSettings.websiteUrl); //test url valide
-            this.setState({ url: instanceSettings.websiteUrl });
-          } catch (ex) {
-            console.error(ex);
-          }
+      msTeamsAPI1.getTeamsApp().pages.config.setValidityState(false);
+      const instanceSettings = await (await msTeamsAPI()).getTeamsApp().pages.getConfig();
+      if (instanceSettings.websiteUrl) {
+        try {
+          new URL(instanceSettings.websiteUrl); //test url valide
+          this.setState({ url: instanceSettings.websiteUrl });
+        } catch (ex) {
+          console.error(ex);
         }
-      });
+      }
       const callbackUrl = async (msg) => {
         try {
           let url=msg.url;
           this.setState({ url: url });
           const roomurl = new URL(url); //test url valide
-          const teamsParams = btoa(encodeURIComponent(JSON.stringify(await (await msTeamsAPI()).getLoginService().getTeamsLoginService().getCredential().getUserInfo())));
+          const teamsParams = btoa(encodeURIComponent(JSON.stringify(await msTeamsAPI1.getLoginService().getTeamsLoginService().getCredential().getUserInfo())));
           roomurl.searchParams.append(MSTEAMS_QUERY_PARAM, teamsParams);
           let data = roomService().parseUrl(roomurl.toString());
           let token = await roomService().getEmbedToken(data.roomSID, data.origin);
@@ -64,18 +63,18 @@ export class TabConfig extends React.Component {
           console.error(ex);
         }
       };
-      (await msTeamsAPI()).getMSEvents().on(CHANGE_SETTINGS_URL, callbackUrl);
+      msTeamsAPI1.getMSEvents().on(CHANGE_SETTINGS_URL, callbackUrl);
 
       this.removeListeners = async () => {
-        (await msTeamsAPI()).getMSEvents().off(CHANGE_SETTINGS_URL, callbackUrl);
+        msTeamsAPI1.getMSEvents().off(CHANGE_SETTINGS_URL, callbackUrl);
       };
       /**
        * When the user clicks "Save", save the url for your configured tab.
        * This allows for the addition of query string parameters based on
        * the settings selected by the user.
        */
-      microsoftTeams.settings.registerOnSaveHandler((saveEvent) => {
-        microsoftTeams.settings.setSettings({
+      msTeamsAPI1.getTeamsApp().pages.config.registerOnSaveHandler(async (saveEvent) => {
+        await msTeamsAPI1.getTeamsApp().pages.config.setConfig({
           suggestedDisplayName: this.state.suggestedDisplayName,
           entityId: "sceneConfig",
           contentUrl: this.fullUrl,
@@ -104,7 +103,10 @@ export class TabConfig extends React.Component {
       //form validation
       try {
         new URL(this.state.url);
-        microsoftTeams.settings.setValidityState(true);
+        (async ()=>{
+          let msTeamsAPI1 = await msTeamsAPI();
+          msTeamsAPI1.getTeamsApp().pages.config.setValidityState(true);
+        })()
       } catch (e) {
         //ignore error
       }
@@ -131,7 +133,10 @@ export class TabConfig extends React.Component {
               suggestedDisplayName={this.state.suggestedDisplayName}
               onChangeRoomUrl={(text) => {
                 if (!text) {
-                  microsoftTeams.settings.setValidityState(false);
+                  (async ()=>{
+                    let msTeamsAPI1 = await msTeamsAPI();
+                    msTeamsAPI1.getTeamsApp().pages.config.setValidityState(false);
+                  })()
                 }
                 this.setState({ url: text });
               }}

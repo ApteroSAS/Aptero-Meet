@@ -30,6 +30,8 @@ export class MSettingsMain extends React.Component {
                 this.setState({ page: "settings" });
               }
             });
+          }else{
+            this.setState({ page: "no-msteams" });
           }
         }
       }
@@ -39,6 +41,7 @@ export class MSettingsMain extends React.Component {
   render() {
     return <Provider theme={teamsTheme}>
       {this.state.page === "loading" && <Loader/>}
+      {this.state.page === "no-msteams" && <div>Please Open in MS Teams</div>}
       {this.state.page === "sidePanel" && <MeetingSidePanel/>}
       {this.state.page === "settings" && <TabConfig/>}
     </Provider>

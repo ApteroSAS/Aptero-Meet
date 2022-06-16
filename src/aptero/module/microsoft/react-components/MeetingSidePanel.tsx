@@ -3,7 +3,6 @@ import * as React from "react";
 import styles from "./MeetingSidePanel.scss";
 import classNames from "classnames";
 import { useEffect, useState } from "react";
-import * as microsoftTeams from "@microsoft/teams-js";
 import { Button, Loader } from "@fluentui/react-northstar";
 import { FormattedMessage } from "react-intl";
 import {msTeamsAPI, msTeamsAPILight} from "@aptero/axolotis-module-teams";
@@ -13,15 +12,14 @@ import {msTeamsAPI, msTeamsAPILight} from "@aptero/axolotis-module-teams";
 export function MeetingSidePanel() {
   const [loading, setLoading] = useState(false);
   const [context, setContext] = useState("mobile");
-  const switchToRoom = () => {
-    microsoftTeams.settings.getSettings((instanceSettings) => {
-      if (instanceSettings.websiteUrl) {
-        let url = new URL(instanceSettings.websiteUrl); //test url valide
-        url.searchParams.set("msForceHub", "true");
-        window.location.replace(url.toString());
-      }
-    });
-  };
+  const switchToRoom = async () => {
+   const instanceSettings = await (await msTeamsAPI()).getTeamsApp().pages.getConfig();
+    if (instanceSettings.websiteUrl) {
+      let url = new URL(instanceSettings.websiteUrl); //test url valide
+      url.searchParams.set("msForceHub", "true");
+      window.location.replace(url.toString());
+    }
+  }
   useEffect(() => {
     (async ()=>{
     if(loading) {

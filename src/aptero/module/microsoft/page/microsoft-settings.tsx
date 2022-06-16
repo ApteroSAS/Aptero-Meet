@@ -15,6 +15,7 @@ import { AuthContextProvider } from "../../../../react-components/auth/AuthConte
 import { ThemeProvider } from "../../../../react-components/styles/theme";
 import { WrappedIntlProvider } from "../../../../react-components/wrapped-intl-provider";
 import {MSettingsMain} from "../react-components/MSettingsMain";
+import {getService} from "@aptero/axolotis-player";
 
 const WrappedIntlProviderAny: any = WrappedIntlProvider;
 
@@ -43,4 +44,13 @@ export class MicrosoftSettings extends React.Component<any, { page: string }> {
 
 }
 
-ReactDOM.render(<MicrosoftSettings/>, document.getElementById("home-root"));
+(async () => {
+  const {initAxolotisPlayer} = await import("../../axolotis/AxInit");
+  await initAxolotisPlayer();
+  const {PROPERTIES_SERVICE,MICROSOFT_STATIC_SERVICE,ROOM_SERVICE} = await import("@aptero/axolotis-module-teams");
+  /*preload*/
+  await getService(PROPERTIES_SERVICE);
+  await getService(MICROSOFT_STATIC_SERVICE);
+  await getService(ROOM_SERVICE);
+  ReactDOM.render(<MicrosoftSettings/>, document.getElementById("home-root"));
+})();
