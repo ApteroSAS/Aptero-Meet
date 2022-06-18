@@ -32,11 +32,15 @@ export class TabConfig extends React.Component {
   componentDidMount() {
     (async ()=>{
       let msTeamsAPI1 = await msTeamsAPI();
-      await msTeamsAPI1.getLoginService().onReady();
+      let loginService = msTeamsAPI1.getLoginService();
+      await loginService.onReady();
       try {
         await msTeamsAPI1.getTeamsApp().app.initialize();
       } catch (e) {
         console.log("microsoftTeams.initialize failed (probably not in teams so we skip it)", e);
+      }
+      if(!loginService.isSignedIn()){
+        await loginService.login();//first signIn In the App
       }
       msTeamsAPI1.getTeamsApp().pages.config.setValidityState(false);
       const instanceSettings = await (await msTeamsAPI()).getTeamsApp().pages.getConfig();
@@ -53,7 +57,7 @@ export class TabConfig extends React.Component {
           let url=msg.url;
           this.setState({ url: url });
           const roomurl = new URL(url); //test url valide
-          const teamsParams = btoa(encodeURIComponent(JSON.stringify(await msTeamsAPI1.getLoginService().getTeamsLoginService().getCredential().getUserInfo())));
+          const teamsParams = btoa(encodeURIComponent(JSON.stringify(await loginService.getTeamsLoginService().getCredential().getUserInfo())));
           roomurl.searchParams.append(MSTEAMS_QUERY_PARAM, teamsParams);
           let data = roomService().parseUrl(roomurl.toString());
           let token = await roomService().getEmbedToken(data.roomSID, data.origin);
