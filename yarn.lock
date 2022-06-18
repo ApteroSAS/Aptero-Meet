@@ -10,9 +10,9 @@
     "@jridgewell/gen-mapping" "^0.1.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@aptero/axolotis-module-teams@git+https://github.com/ApteroSAS/teams-module.git#3a8ff854ebfba5b076abc0c02f235d1292f166cd":
+"@aptero/axolotis-module-teams@git+https://github.com/ApteroSAS/teams-module.git#303cc388233076743ba8f98725bc66315045a95d":
   version "1.0.0"
-  resolved "git+https://github.com/ApteroSAS/teams-module.git#3a8ff854ebfba5b076abc0c02f235d1292f166cd"
+  resolved "git+https://github.com/ApteroSAS/teams-module.git#303cc388233076743ba8f98725bc66315045a95d"
   dependencies:
     "@azure/msal-browser" "2.25.0"
     "@microsoft/microsoft-graph-client" "^3.0.2"
@@ -27,9 +27,9 @@
     tsutils "^3.21.0"
     uuid "^3.2.1"
 
-"@aptero/axolotis-player@git+https://github.com/ApteroSAS/axolotis-player.git#semver:^1.1.1":
+"@aptero/axolotis-player@git+https://github.com/ApteroSAS/axolotis-player.git#semver:^1.1.2":
   version "2.0.0"
-  resolved "git+https://github.com/ApteroSAS/axolotis-player.git#705fd6b9daa5cb9ee2dd5ad765ef5373d5fa2def"
+  resolved "git+https://github.com/ApteroSAS/axolotis-player.git#3f8fff8508fa9dcb18c40214685ab28027e104a1"
 
 "@ava/babel-plugin-throws-helper@^3.0.0":
   version "3.0.0"

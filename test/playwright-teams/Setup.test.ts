@@ -102,10 +102,6 @@ test('teams setting up', async ({ page }) => {
     await new Promise(resolve => setTimeout(resolve, 500));
     await page.locator('[aria-label="Save"]').click();
 
-    //NOTE this is a HACK since the first save does not work in localhost but the second work
-    await new Promise(resolve => setTimeout(resolve, 500));
-    await page.locator('[aria-label="Save"]').click();
-
     await page.waitForLoadState('networkidle');//load the iframe containing the aptero app
     await new Promise(resolve => setTimeout(resolve, 500));
     //Focus virtual meeting
