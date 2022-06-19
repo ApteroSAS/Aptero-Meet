@@ -41,7 +41,6 @@ export function RoomSection(props: {
   onChangeSuggestedDisplayName: (text: string) => void;
   onChangeRoomUrl: (text: string) => void;
 }) {
-  const auth: any = useContext(AuthContext); // Re-render when you log in/out.
   const [currentTab, setTab] = useState("featured");
   const {results: favoriteRooms} = useFavoriteRooms();
   const {results: spokeProject} = useSpokeProject();
@@ -54,35 +53,11 @@ export function RoomSection(props: {
   const sortedFavoriteRooms = Array.from(favoriteRooms).sort((a, b) => b.member_count - a.member_count);
   const sortedSpokeProject = Array.from(spokeProject).sort((a, b) => b.member_count - a.member_count);
 
-  useEffect(() => {
-    const qs = new URLSearchParams(location.search);
-
-    // Support legacy sign in urls.
-    if (qs.has("sign_in")) {
-      const redirectUrl = new URL("/signin", window.location);
-      redirectUrl.search = location.search;
-      window.location = redirectUrl;
-    } else if (qs.has("auth_topic")) {
-      const redirectUrl = new URL("/verify", window.location);
-      redirectUrl.search = location.search;
-      window.location = redirectUrl;
-    }
-
-    if (qs.has("new")) {
-      roomService().createAndRedirectToNewHub(null, null, true);
-    }
-  }, []);
-
   const mySceneDisplay = sortedSpokeProject.length > 0;
   const myRoomDisplay = sortedFavoriteRooms.length > 0;
   const featuredDisplay = myRoomDisplay || mySceneDisplay;
   const Column2: any = Column;
-  return (
-    <>
-      {auth && !auth.userId && <FormattedMessage id="microsoft.settings.room-display-sign-in"
-                                         defaultMessage="Please Sign In to create your first 3d space."/>}
-      {auth && auth.userId && (
-        <>
+  return (<>
           <h2>
             <FormattedMessage id="microsoft.settings.room" defaultMessage="Room"/>
           </h2>
@@ -242,8 +217,6 @@ export function RoomSection(props: {
               )}
             </>
           )}
-        </>
-      )}
     </>
   );
 }

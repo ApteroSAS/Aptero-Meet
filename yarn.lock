@@ -10,9 +10,9 @@
     "@jridgewell/gen-mapping" "^0.1.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@aptero/axolotis-module-teams@git+https://github.com/ApteroSAS/teams-module.git#e666628560fc0966e92f1af8643679ba4e7963fe":
+"@aptero/axolotis-module-teams@git+https://github.com/ApteroSAS/teams-module.git#84473535e781f5a84499be433add6e6aa955e1d6":
   version "1.0.0"
-  resolved "git+https://github.com/ApteroSAS/teams-module.git#e666628560fc0966e92f1af8643679ba4e7963fe"
+  resolved "git+https://github.com/ApteroSAS/teams-module.git#84473535e781f5a84499be433add6e6aa955e1d6"
   dependencies:
     "@azure/msal-browser" "2.25.0"
     "@microsoft/microsoft-graph-client" "^3.0.2"

@@ -16,14 +16,16 @@ export function LoginButton(props) {
       setService(await (await msTeamsAPI()).getLoginService());
       setLoading(false);
     })();
-  });
+  },[]);
 
   const requestAuth = async () => {
     try {
+      console.log("1");
       setLoading(true);
       setError(null);
       await service.login(false);
       setLoading(false);
+      console.log("2");
     } catch (e) {
       setError(e);
       setLoading(false);

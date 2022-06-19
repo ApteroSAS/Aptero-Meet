@@ -39,9 +39,6 @@ export class TabConfig extends React.Component {
       } catch (e) {
         console.log("microsoftTeams.initialize failed (probably not in teams so we skip it)", e);
       }
-      if(!loginService.isSignedIn()){
-        await loginService.login();//first signIn In the App
-      }
       msTeamsAPI1.getTeamsApp().pages.config.setValidityState(false);
       const instanceSettings = await (await msTeamsAPI()).getTeamsApp().pages.getConfig();
       if (instanceSettings.websiteUrl) {
