@@ -26,7 +26,7 @@
     "ci:debug:run:one": "cross-env CI=1 PW_PORT=53000 PWDEBUG=1 npx playwright test --config ./test/playwright-teams.config.js ./test/playwright-teams/Setup.test.ts",
     "ci:debug:serve": "cross-env NODE_ENV=development PW_PORT=53000 yarn run dev",
     "ci:debug:run": "cross-env CI=true PW_PORT=53000 NODE_ENV=development PWDEBUG=1 npx playwright test --config ./test/playwright.config.js --headed",
-    "ci:coverage:serve": "cross-env NODE_ENV=development USE_BABEL_PLUGIN_ISTANBUL=1 webpack --stats-error-details --config webpack.config.js && npx http-server dist -p 53000 --ssl --cert ./certs/cert.pem --key ./certs/key.pem",
+    "ci:coverage:serve": "cross-env NODE_ENV=development USE_BABEL_PLUGIN_ISTANBUL=1 webpack --stats-error-details --config webpack.config.js && npx http-server dist --silent -p 53000 --ssl --cert ./certs/cert.pem --key ./certs/key.pem",
     "ci:coverage:playwright:run": "cross-env NODE_ENV=development PLAYWRIGHT_JUNIT_OUTPUT_NAME=./coverage/junit/junit.xml npx playwright test --config ./test/playwright.config.js --workers=1 --reporter=junit",
     "ci:coverage:teams:run": "cross-env NODE_ENV=development PLAYWRIGHT_JUNIT_OUTPUT_NAME=./coverage/junit/junit-teams.xml npx playwright test --config ./test/playwright-teams.config.js --workers=1 --reporter=junit",
     "ci:coverage:run": "cross-env yarn ci:coverage:playwright:run && yarn ci:coverage:teams:run",
