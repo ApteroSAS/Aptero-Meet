@@ -1,5 +1,7 @@
 import EventEmitter from "eventemitter3";
 
+declare const window:any;
+
 export default class AdapterUserListener {
   em = new EventEmitter();
   onUserEnter(callback) {

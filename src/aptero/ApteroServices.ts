@@ -83,12 +83,6 @@ export class ApteroServices {
     aptLogger.setAdditionalData("version", process.env.BUILD_VERSION);
   }
 
-  applySoftRedirect() {
-    if (window.location.host === "hub.aptero.co") {
-      window.location.href = window.location.href.replace("hub.aptero.co", "meet.aptero.co");
-    }
-  }
-
   start(audioSettingsSystem) {
     this.audioSettingsSystem = audioSettingsSystem;
     waitForDOMContentLoaded().then(async () => {

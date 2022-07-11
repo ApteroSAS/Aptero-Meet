@@ -11,7 +11,13 @@ export async function initAxolotisPlayer(){
     throw new Error("Axolotis World already initialized");
   }
   await createWorld();
-  const {register} = await import("@aptero/axolotis-module-teams");
-  register();
+  {
+    const { register } = await import("@aptero/axolotis-module-teams");
+    register();
+  }
+  {
+    const { register } = await import("@aptero/axolotis-module-basic");
+    register();
+  }
   console.log("Axolotis player : loaded");
 }

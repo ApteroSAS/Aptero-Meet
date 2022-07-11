@@ -13,8 +13,33 @@ let debug = console.log;
 let error = console.error;
 let info = console.log;
 
+declare const window:any;
+
 export const DIALOG_CONNECTION_ERROR_FATAL = "dialog-connection-error-fatal";
 export default class NafTwilioAdapter extends EventEmitter {
+  private _micProducer: any;
+  private _cameraProducer: any;
+  private _shareProducer: any;
+  private _localMediaStream: any;
+  private _consumers: Map<any, any>;
+  private _pendingMediaRequests: Map<any, any>;
+  private _blockedClients: Map<any, any>;
+  private _forceTcp: boolean;
+  private _forceTurn: boolean;
+  private _iceTransportPolicy: any;
+  private scene: any;
+  private _serverParams: any;
+  private adapterUserListener: any;
+  private _consumerStats:any;
+  private _serverUrl: any;
+  private _clientId: any;
+  private _roomId: any;
+  private _joinToken: any;
+  private subAdapter: any;
+  private _closed: boolean;
+  private _micEnabled: Boolean;
+  private _micShouldBeEnabled: any;
+
   constructor() {
     super();
     this._micProducer = null;
@@ -133,47 +158,12 @@ export default class NafTwilioAdapter extends EventEmitter {
     urlWithParams.searchParams.append("roomId", this._roomId);
     urlWithParams.searchParams.append("peerId", this._clientId);
 
-    // TODO: Establishing connection could take a very long time.
-    //       Inform the user if we are stuck here.
-    this.protooHelper = new ProtooHelper();
-    await this.protooHelper.init(urlWithParams);
-    this._protoo =this.protooHelper._protoo;
-
     this._closed = false;
 
-    this.protooHelper._protoo.on("notification", notification => {
-      switch (notification.method) {
-        case "newPeer": {
-          const peer = notification.data;
-          this.newPeer(peer);
-          break;
-        }
-
-        case "peerClosed": {
-          const { peerId } = notification.data;
-          this.closePeer(peerId);
-          break;
-        }
-
-        case "peerBlocked": {
-          const { peerId } = notification.data;
-          document.body.dispatchEvent(new CustomEvent("blocked", { detail: { clientId: peerId } }));
-
-          break;
-        }
-
-        case "peerUnblocked": {
-          const { peerId } = notification.data;
-          document.body.dispatchEvent(new CustomEvent("unblocked", { detail: { clientId: peerId } }));
-
-          break;
-        }
-      }
-    });
     return new Promise(async (resolve, reject) => {
       try {
         await this._joinRoom();
-        resolve();
+        resolve(true);
       } catch (err) {
         this.emitRTCEvent("warn", "Adapter", () => `Error during connect: ${error}`);
         reject(err);
@@ -183,8 +173,7 @@ export default class NafTwilioAdapter extends EventEmitter {
 
   async _retryConnectWithNewHost() {
     this.cleanUpLocalState();
-    this._protoo.removeAllListeners();
-    const serverParams = await APP.hubChannel.getHost();
+    const serverParams = await window.APP.hubChannel.getHost();
     const { host, port } = serverParams;
     const newServerUrl = `wss://${host}:${port}`;
     if (this._serverUrl === newServerUrl) {
@@ -196,7 +185,7 @@ export default class NafTwilioAdapter extends EventEmitter {
     await this.connect({
       serverUrl: newServerUrl,
       roomId: this._roomId,
-      joinToken: APP.hubChannel.token,
+      joinToken: window.APP.hubChannel.token,
       serverParams,
       scene: this.scene,
       clientId: this._clientId,
@@ -305,8 +294,6 @@ export default class NafTwilioAdapter extends EventEmitter {
 
   async _joinRoom() {
     debug("_joinRoom()");
-
-      await this.protooHelper.join(this._clientId,this._device,this._joinToken);
     if (this._localMediaStream) {
       // TODO: Refactor to be "Create producers"
       await this.setLocalMediaStream(this._localMediaStream);
@@ -419,35 +406,21 @@ export default class NafTwilioAdapter extends EventEmitter {
 
     debug("disconnect()");
     this.cleanUpLocalState();
-    if (this._protoo) {
-      this._protoo.removeAllListeners();
-      if (this._protoo.connected) {
-        this._protoo.close();
-        this.emitRTCEvent("info", "Signaling", () => `[close]`);
-      }
-    }
     this.adapterUserListener.disconnect();
   }
 
   kick(clientId, permsToken) {
-    return this.protooHelper.kick(clientId, permsToken,this.room)
-      .then(() => {
-        document.body.dispatchEvent(new CustomEvent("kicked", { detail: { clientId: clientId } }));
-      });
+    document.body.dispatchEvent(new CustomEvent("kicked", { detail: { clientId: clientId } }));
   }
 
   block(clientId) {
-    return this.protooHelper.block(clientId).then(() => {
-      this._blockedClients.set(clientId, true);
-      document.body.dispatchEvent(new CustomEvent("blocked", { detail: { clientId: clientId } }));
-    });
+    this._blockedClients.set(clientId, true);
+    document.body.dispatchEvent(new CustomEvent("blocked", { detail: { clientId: clientId } }));
   }
 
   unblock(clientId) {
-    return this.protooHelper.unblock(clientId).then(() => {
-      this._blockedClients.delete(clientId);
-      document.body.dispatchEvent(new CustomEvent("unblocked", { detail: { clientId: clientId } }));
-    });
+    this._blockedClients.delete(clientId);
+    document.body.dispatchEvent(new CustomEvent("unblocked", { detail: { clientId: clientId } }));
   }
 
   emitRTCEvent(level, tag, msgFunc) {

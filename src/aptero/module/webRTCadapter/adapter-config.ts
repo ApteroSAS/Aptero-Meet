@@ -12,6 +12,9 @@ let profile = null;
 //https://github.com/networked-aframe/networked-aframe
 const adapterList = ["wseasyrtc","easyrtc","janus","socketio","webrtc","Firebase","uWS","dialog","dialog-io","agora","twilio","none","dialog-io-data-only"];
 
+declare const window:any;
+declare const AFRAME:any;
+
 export async function choseAdapter(adapter) {
   configs.APP_CONFIG.adapterParams.adapter = adapter;
   //fetch profile
@@ -104,7 +107,7 @@ export async function fetchICEservers() {
         "Basic " + configs.APP_CONFIG.turn.twilio.auth
     );
 
-    const requestOptions = {
+    const requestOptions:any = {
       method: "POST",
       headers: myHeaders,
       redirect: "follow"

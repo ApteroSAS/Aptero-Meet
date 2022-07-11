@@ -120,7 +120,7 @@ export default class ProfileEntryPanel extends Component {
     this.setState({ jobTitle: jobTitle });
     const json = JSON.stringify({ mail: this.state.email, profile: profile });
 
-    await axios.post(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "service/user/update/user", json, {
+    await axios.post(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/user/update/user", json, {
       headers: {
         // Overwrite Axios's automatically set Content-Type
         "Content-Type": "application/json"

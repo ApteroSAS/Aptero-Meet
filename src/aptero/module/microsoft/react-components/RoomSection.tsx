@@ -7,10 +7,10 @@ import {MediaGrid} from "./hubs/react-components/room/MediaGrid";
 import {usePaginatedAPI} from "./hubs/react-components/home/usePaginatedAPI";
 import {Container} from "./hubs/react-components/layout/Container";
 import {Column} from "./hubs/react-components/layout/Column";
-import {roomService} from "@aptero/axolotis-module-basic";
+import { roomService, roomServiceSync } from "@aptero/axolotis-module-basic";
 import {AuthContext} from "../../../../react-components/auth/AuthContext";
 import {MediaTile} from "../../../../react-components/room/MediaTiles";
-import {msTeamsAPI} from "../../../../../../common/modules/teams-module";
+import {msTeamsAPI} from "@aptero/axolotis-module-teams";
 
 //https://fluentsite.z22.web.core.windows.net/0.60.1
 
@@ -19,7 +19,7 @@ declare const window;
 function useSpokeProject() {
   const auth: any = useContext(AuthContext); // Re-render when you log in/out.
   if (auth) {
-    const getMoreRooms = useCallback(roomService().fetchSpokeProject(auth.userId), [auth.userId]);
+    const getMoreRooms = useCallback(roomServiceSync().fetchSpokeProject(auth.userId), [auth.userId]);
     return usePaginatedAPI(getMoreRooms);
   } else {
     return {results:[]}
@@ -29,7 +29,7 @@ function useSpokeProject() {
 function useFavoriteRooms() {
   const auth:any = useContext(AuthContext); // Re-render when you log in/out.
   if (auth) {
-    const getMoreRooms = useCallback(roomService().fetchFavoriteRoom(auth.userId), [auth.userId]);
+    const getMoreRooms = useCallback(roomServiceSync().fetchFavoriteRoom(auth.userId), [auth.userId]);
     return usePaginatedAPI(getMoreRooms);
   } else {
     return {results:[]}
@@ -47,9 +47,9 @@ export function RoomSection(props: {
   const {results: spokeProject} = useSpokeProject();
 
   const sortedFeaturedScene = [
-    roomService().createRoomEntry("Room 1", "pywjaKD", "https://meet.aptero.co/files/20c63c61-0eb1-4945-a0dc-82e041983d17.jpg"),
-    roomService().createRoomEntry("Room 2", "ttQn7dJ", "https://meet.aptero.co/files/b3b8c2c8-3508-4916-a70e-4928eb23d380.jpg"),
-    roomService().createRoomEntry("Room 3", "HkZhZjU", "https://meet.aptero.co/files/9574cccb-5241-4900-b2f5-4af780ec714d.jpg"),
+    roomServiceSync().createRoomEntry("Room 1", "pywjaKD", "https://meet.aptero.co/files/20c63c61-0eb1-4945-a0dc-82e041983d17.jpg"),
+    roomServiceSync().createRoomEntry("Room 2", "ttQn7dJ", "https://meet.aptero.co/files/b3b8c2c8-3508-4916-a70e-4928eb23d380.jpg"),
+    roomServiceSync().createRoomEntry("Room 3", "HkZhZjU", "https://meet.aptero.co/files/9574cccb-5241-4900-b2f5-4af780ec714d.jpg"),
   ];
   const sortedFavoriteRooms = Array.from(favoriteRooms).sort((a, b) => b.member_count - a.member_count);
   const sortedSpokeProject = Array.from(spokeProject).sort((a, b) => b.member_count - a.member_count);
@@ -136,7 +136,7 @@ export function RoomSection(props: {
                           <MediaTile
                             onClick={async (event) => {
                               event.preventDefault();
-                              let url = roomService().createAndSelect(room.id);
+                              let url = (await roomService()).createAndSelect(room.id);
                               console.log("created room : " + url);
                               await (await msTeamsAPI()).changeUrlSettings(url);
                             }}
@@ -169,7 +169,7 @@ export function RoomSection(props: {
                           <MediaTile
                             onClick={async (event) => {
                               event.preventDefault();
-                              let url = roomService().createAndSelect(room.id);
+                              let url = (await roomService()).createAndSelect(room.id);
                               console.log("created room : " + url);
                               await (await msTeamsAPI()).changeUrlSettings(url);
                             }}

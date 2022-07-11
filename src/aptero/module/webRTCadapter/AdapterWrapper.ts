@@ -3,9 +3,14 @@ import { adapterFactory } from "./adapter-config";
 import { wait } from "../../util/AsyncWaiter";
 import { roomParameters } from "../HubsBridge/service/RoomParameters";
 
+declare const AFRAME;
+
 export class AdapterWarpper {
   lasyLoadingFinished = false;
   tmplisteners = {};
+  private tmpEventEmiter: EventEmitter<string | symbol, any>;
+  private on: (event, fn) => void;
+  private __proto__: any;
 
    constructor() {
      this.tmpEventEmiter = new EventEmitter();

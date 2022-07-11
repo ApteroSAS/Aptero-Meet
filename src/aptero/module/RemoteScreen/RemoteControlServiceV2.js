@@ -110,11 +110,13 @@ export class RemoteControlServiceV2 {
 
     updateCursorPosition(remoteScreenSessionId, mouseRatioX, mouseRatioY) {
         this.lastSessionID = remoteScreenSessionId;
-        let mouseX = this.screenSize[remoteScreenSessionId].width * mouseRatioX;
-        let mouseY = this.screenSize[remoteScreenSessionId].height * (mouseRatioY-1)*-1;
-        this.lastX =mouseX;
-        this.lastY =mouseY;
-        this.remoteScreenSessionRfbMap[remoteScreenSessionId]._handleMouseMove(mouseX,mouseY);
+        if(this.remoteScreenSessionRfbMap[remoteScreenSessionId]) {
+            let mouseX = this.screenSize[remoteScreenSessionId].width * mouseRatioX;
+            let mouseY = this.screenSize[remoteScreenSessionId].height * (mouseRatioY - 1) * -1;
+            this.lastX = mouseX;
+            this.lastY = mouseY;
+            this.remoteScreenSessionRfbMap[remoteScreenSessionId]._handleMouseMove(mouseX, mouseY);
+        }
     }
 
     tryCaptureCursor(intersection) {

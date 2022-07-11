@@ -17,7 +17,7 @@ window.APP_PROPS = {
   THUMBNAIL_SERVER: "",
 
   // Comma-separated list of domains which are known to not need CORS proxying
-  NON_CORS_PROXY_DOMAINS: "alphahub.aptero.co,hub.aptero.co,meet.aptero.co",
+  NON_CORS_PROXY_DOMAINS: "alphahub.aptero.co,meet.aptero.co",
 
   // A comma-separated list of environment URLs to make available in the picker, besides the defaults.
   // These URLs are expected to be relative to ASSET_BUNDLE_SERVER.
@@ -30,7 +30,7 @@ window.APP_PROPS = {
 
   AVAILABLE_INTEGRATIONS:{"objects":true, "videos360":true, "videos2d":true, "scenes":true, "avatars":true,"tenor":false,"poly":false, "sketchfab":false,"bing_videos":false},
 
-  REMOTE_VM_SERVICE:{ url:"meet.aptero.co"},
+  REMOTE_VM_SERVICE:{ url:"vm.aptero.co"},
   WEBRTC_BRIDGE_URL:"http://localhost:8195",
 
   //SENTRY_DSN:"https://944afa0719c6473997fa1d6a06515c7e@o407192.ingest.sentry.io/5275835",
@@ -51,7 +51,7 @@ window.APP_PROPS = {
   },
 
   APP_CONFIG: {
-    GLOBAL_ASSETS_PATH: "https://hub.aptero.co/data/global/",
+    GLOBAL_ASSETS_PATH: "https://meet.aptero.co/data/global/",
     LOGGER:{
       URL:"https://aptero.co/tracking",
       ACTIVATED:false,

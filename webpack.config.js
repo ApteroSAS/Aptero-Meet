@@ -332,6 +332,10 @@ module.exports = async (env, argv) => {
             to: "assets/js/library"
           },
           {
+            from: "node_modules/@aptero/axolotis-module-basic/build/library/",
+            to: "assets/js/library"
+          },
+          {
             from: "node_modules/@aptero/axolotis-module-teams/build/library/@aptero/axolotis-module-teams/assets/auth-start.html",
             to: "auth-start.html"
           },

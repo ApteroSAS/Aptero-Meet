@@ -10,9 +10,9 @@
     "@jridgewell/gen-mapping" "^0.1.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@aptero/axolotis-module-basic@git+https://github.com/ApteroSAS/basic-modules.git#d259f4c406cff014a52b1921dc40039076dd1ef5":
+"@aptero/axolotis-module-basic@git+https://github.com/ApteroSAS/basic-modules.git#740dae3147c3e61aa425c3ba066cdf6664740ad1":
   version "1.0.0"
-  resolved "git+https://github.com/ApteroSAS/basic-modules.git#d259f4c406cff014a52b1921dc40039076dd1ef5"
+  resolved "git+https://github.com/ApteroSAS/basic-modules.git#740dae3147c3e61aa425c3ba066cdf6664740ad1"
   dependencies:
     deepmerge "^4.2.2"
     event-target-shim "^6.0.2"
@@ -23,22 +23,15 @@
     tsutils "^3.21.0"
     uuid "^3.2.1"
 
-"@aptero/axolotis-module-teams@git+https://github.com/ApteroSAS/teams-module.git#84473535e781f5a84499be433add6e6aa955e1d6":
+"@aptero/axolotis-module-teams@git+https://github.com/ApteroSAS/teams-module.git#5fc54ea3aad89bb2dea3df94e01549271ddf077c":
   version "1.0.0"
-  resolved "git+https://github.com/ApteroSAS/teams-module.git#84473535e781f5a84499be433add6e6aa955e1d6"
+  resolved "git+https://github.com/ApteroSAS/teams-module.git#5fc54ea3aad89bb2dea3df94e01549271ddf077c"
   dependencies:
-    "@azure/msal-browser" "2.25.0"
+    "@azure/msal-browser" "2.27.0"
     "@microsoft/microsoft-graph-client" "^3.0.2"
     "@microsoft/teams-js" "^2.0.0"
     "@microsoft/teamsfx" "^1.0.0"
-    deepmerge "^4.2.2"
-    event-target-shim "^6.0.2"
-    eventemitter3 "^4.0.7"
-    js-cookie "^2.2.0"
-    jsonschema "^1.2.2"
-    phoenix "github:gfodor/phoenix-js#f4cebf1534dd7c503fe797ef396709c4d3ea8d69"
     tsutils "^3.21.0"
-    uuid "^3.2.1"
 
 "@aptero/axolotis-player@git+https://github.com/ApteroSAS/axolotis-player.git#semver:^1.1.2":
   version "2.0.0"
@@ -261,12 +254,12 @@
     uuid "^3.2.1"
     xml2js "^0.4.19"
 
-"@azure/msal-browser@2.25.0":
-  version "2.25.0"
-  resolved "https://registry.yarnpkg.com/@azure/msal-browser/-/msal-browser-2.25.0.tgz#bd80fc3407e88da2ce5bd513979a06a2c8f92858"
-  integrity sha512-hXyqNqNO1pcGqfPLBFutqlsk4VvXXuj0SLXdFpV3dq/dPUgbXDj+9ZkY/Lm+GyqWKBjKuU2AXDOhL9qDjwAWVw==
+"@azure/msal-browser@2.27.0":
+  version "2.27.0"
+  resolved "https://registry.yarnpkg.com/@azure/msal-browser/-/msal-browser-2.27.0.tgz#3db38db6bc2bae44485025ba9bb99c43ed7f4302"
+  integrity sha512-PyATq2WvK+x32waRqqikym8wvn939iO9UhpFqhLwitNrfLa3PHUgJuuI9oLSQOS3/UzjYb8aqN+XzchU3n/ZuQ==
   dependencies:
-    "@azure/msal-common" "^6.4.0"
+    "@azure/msal-common" "^7.1.0"
 
 "@azure/msal-browser@^2.16.0", "@azure/msal-browser@^2.21.0":
   version "2.26.0"
@@ -282,15 +275,15 @@
   dependencies:
     debug "^4.1.1"
 
-"@azure/msal-common@^6.4.0":
-  version "6.4.0"
-  resolved "https://registry.yarnpkg.com/@azure/msal-common/-/msal-common-6.4.0.tgz#434a55be9639cb5c7910c0cc1a46555ff0bc6c39"
-  integrity sha512-WZdgq9f9O8cbxGzdRwLLMM5xjmLJ2mdtuzgXeiGxIRkVVlJ9nZ6sWnDFKa2TX8j72UXD1IfL0p/RYNoTXYoGfg==
-
 "@azure/msal-common@^7.0.0":
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/@azure/msal-common/-/msal-common-7.0.0.tgz#f4b52c6d9591cf8720dcb24c1d21fce2d186f871"
   integrity sha512-EkaHGjv0kw1RljhboeffM91b+v9d5VtmyG+0a/gvdqjbLu3kDzEfoaS5BNM9QqMzbxgZylsjAjQDtxdHLX/ziA==
+
+"@azure/msal-common@^7.1.0":
+  version "7.1.0"
+  resolved "https://registry.yarnpkg.com/@azure/msal-common/-/msal-common-7.1.0.tgz#b77dbf9ae581f1ed254f81d56422e3cdd6664b32"
+  integrity sha512-WyfqE5mY/rggjqvq0Q5DxLnA33KSb0vfsUjxa95rycFknI03L5GPYI4HTU9D+g0PL5TtsQGnV3xzAGq9BFCVJQ==
 
 "@azure/msal-node@^1.3.0":
   version "1.10.0"

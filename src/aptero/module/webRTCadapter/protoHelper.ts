@@ -2,6 +2,7 @@ import protooClient from "protoo-client";
 import { getAdapterConfig } from "./adapter-config";
 
 export class ProtooHelper {
+  private _protoo: protooClient.Peer;
   async init(urlWithParams) {
     let protooTransport;
     let adapterConfig = getAdapterConfig();
@@ -14,7 +15,7 @@ export class ProtooHelper {
 
     await new Promise(res => {
       this._protoo.on("open", async () => {
-        res();
+        res(true);
       });
     });
 

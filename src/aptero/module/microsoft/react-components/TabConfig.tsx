@@ -56,8 +56,8 @@ export class TabConfig extends React.Component {
           const roomurl = new URL(url); //test url valide
           const teamsParams = btoa(encodeURIComponent(JSON.stringify(await loginService.getTeamsLoginService().getCredential().getUserInfo())));
           roomurl.searchParams.append(MSTEAMS_QUERY_PARAM, teamsParams);
-          let data = roomService().parseUrl(roomurl.toString());
-          let token = await roomService().getEmbedToken(data.roomSID, data.origin);
+          let data = (await roomService()).parseUrl(roomurl.toString());
+          let token = await (await roomService()).getEmbedToken(data.roomSID, data.origin);
           roomurl.searchParams.append("embed_token", token);
           this.fullUrl = roomurl.toString();
         } catch (ex) {

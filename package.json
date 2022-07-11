@@ -23,7 +23,7 @@
     "intl-extract-en-locale": "node ./src/assets/locales/intl-extract.js en",
     "ci:test": "cross-env NODE_ENV=development npx playwright test --config ./test/playwright.config.js",
     "ci:load:run": "cross-env npx playwright test --config ./test/playwright-load.config.js",
-    "ci:debug:run:one": "cross-env CI=1 PW_PORT=53000 PWDEBUG=1 npx playwright test --config ./test/playwright-teams.config.js ./test/playwright-teams/SignInOut.test.ts",
+    "ci:debug:run:one": "cross-env CI=1 PW_PORT=53000 PWDEBUG=1 npx playwright test --config ./test/playwright.config.js ./test/playwright/Room.test.ts",
     "ci:debug:serve": "cross-env NODE_ENV=development PW_PORT=53000 yarn run dev",
     "ci:debug:run": "cross-env CI=true PW_PORT=53000 NODE_ENV=development PWDEBUG=1 npx playwright test --config ./test/playwright.config.js --headed",
     "ci:coverage:serve": "cross-env NODE_ENV=development USE_BABEL_PLUGIN_ISTANBUL=1 webpack --stats-error-details --config webpack.config.js && npx http-server dist --silent -p 53000 --ssl --cert ./certs/cert.pem --key ./certs/key.pem",
@@ -61,8 +61,8 @@
     ]
   },
   "dependencies": {
-    "@aptero/axolotis-module-teams": "git+https://github.com/ApteroSAS/teams-module.git#84473535e781f5a84499be433add6e6aa955e1d6",
-    "@aptero/axolotis-module-basic": "git+https://github.com/ApteroSAS/basic-modules.git#d259f4c406cff014a52b1921dc40039076dd1ef5",
+    "@aptero/axolotis-module-teams": "git+https://github.com/ApteroSAS/teams-module.git#5fc54ea3aad89bb2dea3df94e01549271ddf077c",
+    "@aptero/axolotis-module-basic": "git+https://github.com/ApteroSAS/basic-modules.git#740dae3147c3e61aa425c3ba066cdf6664740ad1",
     "@aptero/axolotis-player": "git+https://github.com/ApteroSAS/axolotis-player.git#semver:^1.1.2",
     "@braintree/sanitize-url": "^5.0.0",
     "@fluentui/react-northstar": "^0.61.0",
