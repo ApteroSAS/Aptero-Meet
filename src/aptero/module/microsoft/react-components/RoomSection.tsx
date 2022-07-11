@@ -1,5 +1,5 @@
 import * as React from "react";
-import {useCallback, useContext, useEffect, useState} from "react";
+import {useCallback, useContext, useState} from "react";
 import {FormattedMessage} from "react-intl";
 
 import {Button, Input} from "@fluentui/react-northstar";
@@ -7,9 +7,10 @@ import {MediaGrid} from "./hubs/react-components/room/MediaGrid";
 import {usePaginatedAPI} from "./hubs/react-components/home/usePaginatedAPI";
 import {Container} from "./hubs/react-components/layout/Container";
 import {Column} from "./hubs/react-components/layout/Column";
-import {roomService} from "@aptero/axolotis-module-teams";
+import {roomService} from "@aptero/axolotis-module-basic";
 import {AuthContext} from "../../../../react-components/auth/AuthContext";
 import {MediaTile} from "../../../../react-components/room/MediaTiles";
+import {msTeamsAPI} from "../../../../../../common/modules/teams-module";
 
 //https://fluentsite.z22.web.core.windows.net/0.60.1
 
@@ -133,9 +134,11 @@ export function RoomSection(props: {
                       {sortedFeaturedScene.map((room) => {
                         return (
                           <MediaTile
-                            onClick={(event) => {
+                            onClick={async (event) => {
                               event.preventDefault();
-                              roomService().createRoom(room.id);
+                              let url = roomService().createAndSelect(room.id);
+                              console.log("created room : " + url);
+                              await (await msTeamsAPI()).changeUrlSettings(url);
                             }}
                             onEdit={(event) => {
                               event.preventDefault();
@@ -164,9 +167,11 @@ export function RoomSection(props: {
                       {sortedSpokeProject.map((room) => {
                         return (
                           <MediaTile
-                            onClick={(event) => {
+                            onClick={async (event) => {
                               event.preventDefault();
-                              roomService().createRoom(room.id);
+                              let url = roomService().createAndSelect(room.id);
+                              console.log("created room : " + url);
+                              await (await msTeamsAPI()).changeUrlSettings(url);
                             }}
                             onEdit={(event) => {
                               event.preventDefault();
@@ -192,14 +197,14 @@ export function RoomSection(props: {
                       {sortedFavoriteRooms.map((room) => {
                         return (
                           <MediaTile
-                            onClick={(event) => {
+                            onClick={async (event) => {
                               event.preventDefault();
                               let roomurl = window.location.origin + "/" + room.id;
                               if (window.location.origin.startsWith("https://localhost")) {
                                 roomurl = window.location.origin + "/hub.html?hub_id=" + room.id;
                               }
                               console.log(roomurl);
-                              roomService().changeUrlSettings(roomurl);
+                              await (await msTeamsAPI()).changeUrlSettings(roomurl);
                             }}
                             key={room.id}
                             entry={room}

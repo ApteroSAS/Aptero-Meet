@@ -47,7 +47,8 @@ export class MicrosoftSettings extends React.Component<any, { page: string }> {
 (async () => {
   const {initAxolotisPlayer} = await import("../../axolotis/AxInit");
   await initAxolotisPlayer();
-  const {PROPERTIES_SERVICE,MICROSOFT_STATIC_SERVICE,ROOM_SERVICE} = await import("@aptero/axolotis-module-teams");
+  const {PROPERTIES_SERVICE,MICROSOFT_STATIC_SERVICE} = await import("@aptero/axolotis-module-teams");
+  const {ROOM_SERVICE} = await import("@aptero/axolotis-module-basic");
   /*preload*/
   await getService(PROPERTIES_SERVICE);
   await getService(MICROSOFT_STATIC_SERVICE);

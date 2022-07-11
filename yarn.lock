@@ -10,6 +10,19 @@
     "@jridgewell/gen-mapping" "^0.1.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
+"@aptero/axolotis-module-basic@git+https://github.com/ApteroSAS/basic-modules.git#d259f4c406cff014a52b1921dc40039076dd1ef5":
+  version "1.0.0"
+  resolved "git+https://github.com/ApteroSAS/basic-modules.git#d259f4c406cff014a52b1921dc40039076dd1ef5"
+  dependencies:
+    deepmerge "^4.2.2"
+    event-target-shim "^6.0.2"
+    eventemitter3 "^4.0.7"
+    js-cookie "^2.2.0"
+    jsonschema "^1.2.2"
+    phoenix "github:gfodor/phoenix-js#f4cebf1534dd7c503fe797ef396709c4d3ea8d69"
+    tsutils "^3.21.0"
+    uuid "^3.2.1"
+
 "@aptero/axolotis-module-teams@git+https://github.com/ApteroSAS/teams-module.git#84473535e781f5a84499be433add6e6aa955e1d6":
   version "1.0.0"
   resolved "git+https://github.com/ApteroSAS/teams-module.git#84473535e781f5a84499be433add6e6aa955e1d6"
