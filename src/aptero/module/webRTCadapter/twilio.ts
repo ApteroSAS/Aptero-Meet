@@ -6,7 +6,9 @@ export class TwilioAdapter {
   currentRoom = null;
   videoTrack = null;
   twilioMicEnable = false;
-  onTrack = () => {console.error("invalid")};
+  onTrack = (a:any,b:any,c:any) => {console.error("invalid")};
+  private adapterUserListener: any;
+  private onParticipantDisconnected: any;
 
   constructor(adapterUserListener) {
     this.adapterUserListener = adapterUserListener;
@@ -82,7 +84,7 @@ export class TwilioAdapter {
       await this.unpublishVideoTrack();
       if (constraints.video.mediaSource === "camera") {
         //https://www.twilio.com/docs/video/javascript-v1-getting-started#specify-constraints
-        let localTracks = await Video.createLocalTracks(constraints);
+        let localTracks:any = await Video.createLocalTracks(constraints);
         console.log("currentTracks updated: " + localTracks);
         if (room) {
           room.localParticipant?.publishTrack(localTracks[0]);
@@ -92,7 +94,7 @@ export class TwilioAdapter {
       } else {
         //https://www.twilio.com/docs/video/javascript-v1-screen-capture-chrome
         let stream = await navigator.mediaDevices.getDisplayMedia(constraints);
-        let localTracks = await Video.LocalVideoTrack(stream.getTracks()[0]);
+        let localTracks:any = await new Video.LocalVideoTrack(stream.getTracks()[0]);
         console.log("currentTracks updated: " + localTracks);
         if (room) {
           room.localParticipant?.publishTrack(localTracks);
@@ -103,7 +105,7 @@ export class TwilioAdapter {
     } else if (constraints.audio) {
       await this.unpublishAudioTrack();
       //https://www.twilio.com/docs/video/javascript-v1-getting-started#specify-constraints
-      let localTracks = await Video.createLocalTracks(constraints);
+      let localTracks:any = await Video.createLocalTracks(constraints);
       console.log("currentTracks updated: " + localTracks);
       if (room) {
         room.localParticipant?.publishTrack(localTracks[0]);
@@ -210,6 +212,10 @@ export class TwilioAdapter {
       }
     }
     this.videoTrack = null
+  }
+
+  private onTrackRemoved(name) {
+
   }
 }
 

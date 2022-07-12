@@ -4,6 +4,10 @@ import { getAdapterConfig } from "./adapter-config";
 export class AgoraAdapter {
 
   currentRoom = null;
+  private adapterUserListener: any;
+  private _micProducer: any;
+  private _videoProducer: any;
+  private onTrackRemoved: any;
 
   constructor(adapterUserListener) {
     this.adapterUserListener = adapterUserListener;
@@ -51,7 +55,7 @@ export class AgoraAdapter {
       } else {
         //https://docs.agora.io/en/Voice/API%20Reference/web_ng/interfaces/iagorartc.html#createscreenvideotrack
         //https://docs.agora.io/en/Voice/API%20Reference/web_ng/interfaces/screenvideotrackinitconfig.html
-        track = await AgoraRTC.createScreenVideoTrack();
+        track = await AgoraRTC.createScreenVideoTrack(undefined);
       }
       this._videoProducer = track;
     } else if (constraints.audio) {
@@ -154,5 +158,13 @@ export class AgoraAdapter {
       await this.currentRoom.unpublish(this._videoProducer);
       this._videoProducer = null;
     }
+  }
+
+  private onTrack(track: any, peerId: any, s: string) {
+
+  }
+
+  private onParticipantDisconnected(peerId: any) {
+
   }
 }
