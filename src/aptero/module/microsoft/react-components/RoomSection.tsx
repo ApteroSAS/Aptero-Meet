@@ -7,12 +7,18 @@ import {MediaGrid} from "./hubs/react-components/room/MediaGrid";
 import {usePaginatedAPI} from "./hubs/react-components/home/usePaginatedAPI";
 import {Container} from "./hubs/react-components/layout/Container";
 import {Column} from "./hubs/react-components/layout/Column";
-import { roomService, roomServiceSync } from "@aptero/axolotis-module-basic";
+import { roomService,ROOM_SERVICE,RoomService } from "@aptero/axolotis-module-basic";
 import {AuthContext} from "../../../../react-components/auth/AuthContext";
 import {MediaTile} from "../../../../react-components/room/MediaTiles";
 import {msTeamsAPI} from "@aptero/axolotis-module-teams";
+import { PadNumber } from "./PadNumber";
+import { getServiceSync } from "@aptero/axolotis-player";
 
 //https://fluentsite.z22.web.core.windows.net/0.60.1
+
+export function roomServiceSync(): RoomService {
+  return getServiceSync<RoomService>(ROOM_SERVICE);
+}
 
 declare const window;
 
@@ -56,7 +62,6 @@ export function RoomSection(props: {
 
   const mySceneDisplay = sortedSpokeProject.length > 0;
   const myRoomDisplay = sortedFavoriteRooms.length > 0;
-  const featuredDisplay = myRoomDisplay || mySceneDisplay;
   const Column2: any = Column;
   return (<>
           <h2>
@@ -93,17 +98,15 @@ export function RoomSection(props: {
           {!props.roomUrl && (
             <>
               <div style={{padding: 10, display: "flex", justifyContent: "space-evenly"}}>
-                {featuredDisplay && (
-                  <Button
-                    style={{margin: 10}}
-                    primary={currentTab === "featured"}
-                    onClick={() => {
-                      setTab("featured");
-                    }}
-                  >
-                    <FormattedMessage id="microsoft-settings-page.featured" defaultMessage="Featured"/>
-                  </Button>
-                )}
+                <Button
+                  style={{margin: 10}}
+                  primary={currentTab === "featured"}
+                  onClick={() => {
+                    setTab("featured");
+                  }}
+                >
+                  <FormattedMessage id="microsoft-settings-page.featured" defaultMessage="Featured"/>
+                </Button>
                 {mySceneDisplay && (
                   <Button
                     style={{margin: 10}}
@@ -126,6 +129,15 @@ export function RoomSection(props: {
                     <FormattedMessage id="microsoft-settings-page.my-scene" defaultMessage="My Room"/>
                   </Button>
                 )}
+                <Button
+                  style={{margin: 10}}
+                  primary={currentTab === "room-code"}
+                  onClick={() => {
+                    setTab("room-code");
+                  }}
+                >
+                  <FormattedMessage id="microsoft-settings-page.room-code" defaultMessage="Room Code"/>
+                </Button>
               </div>
               {currentTab === "featured" && sortedFeaturedScene.length > 0 && (
                 <Container as={undefined} className={undefined}>
@@ -136,7 +148,7 @@ export function RoomSection(props: {
                           <MediaTile
                             onClick={async (event) => {
                               event.preventDefault();
-                              let url = (await roomService()).createAndSelect(room.id);
+                              let url = await (await roomService()).createAndSelect(room.id);
                               console.log("created room : " + url);
                               await (await msTeamsAPI()).changeUrlSettings(url);
                             }}
@@ -169,7 +181,7 @@ export function RoomSection(props: {
                           <MediaTile
                             onClick={async (event) => {
                               event.preventDefault();
-                              let url = (await roomService()).createAndSelect(room.id);
+                              let url = await (await roomService()).createAndSelect(room.id);
                               console.log("created room : " + url);
                               await (await msTeamsAPI()).changeUrlSettings(url);
                             }}
@@ -217,6 +229,16 @@ export function RoomSection(props: {
                         );
                       })}
                     </MediaGrid>
+                  </Column2>
+                </Container>
+              )}
+              {currentTab === "room-code" && (
+                <Container className={undefined} as={undefined}>
+                  <Column2 grow padding>
+                    <PadNumber execute={async (code)=>{
+                      const url = await (await roomService()).getLinkFromCode(code);
+                      await (await msTeamsAPI()).changeUrlSettings(url);
+                    }}/>
                   </Column2>
                 </Container>
               )}
