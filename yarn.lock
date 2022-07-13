@@ -23,9 +23,9 @@
     tsutils "^3.21.0"
     uuid "^3.2.1"
 
-"@aptero/axolotis-module-teams@git+https://github.com/ApteroSAS/teams-module.git#5fc54ea3aad89bb2dea3df94e01549271ddf077c":
+"@aptero/axolotis-module-teams@git+https://github.com/ApteroSAS/teams-module.git#082658cadd5c31bb6fa198a36080df8436da0aa1":
   version "1.0.0"
-  resolved "git+https://github.com/ApteroSAS/teams-module.git#5fc54ea3aad89bb2dea3df94e01549271ddf077c"
+  resolved "git+https://github.com/ApteroSAS/teams-module.git#082658cadd5c31bb6fa198a36080df8436da0aa1"
   dependencies:
     "@azure/msal-browser" "2.27.0"
     "@microsoft/microsoft-graph-client" "^3.0.2"
