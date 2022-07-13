@@ -10,7 +10,7 @@ import {msTeamsAPI, msTeamsAPILight} from "@aptero/axolotis-module-teams";
 //https://fluentsite.z22.web.core.windows.net/0.60.1
 
 export function MeetingSidePanel() {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [context, setContext] = useState("mobile");
   const switchToRoom = async () => {
    const instanceSettings = await (await msTeamsAPI()).getTeamsApp().pages.getConfig();
@@ -25,7 +25,8 @@ export function MeetingSidePanel() {
     if(loading) {
       if (msTeamsAPILight().msTeams()) {
         await (await msTeamsAPI()).getContext((context) => {
-          if (context.frameContext === "sidePanel" && (context.hostClientType === "android" || context.hostClientType === "ios")) {
+          const clientType = context.app.host.clientType;
+          if (context.page.frameContext === "sidePanel" && (clientType === "android" || clientType === "ios")) {
             setContext("mobile");
             //switchToRoom();//This is just in case but it will not occure here since the sidepage loaded initially is hub.html
           } else {

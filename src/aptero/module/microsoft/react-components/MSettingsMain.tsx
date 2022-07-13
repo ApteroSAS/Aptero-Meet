@@ -24,7 +24,7 @@ export class MSettingsMain extends React.Component {
           if (msTeamsAPILight().msTeams()) {
             await (await msTeamsAPI()).getContext((context) => {
               //https://docs.microsoft.com/en-us/microsoftteams/platform/tabs/how-to/access-teams-context
-              if (context.frameContext === "sidePanel") {
+              if (context.page.frameContext === "sidePanel") {
                 this.setState({ page: "sidePanel" });
               } else {
                 this.setState({ page: "settings" });

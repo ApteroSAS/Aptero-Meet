@@ -722,10 +722,10 @@ export class UIRoot extends Component {
     // Push the new history state before going into VR, otherwise menu button will take us back
     clearHistoryState(this.props.history);
 
-    const muteOnEntry =
+    const muteOnEntry = msTeamsAPILight().msTeams() ||
       window.APP_CONFIG.adapterParams.adapter === "none" ||
-      this.props.store.state.preferences["muteMicOnEntry"] || msTeamsAPILight().msTeams();
-    false;
+      this.props.store.state.preferences["muteMicOnEntry"];
+
     await this.props.enterScene(this.state.enterInVR, muteOnEntry);
 
     this.setState({ entered: true, entering: false, showShareDialog: false });
