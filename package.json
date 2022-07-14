@@ -61,9 +61,9 @@
     ]
   },
   "dependencies": {
-    "@aptero/axolotis-module-teams": "git+https://github.com/ApteroSAS/teams-module.git#082658cadd5c31bb6fa198a36080df8436da0aa1",
-    "@aptero/axolotis-module-basic": "git+https://github.com/ApteroSAS/basic-modules.git#740dae3147c3e61aa425c3ba066cdf6664740ad1",
-    "@aptero/axolotis-player": "git+https://github.com/ApteroSAS/axolotis-player.git#semver:^1.1.2",
+    "@aptero/axolotis-module-basic": "./modules/basic-modules",
+    "@aptero/axolotis-module-teams": "./modules/teams-module",
+    "@aptero/axolotis-player": "github:ApteroSAS/axolotis-player.git#semver:^1.1.2",
     "@braintree/sanitize-url": "^5.0.0",
     "@fluentui/react-northstar": "^0.61.0",
     "@formatjs/intl-locale": "^2.4.13",
@@ -229,7 +229,7 @@
     "raw-loader": "^0.5.1",
     "react-is": "^16.13.1",
     "request": "^2.88.2",
-    "rimraf": "^2.6.2",
+    "rimraf": "^3.0.2",
     "sass": "^1.52.3",
     "sass-loader": "^13.0.0",
     "selfsigned": "^1.10.2",
