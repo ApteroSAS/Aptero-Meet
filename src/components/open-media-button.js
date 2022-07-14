@@ -30,6 +30,21 @@ AFRAME.registerComponent("open-media-button", {
       const visible = src && guessContentType(src) !== "video/vnd.hubs-webrtc";
       const mayChangeScene = this.el.sceneEl.systems.permissions.canOrWillIfCreator("update_hub");
 
+      //Aptero feature custom query string
+      const wurl = new URL(window.location.href)
+      const dirtyJson = wurl.searchParams.get("cqs")
+      if(dirtyJson) {
+        let correctJson = dirtyJson.replace(/(['"])?([a-z0-9A-Z_]+)(['"])?:/g, '"$2": ');
+        correctJson = correctJson.replaceAll("'", "\"")
+        const qsJson = JSON.parse(correctJson);
+        const newUrl = new URL(this.src);
+        for (const entry in qsJson) {
+          newUrl.searchParams.set(entry, qsJson[entry]);
+        }
+        console.log("custom link :"+newUrl.toString());
+        this.src = newUrl.toString();
+      }
+
       this.el.object3D.visible = !!visible;
 
       if (visible) {
@@ -54,7 +69,7 @@ AFRAME.registerComponent("open-media-button", {
         //Aptero
         if (!this.data.onlyOpenLink) {
           setupIframeButton(this);
-        };
+        }
       }
     };
 
