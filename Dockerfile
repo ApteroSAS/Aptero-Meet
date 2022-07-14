@@ -1,7 +1,6 @@
 FROM node:16-alpine
 RUN apk add git openssh
-
-COPY ./package.json .pub
+COPY ./package.json .
 COPY ./yarn.lock .
 
 COPY ./modules/ ./modules/
