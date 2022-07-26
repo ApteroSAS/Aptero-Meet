@@ -66,7 +66,8 @@ AFRAME.registerComponent("open-media-button", {
           }
           else {
             //Aptero
-            setupIframeButton(this);
+            label = await setupIframeButton(this) || label;
+            console.log(label)
           }
         }
         this.label.setAttribute("text", "value", label);
