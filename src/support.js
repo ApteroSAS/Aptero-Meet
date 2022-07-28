@@ -28,14 +28,28 @@ function syntaxSupported(syntax) {
   }
 }
 
+function isMsTeams() {
+  let url = new URL(window.location.href);
+  return  !!url.searchParams.get("msteams");
+}
+
 function getPlatformSupport() {
-  return [
-    { name: "Web Assembly", supported: !!window.WebAssembly },
-    { name: "Media Devices", supported: !!navigator.mediaDevices },
-    { name: "Shorthand initializer syntax", supported: syntaxSupported(SHORTHAND_INITIALIZER) },
-    { name: "Spread syntax", supported: syntaxSupported(SPREAD_SYNTAX) },
-    { name: "Optional catch syntax", supported: syntaxSupported(CATCH_SYNTAX) }
-  ];
+  if(isMsTeams()){
+    return [
+      { name: "Web Assembly", supported: !!window.WebAssembly },
+      { name: "Shorthand initializer syntax", supported: syntaxSupported(SHORTHAND_INITIALIZER) },
+      { name: "Spread syntax", supported: syntaxSupported(SPREAD_SYNTAX) },
+      { name: "Optional catch syntax", supported: syntaxSupported(CATCH_SYNTAX) }
+    ];
+  }else {
+    return [
+      { name: "Web Assembly", supported: !!window.WebAssembly },
+      { name: "Media Devices", supported: !!navigator.mediaDevices },
+      { name: "Shorthand initializer syntax", supported: syntaxSupported(SHORTHAND_INITIALIZER) },
+      { name: "Spread syntax", supported: syntaxSupported(SPREAD_SYNTAX) },
+      { name: "Optional catch syntax", supported: syntaxSupported(CATCH_SYNTAX) }
+    ];
+  }
 }
 
 function isInAppBrowser() {
@@ -55,7 +69,7 @@ function isInAppBrowser() {
 }
 
 export function platformUnsupported() {
-  return getPlatformSupport().some(s => !s.supported) || isInAppBrowser();
+  return (getPlatformSupport().some(s => !s.supported) || isInAppBrowser()) && !isMsTeams();
 }
 
 class Support extends React.Component {
@@ -76,6 +90,10 @@ class Support extends React.Component {
     const platformSupport = getPlatformSupport();
     const allSupported = platformSupport.every(s => s.supported);
     const inAppBrowser = isInAppBrowser();
+
+    if(isMsTeams()){
+      return null;
+    }
 
     if (allSupported && !inAppBrowser) return null;
 

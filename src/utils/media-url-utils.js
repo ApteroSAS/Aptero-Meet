@@ -1,7 +1,4 @@
-import { hasReticulumServer } from "./phoenix-utils";
 import configs from "./configs";
-import { microsoftService } from "../aptero/service/MicrosoftIntegration/MicrosoftService";
-import { proxyURL } from "../aptero/react-components/media-utils-lib";
 
 const nonCorsProxyDomains = (configs.NON_CORS_PROXY_DOMAINS || "").split(",");
 if (configs.CORS_PROXY_SERVER) {
@@ -180,7 +177,11 @@ async function isHubsServer(url) {
   } catch (e) {
     isHubsServer = false;
   }*/
-  isHubsServer = true;
+
+  //Fix simple urls from being interpreted as hubs server
+  if(url.includes("www.")) isHubsServer =  false;
+  else isHubsServer = true;
+
   originIsHubsServer.set(origin, isHubsServer);
   return isHubsServer;
 }

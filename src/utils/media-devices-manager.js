@@ -1,4 +1,5 @@
-import { createTrack } from "../aptero/adapter/adapter-config";
+import { createTrack } from "../aptero/module/webRTCadapter/adapter-config";
+import {msTeams} from "../aptero/module/microsoft/service/MsTeams";
 
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
@@ -24,8 +25,9 @@ export default class MediaDevicesManager {
     this._audioTrack = null;
     this.audioSystem = audioSystem;
     this._mediaStream = audioSystem.outboundStream;
-
-    navigator.mediaDevices.addEventListener("devicechange", this.onDeviceChange);
+    if(!msTeams()) {
+      navigator.mediaDevices.addEventListener("devicechange", this.onDeviceChange);
+    }
   }
 
   get deviceId() {
@@ -110,6 +112,9 @@ export default class MediaDevicesManager {
   }
 
   async startMicShare(deviceId) {
+    if(msTeams()){
+      console.error("no audio device in Teams");
+    }
     let constraints = { audio: {} };
     if (deviceId) {
       constraints = { audio: { deviceId: { exact: [deviceId] } } };

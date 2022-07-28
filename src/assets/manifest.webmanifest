@@ -1,9 +1,9 @@
 {
   "lang": "en",
   "dir": "ltr",
-  "name": "Aptero Hub",
-  "description": "Share a virtual room.",
-  "short_name": "Hubs",
+  "name": "Aptero Meet",
+  "description": "Meet, share and collaborate together in private 3D virtual spaces.",
+  "short_name": "Aptero",
   "icons": [
     {
       "src": "https://hub.aptero.co/data/data/Aptero_Logo_512x512.png",
@@ -11,6 +11,10 @@
       "type": "image/png"
     }
   ],
+  "permissions": [
+     "storage",
+     "unlimitedStorage"
+   ],
   "scope": "/",
   "start_url": "/",
   "display": "standalone",

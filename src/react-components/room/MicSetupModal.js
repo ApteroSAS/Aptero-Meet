@@ -14,7 +14,7 @@ import { ToggleInput } from "../input/ToggleInput";
 import { ToolbarButton } from "../input/ToolbarButton";
 import { Column } from "../layout/Column";
 import { FormattedMessage } from "react-intl";
-import { minimumQualityService } from "../../aptero/service/MinimumQualityService";
+import { minimumQualityService } from "../../aptero/module/perf/MinimumQualityService";
 
 const micButtonDiameter = 96;
 

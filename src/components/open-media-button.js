@@ -1,10 +1,10 @@
-import { isLocalHubsUrl, isLocalHubsSceneUrl, isHubsRoomUrl, isLocalHubsAvatarUrl } from "../utils/media-url-utils";
+import { isLocalHubsUrl, isLocalHubsSceneUrl, isHubsRoomUrl, isHubsServer, isHubsAvatarUrl, isHubsSceneUrl, isLocalHubsAvatarUrl } from "../utils/media-url-utils";
 import { guessContentType } from "../utils/media-url-utils";
 import { handleExitTo2DInterstitial } from "../utils/vr-interstitial";
 import { changeHub } from "../change-hub";
-import { duplicateEntryModeOnSrc } from "../aptero/util/EntryMode";
 //aptero
-import {setupIframeButton} from "../aptero/react-components/openIframe";
+import {setupIframeButton} from "../aptero/module/CustomPanel/react-component/openIframe";
+import { duplicateEntryModeOnSrc } from "../aptero/module/HubsBridge/utils/EntryMode";
 
 //aptero
 function isValidHttpUrl(string) {
@@ -31,6 +31,21 @@ AFRAME.registerComponent("open-media-button", {
       const visible = src && guessContentType(src) !== "video/vnd.hubs-webrtc";
       const mayChangeScene = this.el.sceneEl.systems.permissions.canOrWillIfCreator("update_hub");
 
+      //Aptero feature custom query string
+      const wurl = new URL(window.location.href)
+      const dirtyJson = wurl.searchParams.get("cqs")
+      if(dirtyJson) {
+        let correctJson = dirtyJson.replace(/(['"])?([a-z0-9A-Z_]+)(['"])?:/g, '"$2": ');
+        correctJson = correctJson.replaceAll("'", "\"")
+        const qsJson = JSON.parse(correctJson);
+        const newUrl = new URL(this.src);
+        for (const entry in qsJson) {
+          newUrl.searchParams.set(entry, qsJson[entry]);
+        }
+        console.log("custom link :"+newUrl.toString());
+        this.src = newUrl.toString();
+      }
+
       this.el.object3D.visible = !!visible;
 
       if (visible) {
@@ -49,13 +64,14 @@ AFRAME.registerComponent("open-media-button", {
               label = "visit room";
             }
           }
+          else {
+            //Aptero
+            label = await setupIframeButton(this) || label;
+            console.log(label)
+          }
         }
         this.label.setAttribute("text", "value", label);
 
-        //Aptero
-        if (!this.data.onlyOpenLink) {
-          setupIframeButton(this);
-        };
       }
     };
 
@@ -90,7 +106,7 @@ AFRAME.registerComponent("open-media-button", {
         }
       } else {
         await exitImmersive();
-        window.open(this.src);
+        window.open(this.src,"_blank","popup");
       }
     };
 

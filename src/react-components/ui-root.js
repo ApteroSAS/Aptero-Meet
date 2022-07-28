@@ -4,7 +4,7 @@ import classNames from "classnames";
 import copy from "copy-to-clipboard";
 import { FormattedMessage } from "react-intl";
 import screenfull from "screenfull";
-
+import { ReactComponent as ObjectsIcon } from "./icons/Objects.svg";
 import configs from "../utils/configs";
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
 import { canShare } from "../utils/share";
@@ -46,7 +46,7 @@ import { ToolbarButton } from "./input/ToolbarButton";
 import { RoomEntryModal } from "./room/RoomEntryModal";
 import { EnterOnDeviceModal } from "./room/EnterOnDeviceModal";
 import { MicPermissionsModal } from "./room/MicPermissionsModal";
-import { FallbackModal } from "../aptero/react-components/FallbackModal";
+import { FallbackModal } from "../aptero/module/Fallback/FallbackModal";
 import { MicSetupModalContainer } from "./room/MicSetupModalContainer";
 import { InvitePopoverContainer } from "./room/InvitePopoverContainer";
 import { MoreMenuPopoverButton, CompactMoreMenuButton, MoreMenuContextProvider } from "./room/MoreMenuPopover";
@@ -77,7 +77,6 @@ import { ObjectMenuContainer } from "./room/ObjectMenuContainer";
 import { useCssBreakpoints } from "react-use-css-breakpoints";
 import { PlacePopoverContainer } from "./room/PlacePopoverContainer";
 import { SharePopoverContainer } from "./room/SharePopoverContainer";
-import { DropDownChatList } from "./room/DropDownChatList";
 import { VoiceButtonContainer } from "./room/VoiceButtonContainer";
 import { ReactionPopoverContainer } from "./room/ReactionPopoverContainer";
 import { SafariMicModal } from "./room/SafariMicModal";
@@ -95,20 +94,18 @@ import { TweetModalContainer } from "./room/TweetModalContainer";
 import { TipContainer, FullscreenTip } from "./room/TipContainer";
 import { SpectatingLabel } from "./room/SpectatingLabel";
 import { SignInMessages } from "./auth/SignInModal";
-import { minimumQualityService } from "../aptero/service/MinimumQualityService";
 import { apteroService } from "../aptero/ApteroServices";
-import { CustomSidebarContainer } from "../aptero/react-components/CustomSidebarContainer";
-import { customMenuService } from "../aptero/service/CustomMenuService";
-import AptRoot from "../aptero/react-components/AptRoot";
-import { getSelectedPersonId, getSelectedPersonName } from "./room/PeopleSidebarContainer";
+import { CustomSidebarContainer } from "../aptero/module/CustomPanel/react-component/CustomSidebarContainer";
+import { customMenuService } from "../aptero/module/CustomPanel/CustomMenuService";
+import { getSelectedPersonName } from "./room/PeopleSidebarContainer";
 import { Promise } from "core-js";
-import { CheckUserInfoButton } from "./input/CheckUserInfoButton";
-import { UserProfileVisitCard } from "./room/UserProfileVisitCard";
 import { UserProfileVisitCardContainer } from "./room/UserProfileVisitCardContainer";
 import axios from "axios";
-import { msTeams } from "../aptero/util/MsTeams";
-import { store } from "emoji-mart";
-import { propertiesService } from "../aptero/properties/propertiesService";
+import { msTeams } from "../aptero/module/microsoft/service/MsTeams";
+import { propertiesService } from "../aptero/module/properties/propertiesService";
+import { microsoftLoginService } from "../aptero/module/microsoft/service/MicrosoftLoginService";
+import AptRoot from "../aptero/module/HubsBridge/AptRoot";
+import { minimumQualityService } from "../aptero/module/perf/MinimumQualityService";
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 const IN_ROOM_MODAL_ROUTER_PATHS = ["/media"];
 const IN_ROOM_MODAL_QUERY_VARS = ["media_source"];
@@ -200,9 +197,7 @@ export class UIRoot extends Component {
     audioTrackClone: null,
     displayName:null,
     identityName:null,
-    //email:null,
-    //jobTitle:null,
-    //companyName:null,
+
     onBack:null,
     onClose:null,
     autoExitTimerStartedAt: null,
@@ -319,14 +314,15 @@ export class UIRoot extends Component {
 
   componentDidMount() {
     
-    this.props.scene.addEventListener("join", e => {
+    this.props.scene.addEventListener("join", () => {
       if(!!this.props.store.state.credentials && !!this.props.store.state.credentials.token && !this.props.store.state.profile.microsoftUser ){
+        // eslint-disable-next-line no-use-before-define
         getUserProfile(this.props.store);
       }
-      let people = usePeopleList(this.props.presences, this.props.sessionId);
       const useFetch = async avatarId => {
         var data;
         const fetchData = async () => {
+          // eslint-disable-next-line no-use-before-define
           data = await getUrl(avatarId);
         };
         await fetchData();
@@ -352,6 +348,7 @@ export class UIRoot extends Component {
       const useFetch = async avatarId => {
         var data;
         const fetchData = async () => {
+          // eslint-disable-next-line no-use-before-define
           data = await getUrl(avatarId);
         };
         await fetchData();
@@ -502,13 +499,6 @@ export class UIRoot extends Component {
           onClose: onContinueAfterSignIn || this.closeDialog
         });
          await authChannel.convertToHubToken(user, this.props.hubChannel);
-      
-        
-        //onSubmitEmailMicrosoftLogin(user);
-   
-   
-
-      //await authComplete;
 
       this.setState({ signedIn: true });
       this.showNonHistoriedDialog(RoomSignInModalContainer, {
@@ -675,11 +665,15 @@ export class UIRoot extends Component {
 
   performDirectEntryFlow = async enterInVR => {
     this.setState({ enterInVR, waitingOnAudio: true });
+    let hasGrantedMic = false;
+    if(msTeams()) {
+      hasGrantedMic = true;
+    }else{
+      hasGrantedMic = (await grantedMicLabels()).length > 0;
+    }
 
-    const hasGrantedMic = (await grantedMicLabels()).length > 0;
-
-    if (hasGrantedMic || new URL(window.location.href).searchParams.get("offline2")) {
-      if (!this.mediaDevicesManager.isMicShared) {
+    if (hasGrantedMic || new URL(window.location.href).searchParams.get("offline2") || msTeams()) {
+      if (!this.mediaDevicesManager.isMicShared && !msTeams()) {
         await this.mediaDevicesManager.startLastUsedMicShare();
       }
       this.beginOrSkipAudioSetup();
@@ -687,7 +681,6 @@ export class UIRoot extends Component {
       this.onRequestMicPermission();
       this.pushHistoryState("entry_step", "mic_grant");
     }
-
     this.setState({ waitingOnAudio: false });
   };
 
@@ -713,7 +706,7 @@ export class UIRoot extends Component {
 
   onRequestMicPermission = async () => {
     // TODO: Show an error state if getting the microphone permissions fails
-    if (window.APP_CONFIG.adapterParams.adapter !== "none") {
+    if (window.APP_CONFIG.adapterParams.adapter !== "none" && !msTeams()) {
       await this.mediaDevicesManager.startLastUsedMicShare();
     }
     this.beginOrSkipAudioSetup();
@@ -727,7 +720,7 @@ export class UIRoot extends Component {
       AFRAME.scenes[0].audioListener.context.currentTime,
       0.2
     );
-    if (skipAudioSetup || window.APP_CONFIG.adapterParams.adapter === "none") {
+    if (skipAudioSetup || window.APP_CONFIG.adapterParams.adapter === "none" || msTeams()) {
       this.onAudioReadyButton();
     } else {
       this.pushHistoryState("entry_step", "audio");
@@ -754,7 +747,7 @@ export class UIRoot extends Component {
 
     const muteOnEntry =
       window.APP_CONFIG.adapterParams.adapter === "none" ||
-      this.props.store.state.preferences["muteMicOnEntry"] ||
+      this.props.store.state.preferences["muteMicOnEntry"] || msTeams()
       false;
     await this.props.enterScene(this.state.enterInVR, muteOnEntry);
 
@@ -1099,15 +1092,19 @@ export class UIRoot extends Component {
   getSelectedUser() {
     const selectedUserId = this.state.selectedUserId;
     const presence = this.props.presences[selectedUserId];
-    const micPresences = getMicrophonePresences();
-    return userFromPresence(selectedUserId, presence, micPresences, this.props.sessionId);
+    if(!presence){
+      return null;
+    } else {
+      const micPresences = getMicrophonePresences();
+      return userFromPresence(selectedUserId, presence, micPresences, this.props.sessionId);
+    }
   }
 
   getSelectedId() {
     const selectedUserId = this.state.selectedUserId;
     return selectedUserId;
   }
-  
+
   render() {
     const isGhost =
       configs.feature("enable_lobby_ghosts") && (this.state.watching || this.state.hide || this.props.hide);
@@ -1120,6 +1117,7 @@ export class UIRoot extends Component {
       isGhost,
       hide
     };
+
     if (this.props.hide || this.state.hide) {
       return (
         <div className={classNames(rootStyles)}>
@@ -1273,160 +1271,173 @@ export class UIRoot extends Component {
     const canCloseRoom = this.props.hubChannel && !!this.props.hubChannel.canOrWillIfCreator("close_hub");
     const isModerator = this.props.hubChannel && this.props.hubChannel.canOrWillIfCreator("kick_users") && !isMobileVR;
 
-    const moreMenu = [
+    let moreMenu = [
       {
         id: "user",
         label:
-          "You" +
-          (this.state.signedIn ? ` (Signed in as: ${maskEmail(this.props.store.state.credentials.email)})` : ""),
+            "You" +
+            (this.state.signedIn ? ` (Signed in as: ${maskEmail(this.props.store.state.credentials.email)})` : ""),
         items: [
           this.state.signedIn
-            ? {
+              ? {
                 id: "sign-out",
-                label: <FormattedMessage id="more-menu.sign-out" defaultMessage="Sign Out" />,
+                label: <FormattedMessage id="more-menu.sign-out" defaultMessage="Sign Out"/>,
                 icon: LeaveIcon,
                 onClick: async () => {
                   await this.props.authChannel.signOut(this.props.hubChannel);
-                  this.setState({ signedIn: false });
+                  this.setState({signedIn: false});
                 }
               }
-            : {
+              : {
                 id: "sign-in",
-                label: <FormattedMessage id="more-menu.sign-in" defaultMessage="Sign In" />,
+                label: <FormattedMessage id="more-menu.sign-in" defaultMessage="Sign In"/>,
                 icon: EnterIcon,
                 onClick: () => this.showContextualSignInDialog()
               },
           canCreateRoom && {
             id: "create-room",
-            label: <FormattedMessage id="more-menu.create-room" defaultMessage="Create Room" />,
+            label: <FormattedMessage id="more-menu.create-room" defaultMessage="Create Room"/>,
             icon: AddIcon,
             onClick: () =>
-              this.showNonHistoriedDialog(LeaveRoomModal, {
-                destinationUrl: "/",
-                reason: LeaveReason.createRoom
-              })
+                this.showNonHistoriedDialog(LeaveRoomModal, {
+                  destinationUrl: "/",
+                  reason: LeaveReason.createRoom
+                })
           },
           {
             id: "user-profile",
-            label: <FormattedMessage id="more-menu.profile" defaultMessage="Change Name & Avatar" />,
+            label: <FormattedMessage id="more-menu.profile" defaultMessage="Change Name & Avatar"/>,
             icon: AvatarIcon,
             onClick: () => this.setSidebar("profile")
           },
           {
             id: "favorite-rooms",
-            label: <FormattedMessage id="more-menu.favorite-rooms" defaultMessage="Favorite Rooms" />,
+            label: <FormattedMessage id="more-menu.favorite-rooms" defaultMessage="Favorite Rooms"/>,
             icon: FavoritesIcon,
             onClick: () =>
-              this.props.performConditionalSignIn(
-                () => this.props.hubChannel.signedIn,
-                () => {
-                  showFullScreenIfAvailable();
-                  this.props.mediaSearchStore.sourceNavigateWithNoNav("favorites", "use");
-                },
-                SignInMessages.favoriteRooms
-              )
+                this.props.performConditionalSignIn(
+                    () => this.props.hubChannel.signedIn,
+                    () => {
+                      showFullScreenIfAvailable();
+                      this.props.mediaSearchStore.sourceNavigateWithNoNav("favorites", "use");
+                    },
+                    SignInMessages.favoriteRooms
+                )
           },
           {
             id: "preferences",
             label: "Preferences",
             icon: SettingsIcon,
-            onClick: () => this.setState({ showPrefs: true })
+            onClick: () => this.setState({showPrefs: true})
           }
         ].filter(item => item)
       },
       {
         id: "room",
-        label: <FormattedMessage id="more-menu.room" defaultMessage="Room" />,
+        label: <FormattedMessage id="more-menu.room" defaultMessage="Room"/>,
         items: [
+          renderEntryFlow && (enableSpectateVRButton || true) && { //Aptero add enter-device menu
+            id: "enter-device",
+            label: <FormattedMessage id="room-entry-modal.enter-on-device-button" defaultMessage="Enter On Device"/>,
+            icon: VRIcon,
+            onClick: () => this.attemptLink()
+          },
           {
             id: "room-info",
-            label: <FormattedMessage id="more-menu.room-info" defaultMessage="Room Info and Settings" />,
+            label: <FormattedMessage id="more-menu.room-info" defaultMessage="Room Info and Settings"/>,
             icon: HomeIcon,
             onClick: () => this.setSidebar("room-info")
           },
-          (this.props.breakpoint === "sm" || this.props.breakpoint === "md") &&
-            this.props.hub &&
-            (this.props.hub.entry_mode !== "invite" || this.props.hubChannel.can("update_hub")) && {
-              id: "invite",
-              label: <FormattedMessage id="more-menu.invite" defaultMessage="Invite" />,
-              icon: InviteIcon,
-              onClick: () => this.props.scene.emit("action_invite")
-            },
+          {
+            id: "objects",
+            label: <FormattedMessage id="more-menu.objects" defaultMessage="Objects"/>,
+            icon: ObjectsIcon,
+            onClick: () => this.setSidebar("objects")
+          },
+          (this.props.breakpoint === "sm" || this.props.breakpoint === "md" || true) &&//Aptero for the '|| to force render of invite'
+          this.props.hub &&
+          (this.props.hub.entry_mode !== "invite" || this.props.hubChannel.can("update_hub")) && {
+            id: "invite",
+            label: <FormattedMessage id="more-menu.invite" defaultMessage="Invite"/>,
+            icon: InviteIcon,
+            onClick: () => console.log(document.querySelector("." + styles.inviteButtonContainer).click())
+            // this.props.scene.emit("action_invite")
+          },
           this.isFavorited()
-            ? {
+              ? {
                 id: "unfavorite-room",
-                label: <FormattedMessage id="more-menu.unfavorite-room" defaultMessage="Unfavorite Room" />,
+                label: <FormattedMessage id="more-menu.unfavorite-room" defaultMessage="Unfavorite Room"/>,
                 icon: StarIcon,
                 onClick: () => this.toggleFavorited()
               }
-            : {
+              : {
                 id: "favorite-room",
-                label: <FormattedMessage id="more-menu.favorite-room" defaultMessage="Favorite Room" />,
+                label: <FormattedMessage id="more-menu.favorite-room" defaultMessage="Favorite Room"/>,
                 icon: StarOutlineIcon,
                 onClick: () => this.toggleFavorited()
               },
           isModerator &&
-            entered && {
-              id: "streamer-mode",
-              label: streaming ? (
-                <FormattedMessage id="more-menu.exit-streamer-mode" defaultMessage="Exit Streamer Mode" />
-              ) : (
-                <FormattedMessage id="more-menu.enter-streamer-mode" defaultMessage="Enter Streamer Mode" />
-              ),
-              icon: CameraIcon,
-              onClick: () => this.toggleStreamerMode()
-            },
+          entered && {
+            id: "streamer-mode",
+            label: streaming ? (
+                <FormattedMessage id="more-menu.exit-streamer-mode" defaultMessage="Exit Streamer Mode"/>
+            ) : (
+                <FormattedMessage id="more-menu.enter-streamer-mode" defaultMessage="Enter Streamer Mode"/>
+            ),
+            icon: CameraIcon,
+            onClick: () => this.toggleStreamerMode()
+          },
           (this.props.breakpoint === "sm" || this.props.breakpoint === "md") &&
-            entered && {
-              id: "leave-room",
-              label: <FormattedMessage id="more-menu.enter-leave-room" defaultMessage="Leave Room" />,
-              icon: LeaveIcon,
-              onClick: () => {
-                this.showNonHistoriedDialog(LeaveRoomModal, {
-                  destinationUrl: "/",
-                  reason: LeaveReason.leaveRoom
-                });
-              }
-            },
+          entered && {
+            id: "leave-room",
+            label: <FormattedMessage id="more-menu.enter-leave-room" defaultMessage="Leave Room"/>,
+            icon: LeaveIcon,
+            onClick: () => {
+              this.showNonHistoriedDialog(LeaveRoomModal, {
+                destinationUrl: "/",
+                reason: LeaveReason.leaveRoom
+              });
+            }
+          },
           canCloseRoom && {
             id: "close-room",
-            label: <FormattedMessage id="more-menu.close-room" defaultMessage="Close Room" />,
+            label: <FormattedMessage id="more-menu.close-room" defaultMessage="Close Room"/>,
             icon: DeleteIcon,
             onClick: () =>
-              this.props.performConditionalSignIn(
-                () => this.props.hubChannel.can("update_hub"),
-                () => {
-                  this.showNonHistoriedDialog(CloseRoomModal, {
-                    roomName: this.props.hub.name,
-                    onConfirm: () => {
-                      this.props.hubChannel.closeHub();
-                    }
-                  });
-                },
-                SignInMessages.closeRoom
-              )
+                this.props.performConditionalSignIn(
+                    () => this.props.hubChannel.can("update_hub"),
+                    () => {
+                      this.showNonHistoriedDialog(CloseRoomModal, {
+                        roomName: this.props.hub.name,
+                        onConfirm: () => {
+                          this.props.hubChannel.closeHub();
+                        }
+                      });
+                    },
+                    SignInMessages.closeRoom
+                )
           }
         ].filter(item => item)
       },
       {
         id: "support",
-        label: <FormattedMessage id="more-menu.support" defaultMessage="Support" />,
+        label: <FormattedMessage id="more-menu.support" defaultMessage="Support"/>,
         items: [
           configs.feature("show_community_link") && {
             id: "community",
-            label: <FormattedMessage id="more-menu.community" defaultMessage="Community" />,
+            label: <FormattedMessage id="more-menu.community" defaultMessage="Community"/>,
             icon: DiscordIcon,
             href: configs.link("community", "https://discord.gg/dFJncWwHun")
           },
           configs.feature("show_issue_report_link") && {
             id: "report-issue",
-            label: <FormattedMessage id="more-menu.report-issue" defaultMessage="Report Issue" />,
+            label: <FormattedMessage id="more-menu.report-issue" defaultMessage="Report Issue"/>,
             icon: WarningCircleIcon,
             href: configs.link("issue_report", "https://www.aptero.co/docs/help.html")
           },
           entered && {
             id: "start-tour",
-            label: <FormattedMessage id="more-menu.start-tour" defaultMessage="Start Tour" />,
+            label: <FormattedMessage id="more-menu.start-tour" defaultMessage="Start Tour"/>,
             icon: SupportIcon,
             onClick: () => {
               window.open("https://vimeo.com/524816064");
@@ -1435,37 +1446,199 @@ export class UIRoot extends Component {
           },
           configs.feature("show_docs_link") && {
             id: "help",
-            label: <FormattedMessage id="more-menu.help" defaultMessage="Help" />,
+            label: <FormattedMessage id="more-menu.help" defaultMessage="Help"/>,
             icon: SupportIcon,
             href: configs.link("docs", "https://www.aptero.co/docs")
           },
           configs.feature("show_controls_link") && {
             id: "controls",
-            label: <FormattedMessage id="more-menu.controls" defaultMessage="Controls" />,
+            label: <FormattedMessage id="more-menu.controls" defaultMessage="Controls"/>,
             icon: SupportIcon,
             href: configs.link("controls", "https://www.aptero.co/docs/hubs-controls.html")
           },
           configs.feature("show_whats_new_link") && {
             id: "whats-new",
-            label: <FormattedMessage id="more-menu.whats-new" defaultMessage="What's New" />,
+            label: <FormattedMessage id="more-menu.whats-new" defaultMessage="What's New"/>,
             icon: SupportIcon,
             href: "/whats-new"
           },
           configs.feature("show_terms") && {
             id: "tos",
-            label: <FormattedMessage id="more-menu.tos" defaultMessage="Terms of Service" />,
+            label: <FormattedMessage id="more-menu.tos" defaultMessage="Terms of Service"/>,
             icon: TextDocumentIcon,
             href: configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")
           },
           configs.feature("show_privacy") && {
             id: "privacy",
-            label: <FormattedMessage id="more-menu.privacy" defaultMessage="Privacy Notice" />,
+            label: <FormattedMessage id="more-menu.privacy" defaultMessage="Privacy Notice"/>,
             icon: ShieldIcon,
             href: configs.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")
+          },
+          {
+            id: "faq",
+            label: <FormattedMessage id="more-menu.faq" defaultMessage="FAQ"/>,
+            icon: SupportIcon,
+            href: configs.link("docs", "https://www.aptero.co/help.html")
           }
         ].filter(item => item)
       }
     ];
+
+    if(msTeams()){
+      moreMenu = [
+        {
+          id: "user",
+          label:
+              "You" +
+              (this.state.signedIn ? ` (Signed in as: ${maskEmail(this.props.store.state.credentials.email)})` : ""),
+          items: [
+            {
+              id: "user-profile",
+              label: <FormattedMessage id="more-menu.profile" defaultMessage="Change Name & Avatar"/>,
+              icon: AvatarIcon,
+              onClick: () => this.setSidebar("profile")
+            },
+            {
+              id: "preferences",
+              label: "Preferences",
+              icon: SettingsIcon,
+              onClick: () => this.setState({showPrefs: true})
+            },
+            microsoftLoginService.isSignedIn()?{
+              id: "authorize",
+              label: "Sign Out",
+              icon: SettingsIcon,
+              onClick: () => {
+                microsoftLoginService.logout();
+              }
+            }:{
+              id: "authorize",
+              label: "Sign In",
+              icon: SettingsIcon,
+              onClick: () => {
+                microsoftLoginService.login();
+              }
+            }
+          ].filter(item => item)
+        },
+        {
+          id: "room",
+          label: <FormattedMessage id="more-menu.room" defaultMessage="Room"/>,
+          items: [
+            renderEntryFlow && (enableSpectateVRButton || true) && { //Aptero add enter-device menu
+              id: "enter-device",
+              label: <FormattedMessage id="room-entry-modal.enter-on-device-button" defaultMessage="Enter On Device"/>,
+              icon: VRIcon,
+              onClick: () => this.attemptLink()
+            },
+            {
+              id: "room-info",
+              label: <FormattedMessage id="more-menu.room-info" defaultMessage="Room Info and Settings"/>,
+              icon: HomeIcon,
+              onClick: () => this.setSidebar("room-info")
+            },
+            {
+              id: "objects",
+              label: <FormattedMessage id="more-menu.objects" defaultMessage="Objects"/>,
+              icon: ObjectsIcon,
+              onClick: () => this.setSidebar("objects")
+            },
+            this.isFavorited()
+                ? {
+                  id: "unfavorite-room",
+                  label: <FormattedMessage id="more-menu.unfavorite-room" defaultMessage="Unfavorite Room"/>,
+                  icon: StarIcon,
+                  onClick: () => this.toggleFavorited()
+                }
+                : {
+                  id: "favorite-room",
+                  label: <FormattedMessage id="more-menu.favorite-room" defaultMessage="Favorite Room"/>,
+                  icon: StarOutlineIcon,
+                  onClick: () => this.toggleFavorited()
+                },
+            isModerator &&
+            entered && {
+              id: "streamer-mode",
+              label: streaming ? (
+                  <FormattedMessage id="more-menu.exit-streamer-mode" defaultMessage="Exit Streamer Mode"/>
+              ) : (
+                  <FormattedMessage id="more-menu.enter-streamer-mode" defaultMessage="Enter Streamer Mode"/>
+              ),
+              icon: CameraIcon,
+              onClick: () => this.toggleStreamerMode()
+            }
+          ].filter(item => item)
+        },
+        {
+          id: "support",
+          label: <FormattedMessage id="more-menu.support" defaultMessage="Support"/>,
+          items: [
+            configs.feature("show_community_link") && {
+              id: "community",
+              label: <FormattedMessage id="more-menu.community" defaultMessage="Community"/>,
+              icon: DiscordIcon,
+              href: configs.link("community", "https://discord.gg/dFJncWwHun")
+            },
+            configs.feature("show_issue_report_link") && {
+              id: "report-issue",
+              label: <FormattedMessage id="more-menu.report-issue" defaultMessage="Report Issue"/>,
+              icon: WarningCircleIcon,
+              href: configs.link("issue_report", "https://www.aptero.co/docs/help.html")
+            },
+            entered && {
+              id: "start-tour",
+              label: <FormattedMessage id="more-menu.start-tour" defaultMessage="Start Tour"/>,
+              icon: SupportIcon,
+              onClick: () => {
+                window.open("https://vimeo.com/524816064");
+                this.props.scene.systems.tips.resetTips();
+              }
+            },
+            configs.feature("show_docs_link") && {
+              id: "help",
+              label: <FormattedMessage id="more-menu.help" defaultMessage="Help"/>,
+              icon: SupportIcon,
+              href: configs.link("docs", "https://www.aptero.co/docs")
+            },
+            configs.feature("show_controls_link") && {
+              id: "controls",
+              label: <FormattedMessage id="more-menu.controls" defaultMessage="Controls"/>,
+              icon: SupportIcon,
+              href: configs.link("controls", "https://www.aptero.co/docs/hubs-controls.html")
+            },
+            configs.feature("show_whats_new_link") && {
+              id: "whats-new",
+              label: <FormattedMessage id="more-menu.whats-new" defaultMessage="What's New"/>,
+              icon: SupportIcon,
+              href: "/whats-new"
+            },
+            configs.feature("show_terms") && {
+              id: "tos",
+              label: <FormattedMessage id="more-menu.tos" defaultMessage="Terms of Service"/>,
+              icon: TextDocumentIcon,
+              href: configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")
+            },
+            configs.feature("show_privacy") && {
+              id: "privacy",
+              label: <FormattedMessage id="more-menu.privacy" defaultMessage="Privacy Notice"/>,
+              icon: ShieldIcon,
+              href: configs.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")
+            },
+            {
+              id: "faq",
+              label: <FormattedMessage id="more-menu.faq" defaultMessage="FAQ"/>,
+              icon: SupportIcon,
+              href: configs.link("docs", "https://www.aptero.co/help.html")
+            }
+          ].filter(item => item)
+        }
+      ];
+    }
+
+    if(!this.getSelectedUser() && (this.state.sidebarId === "display_user_panel" ||  this.state.sidebarId ==="user")){
+      this.setState({sidebarId:null});
+    }
+
     return (
       <MoreMenuContextProvider>
         <ReactAudioContext.Provider value={this.state.audioContext}>
@@ -1539,7 +1712,7 @@ export class UIRoot extends Component {
                   <>
                     {!this.state.dialog && renderEntryFlow ? entryDialog : undefined}
                     {!this.props.selectedObject && <CompactMoreMenuButton />}
-                    {(aptGuiVisible && !msTeams()) &&
+                    {(aptGuiVisible) &&
                       (!this.props.selectedObject ||
                         (this.props.breakpoint !== "sm" && this.props.breakpoint !== "md")) && (
                         <ContentMenu>
@@ -1549,7 +1722,7 @@ export class UIRoot extends Component {
                               onClick={() => this.toggleSidebar("custom")}
                             />
                           )}
-                          {showObjectList && (
+                          {showObjectList && false && (//Aptero
                             <ObjectsMenuButton
                               active={this.state.sidebarId === "objects"}
                               onClick={() => this.toggleSidebar("objects")}
@@ -1663,7 +1836,7 @@ export class UIRoot extends Component {
                           mediaSearchStore={this.props.mediaSearchStore}
                         />
                       )}
-                      {this.state.sidebarId === "user" && (
+                      {(this.state.sidebarId === "user" && this.getSelectedUser()) && (
                         <UserProfileSidebarContainer
                           user={this.getSelectedUser()}
                           performConditionalSignIn={this.props.performConditionalSignIn}
@@ -1674,7 +1847,7 @@ export class UIRoot extends Component {
                         />
                       )}
                       
-                      {this.state.sidebarId === "display_user_panel" && (
+                      {(this.state.sidebarId === "display_user_panel" && this.getSelectedUser()) && (
                         <UserProfileSidebarContainer
                           user={this.getSelectedUser()}
                           performConditionalSignIn={this.props.performConditionalSignIn}
@@ -1691,9 +1864,6 @@ export class UIRoot extends Component {
                           history={this.props.history}
                           mySessionId={this.props.sessionId}
                           presences={this.props.presences}
-                          onClose={() => this.setSidebar(null)}
-                          onCloseDialog={() => this.closeDialog()}
-                          performConditionalSignIn={this.props.performConditionalSignIn}
                           toggleChatSidebar={(type, userid,onBack) => this.toggleSidebar(type, userid,onBack)}
                         />
                       )}
@@ -1704,7 +1874,6 @@ export class UIRoot extends Component {
                           userId={this.state.userId}
                           store={this.props.store}
                           hubChannel={this.props.hubChannel}
-                          presences={this.props.presences}
                           performConditionalSignIn={this.props.performConditionalSignIn}
                           onClose={() => this.setSidebar(null)}
                           onCloseDialog={() => this.closeDialog()}
@@ -1753,13 +1922,7 @@ export class UIRoot extends Component {
                 }
                 modal={this.state.dialog}
                 toolbarLeft={<div></div>/*
-                  !aptGuiVisible ? null : (
-                    <InvitePopoverContainer
-                      hub={this.props.hub}
-                      hubChannel={this.props.hubChannel}
-                      scene={this.props.scene}
-                    />
-                  )*/
+                  */
                 }
                 toolbarCenter={
                   !aptGuiVisible ? null : (
@@ -1827,7 +1990,13 @@ export class UIRoot extends Component {
                           onClick={() => exit2DInterstitialAndEnterVR(true)}
                         />
                       )}
-                      <MoreMenuPopoverButton menu={moreMenu} />
+                      <MoreMenuPopoverButton menu={moreMenu} />{/*Aptero*/}
+                      {!aptGuiVisible ? null : (
+                      <InvitePopoverContainer className={styles.inviteButtonContainer}
+                        hub={this.props.hub}
+                        hubChannel={this.props.hubChannel}
+                        scene={this.props.scene}
+                      />)}
                     </>
                   )
                 }
@@ -1854,7 +2023,7 @@ function usePeopleList(presences, mySessionId) {
   return people;
 }
 function getUrl(avatarGlb) {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function(resolve) {
     const params = {
       model: avatarGlb,
       scene: "halfbody-portrait-v1",

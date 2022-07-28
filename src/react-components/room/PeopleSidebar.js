@@ -14,6 +14,7 @@ import { ReactComponent as VolumeHighIcon } from "../icons/VolumeHigh.svg";
 import { ReactComponent as VolumeMutedIcon } from "../icons/VolumeMuted.svg";
 import { List, ButtonListItem } from "../layout/List";
 import { FormattedMessage, useIntl } from "react-intl";
+import { msTeams} from "../../aptero/module/microsoft/service/MsTeams";
 
 function getDeviceLabel(ctx, intl) {
   if (ctx) {
@@ -103,7 +104,7 @@ export function PeopleSidebar({ people, onSelectPerson, onClose, showMuteAll, on
       }
       beforeTitle={<CloseButton onClick={onClose} />}
       afterTitle={
-        showMuteAll ? (
+        showMuteAll && !msTeams()? (
           <IconButton onClick={onMuteAll}>
             <FormattedMessage id="people-sidebar.mute-all-button" defaultMessage="Mute All" />
           </IconButton>
@@ -121,7 +122,9 @@ export function PeopleSidebar({ people, onSelectPerson, onClose, showMuteAll, on
               className={styles.person}
               key={person.id}
               type="button"
-              onClick={e => onSelectPerson(person, e)}
+              onClick={e => {
+                  onSelectPerson(person, e)
+              }}
             >
               {<DeviceIcon title={getDeviceLabel(person.context, intl)} />}
               {!person.context.discord && VoiceIcon && <VoiceIcon title={getVoiceLabel(person.micPresence, intl)} />}

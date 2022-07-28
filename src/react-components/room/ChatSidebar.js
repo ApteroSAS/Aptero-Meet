@@ -16,7 +16,7 @@ import { EmojiPicker } from "./EmojiPicker";
 import styles from "./ChatSidebar.scss";
 import { formatMessageBody } from "../../utils/chat-message";
 import { FormattedMessage, useIntl, defineMessages, FormattedRelativeTime } from "react-intl";
-import { customFormatSystemMessage } from "../../aptero/react-components/ChatSidebarCustom";
+import { customFormatSystemMessage } from "../../aptero/module/HubsBridge/react-components/ChatSidebarCustom";
 import {DropDownChatList} from "./DropDownChatList";
 import { useState } from "react";
 import {getPresences} from "./DropDownChatList";

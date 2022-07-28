@@ -9,7 +9,7 @@ import { Button } from "../input/Button";
 import { Column } from "../layout/Column";
 import { FormattedMessage, useIntl } from "react-intl";
 import configs from "../../utils/configs"
-import ApteroRoomEditPlugin from "../../aptero/react-components/ApteroRoomEditPlugin";
+import ApteroRoomEditPlugin from "../../aptero/module/HubsBridge/react-components/ApteroRoomEditPlugin";
 
 function SceneAttribution({ attribution }) {
   const intl = useIntl();

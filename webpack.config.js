@@ -8,12 +8,11 @@ const HTMLWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
-const TOML = require("@iarna/toml");
-const fetch = require("node-fetch");
 const packageLock = require("./webpack-package-lock-info.json");
 const versionJson = require("./version.json");
 const request = require("request");
-const internalIp = require("internal-ip");
+
+const PORT = 53000;//Teams needs port 53000
 
 function createHTTPSConfig() {
   // Generate certs for the local webpack-dev-server.
@@ -99,94 +98,6 @@ function deepModuleDependencyTest(modulesArr) {
   };
 }
 
-function createDefaultAppConfig() {
-  const schemaPath = path.join(__dirname, "src", "schema.toml");
-  const schemaString = fs.readFileSync(schemaPath).toString();
-
-  let appConfigSchema;
-
-  try {
-    appConfigSchema = TOML.parse(schemaString);
-  } catch (e) {
-    console.error("Error parsing schema.toml on line " + e.line + ", column " + e.column + ": " + e.message);
-    throw e;
-  }
-
-  const appConfig = {};
-
-  for (const [categoryName, category] of Object.entries(appConfigSchema)) {
-    appConfig[categoryName] = {};
-
-    // Enable all features with a boolean type
-    if (categoryName === "features") {
-      for (const [key, schema] of Object.entries(category)) {
-        if (key === "require_account_for_join" || key === "disable_room_creation") {
-          appConfig[categoryName][key] = false;
-        } else {
-          appConfig[categoryName][key] = schema.type === "boolean" ? true : null;
-        }
-      }
-    }
-  }
-
-  const themesPath = path.join(__dirname, "themes.json");
-
-  if (fs.existsSync(themesPath)) {
-    const themesString = fs.readFileSync(themesPath).toString();
-    const themes = JSON.parse(themesString);
-    appConfig.themes = themes;
-  }
-
-  return appConfig;
-}
-
-async function fetchAppConfigAndEnvironmentVars() {
-  if (!fs.existsSync(".ret.credentials")) {
-    throw new Error("Not logged in to Hubs Cloud. Run `npm run login` first.");
-  }
-
-  const { host, token } = JSON.parse(fs.readFileSync(".ret.credentials"));
-
-  const headers = {
-    Authorization: `Bearer ${token}`,
-    "Content-Type": "application/json"
-  };
-
-  // Load the Hubs Cloud instance's app config in development
-  const appConfigsResponse = await fetch(`https://${host}/api/v1/app_configs`, { headers });
-
-  if (!appConfigsResponse.ok) {
-    throw new Error(`Error fetching Hubs Cloud config "${appConfigsResponse.statusText}"`);
-  }
-
-  const appConfig = await appConfigsResponse.json();
-
-  // dev.reticulum.io doesn't run ita
-  if (host === "dev.reticulum.io") {
-    return appConfig;
-  }
-
-  const hubsConfigsResponse = await fetch(`https://${host}/api/ita/configs/hubs`, { headers });
-
-  const hubsConfigs = await hubsConfigsResponse.json();
-
-  if (!hubsConfigsResponse.ok) {
-    throw new Error(`Error fetching Hubs Cloud config "${hubsConfigsResponse.statusText}"`);
-  }
-
-  const { shortlink_domain, thumbnail_server } = hubsConfigs.general;
-
-  const localIp = process.env.HOST_IP || (await internalIp.v4()) || "localhost";
-
-  process.env.RETICULUM_SERVER = host;
-  process.env.SHORTLINK_DOMAIN = shortlink_domain;
-  process.env.CORS_PROXY_SERVER = `${localIp}:8080/cors-proxy`;
-  process.env.THUMBNAIL_SERVER = thumbnail_server;
-  process.env.NON_CORS_PROXY_DOMAINS = `${localIp},localhost`;
-
-  return appConfig;
-}
-
 module.exports = async (env, argv) => {
   env = env || {};
 
@@ -196,26 +107,11 @@ module.exports = async (env, argv) => {
   dotenv.config({ path: ".env" });
   dotenv.config({ path: ".defaults.env" });
 
-  let appConfig = undefined;
-
   /**
    * Initialize the Webpack build envrionment for the provided environment.
    */
 
   if (argv.mode !== "production" || env.bundleAnalyzer) {
-    if (env.loadAppConfig || process.env.LOAD_APP_CONFIG) {
-      if (!env.localDev) {
-        // Load and set the app config and environment variables from the remote server.
-        // A Hubs Cloud server or dev.reticulum.io can be used.
-        appConfig = await fetchAppConfigAndEnvironmentVars();
-      }
-    } else {
-      if (!env.localDev) {
-        // Use the default app config with all features enabled.
-        appConfig = createDefaultAppConfig();
-      }
-    }
-
     if (env.localDev) {
       // Local Dev Environment (npm run local)
       Object.assign(process.env, {
@@ -223,7 +119,7 @@ module.exports = async (env, argv) => {
         RETICULUM_SOCKET_SERVER: "localhost",
         CORS_PROXY_SERVER: "hubs-proxy.local:4000",
         NON_CORS_PROXY_DOMAINS: "localhost,dev.reticulum.io",
-        BASE_ASSETS_PATH: "https://localhost:8080/",
+        BASE_ASSETS_PATH: "https://localhost:"+PORT+"/",
         RETICULUM_SERVER: "localhost:4000",
         POSTGREST_SERVER: "",
         ITA_SERVER: ""
@@ -256,20 +152,14 @@ module.exports = async (env, argv) => {
       fs: "empty"
     },
     entry: {
+      "microsoft-settings": path.join(__dirname, "src/aptero/module/microsoft/page", "microsoft-settings.tsx"),
       support: path.join(__dirname, "src", "support.js"),
       index: path.join(__dirname, "src", "index.js"),
       hub: path.join(__dirname, "src", "hub.js"),
       scene: path.join(__dirname, "src", "scene.js"),
-      avatar: path.join(__dirname, "src", "avatar.js"),
       link: path.join(__dirname, "src", "link.js"),
-      microsoft: path.join(__dirname, "src", "./aptero/pages/microsoft.js"),
-      discord: path.join(__dirname, "src", "discord.js"),
-      cloud: path.join(__dirname, "src", "cloud.js"),
       signin: path.join(__dirname, "src", "signin.js"),
       verify: path.join(__dirname, "src", "verify.js"),
-      tokens: path.join(__dirname, "src", "tokens.js"),
-      "whats-new": path.join(__dirname, "src", "whats-new.js"),
-      "webxr-polyfill": path.join(__dirname, "src", "webxr-polyfill.js")
     },
     output: {
       filename: "assets/js/[name]-[chunkhash].js",
@@ -277,10 +167,12 @@ module.exports = async (env, argv) => {
     },
     devtool: argv.mode === "production" ? "source-map" : "source-map",
     devServer: {
-      https: createHTTPSConfig(),
+      https: createHTTPSConfig(),//Comment for ngrok http <port>
       host: "0.0.0.0",
-      public: `${host}:8080`,
+      port: PORT,
+      public: `${host}:${PORT}`,
       useLocalIp: true,
+      disableHostCheck: true,
       allowedHosts: [host, "localhost"],
       headers: {
         "Access-Control-Allow-Origin": "*"
@@ -313,7 +205,7 @@ module.exports = async (env, argv) => {
           const redirectLocation = req.header("location");
 
           if (redirectLocation) {
-            res.header("Location", "https://localhost:8080/cors-proxy/" + redirectLocation);
+            res.header("Location", "https://localhost:"+PORT+"/cors-proxy/" + redirectLocation);
           }
 
           if (req.method === "OPTIONS") {
@@ -347,6 +239,9 @@ module.exports = async (env, argv) => {
       assetFilter(assetFilename) {
         return !/\.(map|png|jpg|gif|glb|webm)$/.test(assetFilename);
       }
+    },
+    resolve: {
+      extensions: ['*', '.js', '.jsx', '.tsx', '.ts', ".json"],
     },
     module: {
       rules: [
@@ -388,7 +283,7 @@ module.exports = async (env, argv) => {
           }
         },
         {
-          test: /\.js$/,
+          test: /\.(js|jsx|tsx|ts)$/,
           include: [path.resolve(__dirname, "src")],
           // Exclude JS assets in node_modules because they are already transformed and often big.
           exclude: [path.resolve(__dirname, "node_modules")],
@@ -516,6 +411,15 @@ module.exports = async (env, argv) => {
       }),
       // Each output page needs a HTMLWebpackPlugin entry
       new HTMLWebpackPlugin({
+        filename: "microsoft-settings.html",
+        template: path.join(__dirname, "src/aptero/module/microsoft/page", "microsoft-settings.html"),
+        chunks: ["microsoft-settings"],
+        chunksSortMode: "manual",
+        minify: {
+          removeComments: false
+        }
+      }),
+      new HTMLWebpackPlugin({
         filename: "index.html",
         template: path.join(__dirname, "src", "index.html"),
         chunks: ["support", "index"],
@@ -527,7 +431,7 @@ module.exports = async (env, argv) => {
       new HTMLWebpackPlugin({
         filename: "hub.html",
         template: path.join(__dirname, "src", "hub.html"),
-        chunks: ["webxr-polyfill", "support", "hub"],
+        chunks: ["support", "hub"],
         chunksSortMode: "manual",
         inject: "head",
         minify: {
@@ -545,46 +449,10 @@ module.exports = async (env, argv) => {
         }
       }),
       new HTMLWebpackPlugin({
-        filename: "avatar.html",
-        template: path.join(__dirname, "src", "avatar.html"),
-        chunks: ["support", "avatar"],
-        chunksSortMode: "manual",
-        inject: "head",
-        minify: {
-          removeComments: false
-        }
-      }),
-      new HTMLWebpackPlugin({
         filename: "link.html",
         template: path.join(__dirname, "src", "link.html"),
         chunks: ["support", "link"],
         chunksSortMode: "manual",
-        minify: {
-          removeComments: false
-        }
-      }),
-      new HTMLWebpackPlugin({
-        filename: "discord.html",
-        template: path.join(__dirname, "src", "discord.html"),
-        chunks: ["discord"],
-        minify: {
-          removeComments: false
-        }
-      }),
-      new HTMLWebpackPlugin({
-        filename: "whats-new.html",
-        template: path.join(__dirname, "src", "whats-new.html"),
-        chunks: ["whats-new"],
-        inject: "head",
-        minify: {
-          removeComments: false
-        }
-      }),
-      new HTMLWebpackPlugin({
-        filename: "cloud.html",
-        template: path.join(__dirname, "src", "cloud.html"),
-        chunks: ["cloud"],
-        inject: "head",
         minify: {
           removeComments: false
         }
@@ -605,14 +473,6 @@ module.exports = async (env, argv) => {
           removeComments: false
         }
       }),
-      new HTMLWebpackPlugin({
-        filename: "tokens.html",
-        template: path.join(__dirname, "src", "tokens.html"),
-        chunks: ["tokens"],
-        minify: {
-          removeComments: false
-        }
-      }),
       new CopyWebpackPlugin([
         {
           from: "src/hub.service.js",
@@ -627,7 +487,7 @@ module.exports = async (env, argv) => {
       ]),
     new CopyWebpackPlugin([
       {
-        from: "src/aptero/properties/properties.js",
+        from: "src/aptero/module/properties/properties.js",
         to: "properties.js"
       }
     ]),
@@ -637,7 +497,19 @@ module.exports = async (env, argv) => {
         to: "favicon.ico"
       }
     ]),
-    new CopyWebpackPlugin([
+      new CopyWebpackPlugin([
+        {
+          from: "src/aptero/module/microsoft/page/auth-start.html",
+          to: "auth-start.html"
+        }
+      ]),
+      new CopyWebpackPlugin([
+        {
+          from: "src/aptero/module/microsoft/page/auth-end.html",
+          to: "auth-end.html"
+        }
+      ]),
+      new CopyWebpackPlugin([
       {
         from: "src/assets/manifest.webmanifest",
         to: "manifest.webmanifest"

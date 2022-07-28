@@ -1,3 +1,7 @@
+import { redirectToTeamsSidePanel } from "./aptero/module/microsoft/service/RedirectToSidePage";
+redirectToTeamsSidePanel();
+console.log(`App version: ${process.env.BUILD_VERSION || "?"}`);
+
 import {
   getCurrentHubId,
   updateVRHudPresenceCount,
@@ -8,9 +12,6 @@ import "./utils/debug-log";
 import configs from "./utils/configs";
 import "./utils/theme";
 import "@babel/polyfill";
-
-console.log(`App version: ${process.env.BUILD_VERSION || "?"}`);
-
 import "./react-components/styles/global.scss";
 import "./assets/stylesheets/globals.scss";
 import "./assets/stylesheets/hub.scss";
@@ -194,12 +195,11 @@ import { sleep } from "./utils/async-utils";
 import { platformUnsupported } from "./support";
 
 //aptero service
-import { microsoftService } from "./aptero/service/MicrosoftIntegration/MicrosoftService";
+import { microsoftUrlService } from "./aptero/module/microsoft/service/MicrosoftUrlService";
 import { apteroService } from "./aptero/ApteroServices";
-import { roomController } from "./aptero/service/api/RoomController";
-import { minimumQualityService } from "./aptero/service/MinimumQualityService";
-import { createTrack, fetchICEservers } from "./aptero/adapter/adapter-config";
-import { AdapterWarpper } from "./aptero/adapter/AdapterWrapper";
+import { roomController } from "./aptero/module/ButtonAPI/api/RoomController";
+import { fetchICEservers } from "./aptero/module/webRTCadapter/adapter-config";
+import { AdapterWarpper } from "./aptero/module/webRTCadapter/AdapterWrapper";
 //aptero service end
 
 window.APP = new App();
@@ -261,9 +261,11 @@ import { OAuthScreenContainer } from "./react-components/auth/OAuthScreenContain
 import { SignInMessages } from "./react-components/auth/SignInModal";
 import { ThemeProvider } from "./react-components/styles/theme";
 import { wait } from "./aptero/util/AsyncWaiter";
-import { networkService } from "./aptero/service/NetworkService";
-import { getEntryMode } from "./aptero/util/EntryMode";
-import { msTeams } from "./aptero/util/MsTeams";
+import { setupVersionComp } from "./aptero/module/HubsBridge/utils/Version";
+import { msTeams } from "./aptero/module/microsoft/service/MsTeams";
+import { minimumQualityService } from "./aptero/module/perf/MinimumQualityService";
+import { networkService } from "./aptero/module/HubsBridge/service/NetworkService";
+import { getEntryMode } from "./aptero/module/HubsBridge/utils/EntryMode";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -272,11 +274,11 @@ NAF.options.syncSource = PHOENIX_RELIABLE_NAF;
 let isOAuthModal = false;
 
 // OAuth popup handler
-// TODO: Replace with a new oauth callback route that has this postMessage script.
+/*// TODO: Replace with a new oauth callback route that has this postMessage script.
 if (window.opener && window.opener.doingTwitterOAuth) {
   window.opener.postMessage("oauth-successful");
   isOAuthModal = true;
-}
+}*/
 
 const isBotMode = qsTruthy("bot");
 const isTelemetryDisabled = qsTruthy("disable_telemetry");
@@ -392,7 +394,7 @@ export async function getSceneUrlForHub(hub) {
   }
 
   //aptero
-  await microsoftService.preFetchConvertMicrosoftUrl(sceneUrl);
+  await microsoftUrlService.preFetchConvertMicrosoftUrl(sceneUrl);
 
   if (isLegacyBundle) {
     // Deprecated
@@ -534,7 +536,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data,
 
   // Turn off NAF for embeds as an optimization, so the user's browser isn't getting slammed
   // with NAF traffic on load.
-  if (isEmbed) {
+  if (isEmbed && !msTeams()) {
     hubChannel.allowNAFTraffic(false);
   }
 
@@ -653,8 +655,8 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data,
     window.APP.hub = hub;
     updateUIForHub(hub, hubChannel);
     scene.emit("hub_updated", { hub });
-
-    if (!isEmbed || new URL(window.location.href).searchParams.get("hideui")) {
+    const hideui = new URL(window.location.href).searchParams.get("hideui");
+    if (!isEmbed || hideui || msTeams()) {
       loadEnvironmentAndConnect();
     } else {
       remountUI({
@@ -698,8 +700,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     return APP.dialog.lasyLoadingFinished;
   });
   console.log("lazy loading finished");
-  //end APTERO
-  document.getElementById("version").innerHTML = process.env.BUILD_VERSION;
+  setupVersionComp();
   if (isOAuthModal) {
     return;
   }
@@ -710,22 +711,25 @@ document.addEventListener("DOMContentLoaded", async () => {
   canvas.classList.add("a-hidden");
 
   if (platformUnsupported()) {
+    console.warn("platformUnsupported");
     return;
   }
 
-  const detectedOS = detectOS(navigator.userAgent);
-  const browser = detect();
-  // HACK - it seems if we don't initialize the mic track up-front, voices can drop out on iOS
-  // safari when initializing it later.
-  if (["iOS", "Mac OS"].includes(detectedOS) && ["safari", "ios"].includes(browser.name)) {
-    try {
-      //await createTrack({ audio: true });//Type MediaStream
-      //note aptero we do not need to use create track here since this is just a hack to trigger safari audio authorization popup
-      await navigator.mediaDevices.getUserMedia({ audio: true });
-    } catch (e) {
-      console.error(e);
-      remountUI({ showSafariMicDialog: true });
-      return;
+  if(!msTeams()) {
+    const detectedOS = detectOS(navigator.userAgent);
+    const browser = detect();
+    // HACK - it seems if we don't initialize the mic track up-front, voices can drop out on iOS
+    // safari when initializing it later.
+    if (["iOS", "Mac OS"].includes(detectedOS) && ["safari", "ios"].includes(browser.name)) {
+      try {
+        //await createTrack({ audio: true });//Type MediaStream
+        //note aptero we do not need to use create track here since this is just a hack to trigger safari audio authorization popup
+        await navigator.mediaDevices.getUserMedia({audio: true});
+      } catch (e) {
+        console.error(e);
+        remountUI({showSafariMicDialog: true});
+        return;
+      }
     }
   }
 
@@ -835,11 +839,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       SignInMessages.changeScene
     );
   });
-
+  const hideui = new URL(window.location.href).searchParams.get("hideui");
   remountUI({
     performConditionalSignIn,
     embed: isEmbed,
-    showPreload: isEmbed && !new URL(window.location.href).searchParams.get("hideui") && !msTeams()
+    showPreload: isEmbed && !hideui && !msTeams()
   });
   entryManager.performConditionalSignIn = performConditionalSignIn;
   entryManager.init();

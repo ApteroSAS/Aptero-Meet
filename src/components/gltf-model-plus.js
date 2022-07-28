@@ -7,7 +7,7 @@ import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
 import { disposeNode, cloneObject3D } from "../utils/three-utils";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";
 import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader";
-import { gltfExtensionProcessorService } from "../aptero/service/api/GLTFExtensionProcessorService";
+import { gltfExtensionProcessorService } from "../aptero/module/ButtonAPI/api/GLTFExtensionProcessorService";
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 

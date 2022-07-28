@@ -2,7 +2,6 @@ import React, { useCallback, useReducer, useContext, useEffect } from "react";
 import configs from "../../utils/configs";
 import { AuthContext } from "./AuthContext";
 import { SignInModal, SignInStep, WaitForVerification, SubmitEmail,WaitForMicrosoftVerification } from "./SignInModal";
-import { microsoftLoginService } from "../../aptero/service/MicrosoftIntegration/MicrosoftLoginService";
 
 const SignInAction = {
   submitEmail: "submitEmail",
@@ -96,8 +95,7 @@ export function SignInModalContainer() {
     },
     [step, redirectUrl]
   );
-  if(!authenticationType.microsoftAuhtentication)
-  {
+  if(!authenticationType.microsoftAuhtentication) {
     return (
       <SignInModal disableFullscreen>
         {step === SignInStep.submit ? (
@@ -120,8 +118,7 @@ export function SignInModalContainer() {
         )}
       </SignInModal>
     );
-  }
-  else{
+  } else{
     return (
       <SignInModal disableFullscreen>
       <WaitForMicrosoftVerification 

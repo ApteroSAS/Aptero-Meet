@@ -51,3 +51,9 @@ body.vr-mode {
   z-index: 11;
   pointer-events: auto;
 }
+
+:local(.inviteButtonContainer) {
+  height: 0;
+  width: 0;
+  overflow: hidden;
+}

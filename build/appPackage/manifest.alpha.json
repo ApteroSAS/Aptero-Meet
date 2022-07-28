@@ -1,0 +1,62 @@
+{
+    "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.11/MicrosoftTeams.schema.json",
+    "manifestVersion": "1.11",
+    "version": "2.0.0",
+    "id": "a8eb8cd3-dfbb-4d50-af96-065edce5412e",
+    "packageName": "com.microsoft.teams.extension",
+    "localizationInfo": {
+        "defaultLanguageTag": "en"
+    },
+    "developer": {
+        "name": "Aptero",
+        "websiteUrl": "https://www.aptero.co",
+        "privacyUrl": "https://www.aptero.co/legal/privacy.html",
+        "termsOfUseUrl": "https://www.aptero.co/legal/termsofuse.html"
+    },
+    "icons": {
+        "color": "resources/color.png",
+        "outline": "resources/outline.png"
+    },
+    "name": {
+        "short": "Aptero (Alpha)",
+        "full": "Aptero - 3D Spaces (Alpha)"
+    },
+    "description": {
+        "short": "Micro metaverse for business",
+        "full": "Your events and immersive training in 3D. Create your immersive 3D rooms with your company's DNA. Organize your meetings, events and training in a fun way remotely. Compatible with any device, personalize and broadcast your content."
+    },
+    "accentColor": "#FFFFFF",
+    "bots": [],
+    "composeExtensions": [],
+    "configurableTabs": [
+        {
+            "configurationUrl": "https://alphahub.aptero.co/microsoft-settings.html?msteams=true",
+            "canUpdateConfiguration": true,
+            "scopes": [
+                "team",
+                "groupchat"
+            ],
+            "context": [
+                "channelTab",
+                "privateChatTab",
+                "meetingChatTab",
+                "meetingDetailsTab",
+                "meetingSidePanel",
+                "meetingStage"
+            ]
+        }
+    ],
+    "permissions": [
+        "identity",
+        "messageTeamMembers"
+    ],
+    "validDomains": [
+        "*.aptero.co",
+        "*.axolotis.com",
+        "alphahub.aptero.co"
+    ],
+    "webApplicationInfo": {
+        "id": "c89c5d54-37ec-49d6-952a-befc9b770079",
+        "resource": "api://alphahub.aptero.co/c89c5d54-37ec-49d6-952a-befc9b770079"
+    }
+}
