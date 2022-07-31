@@ -1,4 +1,4 @@
-import { isLocalHubsUrl, isLocalHubsSceneUrl, isHubsRoomUrl, isLocalHubsAvatarUrl } from "../utils/media-url-utils";
+import { isLocalHubsUrl, isLocalHubsSceneUrl, isHubsRoomUrl, isHubsServer, isHubsAvatarUrl, isHubsSceneUrl, isLocalHubsAvatarUrl } from "../utils/media-url-utils";
 import { guessContentType } from "../utils/media-url-utils";
 import { handleExitTo2DInterstitial } from "../utils/vr-interstitial";
 //aptero
@@ -63,13 +63,14 @@ AFRAME.registerComponent("open-media-button", {
               label = "visit room";
             }
           }
+          else {
+            //Aptero
+            label = await setupIframeButton(this) || label;
+            console.log(label)
+          }
         }
         this.label.setAttribute("text", "value", label);
 
-        //Aptero
-        if (!this.data.onlyOpenLink) {
-          setupIframeButton(this);
-        }
       }
     };
 
@@ -105,7 +106,7 @@ AFRAME.registerComponent("open-media-button", {
         }
       } else {
         await exitImmersive();
-        window.open(this.src);
+        window.open(this.src,"_blank","popup");
       }
     };
 

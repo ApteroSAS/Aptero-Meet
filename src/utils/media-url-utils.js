@@ -177,7 +177,11 @@ async function isHubsServer(url) {
   } catch (e) {
     isHubsServer = false;
   }*/
-  isHubsServer = true;
+
+  //Fix simple urls from being interpreted as hubs server
+  if(url.includes("www.")) isHubsServer =  false;
+  else isHubsServer = true;
+
   originIsHubsServer.set(origin, isHubsServer);
   return isHubsServer;
 }
