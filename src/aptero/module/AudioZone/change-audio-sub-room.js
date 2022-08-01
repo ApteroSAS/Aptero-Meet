@@ -1,8 +1,7 @@
 import { SOUND_PIN } from "../../../systems/sound-effects-system";
-import { choseAdapter } from "../webRTCadapter/adapter-config";
+import { choseAdapter, getAdapterParams } from "../webRTCadapter/adapter-config";
 import { AdapterWarpper } from "../webRTCadapter/AdapterWrapper";
 import { wait } from "../../util/AsyncWaiter";
-import configs from "../../../utils/configs";
 
 const history = [];
 let currentSubroomId = null;
@@ -39,7 +38,7 @@ export async function changeAudioSubRoom(subroomid) {
   }
   if(!defaultAdapter){
     //first adapter we see is the default
-    defaultAdapter = configs.APP_CONFIG.adapterParams.adapter;
+    defaultAdapter = getAdapterParams().adapter;
   }
   currentSubroomId = subroomid;
   const oldParams = {

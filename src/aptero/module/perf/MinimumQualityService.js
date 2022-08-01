@@ -1,4 +1,4 @@
-import { filterServer, getAdapterConfig } from "../webRTCadapter/adapter-config";
+import { filterServer, getAdapterParams } from "../webRTCadapter/adapter-config";
 
 function clampInt (value, min, max) {
   return Math.round(Math.min(Math.max(value, min), max));
@@ -195,7 +195,7 @@ class MinimumQualityService {
   }
 
   async checkTurnServer(iceServers, timeout) {
-      if(!["dialog-io-data-only","naf-socketio-adapter"].includes(getAdapterConfig().adapter)){
+      if(!["dialog-io-data-only","naf-socketio-adapter"].includes(getAdapterParams().adapter)){
         return true;
       }
     return new Promise((resolve) => {

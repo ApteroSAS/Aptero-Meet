@@ -1,7 +1,7 @@
 import * as mediasoupClient from "mediasoup-client";
 import protooClient from "protoo-client";
 import EventEmitter from "eventemitter3";
-import { addIceServers, getAdapterConfig } from "./adapter-config";
+import { addIceServers, getAdapterParams } from "./adapter-config";
 import AdapterUserListener from "./AdapterUserListener";
 
 // Used for VP9 webcam video.
@@ -268,7 +268,7 @@ export default class DialogAdapter extends EventEmitter {
     // TODO: Establishing connection could take a very long time.
     //       Inform the user if we are stuck here.
     let protooTransport;
-    if (getAdapterConfig().transport && getAdapterConfig().transport === "WebSocketTransport") {
+    if (getAdapterParams().transport && getAdapterParams().transport === "WebSocketTransport") {
       protooTransport = new protooClient.WebSocketTransport(urlWithParams.toString(), {
         retry: { retries: 2 }
       });

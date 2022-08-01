@@ -105,6 +105,7 @@ import {msTeamsAPI, msTeamsAPILight} from "@aptero/axolotis-module-teams";
 import { propertiesService } from "../aptero/module/properties/propertiesService";
 import AptRoot from "../aptero/module/HubsBridge/AptRoot";
 import { minimumQualityService } from "../aptero/module/perf/MinimumQualityService";
+import { adapterReady, getAdapterParams } from "../aptero/module/webRTCadapter/adapter-config";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 const IN_ROOM_MODAL_ROUTER_PATHS = ["/media"];
@@ -683,7 +684,8 @@ export class UIRoot extends Component {
 
   onRequestMicPermission = async () => {
     // TODO: Show an error state if getting the microphone permissions fails
-    if (window.APP_CONFIG.adapterParams.adapter !== "none" && !msTeamsAPILight().msTeams()) {
+    await adapterReady();//APTERO
+    if (getAdapterParams().adapter !== "none" && !msTeamsAPILight().msTeams()) {
       await this.mediaDevicesManager.startLastUsedMicShare();
     }
     this.beginOrSkipAudioSetup();
@@ -697,7 +699,7 @@ export class UIRoot extends Component {
       AFRAME.scenes[0].audioListener.context.currentTime,
       0.2
     );
-    if (skipAudioSetup || window.APP_CONFIG.adapterParams.adapter === "none" || msTeamsAPILight().msTeams()) {
+    if (skipAudioSetup || getAdapterParams().adapter === "none" || msTeamsAPILight().msTeams()) {
       this.onAudioReadyButton();
     } else {
       this.pushHistoryState("entry_step", "audio");
@@ -723,7 +725,7 @@ export class UIRoot extends Component {
     clearHistoryState(this.props.history);
 
     const muteOnEntry = msTeamsAPILight().msTeams() ||
-      window.APP_CONFIG.adapterParams.adapter === "none" ||
+      getAdapterParams().adapter === "none" ||
       this.props.store.state.preferences["muteMicOnEntry"];
 
     await this.props.enterScene(this.state.enterInVR, muteOnEntry);

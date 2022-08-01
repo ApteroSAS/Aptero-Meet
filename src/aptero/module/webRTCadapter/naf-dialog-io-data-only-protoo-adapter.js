@@ -1,6 +1,6 @@
 import protooClient from "protoo-client";
 import EventEmitter from "eventemitter3";
-import { getAdapterConfig } from "./adapter-config";
+import { getAdapterParams } from "./adapter-config";
 
 let debug = console.log;
 let error = console.error;
@@ -160,7 +160,7 @@ export default class DialogIODataOnlyAdapter extends EventEmitter {
     urlWithParams.searchParams.append("peerId", this._clientId);
 
     let protooTransport;
-    if (getAdapterConfig().transport && getAdapterConfig().transport === "WebSocketTransport") {
+    if (getAdapterParams().transport && getAdapterParams().transport === "WebSocketTransport") {
       protooTransport = new protooClient.WebSocketTransport(urlWithParams.toString());
     } else {
       protooTransport = new protooClient.WebSocketIOTransport(urlWithParams.toString());

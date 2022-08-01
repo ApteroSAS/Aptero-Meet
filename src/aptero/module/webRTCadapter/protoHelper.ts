@@ -1,11 +1,11 @@
 import protooClient from "protoo-client";
-import { getAdapterConfig } from "./adapter-config";
+import { getAdapterParams } from "./adapter-config";
 
 export class ProtooHelper {
   private _protoo: protooClient.Peer;
   async init(urlWithParams) {
     let protooTransport;
-    let adapterConfig = getAdapterConfig();
+    let adapterConfig = getAdapterParams();
     if (adapterConfig.transport && adapterConfig.transport === "WebSocketTransport") {
       protooTransport = new protooClient.WebSocketTransport(urlWithParams.toString());
     } else {

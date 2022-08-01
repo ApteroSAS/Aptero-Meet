@@ -1,7 +1,7 @@
 import { MicSetupModalContainer } from "../../../react-components/room/MicSetupModalContainer";
 import React, { Component } from "react";
-import configs from "../../../utils/configs";
 import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
+import { getAdapterParams } from "../webRTCadapter/adapter-config";
 
 window.audioChangeHelperController = {};
 window.audioChangeHelperController.spawn = () => {
@@ -16,7 +16,7 @@ export default class AudioChangeHelper extends Component {
 
   componentDidMount() {
     //TODO use a listener
-    if(configs.APP_CONFIG.adapterParams.adapter === "none" || msTeamsAPILight().msTeams()){
+    if(getAdapterParams().adapter === "none" || msTeamsAPILight().msTeams()){
       this.setState({ micShareOk: false });
     }
     window.audioChangeHelperController.spawn = () => {

@@ -1,5 +1,5 @@
 import { LogMessageType } from "../react-components/room/ChatSidebar";
-import { getAdapterConfig } from "../aptero/module/webRTCadapter/adapter-config";
+import { getAdapterParams } from "../aptero/module/webRTCadapter/adapter-config";
 import { GAIN_TIME_CONST } from "../components/audio-params";
 
 export const MixerType = Object.freeze({
@@ -26,7 +26,7 @@ function performDelayedReconnect(gainNode) {
 import * as sdpTransform from "sdp-transform";
 
 async function enableChromeAEC(gainNode) {
-  if(["dialog-io-data-only","naf-socketio-adapter","none"].includes(getAdapterConfig().adapter)){
+  if(["dialog-io-data-only","naf-socketio-adapter","none"].includes(getAdapterParams().adapter)){
     return;//disabled aptero specific adapter
   }
   /**

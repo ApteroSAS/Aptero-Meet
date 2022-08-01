@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import configs from "../../../../utils/configs";
+import { getAdapterParams } from "../../webRTCadapter/adapter-config";
 
 export default class ApteroRoomEditPlugin extends Component {
   static propTypes = {};
@@ -16,7 +16,7 @@ export default class ApteroRoomEditPlugin extends Component {
     return (
       <React.Fragment>
         <div>
-          {"Selected adapter : "+configs.APP_CONFIG.adapterParams.adapter}
+          {"Selected adapter : "+getAdapterParams().adapter}
         </div>
       </React.Fragment>
       );

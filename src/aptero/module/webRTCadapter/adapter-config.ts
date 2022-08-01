@@ -10,10 +10,27 @@ let forceTcpGlobal = false;
 let profile = null;
 
 //https://github.com/networked-aframe/networked-aframe
-const adapterList = ["wseasyrtc","easyrtc","janus","socketio","webrtc","Firebase","uWS","dialog","dialog-io","agora","twilio","none","dialog-io-data-only"];
+const adapterList = ["wseasyrtc", "easyrtc", "janus", "socketio", "webrtc", "Firebase", "uWS", "dialog", "dialog-io", "agora", "twilio", "none", "dialog-io-data-only"];
 
-declare const window:any;
-declare const AFRAME:any;
+declare const window: any;
+declare const AFRAME: any;
+
+let notifyReady;
+const ready = new Promise<any>((resolve) => {
+  notifyReady = resolve;
+});
+
+export async function adapterReady() {
+  return await ready;
+}
+
+export function getAdapterParams(): {
+  adapter: string,//dialog,dialog-io,janus,twilio,agora,default,none,socketio
+  transport: string,
+  url?:string
+} {
+  return profile || {};
+}
 
 export async function choseAdapter(adapter) {
   configs.APP_CONFIG.adapterParams.adapter = adapter;
@@ -22,13 +39,12 @@ export async function choseAdapter(adapter) {
     const url = propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/room/adapter/" + adapter + "/profile";
     const resp = await fetch(url);
     const recvProfile = await resp.json();
-    profile = { ...(configs.APP_CONFIG.adapterParams), ...recvProfile };
-    configs.APP_CONFIG.adapterParams = profile;
+    profile = { ...(configs.APP_CONFIG.adapterParams || {}), ...recvProfile };
   } catch (err) {
     console.error(err);
   }
-  if(!adapterList.includes(adapter)){
-    console.error("invalid adapter selected :",{adapter,adapterList});
+  if (!adapterList.includes(adapter)) {
+    console.error("invalid adapter selected :", { adapter, adapterList });
   }
   await lazyLoad(adapter);
   return adapter;
@@ -40,48 +56,47 @@ export async function choseAdapterAuto() {
   if (configs.APP_CONFIG.adapterParams.adapter) {
     adapter = configs.APP_CONFIG.adapterParams.adapter;
   }
-  if(new URL(window.location.href).searchParams.get("offline2")){
-    adapter="none";
+  if (new URL(window.location.href).searchParams.get("offline2")) {
+    adapter = "none";
   }
-  if(adapter==="default"){
+  if (adapter === "default") {
     adapter = defaultAdapter;
   }
   const qs = new URLSearchParams(location.search);
   const msmode = !!qs.get("msteams");
   //const {msTeamsAPILight} = await import("@aptero/axolotis-module-teams");
   //if(msTeamsAPILight().msTeams()){
-  if(msmode){
-    adapter = "none"
+  if (msmode) {
+    adapter = "none";
   }
 
-  return await choseAdapter(adapter);
+  let ret = await choseAdapter(adapter);
+  notifyReady();
+  return ret;
 }
 
-export async function adapterFactory(){
+export async function adapterFactory() {
   const adapter = await choseAdapterAuto();
   const module = await lazyLoad(adapter);
   return new module.default();
 }
 
-export function getAdapterConfig() {
-  return profile || {};
-}
-
 export async function unpublishVideoTrack() {
-  const adapterParams = getAdapterConfig();
+  const adapterParams = getAdapterParams();
   if (adapterParams.adapter === "twilio" || adapterParams.adapter === "agora") {
     await window.APP.dialog.subAdapter.unpublishVideoTrack();
   }
 }
-export async function setlistenerEndShareVideo(){
+
+export async function setlistenerEndShareVideo() {
   AFRAME.scenes[0].addEventListener("action_end_video_sharing", () => {
     unpublishVideoTrack();
   });
 }
 
 export async function createTrack(constraints, isDisplayDevice) {
-  console.log("createTrack")
-  const adapterParams = getAdapterConfig();
+  console.log("createTrack");
+  const adapterParams = getAdapterParams();
   if (adapterParams.adapter === "twilio" || adapterParams.adapter === "agora") {
     return window.APP.dialog.subAdapter.createTrack(constraints, isDisplayDevice);
   } else {
@@ -103,11 +118,11 @@ export async function fetchICEservers() {
   try {
     const myHeaders = new Headers();
     myHeaders.append(
-        "Authorization",
-        "Basic " + configs.APP_CONFIG.turn.twilio.auth
+      "Authorization",
+      "Basic " + configs.APP_CONFIG.turn.twilio.auth
     );
 
-    const requestOptions:any = {
+    const requestOptions: any = {
       method: "POST",
       headers: myHeaders,
       redirect: "follow"
@@ -155,7 +170,7 @@ export function addIceServers(iceServer) {
     iceServer.unshift(server);
   });
   iceServer = filterServer(iceServer, forceTcpGlobal);
-  console.log("WebRTC",iceServer);
+  console.log("WebRTC", iceServer);
   return iceServer;
 }
 

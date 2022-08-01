@@ -1,5 +1,5 @@
 import AgoraRTC from "agora-rtc-sdk-ng";
-import { getAdapterConfig } from "./adapter-config";
+import { getAdapterParams } from "./adapter-config";
 
 export class AgoraAdapter {
 
@@ -72,7 +72,7 @@ export class AgoraAdapter {
     clientId = clientId + "/" + Math.ceil(Math.random() * 10000);
 
     const roomName = roomId;
-    const apiUrl = getAdapterConfig().url || window.location.origin + "/service/agora";
+    const apiUrl = getAdapterParams().url || window.location.origin + "/service/agora";
     const response1 = await fetch(apiUrl + `/appid`);
     const appID = await response1.text();
     const response2 = await fetch(apiUrl + `/token?identity=${clientId}&roomName=${roomName}`);

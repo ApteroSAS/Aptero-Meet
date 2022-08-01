@@ -1,6 +1,6 @@
-import configs from "../../../utils/configs";
 import * as Video from "twilio-video";
 import { propertiesService } from "../properties/propertiesService";
+import { getAdapterParams } from "./adapter-config";
 
 export class TwilioAdapter {
   currentRoom = null;
@@ -121,13 +121,13 @@ export class TwilioAdapter {
     // Join to the Room with the given AccessToken and ConnectOptions.
     const roomName = roomId;
     let apiUrl;
-    if (!configs.APP_CONFIG.adapterParams.url) {
+    if (!getAdapterParams().url) {
       const url = propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/room/adapter/twilio/profile";
       const resp = await fetch(url);
       const adapterParams = await resp.json();
       apiUrl = adapterParams.url;
     } else {
-      apiUrl = configs.APP_CONFIG.adapterParams.url;
+      apiUrl = getAdapterParams().url;
     }
     const response = await fetch(apiUrl + `?identity=${clientId}&roomName=${roomName}`);
     // Extract the AccessToken from the Response.
