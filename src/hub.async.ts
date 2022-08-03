@@ -21,7 +21,6 @@ import "networked-aframe/src/index";
 import "aframe-rounded";
 import "webrtc-adapter";
 import "aframe-slice9-component";
-import "troika-three-text";
 import "./utils/threejs-positional-audio-updatematrixworld";
 import "./utils/threejs-world-update";
 import "./utils/threejs-raycast-patches";

@@ -4322,9 +4322,9 @@ aframe-rounded@^1.0.3:
   version "1.0.0"
   resolved "https://codeload.github.com/takahirox/aframe-slice9-component/tar.gz/2ec0810cbf23f487a10c767d24dee6d5b7ede77f"
 
-"aframe@github:mozillareality/aframe#3155ad3df9632ee84d93d3cd8250a4c44767e70e":
+"aframe@github:mozillareality/aframe#560c38311081fc5490931c369223f7e4da9f7f76":
   version "1.0.3"
-  resolved "https://codeload.github.com/mozillareality/aframe/tar.gz/3155ad3df9632ee84d93d3cd8250a4c44767e70e"
+  resolved "https://codeload.github.com/mozillareality/aframe/tar.gz/560c38311081fc5490931c369223f7e4da9f7f76"
   dependencies:
     custom-event-polyfill "^1.0.6"
     debug ngokevin/debug#noTimestamp
@@ -5212,13 +5212,6 @@ better-opn@^2.1.1:
   dependencies:
     open "^7.0.3"
 
-bidi-js@^1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/bidi-js/-/bidi-js-1.0.2.tgz#1a497a762c2ddea377429d2649c9ce0f8a91527f"
-  integrity sha512-rzSy/k7WdX5zOyeHHCOixGXbCHkyogkxPKL2r8QtzHmVQDiWCXUWa18bLdMWT9CYMLOYTjWpTHawuev2ouYJVw==
-  dependencies:
-    require-from-string "^2.0.2"
-
 big-integer@^1.6.48, big-integer@^1.6.7:
   version "1.6.51"
   resolved "https://registry.yarnpkg.com/big-integer/-/big-integer-1.6.51.tgz#0df92a5d9880560d3ff2d5fd20245c889d130686"
@@ -5255,10 +5248,6 @@ binpacking@~0.0.1:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/binpacking/-/binpacking-0.0.1.tgz#e82e43e8eb17064681e43f9c8dbc731e317d1892"
   integrity sha512-egOC0ynCAu+4XMry+CR5/GVQYcZdWi5QAJcO4t35Z957Xniu+bVJFRNOr3HiYd3UXEwKxk56Q1pyOxA6+rx1lg==
-
-"bitecs@github:mozilla/bitECS#hubs-patches":
-  version "0.3.38"
-  resolved "https://codeload.github.com/mozilla/bitECS/tar.gz/913b4ae261684eee205251e41a3250d1c1a2817e"
 
 bl@^5.0.0:
   version "5.0.0"
@@ -12422,9 +12411,9 @@ nested-error-stacks@^2.0.0, nested-error-stacks@^2.1.0:
   resolved "https://registry.yarnpkg.com/nested-error-stacks/-/nested-error-stacks-2.1.1.tgz#26c8a3cee6cc05fbcf1e333cd2fc3e003326c0b5"
   integrity sha512-9iN1ka/9zmX1ZvLV9ewJYEk9h7RyRRtqdK0woXcqohu8EWIerfPUjYJPg0ULy0UqP7cslmdGc8xKDJcojlKiaw==
 
-"networked-aframe@github:mozillareality/networked-aframe#25198c32d618adc5f887e70b1c4e8cb5f3d3e047":
+"networked-aframe@github:mozillareality/networked-aframe#ae8ca30fcded2369c8702686b07cce46dfc16306":
   version "0.6.1"
-  resolved "https://codeload.github.com/mozillareality/networked-aframe/tar.gz/25198c32d618adc5f887e70b1c4e8cb5f3d3e047"
+  resolved "https://codeload.github.com/mozillareality/networked-aframe/tar.gz/ae8ca30fcded2369c8702686b07cce46dfc16306"
   dependencies:
     buffered-interpolation "^0.2.5"
     easyrtc "1.1.0"
@@ -16823,25 +16812,6 @@ trim@0.0.1:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/trim/-/trim-0.0.1.tgz#5858547f6b290757ee95cccc666fb50084c460dd"
   integrity sha512-YzQV+TZg4AxpKxaTHK3c3D+kRDCGVEE7LemdlQZoQXn0iennk10RsIoY6ikzAqJTc9Xjl9C1/waHom/J86ziAQ==
-
-troika-three-text@^0.45.0:
-  version "0.45.1"
-  resolved "https://registry.yarnpkg.com/troika-three-text/-/troika-three-text-0.45.1.tgz#30378fd10ef4f1ab68347c13de6b167233753c9a"
-  integrity sha512-TJGjiK/7MhJOdB+BhfW5WYuY5uPF27cPU+0D/PArCQceS8ee9MyP2YRZY2KF8coLwAXFTLJUbLiHlfw2eOb0gA==
-  dependencies:
-    bidi-js "^1.0.2"
-    troika-three-utils "^0.45.0"
-    troika-worker-utils "^0.45.0"
-
-troika-three-utils@^0.45.0:
-  version "0.45.0"
-  resolved "https://registry.yarnpkg.com/troika-three-utils/-/troika-three-utils-0.45.0.tgz#d624e4d2427275fd2750d542766635be37042920"
-  integrity sha512-VJqEx8aww2El/zSbbnmjdhaAOQ4LM0CVJmKh385Vi/CzruhMmWEaunMRI/J1vh4MbbGo+dREu73FkMkr/PXypA==
-
-troika-worker-utils@^0.45.0:
-  version "0.45.0"
-  resolved "https://registry.yarnpkg.com/troika-worker-utils/-/troika-worker-utils-0.45.0.tgz#94a7b5c7f6f54c81f229eafae2224259e182c010"
-  integrity sha512-pEO8u7+29dG5SbmGUg0wqXPEe+r+Hd0ibKf75tjH2aoR7ZPlRwUzRTvPURDlDNFF4KysDLvMCdHnyslG9IG5Hw==
 
 trough@^1.0.0:
   version "1.0.5"
