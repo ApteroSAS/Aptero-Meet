@@ -1997,6 +1997,10 @@ function usePeopleList(presences, mySessionId) {
 
   const micPresences = getMicrophonePresences();
 
+  if (!micPresences) {
+    return [];
+  }
+
   people = Object.entries(presences).map(([id, presence]) => {
     return userFromPresence(id, presence, micPresences, mySessionId);
   });
@@ -2103,7 +2107,6 @@ export async function  getUserProfile(mail,userId) {
 function UIRootHooksWrapper(props) {
   useAccessibleOutlineStyle();
   const breakpoint = useCssBreakpoints();
-  let people = usePeopleList(props.presences, props.sessionId);
   useEffect(() => {
     const el = document.getElementById("preload-overlay");
     el.classList.add("loaded");
@@ -2122,6 +2125,7 @@ function UIRootHooksWrapper(props) {
       sceneEl.classList.remove(roomLayoutStyles.scene);
     };
   }, [props.scene]);
+  let people = usePeopleList(props.presences, props.sessionId);
   return (
     <ChatContextProvider
       messageDispatch={props.messageDispatch}
