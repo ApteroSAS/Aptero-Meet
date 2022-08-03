@@ -157,6 +157,7 @@
     "styled-components": "^5.3.1",
     "three": "^0.128.0",
     "three-ammo": "github:infinitelee/three-ammo",
+    "three-bmfont-text": "github:mozillareality/three-bmfont-text#hubs/master",
     "three-mesh-bvh": "^0.3.7",
     "three-pathfinding": "^0.14.1",
     "three-to-ammo": "github:infinitelee/three-to-ammo#9e68a3bbe500988f2dc0096f78c12dabbdaf5548",
