@@ -1,12 +1,12 @@
 import uuid from "uuid/v4";
-import { microsoftLoginService } from "../aptero/module/microsoft/service/MicrosoftLoginService";
+import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
 
 export default class AuthChannel {
   constructor(store) {
     this.store = store;
     this.socket = null;
     this._signedIn = !!this.store.state.credentials.token;
-    microsoftLoginService.passiveLogin();
+    msTeamsAPILight().conditionalPassiveLogIn();
   }
 
   setSocket = socket => {
@@ -15,7 +15,7 @@ export default class AuthChannel {
 
 
   get email() {
-    return (microsoftLoginService.getUserAccount() && (microsoftLoginService.getUserAccount().mail)) || this.store.state.credentials.email;
+    return this.store.state.credentials.email;
   }
 
 
@@ -30,7 +30,7 @@ export default class AuthChannel {
     this.store.update({ credentials: { token: null, email: null } });
     await this.store.resetToRandomDefaultAvatar();
     this._signedIn = false;
-    microsoftLoginService.logout();
+    await msTeamsAPILight().logout();
   };
 
   verifyAuthentication(authTopic, authToken, authPayload) {

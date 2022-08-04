@@ -16,7 +16,7 @@ jobs:
     # A list of available CircleCI Docker Convenience Images are available here: https://circleci.com/developer/images/image/cimg/node
     docker:
       #- image: cimg/node:current-browsers
-      - image: mcr.microsoft.com/playwright:v1.21.0-focal
+      - image: mcr.microsoft.com/playwright:latest
     environment:
       NODE_ENV: development # Needed if playwright is in `devDependencies`
       CODECOV_TOKEN: 9e8cfc48-1cd8-4fdc-9e07-8de2822b3155
@@ -46,7 +46,7 @@ jobs:
       - store_artifacts:
           path: ./coverage/store/
       - store_test_results:
-          path: ./junit.xml
+          path: ./coverage/junit/
       - codecov/upload
 
 workflows:

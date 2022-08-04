@@ -1,17 +1,10 @@
 import protooClient from "protoo-client";
-import { debug as newDebug } from "debug";
 import EventEmitter from "eventemitter3";
-import { getAdapterConfig } from "./adapter-config";
+import { getAdapterParams } from "./adapter-config";
 
 let debug = console.log;
 let error = console.error;
 let info = console.log;
-if(newDebug){
-	debug = newDebug("naf-dialog-adapter:debug");
-	//const warn = newDebug("naf-dialog-adapter:warn");
-	error = newDebug("naf-dialog-adapter:error");
-	info = newDebug("naf-dialog-adapter:info");
-}
 
 export default class DialogIODataOnlyAdapter extends EventEmitter {
   constructor() {
@@ -167,7 +160,7 @@ export default class DialogIODataOnlyAdapter extends EventEmitter {
     urlWithParams.searchParams.append("peerId", this._clientId);
 
     let protooTransport;
-    if (getAdapterConfig().transport && getAdapterConfig().transport === "WebSocketTransport") {
+    if (getAdapterParams().transport && getAdapterParams().transport === "WebSocketTransport") {
       protooTransport = new protooClient.WebSocketTransport(urlWithParams.toString());
     } else {
       protooTransport = new protooClient.WebSocketIOTransport(urlWithParams.toString());

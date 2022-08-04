@@ -2,7 +2,6 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Modal } from "../../../react-components/modal/Modal";
 import { Button } from "../../../react-components/input/Button";
-import styles from "./FallbackModal.scss";
 import { BackButton } from "../../../react-components/input/BackButton";
 import { FormattedMessage } from "react-intl";
 import { Column } from "../../../react-components/layout/Column";
@@ -11,7 +10,7 @@ import { minimumQualityService } from "../perf/MinimumQualityService";
 
 export function fallbackVMButton(){
   return <>
-    <Button preset="green" onClick={async ()=>{
+    <Button preset="accept" onClick={async ()=>{
       window.location.href = await remoteControlServiceV2.generateFallBackUrl();
     }
     }>
@@ -24,7 +23,7 @@ export function fallbackTCPButton(){
   const tcpUrl = new URL(window.location.toString());
   tcpUrl.searchParams.set("force_tcp", true);
   return <>
-    <Button preset="green" onClick={async ()=>{
+    <Button preset="accept" onClick={async ()=>{
       window.location.href = tcpUrl.toString();
     }
     }>
@@ -51,7 +50,7 @@ export function FallbackModal({ className, onEnterRoom, onBack, ...rest }) {
           className={className}
           {...rest}
       >
-        <Column padding center className={styles.content}>
+        <Column padding center>
           {status["turn-udp-issue"] || status["turn-tcp-issue"] &&
           <div style={{ color: "red" }}>
             <FormattedMessage
@@ -77,7 +76,7 @@ export function FallbackModal({ className, onEnterRoom, onBack, ...rest }) {
             fallbackVMButton()
           }
           <>
-            <Button preset="green" onClick={onEnterRoom}>
+            <Button preset="accept" onClick={onEnterRoom}>
               <FormattedMessage id="fallback-modal.enter-room-button-anyway" defaultMessage="Enter Room Anyway"/>
             </Button>
           </>

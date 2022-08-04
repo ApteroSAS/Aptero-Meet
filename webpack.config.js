@@ -3,14 +3,10 @@ const fs = require("fs");
 const path = require("path");
 const selfsigned = require("selfsigned");
 const webpack = require("webpack");
-const cors = require("cors");
 const HTMLWebpackPlugin = require("html-webpack-plugin");
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+//const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
-const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
-const packageLock = require("./webpack-package-lock-info.json");
 const versionJson = require("./version.json");
-const request = require("request");
 
 const PORT = 53000;//Teams needs port 53000
 
@@ -40,7 +36,7 @@ function createHTTPSConfig() {
               {
                 type: 2,
                 value: "localhost"
-              },
+              }
             ]
           }
         ]
@@ -58,46 +54,6 @@ function createHTTPSConfig() {
   }
 }
 
-function getModuleDependencies(moduleName) {
-  const deps = packageLock.dependencies;
-  const arr = [];
-
-  const gatherDeps = name => {
-    arr.push(path.join(__dirname, "node_modules", name) + path.sep);
-
-    const moduleDef = deps[name];
-
-    if (moduleDef && moduleDef.requires) {
-      for (const requiredModuleName in moduleDef.requires) {
-        gatherDeps(requiredModuleName);
-      }
-    }
-  };
-
-  gatherDeps(moduleName);
-
-  return arr;
-}
-
-function deepModuleDependencyTest(modulesArr) {
-  const deps = [];
-
-  for (const moduleName of modulesArr) {
-    const moduleDependencies = getModuleDependencies(moduleName);
-    deps.push(...moduleDependencies);
-  }
-
-  return module => {
-    if (!module.nameForCondition) {
-      return false;
-    }
-
-    const name = module.nameForCondition();
-
-    return deps.some(depName => name.startsWith(depName));
-  };
-}
-
 module.exports = async (env, argv) => {
   env = env || {};
 
@@ -106,26 +62,6 @@ module.exports = async (env, argv) => {
   // Previously defined environment variables are not overwritten
   dotenv.config({ path: ".env" });
   dotenv.config({ path: ".defaults.env" });
-
-  /**
-   * Initialize the Webpack build envrionment for the provided environment.
-   */
-
-  if (argv.mode !== "production" || env.bundleAnalyzer) {
-    if (env.localDev) {
-      // Local Dev Environment (npm run local)
-      Object.assign(process.env, {
-        HOST: "localhost",
-        RETICULUM_SOCKET_SERVER: "localhost",
-        CORS_PROXY_SERVER: "hubs-proxy.local:4000",
-        NON_CORS_PROXY_DOMAINS: "localhost,dev.reticulum.io",
-        BASE_ASSETS_PATH: "https://localhost:"+PORT+"/",
-        RETICULUM_SERVER: "localhost:4000",
-        POSTGREST_SERVER: "",
-        ITA_SERVER: ""
-      });
-    }
-  }
 
   // In production, the environment variables are defined in CI or loaded from ita and
   // the app config is injected into the head of the page by Reticulum.
@@ -143,42 +79,39 @@ module.exports = async (env, argv) => {
       "@babel/plugin-proposal-optional-chaining"
     ]
   };
-
   return {
-    node: {
+    mode: "production",
+    /*node: {
       // need to specify this manually because some random lodash code will try to access
       // Buffer on the global object if it exists, so webpack will polyfill on its behalf
       Buffer: false,
       fs: "empty"
-    },
+    },*/
     entry: {
       "microsoft-settings": path.join(__dirname, "src/aptero/module/microsoft/page", "microsoft-settings.tsx"),
       support: path.join(__dirname, "src", "support.js"),
-      index: path.join(__dirname, "src", "index.js"),
-      hub: path.join(__dirname, "src", "hub.js"),
+      index: path.join(__dirname, "src", "index.async.ts"),
+      hub: path.join(__dirname, "src", "hub.async.ts"),
       scene: path.join(__dirname, "src", "scene.js"),
       link: path.join(__dirname, "src", "link.js"),
       signin: path.join(__dirname, "src", "signin.js"),
-      verify: path.join(__dirname, "src", "verify.js"),
+      verify: path.join(__dirname, "src", "verify.js")
     },
     output: {
       filename: "assets/js/[name]-[chunkhash].js",
       publicPath: process.env.BASE_ASSETS_PATH || "/"
     },
-    devtool: argv.mode === "production" ? "source-map" : "source-map",
+    devtool: argv.mode === "production" ? "source-map" : "eval-source-map",
     devServer: {
       https: createHTTPSConfig(),//Comment for ngrok http <port>
       host: "0.0.0.0",
       port: PORT,
-      public: `${host}:${PORT}`,
-      useLocalIp: true,
-      disableHostCheck: true,
       allowedHosts: [host, "localhost"],
       headers: {
         "Access-Control-Allow-Origin": "*"
       },
-      hot: liveReload,
-      inline: liveReload,
+      hot:false,
+      liveReload: liveReload,
       historyApiFallback: {
         rewrites: [
           { from: /^\/signin/, to: "/signin.html" },
@@ -188,60 +121,28 @@ module.exports = async (env, argv) => {
           { from: /^\/tokens/, to: "/tokens.html" },
           { from: /^\/whats-new/, to: "/whats-new.html" }
         ]
-      },
-      before: function(app) {
-        // Local CORS proxy
-        app.all("/cors-proxy/*", (req, res) => {
-          res.header("Access-Control-Allow-Origin", "*");
-          res.header("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
-          res.header("Access-Control-Allow-Headers", "Range");
-          res.header(
-            "Access-Control-Expose-Headers",
-            "Accept-Ranges, Content-Encoding, Content-Length, Content-Range, Hub-Name, Hub-Entity-Type"
-          );
-          res.header("Vary", "Origin");
-          res.header("X-Content-Type-Options", "nosniff");
-
-          const redirectLocation = req.header("location");
-
-          if (redirectLocation) {
-            res.header("Location", "https://localhost:"+PORT+"/cors-proxy/" + redirectLocation);
-          }
-
-          if (req.method === "OPTIONS") {
-            res.send();
-          } else {
-            const url = req.path.replace("/cors-proxy/", "");
-            request({ url, method: req.method }, error => {
-              if (error) {
-                console.error(`cors-proxy: error fetching "${url}"\n`, error);
-                return;
-              }
-            }).pipe(res);
-          }
-        });
-
-        // be flexible with people accessing via a local reticulum on another port
-        app.use(cors({ origin: /hubs\.local(:\d*)?$/ }));
-        // networked-aframe makes HEAD requests to the server for time syncing. Respond with an empty body.
-        app.head("*", function(req, res, next) {
-          if (req.method === "HEAD") {
-            res.append("Date", new Date().toGMTString());
-            res.send("");
-          } else {
-            next();
-          }
-        });
       }
     },
     performance: {
+      //maxEntrypointSize: 500 * 1000,//500kb
+      maxAssetSize: 2 * 1000 * 1000,//2mb
       // Ignore media and sourcemaps when warning about file size.
       assetFilter(assetFilename) {
         return !/\.(map|png|jpg|gif|glb|webm)$/.test(assetFilename);
       }
     },
     resolve: {
-      extensions: ['*', '.js', '.jsx', '.tsx', '.ts', ".json"],
+      fallback: {
+        //https://gist.github.com/ef4/d2cf5672a93cf241fd47c020b9b3066a
+        "stream": require.resolve('stream-browserify'), // for react-dom dep
+        'fs': false, // for ammo.js dep
+        'path': require.resolve('path-browserify'), // for ammo.js dep
+        'process': require.resolve("process/browser"),
+        'zlib': require.resolve('browserify-zlib'),
+        'util': require.resolve('util/'),
+        'events': require.resolve('events/')
+      },
+      extensions: ["*", ".js", ".jsx", ".tsx", ".ts", ".json"]
     },
     module: {
       rules: [
@@ -271,7 +172,7 @@ module.exports = async (env, argv) => {
           loader: "babel-loader",
           options: legacyBabelConfig
         },
-        // Some JS assets are loaded at runtime and should be coppied unmodified and loaded using file-loader
+        // Some JS assets are loaded at runtime and should be copied unmodified and loaded using file-loader
         {
           test: [
             path.resolve(__dirname, "node_modules", "three", "examples", "js", "libs", "basis", "basis_transcoder.js")
@@ -284,27 +185,28 @@ module.exports = async (env, argv) => {
         },
         {
           test: /\.(js|jsx|tsx|ts)$/,
-          include: [path.resolve(__dirname, "src")],
           // Exclude JS assets in node_modules because they are already transformed and often big.
-          exclude: [path.resolve(__dirname, "node_modules")],
+          exclude: /node_modules/,
           loader: "babel-loader"
         },
         {
           test: /\.(scss|css)$/,
           use: [
+            // Creates `style` nodes from JS strings
+            "style-loader",
+            // Translates CSS into CommonJS
             {
-              loader: MiniCssExtractPlugin.loader
-            },
-            {
+              //https://stackoverflow.com/questions/59147277/styles-is-undefined-with-webpack-and-typescript
               loader: "css-loader",
               options: {
-                name: "[path][name]-[hash].[ext]",
-                localIdentName: "[name]__[local]__[hash:base64:5]",
-                camelCase: true
+                modules: {
+                  exportLocalsConvention:"camelCase"
+                }
               }
             },
-            "sass-loader"
-          ]
+            // Compiles Sass to CSS
+            "sass-loader",
+          ],
         },
         {
           test: /\.svg$/,
@@ -360,193 +262,103 @@ module.exports = async (env, argv) => {
     },
 
     optimization: {
-    // We no not want to minimize our code. //TODO activate for prod => minimize: true
-    //minimize: false,
-      minimize: argv.mode === "production" ? true : false,
+      //https://webpack.js.org/plugins/split-chunks-plugin/
+      minimize: argv.mode === "production",
       splitChunks: {
-        maxAsyncRequests: 10,
-        maxInitialRequests: 10,
-        cacheGroups: {
-          frontend: {
-            test: deepModuleDependencyTest([
-              "react",
-              "react-dom",
-              "prop-types",
-              "raven-js",
-              "react-intl",
-              "classnames",
-              "react-router",
-              "@fortawesome/fontawesome-svg-core",
-              "@fortawesome/free-solid-svg-icons",
-              "@fortawesome/react-fontawesome"
-            ]),
-            name: "frontend",
-            chunks: "initial",
-            priority: 40
-          },
-          engine: {
-            test: deepModuleDependencyTest(["aframe", "three"]),
-            name: "engine",
-            chunks: "initial",
-            priority: 30
-          },
-          store: {
-            test: deepModuleDependencyTest(["phoenix", "jsonschema", "event-target-shim", "jwt-decode", "js-cookie"]),
-            name: "store",
-            chunks: "initial",
-            priority: 20
-          },
-          hubVendors: {
-            test: /[\\/]node_modules[\\/]/,
-            name: "hub-vendors",
-            chunks: chunk => chunk.name === "hub",
-            priority: 10
-          }
-        }
-      }
+        chunks: 'all',
+        minSize: 20000,
+        minRemainingSize: 0,
+        minChunks: 1,
+        maxAsyncRequests: 30,
+        maxInitialRequests: 30,
+        enforceSizeThreshold: 50000,
+      },
     },
     plugins: [
-      new BundleAnalyzerPlugin({
-        analyzerMode: env && env.bundleAnalyzer ? "server" : "disabled"
+      new webpack.ProvidePlugin({
+        process: 'process/browser',//for debug.js
       }),
       // Each output page needs a HTMLWebpackPlugin entry
       new HTMLWebpackPlugin({
         filename: "microsoft-settings.html",
         template: path.join(__dirname, "src/aptero/module/microsoft/page", "microsoft-settings.html"),
         chunks: ["microsoft-settings"],
-        chunksSortMode: "manual",
-        minify: {
-          removeComments: false
-        }
+        minify: { removeComments: false }
       }),
       new HTMLWebpackPlugin({
         filename: "index.html",
         template: path.join(__dirname, "src", "index.html"),
         chunks: ["support", "index"],
-        chunksSortMode: "manual",
-        minify: {
-          removeComments: false
-        }
+        minify: { removeComments: false }
       }),
       new HTMLWebpackPlugin({
         filename: "hub.html",
         template: path.join(__dirname, "src", "hub.html"),
         chunks: ["support", "hub"],
-        chunksSortMode: "manual",
         inject: "head",
-        minify: {
-          removeComments: false
-        }
       }),
       new HTMLWebpackPlugin({
         filename: "scene.html",
         template: path.join(__dirname, "src", "scene.html"),
         chunks: ["support", "scene"],
-        chunksSortMode: "manual",
         inject: "head",
-        minify: {
-          removeComments: false
-        }
+        minify: { removeComments: false }
       }),
       new HTMLWebpackPlugin({
         filename: "link.html",
         template: path.join(__dirname, "src", "link.html"),
         chunks: ["support", "link"],
-        chunksSortMode: "manual",
-        minify: {
-          removeComments: false
-        }
+        minify: { removeComments: false }
       }),
       new HTMLWebpackPlugin({
         filename: "signin.html",
         template: path.join(__dirname, "src", "signin.html"),
         chunks: ["signin"],
-        minify: {
-          removeComments: false
-        }
+        minify: { removeComments: false }
       }),
       new HTMLWebpackPlugin({
         filename: "verify.html",
         template: path.join(__dirname, "src", "verify.html"),
         chunks: ["verify"],
-        minify: {
-          removeComments: false
-        }
+        minify: { removeComments: false }
       }),
-      new CopyWebpackPlugin([
-        {
-          from: "src/hub.service.js",
-          to: "hub.service.js"
-        }
-      ]),
-      new CopyWebpackPlugin([
-        {
-          from: "src/schema.toml",
-          to: "schema.toml"
-        }
-      ]),
-    new CopyWebpackPlugin([
-      {
-        from: "src/aptero/module/properties/properties.js",
-        to: "properties.js"
-      }
-    ]),
-    new CopyWebpackPlugin([
-      {
-        from: "src/assets/images/favicon.ico",
-        to: "favicon.ico"
-      }
-    ]),
-      new CopyWebpackPlugin([
-        {
-          from: "src/aptero/module/microsoft/page/auth-start.html",
-          to: "auth-start.html"
-        }
-      ]),
-      new CopyWebpackPlugin([
-        {
-          from: "src/aptero/module/microsoft/page/auth-end.html",
-          to: "auth-end.html"
-        }
-      ]),
-      new CopyWebpackPlugin([
-      {
-        from: "src/assets/manifest.webmanifest",
-        to: "manifest.webmanifest"
-      }
-    ]),
-    new CopyWebpackPlugin([
-      {
-        from: "src/assets/static/",
-        to: "assets/static/"
-      }
-    ]),
-    new CopyWebpackPlugin([
-      {
-        from: "src/workers/pdfjs-dist@2.1.266/build/pdf.worker.js",
-        to: "workers/pdfjs-dist@2.1.266/build/pdf.worker.js"
-      }
-    ]),
-    // Extract required css and add a content hash.
-    new MiniCssExtractPlugin({
-      filename: "assets/stylesheets/[name]-[contenthash].css",
-      disable: argv.mode !== "production"
+      new CopyWebpackPlugin({
+        patterns: [{ from: "src/hub.service.js", to: "hub.service.js" },
+          { from: "src/schema.toml", to: "schema.toml" },
+          { from: "src/aptero/module/properties/properties.js", to: "properties.js" },
+          { from: "src/assets/images/favicon.ico", to: "favicon.ico" },
+          {
+            from: "node_modules/@aptero/axolotis-module-teams/build/library/",
+            to: "assets/js/library"
+          },
+          {
+            from: "node_modules/@aptero/axolotis-module-basic/build/library/",
+            to: "assets/js/library"
+          },
+          {
+            from: "node_modules/@aptero/axolotis-module-teams/build/library/@aptero/axolotis-module-teams/assets/auth-start.html",
+            to: "auth-start.html"
+          },
+          {
+            from: "node_modules/@aptero/axolotis-module-teams/build/library/@aptero/axolotis-module-teams/assets/auth-end.html",
+            to: "auth-end.html"
+          },
+          { from: "src/assets/manifest.webmanifest", to: "manifest.webmanifest" },
+          { from: "src/assets/static/", to: "assets/static/" },
+          {
+            from: "src/workers/pdfjs-dist@2.1.266/build/pdf.worker.js",
+            to: "workers/pdfjs-dist@2.1.266/build/pdf.worker.js"
+          }]
       }),
+      // Extract required css and add a content hash.
+      /*new MiniCssExtractPlugin({
+        filename: "assets/stylesheets/[name]-[contenthash].css",
+        //disable: argv.mode !== "production"
+      }),*/
       // Define process.env variables in the browser context.
       new webpack.DefinePlugin({
         "process.env": JSON.stringify({
-          /*NODE_ENV: argv.mode,
-          SHORTLINK_DOMAIN: process.env.SHORTLINK_DOMAIN,
-          RETICULUM_SERVER: process.env.RETICULUM_SERVER,
-          RETICULUM_SOCKET_SERVER: process.env.RETICULUM_SOCKET_SERVER,
-          THUMBNAIL_SERVER: process.env.THUMBNAIL_SERVER,
-          CORS_PROXY_SERVER: process.env.CORS_PROXY_SERVER,
-          NON_CORS_PROXY_DOMAINS: process.env.NON_CORS_PROXY_DOMAINS,*/
-          BUILD_VERSION: versionJson.version,
-          /*SENTRY_DSN: process.env.SENTRY_DSN,
-          GA_TRACKING_ID: process.env.GA_TRACKING_ID,
-          POSTGREST_SERVER: process.env.POSTGREST_SERVER,
-          APP_CONFIG: appConfig*/
+          BUILD_VERSION: versionJson.version
         })
       })
     ]

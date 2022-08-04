@@ -40,7 +40,7 @@ class GLTFCache {
     const cacheItem = this.cache.get(src);
 
     if (!cacheItem) {
-      console.error(`Releasing uncached gltf ${src}`);
+      console.warn(`Releasing uncached gltf ${src}`);
       return;
     }
 

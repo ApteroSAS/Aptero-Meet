@@ -17,7 +17,7 @@ window.APP_PROPS = {
   THUMBNAIL_SERVER: "",
 
   // Comma-separated list of domains which are known to not need CORS proxying
-  NON_CORS_PROXY_DOMAINS: "alphahub.aptero.co",
+  NON_CORS_PROXY_DOMAINS: "alphahub.aptero.co,meet.aptero.co",
 
   // A comma-separated list of environment URLs to make available in the picker, besides the defaults.
   // These URLs are expected to be relative to ASSET_BUNDLE_SERVER.
@@ -30,17 +30,28 @@ window.APP_PROPS = {
 
   AVAILABLE_INTEGRATIONS:{"objects":true, "videos360":true, "videos2d":true, "scenes":true, "avatars":true,"tenor":false,"poly":false, "sketchfab":false,"bing_videos":false},
 
-  REMOTE_VM_SERVICE:{ url:"meet.aptero.co"},
+  REMOTE_VM_SERVICE:{ url:"vm.aptero.co"},
   WEBRTC_BRIDGE_URL:"http://localhost:8195",
 
   //SENTRY_DSN:"https://944afa0719c6473997fa1d6a06515c7e@o407192.ingest.sentry.io/5275835",
   //SENTRY_ENV:"web-local",
 
-  APP_CONFIG: {
+  "@aptero/axolotis-module-room":{
+    ROOM_TOKEN_SERVICE: "https://alphahub.aptero.co"
+  },
+  "@aptero/axolotis-module-teams":{
     MICROSOFT_APP_ID: "c89c5d54-37ec-49d6-952a-befc9b770079",
     //MICROSOFT_APP_AUTHORITY: "https://login.microsoftonline.com/apteroco.onmicrosoft.com",
     MICROSOFT_APP_AUTHORITY:"https://login.microsoftonline.com/common",
-    GLOBAL_ASSETS_PATH: "https://hub.aptero.co/data/global/",
+  },
+  "@aptero/axolotis-module-phoenix-auth":{
+    RETICULUM_SERVER: "alphahub.aptero.co",
+    RETICULUM_SOCKET_PROTOCOL: "",
+    RETICULUM_SOCKET_SERVER: ""
+  },
+
+  APP_CONFIG: {
+    GLOBAL_ASSETS_PATH: "https://meet.aptero.co/data/global/",
     LOGGER:{
       URL:"https://aptero.co/tracking",
       ACTIVATED:false,
@@ -48,6 +59,7 @@ window.APP_PROPS = {
     },
     adapterParams: {
       adapter: "twilio",//dialog,dialog-io,janus,twilio,agora,default,none,socketio
+      transport:"WebSocketTransport"
     },
     turn:{
       twilio:{

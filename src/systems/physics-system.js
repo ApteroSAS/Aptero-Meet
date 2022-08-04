@@ -1,6 +1,5 @@
 import { AmmoWorker, WorkerHelpers, CONSTANTS } from "three-ammo";
 import { AmmoDebugConstants, DefaultBufferSize } from "ammo-debug-drawer";
-import configs from "../utils/configs";
 import * as ammoWasmUrl from "ammo.js/builds/ammo.wasm.wasm";
 
 const MESSAGE_TYPES = CONSTANTS.MESSAGE_TYPES,

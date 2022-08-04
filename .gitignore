@@ -37,7 +37,7 @@ node_modules/
 jspm_packages/
 
 # Typescript v1 declaration files
-typings/
+#typings/
 
 # Optional npm cache directory
 .npm
@@ -79,3 +79,8 @@ src/assets/locales/extracted-messages.json
 .fx/configs/config.local.json
 .fx/states/state.local.json
 .backup
+/build/types/
+/tabs/.env.teamsfx.local
+/.fx/states/local.userdata
+/.fx/states/state.local.json
+/build/

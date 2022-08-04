@@ -111,7 +111,7 @@ export function MicSetupModal({
           <ToolbarButton
             icon={soundPlaying ? <VolumeHighIcon width={48} height={48} /> : <VolumeOffIcon width={48} height={48} />}
             label={<FormattedMessage id="mic-setup-modal.test-audio" defaultMessage="Click to Test Audio" />}
-            preset={soundPlaying ? "primary" : "basic"}
+            preset={soundPlaying ? "accept" : "basic"}
             className={styles.largeToolbarButton}
             onClick={onPlaySound}
             large

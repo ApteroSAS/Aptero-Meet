@@ -4,14 +4,11 @@ import {Sidebar} from "../sidebar/Sidebar";
 import {BackButton} from "../input/BackButton";
 import {Button} from "../input/Button";
 import {Column} from "../layout/Column";
-import styles from "./UserProfileSidebar.scss";
 import {FormattedMessage, useIntl} from "react-intl";
 import {rotateInPlaceAroundWorldUp, affixToWorldUp} from "../../utils/three-utils";
-import {Spinner} from "../misc/Spinner";
 import {UserProfileVisitCardContainer} from "./UserProfileVisitCardContainer";
 import {PeopleSidebarContainer, usePeopleList} from "./PeopleSidebarContainer";
-import { msTeams, processDeepLink } from "../../aptero/module/microsoft/service/MsTeams";
-import { ReactComponent as AcountIcon } from "../icons/Acount.svg";
+import {msTeamsAPI,msTeamsAPILight} from "@aptero/axolotis-module-teams";
 
 function useGoToSelectedAvatar(entity) {
     const targetMatrix = new THREE.Matrix4();
@@ -47,11 +44,15 @@ export function UserProfileSidebar({
                                        onPromote,
                                        canDemote,
                                        onDemote,
+                                     // eslint-disable-next-line no-unused-vars
                                        isHidden,
+                                     // eslint-disable-next-line no-unused-vars
                                        onToggleHidden,
                                        canMute,
                                        onMute,
+                                     // eslint-disable-next-line no-unused-vars
                                        canKick,
+                                     // eslint-disable-next-line no-unused-vars
                                        onKick,
                                        showBackButton,
                                        onBack,
@@ -190,13 +191,14 @@ export function UserProfileSidebar({
                                     }
                                 }
                             }
+                            // eslint-disable-next-line react-hooks/rules-of-hooks
                             useGoToSelectedAvatar(entity1);
 
                         }}
                     >
                         <FormattedMessage id="avatar-teleport" defaultMessage="Go to"/>
                     </Button>
-                    {(canMute && !msTeams()) && (
+                    {(canMute && !msTeamsAPILight().msTeams()) && (
                         <Button preset="cancel" onClick={onMute}>
                             <FormattedMessage id="user-profile-sidebar.mute-button" defaultMessage="Mute"/>
                         </Button>
@@ -215,13 +217,13 @@ export function UserProfileSidebar({
                     }
                     {microsoftUserId &&
                         <>
-                            <Button preset="basic" onClick={() =>{
-                                processDeepLink("https://teams.microsoft.com/l/chat/0/0?users="+microsoftUserEmail);
+                            <Button preset="basic" onClick={async () =>{
+                                await (await msTeamsAPI()).processDeepLink("https://teams.microsoft.com/l/chat/0/0?users=" + microsoftUserEmail);
                             }}>
                                 <FormattedMessage id="user-profile-sidebar.chat-button" defaultMessage="Chat"/>
                             </Button>
-                            <Button preset="basic" onClick={() => {
-                                processDeepLink("https://teams.microsoft.com/l/call/0/0?users="+microsoftUserEmail);
+                            <Button preset="basic" onClick={async () => {
+                              await (await msTeamsAPI()).processDeepLink("https://teams.microsoft.com/l/call/0/0?users=" + microsoftUserEmail);
                             }}>
                                 <FormattedMessage id="user-profile-sidebar.call-button" defaultMessage="Call"/>
                             </Button>

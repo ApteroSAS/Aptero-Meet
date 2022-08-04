@@ -1,7 +1,6 @@
 import { isLocalHubsUrl, isLocalHubsSceneUrl, isHubsRoomUrl, isHubsServer, isHubsAvatarUrl, isHubsSceneUrl, isLocalHubsAvatarUrl } from "../utils/media-url-utils";
 import { guessContentType } from "../utils/media-url-utils";
 import { handleExitTo2DInterstitial } from "../utils/vr-interstitial";
-import { changeHub } from "../change-hub";
 //aptero
 import {setupIframeButton} from "../aptero/module/CustomPanel/react-component/openIframe";
 import { duplicateEntryModeOnSrc } from "../aptero/module/HubsBridge/utils/EntryMode";
@@ -97,6 +96,7 @@ AFRAME.registerComponent("open-media-button", {
           window.history.replaceState(null, null, window.location.href.split("#")[0] + url.hash);
         } else if (APP.store.state.preferences.fastRoomSwitching && isLocalHubsUrl(this.src)) {
           // move to new room without page load or entry flow
+          const { changeHub } = await import("../change-hub");
           changeHub(hubId);
         } else {
           //aptero

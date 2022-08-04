@@ -1,5 +1,3 @@
-import { redirectToTeamsSidePanel } from "./aptero/module/microsoft/service/RedirectToSidePage";
-redirectToTeamsSidePanel();
 console.log(`App version: ${process.env.BUILD_VERSION || "?"}`);
 
 import {
@@ -11,14 +9,11 @@ import {
 import "./utils/debug-log";
 import configs from "./utils/configs";
 import "./utils/theme";
-import "@babel/polyfill";
 import "./react-components/styles/global.scss";
 import "./assets/stylesheets/globals.scss";
 import "./assets/stylesheets/hub.scss";
 import initialBatchImage from "./assets/images/warning_icon.png";
 import loadingEnvironment from "./assets/models/LoadingEnvironment.glb";
-
-import "aframe";
 
 // A-Frame hardcodes THREE.Cache.enabled = true
 // But we don't want to use THREE.Cache because
@@ -26,22 +21,6 @@ import "aframe";
 // So we disable it here.
 THREE.Cache.enabled = false;
 
-import "./utils/logging";
-import { patchWebGLRenderingContext } from "./utils/webgl";
-patchWebGLRenderingContext();
-
-// It seems we need to use require to import modules
-// under the three/examples/js to avoid tree shaking
-// in webpack production mode.
-require("three/examples/js/loaders/GLTFLoader");
-
-import "networked-aframe/src/index";
-import "aframe-rounded";
-import "webrtc-adapter";
-import "aframe-slice9-component";
-import "./utils/threejs-positional-audio-updatematrixworld";
-import "./utils/threejs-world-update";
-import "./utils/threejs-raycast-patches";
 import patchThreeAllocations from "./utils/threejs-allocation-patches";
 import { detectOS, detect } from "detect-browser";
 import {
@@ -55,95 +34,12 @@ import {
 } from "./utils/phoenix-utils";
 import { Presence } from "phoenix";
 import { emitter } from "./emitter";
-import "./phoenix-adapter";
 
 import nextTick from "./utils/next-tick";
 import { addAnimationComponents } from "./utils/animation";
 import Cookies from "js-cookie";
 const DIALOG_CONNECTION_ERROR_FATAL = "dialog-connection-error-fatal";
 import "./change-hub";
-
-import "./components/scene-components";
-import "./components/scale-in-screen-space";
-import "./components/mute-mic";
-import "./components/bone-mute-state-indicator";
-import "./components/bone-visibility";
-import "./components/fader";
-import "./components/in-world-hud";
-import "./components/emoji";
-import "./components/emoji-hud";
-import "./components/virtual-gamepad-controls";
-import "./components/ik-controller";
-import "./components/hand-controls2";
-import "./components/hoverable-visuals";
-import "./components/hover-visuals";
-import "./components/offset-relative-to";
-import "./components/player-info";
-import "./components/debug";
-import "./components/hand-poses";
-import "./components/hud-controller";
-import "./components/freeze-controller";
-import "./components/icon-button";
-import "./components/text-button";
-import "./components/block-button";
-import "./components/mute-button";
-import "./components/kick-button";
-import "./components/close-vr-notice-button";
-import "./components/leave-room-button";
-import "./components/visible-if-permitted";
-import "./components/visibility-on-content-types";
-import "./components/hide-when-pinned-and-forbidden";
-import "./components/visibility-while-frozen";
-import "./components/stats-plus";
-import "./components/networked-avatar";
-import "./components/media-views";
-import "./components/avatar-volume-controls";
-import "./components/pinch-to-move";
-import "./components/pitch-yaw-rotator";
-import "./components/position-at-border";
-import "./components/pinnable";
-import "./components/pin-networked-object-button";
-import "./components/mirror-media-button";
-import "./components/close-mirrored-media-button";
-import "./components/drop-object-button";
-import "./components/remove-networked-object-button";
-import "./components/camera-focus-button";
-import "./components/unmute-video-button";
-import "./components/destroy-at-extreme-distances";
-import "./components/visible-to-owner";
-import "./components/camera-tool";
-import "./components/emit-state-change";
-import "./components/action-to-event";
-import "./components/action-to-remove";
-import "./components/emit-scene-event-on-remove";
-import "./components/follow-in-fov";
-import "./components/matrix-auto-update";
-import "./components/clone-media-button";
-import "./components/open-media-button";
-import "./components/refresh-media-button";
-import "./components/tweet-media-button";
-import "./components/remix-avatar-button";
-import "./components/transform-object-button";
-import "./components/scale-button";
-import "./components/hover-menu";
-import "./components/disable-frustum-culling";
-import "./components/teleporter";
-import "./components/set-active-camera";
-import "./components/track-pose";
-import "./components/replay";
-import "./components/visibility-by-path";
-import "./components/tags";
-import "./components/hubs-text";
-import "./components/billboard";
-import "./components/periodic-full-syncs";
-import "./components/inspect-button";
-import "./components/inspect-pivot-child-selector";
-import "./components/inspect-pivot-offset-from-camera";
-import "./components/optional-alternative-to-not-hide";
-import "./components/avatar-audio-source";
-import "./components/avatar-inspect-collider";
-import "./components/video-texture-target";
-import "./components/audio-params";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -165,50 +61,19 @@ import SceneEntryManager from "./scene-entry-manager";
 import Subscriptions from "./subscriptions";
 import { createInWorldLogMessage } from "./react-components/chat-message";
 
-import "./systems/nav";
-import "./systems/frame-scheduler";
-import "./systems/personal-space-bubble";
-import "./systems/app-mode";
-import "./systems/permissions";
-import "./systems/exit-on-blur";
-import "./systems/auto-pixel-ratio";
-import "./systems/idle-detector";
-import "./systems/camera-tools";
-import "./systems/pen-tools";
-import "./systems/userinput/userinput";
-import "./systems/userinput/userinput-debug";
-import "./systems/ui-hotkeys";
-import "./systems/tips";
-import "./systems/interactions";
-import "./systems/hubs-systems";
-import "./systems/capture-system";
-import "./systems/listed-media";
-import "./systems/linked-media";
-import "./systems/audio-debug-system";
-import "./systems/audio-gain-system";
-
-import "./gltf-component-mappings";
-
-import { App } from "./App";
 import MediaDevicesManager from "./utils/media-devices-manager";
 import { sleep } from "./utils/async-utils";
 import { platformUnsupported } from "./support";
 
 //aptero service
-import { microsoftUrlService } from "./aptero/module/microsoft/service/MicrosoftUrlService";
 import { apteroService } from "./aptero/ApteroServices";
 import { roomController } from "./aptero/module/ButtonAPI/api/RoomController";
 import { fetchICEservers } from "./aptero/module/webRTCadapter/adapter-config";
-import { AdapterWarpper } from "./aptero/module/webRTCadapter/AdapterWrapper";
 //aptero service end
 
-window.APP = new App();
-window.APP.dialog = new AdapterWarpper();
-window.APP.RENDER_ORDER = {
-  HUD_BACKGROUND: 1,
-  HUD_ICONS: 2,
-  CURSOR: 3
-};
+import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
+msTeamsAPILight().redirectToTeamsSidePanel();
+
 const store = window.APP.store;
 store.update({ preferences: { shouldPromptForRefresh: undefined } }); // Clear flag that prompts for refresh from preference screen
 const mediaSearchStore = window.APP.mediaSearchStore;
@@ -227,26 +92,6 @@ if (isEmbed && !qs.get("embed_token")) {
 
 THREE.Object3D.DefaultMatrixAutoUpdate = false;
 
-import "./components/owned-object-limiter";
-import "./components/owned-object-cleanup-timeout";
-import "./components/set-unowned-body-kinematic";
-import "./components/scalable-when-grabbed";
-import "./components/networked-counter";
-import "./components/event-repeater";
-import "./components/set-yxz-order";
-
-import "./components/cursor-controller";
-
-import "./components/nav-mesh-helper";
-
-import "./components/tools/pen";
-import "./components/tools/pen-laser";
-import "./components/tools/networked-drawing";
-import "./components/tools/drawing-manager";
-
-import "./components/body-helper";
-import "./components/shape-helper";
-
 import registerNetworkSchemas from "./network-schemas";
 import registerTelemetry from "./telemetry";
 
@@ -262,7 +107,6 @@ import { SignInMessages } from "./react-components/auth/SignInModal";
 import { ThemeProvider } from "./react-components/styles/theme";
 import { wait } from "./aptero/util/AsyncWaiter";
 import { setupVersionComp } from "./aptero/module/HubsBridge/utils/Version";
-import { msTeams } from "./aptero/module/microsoft/service/MsTeams";
 import { minimumQualityService } from "./aptero/module/perf/MinimumQualityService";
 import { networkService } from "./aptero/module/HubsBridge/service/NetworkService";
 import { getEntryMode } from "./aptero/module/HubsBridge/utils/EntryMode";
@@ -394,7 +238,7 @@ export async function getSceneUrlForHub(hub) {
   }
 
   //aptero
-  await microsoftUrlService.preFetchConvertMicrosoftUrl(sceneUrl);
+  //await microsoftUrlService.preFetchConvertMicrosoftUrl(sceneUrl);
 
   if (isLegacyBundle) {
     // Deprecated
@@ -536,7 +380,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data,
 
   // Turn off NAF for embeds as an optimization, so the user's browser isn't getting slammed
   // with NAF traffic on load.
-  if (isEmbed && !msTeams()) {
+  if (isEmbed && !msTeamsAPILight().msTeams()) {
     hubChannel.allowNAFTraffic(false);
   }
 
@@ -656,7 +500,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data,
     updateUIForHub(hub, hubChannel);
     scene.emit("hub_updated", { hub });
     const hideui = new URL(window.location.href).searchParams.get("hideui");
-    if (!isEmbed || hideui || msTeams()) {
+    if (!isEmbed || hideui || msTeamsAPILight().msTeams()) {
       loadEnvironmentAndConnect();
     } else {
       remountUI({
@@ -691,7 +535,7 @@ async function runBotMode(scene, entryManager) {
   entryManager.enterSceneWhenLoaded(false);
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
+const init = async () => {
   //APTERO
   let iceServer = await fetchICEservers();
   await minimumQualityService.checkTurnServerAndSwitchToTCP(iceServer);
@@ -715,7 +559,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  if(!msTeams()) {
+  if(!msTeamsAPILight().msTeams()) {
     const detectedOS = detectOS(navigator.userAgent);
     const browser = detect();
     // HACK - it seems if we don't initialize the mic track up-front, voices can drop out on iOS
@@ -843,7 +687,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   remountUI({
     performConditionalSignIn,
     embed: isEmbed,
-    showPreload: isEmbed && !hideui && !msTeams()
+    showPreload: isEmbed && !hideui && !msTeamsAPILight().msTeams()
   });
   entryManager.performConditionalSignIn = performConditionalSignIn;
   entryManager.init();
@@ -1397,4 +1241,5 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   authChannel.setSocket(socket);
   linkChannel.setSocket(socket);
-});
+}
+init();

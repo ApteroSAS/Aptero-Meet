@@ -3,15 +3,9 @@ import ReactDOM from "react-dom";
 import registerTelemetry from "../../../../telemetry";
 import Store from "../../../../storage/store";
 import "../../../../utils/theme";
-import {
-  microsoftLoginService
-} from "../service/MicrosoftLoginService";
-import { Provider, Loader, teamsTheme } from "@fluentui/react-northstar";//https://fluentsite.z22.web.core.windows.net/0.60.1
 
 
 registerTelemetry("/microsoft-settings", "microsoft-settings");
-import { TabConfig } from "../react-component/TabConfig";
-import { getContext, msTeams } from "../service/MsTeams";
 
 const store = new Store();
 declare const window;
@@ -20,48 +14,18 @@ window.APP = { store };
 import { AuthContextProvider } from "../../../../react-components/auth/AuthContext";
 import { ThemeProvider } from "../../../../react-components/styles/theme";
 import { WrappedIntlProvider } from "../../../../react-components/wrapped-intl-provider";
-import { MeetingSidePanel } from "../react-component/MeetingSidePanel";
+import {MSettingsMain} from "../react-components/MSettingsMain";
+import {getService} from "@aptero/axolotis-player";
 
 const WrappedIntlProviderAny: any = WrappedIntlProvider;
 
-try {
-  microsoftLoginService.passiveLogin();
-} catch (e) {
-  console.error(e);
-}
-let url = new URL(window.location.href);
 export class MicrosoftSettings extends React.Component<any, { page: string }> {
-  state = {
-    page: url.searchParams.get("mode") || "loading"
-  };
-
-  constructor(props) {
-    super(props);
-    if (this.state.page === "loading") {
-      if (msTeams()) {
-        getContext((context) => {
-          //https://docs.microsoft.com/en-us/microsoftteams/platform/tabs/how-to/access-teams-context
-          if (context.frameContext === "sidePanel") {
-            this.setState({ page: "sidePanel" });
-          } else {
-            this.setState({ page: "settings" });
-          }
-        });
-      }
-    }
-  }
-
-  componentDidMount() {
-  }
 
   render() {
-    return <Provider theme={teamsTheme}>
-      <WrappedIntlProviderAny>
+    return <WrappedIntlProviderAny>
         <AuthContextProvider store={store}>
           <ThemeProvider store={store}>
-            {this.state.page === "loading" && <Loader/>}
-            {this.state.page === "sidePanel" && <MeetingSidePanel/>}
-            {this.state.page === "settings" && <TabConfig/>}
+            <MSettingsMain />
             <span onClick={() => {
               window.location.reload();
             }} id="version" style={{
@@ -75,10 +39,19 @@ export class MicrosoftSettings extends React.Component<any, { page: string }> {
             }}>{process.env.BUILD_VERSION}</span>
           </ThemeProvider>
         </AuthContextProvider>
-      </WrappedIntlProviderAny>
-    </Provider>;
+      </WrappedIntlProviderAny>;
   }
 
 }
 
-ReactDOM.render(<MicrosoftSettings/>, document.getElementById("home-root"));
+(async () => {
+  const {initAxolotisPlayer} = await import("../../axolotis/AxInit");
+  await initAxolotisPlayer();
+  const {PROPERTIES_SERVICE,MICROSOFT_STATIC_SERVICE} = await import("@aptero/axolotis-module-teams");
+  const {ROOM_SERVICE} = await import("@aptero/axolotis-module-basic");
+  /*preload*/
+  await getService(PROPERTIES_SERVICE);
+  await getService(MICROSOFT_STATIC_SERVICE);
+  await getService(ROOM_SERVICE);
+  ReactDOM.render(<MicrosoftSettings/>, document.getElementById("home-root"));
+})();

@@ -1,4 +1,4 @@
-import React, { Component, useEffect, useState } from "react";
+import React, { Component, useEffect } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import copy from "copy-to-clipboard";
@@ -101,11 +101,12 @@ import { getSelectedPersonName } from "./room/PeopleSidebarContainer";
 import { Promise } from "core-js";
 import { UserProfileVisitCardContainer } from "./room/UserProfileVisitCardContainer";
 import axios from "axios";
-import { msTeams } from "../aptero/module/microsoft/service/MsTeams";
+import {msTeamsAPI, msTeamsAPILight} from "@aptero/axolotis-module-teams";
 import { propertiesService } from "../aptero/module/properties/propertiesService";
-import { microsoftLoginService } from "../aptero/module/microsoft/service/MicrosoftLoginService";
 import AptRoot from "../aptero/module/HubsBridge/AptRoot";
 import { minimumQualityService } from "../aptero/module/perf/MinimumQualityService";
+import { adapterReady, getAdapterParams } from "../aptero/module/webRTCadapter/adapter-config";
+
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 const IN_ROOM_MODAL_ROUTER_PATHS = ["/media"];
 const IN_ROOM_MODAL_QUERY_VARS = ["media_source"];
@@ -113,6 +114,7 @@ const IN_ROOM_MODAL_QUERY_VARS = ["media_source"];
 const LOBBY_MODAL_ROUTER_PATHS = ["/media/scenes", "/media/avatars", "/media/favorites"];
 const LOBBY_MODAL_QUERY_VARS = ["media_source"];
 const LOBBY_MODAL_QUERY_VALUES = ["scenes", "avatars", "favorites"];
+
 async function grantedMicLabels() {
   const mediaDevices = await navigator.mediaDevices.enumerateDevices();
   return mediaDevices.filter(d => d.label && d.kind === "audioinput").map(d => d.label);
@@ -124,7 +126,7 @@ const AUTO_EXIT_TIMER_SECONDS = 10;
 
 const aptGuiVisible = !new URL(window.location.href).searchParams.get("hideui"); //aptero
 var ImageList = [];
-const profileList=[];
+const profileList = [];
 
 export class UIRoot extends Component {
   willCompileAndUploadMaterials = false;
@@ -195,11 +197,11 @@ export class UIRoot extends Component {
     isStreaming: false,
     waitingOnAudio: false,
     audioTrackClone: null,
-    displayName:null,
-    identityName:null,
+    displayName: null,
+    identityName: null,
 
-    onBack:null,
-    onClose:null,
+    onBack: null,
+    onClose: null,
     autoExitTimerStartedAt: null,
     autoExitTimerInterval: null,
     autoExitReason: null,
@@ -213,7 +215,8 @@ export class UIRoot extends Component {
     objectSrc: "",
     sidebarId: null,
     userId: null,
-    presenceCount: 0
+    presenceCount: 0,
+    msTeamsAPI: null
   };
 
   constructor(props) {
@@ -224,6 +227,11 @@ export class UIRoot extends Component {
     // An exit handler that discards event arguments and can be cleaned up.
     this.exitEventHandler = () => this.props.exitScene();
     this.mediaDevicesManager = window.APP.mediaDevicesManager;
+    if (msTeamsAPILight().msTeams()) {
+      msTeamsAPI().then(service => {
+        this.setState({ msTeamsAPI: service });
+      });
+    }
   }
 
   componentDidUpdate(prevProps) {
@@ -313,9 +321,9 @@ export class UIRoot extends Component {
   };
 
   componentDidMount() {
-    
+
     this.props.scene.addEventListener("join", () => {
-      if(!!this.props.store.state.credentials && !!this.props.store.state.credentials.token && !this.props.store.state.profile.microsoftUser ){
+      if (!!this.props.store.state.credentials && !!this.props.store.state.credentials.token && !this.props.store.state.profile.microsoftUser) {
         // eslint-disable-next-line no-use-before-define
         getUserProfile(this.props.store);
       }
@@ -328,25 +336,25 @@ export class UIRoot extends Component {
         await fetchData();
         return data;
       };
-        useFetch(this.props.store.state.profile.avatarId).then(resp=>{
-          var profilePictureUrl=resp;
-          if(resp!=null){
-            profilePictureUrl = profilePictureUrl.replace('"', "");
-            profilePictureUrl= profilePictureUrl.replace('"', "");
-            this.props.store.update({
-              profile: { profilePicture: profilePictureUrl }
-            });
-          }
-        })
+      useFetch(this.props.store.state.profile.avatarId).then(resp => {
+        var profilePictureUrl = resp;
+        if (resp != null) {
+          profilePictureUrl = profilePictureUrl.replace("\"", "");
+          profilePictureUrl = profilePictureUrl.replace("\"", "");
+          this.props.store.update({
+            profile: { profilePicture: profilePictureUrl }
+          });
+        }
+      });
     });
-    this.props.scene.addEventListener('avatarClick',e=>{
-    this.setSidebar("display_user_panel", { selectedUserId: e.detail})
+    this.props.scene.addEventListener("avatarClick", e => {
+      this.setSidebar("display_user_panel", { selectedUserId: e.detail });
     });
-  
-    this.props.scene.addEventListener("avatarChanged", e => {
+
+    this.props.scene.addEventListener("avatarChanged", () => {
       console.log("has changed avatar");
       const useFetch = async avatarId => {
-        var data;
+        let data;
         const fetchData = async () => {
           // eslint-disable-next-line no-use-before-define
           data = await getUrl(avatarId);
@@ -354,19 +362,19 @@ export class UIRoot extends Component {
         await fetchData();
         return data;
       };
-        useFetch(this.props.store.state.profile.avatarId).then(resp=>{
-          var profilePictureUrl=resp;
-          if(resp!=null){
-            profilePictureUrl = profilePictureUrl.replace('"', "");
-            profilePictureUrl= profilePictureUrl.replace('"', "");
-            this.props.store.update({
-              profile: { profilePicture: profilePictureUrl }
-            });
-          }
-        });
-        this.props.store.update({activity :{hasChangedAvatar:false}});
+      useFetch(this.props.store.state.profile.avatarId).then(resp => {
+        let profilePictureUrl = resp;
+        if (resp != null) {
+          profilePictureUrl = profilePictureUrl.replace("\"", "");
+          profilePictureUrl = profilePictureUrl.replace("\"", "");
+          this.props.store.update({
+            profile: { profilePicture: profilePictureUrl }
+          });
+        }
+      });
+      this.props.store.update({ activity: { hasChangedAvatar: false } });
     });
-    
+
     window.addEventListener("concurrentload", this.onConcurrentLoad);
     window.addEventListener("idle_detected", this.onIdleDetected);
     window.addEventListener("activity_detected", this.onActivityDetected);
@@ -395,7 +403,9 @@ export class UIRoot extends Component {
       this.forceUpdate();
     });
     //Aptero
-    this.props.scene.addEventListener("action_toggle_custom_sidebar", ()=>{this.toggleSidebar("custom")});
+    this.props.scene.addEventListener("action_toggle_custom_sidebar", () => {
+      this.toggleSidebar("custom");
+    });
 
     const scene = this.props.scene;
 
@@ -461,9 +471,11 @@ export class UIRoot extends Component {
     window.removeEventListener("concurrentload", this.onConcurrentLoad);
     window.removeEventListener("idle_detected", this.onIdleDetected);
     window.removeEventListener("activity_detected", this.onActivityDetected);
-    
+
     //Aptero
-    this.props.scene.removeEventListener("action_toggle_custom_sidebar", ()=>{this.toggleSidebar("custom")});
+    this.props.scene.removeEventListener("action_toggle_custom_sidebar", () => {
+      this.toggleSidebar("custom");
+    });
   }
 
   storeUpdated = () => {
@@ -478,7 +490,7 @@ export class UIRoot extends Component {
       message: signInMessage,
       onSubmitEmail: async email => {
         const { authComplete } = await authChannel.startAuthentication(email, this.props.hubChannel);
-        
+
         this.showNonHistoriedDialog(RoomSignInModalContainer, {
           step: SignInStep.waitForVerification,
           onClose: onContinueAfterSignIn || this.closeDialog
@@ -493,45 +505,12 @@ export class UIRoot extends Component {
           onContinue: onContinueAfterSignIn || this.closeDialog
         });
       },
-      onSubmitEmailMicrosoftLogin: async user => {
+      onSubmitEmailMicrosoftLogin: async () => {
         this.showNonHistoriedDialog(RoomSignInModalContainer, {
           step: SignInStep.WaitForMicrosoftVerification,
           onClose: onContinueAfterSignIn || this.closeDialog
         });
-         await authChannel.convertToHubToken(user, this.props.hubChannel);
-
-      this.setState({ signedIn: true });
-      this.showNonHistoriedDialog(RoomSignInModalContainer, {
-        step: SignInStep.complete,
-        onClose: onContinueAfterSignIn || this.closeDialog,
-        onContinue: onContinueAfterSignIn || this.closeDialog
-      });
-    },
-      onClose: onContinueAfterSignIn || this.closeDialog
-    });
-  };
-  /*
-  showContextualMicrosoftSignInDialog = () => {
-    
-    const { signInMessage, authChannel, onContinueAfterSignIn } = this.props;
-
-    this.showNonHistoriedDialog(RoomSignInModalContainer, {
-      step: SignInStep.submit,
-      message: signInMessage,
-      onSubmitEmailMicrosoftLogin: async user => {
-        
-        
-          const { authComplete } = await authChannel.convertToHubToken(user, this.props.hubChannel);
-          //onSubmitEmailMicrosoftLogin(user);
-     
-        this.showNonHistoriedDialog(RoomSignInModalContainer, {
-          step: SignInStep.waitForVerification,
-          onClose: onContinueAfterSignIn || this.closeDialog
-        });
-
-        await authComplete;
-
-        this.setState({ signedIn: true });
+        await this.state.msTeamsAPI.getLoginService().login();
         this.showNonHistoriedDialog(RoomSignInModalContainer, {
           step: SignInStep.complete,
           onClose: onContinueAfterSignIn || this.closeDialog,
@@ -540,9 +519,8 @@ export class UIRoot extends Component {
       },
       onClose: onContinueAfterSignIn || this.closeDialog
     });
-    
   };
-*/
+
   updateSubscribedState = () => {
     const isSubscribed = this.props.subscriptions && this.props.subscriptions.isSubscribed();
     this.setState({ isSubscribed });
@@ -666,14 +644,14 @@ export class UIRoot extends Component {
   performDirectEntryFlow = async enterInVR => {
     this.setState({ enterInVR, waitingOnAudio: true });
     let hasGrantedMic = false;
-    if(msTeams()) {
+    if (msTeamsAPILight().msTeams()) {
       hasGrantedMic = true;
-    }else{
+    } else {
       hasGrantedMic = (await grantedMicLabels()).length > 0;
     }
 
-    if (hasGrantedMic || new URL(window.location.href).searchParams.get("offline2") || msTeams()) {
-      if (!this.mediaDevicesManager.isMicShared && !msTeams()) {
+    if (hasGrantedMic || new URL(window.location.href).searchParams.get("offline2") || msTeamsAPILight().msTeams()) {
+      if (!this.mediaDevicesManager.isMicShared && !msTeamsAPILight().msTeams()) {
         await this.mediaDevicesManager.startLastUsedMicShare();
       }
       this.beginOrSkipAudioSetup();
@@ -706,7 +684,8 @@ export class UIRoot extends Component {
 
   onRequestMicPermission = async () => {
     // TODO: Show an error state if getting the microphone permissions fails
-    if (window.APP_CONFIG.adapterParams.adapter !== "none" && !msTeams()) {
+    await adapterReady();//APTERO
+    if (getAdapterParams().adapter !== "none" && !msTeamsAPILight().msTeams()) {
       await this.mediaDevicesManager.startLastUsedMicShare();
     }
     this.beginOrSkipAudioSetup();
@@ -720,7 +699,7 @@ export class UIRoot extends Component {
       AFRAME.scenes[0].audioListener.context.currentTime,
       0.2
     );
-    if (skipAudioSetup || window.APP_CONFIG.adapterParams.adapter === "none" || msTeams()) {
+    if (skipAudioSetup || getAdapterParams().adapter === "none" || msTeamsAPILight().msTeams()) {
       this.onAudioReadyButton();
     } else {
       this.pushHistoryState("entry_step", "audio");
@@ -745,10 +724,10 @@ export class UIRoot extends Component {
     // Push the new history state before going into VR, otherwise menu button will take us back
     clearHistoryState(this.props.history);
 
-    const muteOnEntry =
-      window.APP_CONFIG.adapterParams.adapter === "none" ||
-      this.props.store.state.preferences["muteMicOnEntry"] || msTeams()
-      false;
+    const muteOnEntry = msTeamsAPILight().msTeams() ||
+      getAdapterParams().adapter === "none" ||
+      this.props.store.state.preferences["muteMicOnEntry"];
+
     await this.props.enterScene(this.state.enterInVR, muteOnEntry);
 
     this.setState({ entered: true, entering: false, showShareDialog: false });
@@ -858,7 +837,8 @@ export class UIRoot extends Component {
   };
 
   onTweet = ({ detail }) => {
-    handleExitTo2DInterstitial(true, () => {}).then(() => {
+    handleExitTo2DInterstitial(true, () => {
+    }).then(() => {
       this.props.performConditionalSignIn(
         () => this.props.hubChannel.signedIn,
         () => {
@@ -886,7 +866,7 @@ export class UIRoot extends Component {
   pushHistoryState = (k, v) => pushHistoryState(this.props.history, k, v);
 
   setSidebar(sidebarId, otherState) {
-    
+
     this.setState({ sidebarId, selectedUserId: null, ...otherState });
   }
 
@@ -894,8 +874,8 @@ export class UIRoot extends Component {
     if (sidebarId === "chat") {
       this.setState({ userId: otherState });
     }
-    if(sidebarId==="cardVisit"){
-        this.setState({ userId: otherState });
+    if (sidebarId === "cardVisit") {
+      this.setState({ userId: otherState });
     }
 
     this.setState(({ sidebarId: curSidebarId }) => {
@@ -913,7 +893,7 @@ export class UIRoot extends Component {
     return (
       <div className={styles.interstitial} onClick={() => this.props.onInterstitialPromptClicked()}>
         <div>
-          <FormattedMessage id="ui-root.interstitial-prompt" defaultMessage="Continue" />
+          <FormattedMessage id="ui-root.interstitial-prompt" defaultMessage="Continue"/>
         </div>
       </div>
     );
@@ -922,9 +902,9 @@ export class UIRoot extends Component {
   renderBotMode = () => {
     return (
       <div className="loading-panel">
-        <img className="loading-panel__logo" src={configs.image("logo")} />
-        <input type="file" id="bot-audio-input" accept="audio/*" />
-        <input type="file" id="bot-data-input" accept="application/json" />
+        <img className="loading-panel__logo" src={configs.image("logo")}/>
+        <input type="file" id="bot-audio-input" accept="audio/*"/>
+        <input type="file" id="bot-data-input" accept="application/json"/>
       </div>
     );
   };
@@ -1092,7 +1072,7 @@ export class UIRoot extends Component {
   getSelectedUser() {
     const selectedUserId = this.state.selectedUserId;
     const presence = this.props.presences[selectedUserId];
-    if(!presence){
+    if (!presence) {
       return null;
     } else {
       const micPresences = getMicrophonePresences();
@@ -1124,7 +1104,7 @@ export class UIRoot extends Component {
           <RoomLayoutContainer
             scene={this.props.scene}
             store={this.props.store}
-            viewport={!this.state.hideUITip && <FullscreenTip onDismiss={() => this.setState({ hideUITip: true })} />}
+            viewport={!this.state.hideUITip && <FullscreenTip onDismiss={() => this.setState({ hideUITip: true })}/>}
           />
         </div>
       );
@@ -1133,7 +1113,7 @@ export class UIRoot extends Component {
     if (this.props.showSafariMicDialog) {
       return (
         <div className={classNames(rootStyles)}>
-          <RoomLayoutContainer scene={this.props.scene} store={this.props.store} modal={<SafariMicModal />} />
+          <RoomLayoutContainer scene={this.props.scene} store={this.props.store} modal={<SafariMicModal/>}/>
         </div>
       );
     }
@@ -1145,7 +1125,7 @@ export class UIRoot extends Component {
     if (isLoading && this.state.showPrefs) {
       return (
         <div>
-          <LoadingScreenContainer scene={this.props.scene} onLoaded={this.onLoadingFinished} />
+          <LoadingScreenContainer scene={this.props.scene} onLoaded={this.onLoadingFinished}/>
           <PreferencesScreen
             onClose={() => {
               this.setState({ showPrefs: false });
@@ -1158,7 +1138,7 @@ export class UIRoot extends Component {
     }
     if (this.props.isBotMode) return this.renderBotMode();
     if (isLoading) {
-      return <LoadingScreenContainer scene={this.props.scene} onLoaded={this.onLoadingFinished} />;
+      return <LoadingScreenContainer scene={this.props.scene} onLoaded={this.onLoadingFinished}/>;
     }
     if (this.state.showPrefs) {
       return (
@@ -1204,7 +1184,7 @@ export class UIRoot extends Component {
             {this.renderDevicePanel()}
           </StateRoute>
           <StateRoute stateKey="entry_step" stateValue="mic_grant" history={this.props.history}>
-            <MicPermissionsModal onBack={() => this.props.history.goBack()} />
+            <MicPermissionsModal onBack={() => this.props.history.goBack()}/>
           </StateRoute>
           <StateRoute stateKey="entry_step" stateValue="fallback" history={this.props.history}>
             {/*aptero*/}
@@ -1275,34 +1255,34 @@ export class UIRoot extends Component {
       {
         id: "user",
         label:
-            "You" +
-            (this.state.signedIn ? ` (Signed in as: ${maskEmail(this.props.store.state.credentials.email)})` : ""),
+          "You" +
+          (this.state.signedIn ? ` (Signed in as: ${maskEmail(this.props.store.state.credentials.email)})` : ""),
         items: [
           this.state.signedIn
-              ? {
-                id: "sign-out",
-                label: <FormattedMessage id="more-menu.sign-out" defaultMessage="Sign Out"/>,
-                icon: LeaveIcon,
-                onClick: async () => {
-                  await this.props.authChannel.signOut(this.props.hubChannel);
-                  this.setState({signedIn: false});
-                }
+            ? {
+              id: "sign-out",
+              label: <FormattedMessage id="more-menu.sign-out" defaultMessage="Sign Out"/>,
+              icon: LeaveIcon,
+              onClick: async () => {
+                await this.props.authChannel.signOut(this.props.hubChannel);
+                this.setState({ signedIn: false });
               }
-              : {
-                id: "sign-in",
-                label: <FormattedMessage id="more-menu.sign-in" defaultMessage="Sign In"/>,
-                icon: EnterIcon,
-                onClick: () => this.showContextualSignInDialog()
-              },
+            }
+            : {
+              id: "sign-in",
+              label: <FormattedMessage id="more-menu.sign-in" defaultMessage="Sign In"/>,
+              icon: EnterIcon,
+              onClick: () => this.showContextualSignInDialog()
+            },
           canCreateRoom && {
             id: "create-room",
             label: <FormattedMessage id="more-menu.create-room" defaultMessage="Create Room"/>,
             icon: AddIcon,
             onClick: () =>
-                this.showNonHistoriedDialog(LeaveRoomModal, {
-                  destinationUrl: "/",
-                  reason: LeaveReason.createRoom
-                })
+              this.showNonHistoriedDialog(LeaveRoomModal, {
+                destinationUrl: "/",
+                reason: LeaveReason.createRoom
+              })
           },
           {
             id: "user-profile",
@@ -1315,20 +1295,20 @@ export class UIRoot extends Component {
             label: <FormattedMessage id="more-menu.favorite-rooms" defaultMessage="Favorite Rooms"/>,
             icon: FavoritesIcon,
             onClick: () =>
-                this.props.performConditionalSignIn(
-                    () => this.props.hubChannel.signedIn,
-                    () => {
-                      showFullScreenIfAvailable();
-                      this.props.mediaSearchStore.sourceNavigateWithNoNav("favorites", "use");
-                    },
-                    SignInMessages.favoriteRooms
-                )
+              this.props.performConditionalSignIn(
+                () => this.props.hubChannel.signedIn,
+                () => {
+                  showFullScreenIfAvailable();
+                  this.props.mediaSearchStore.sourceNavigateWithNoNav("favorites", "use");
+                },
+                SignInMessages.favoriteRooms
+              )
           },
           {
             id: "preferences",
             label: "Preferences",
             icon: SettingsIcon,
-            onClick: () => this.setState({showPrefs: true})
+            onClick: () => this.setState({ showPrefs: true })
           }
         ].filter(item => item)
       },
@@ -1364,25 +1344,25 @@ export class UIRoot extends Component {
             // this.props.scene.emit("action_invite")
           },
           this.isFavorited()
-              ? {
-                id: "unfavorite-room",
-                label: <FormattedMessage id="more-menu.unfavorite-room" defaultMessage="Unfavorite Room"/>,
-                icon: StarIcon,
-                onClick: () => this.toggleFavorited()
-              }
-              : {
-                id: "favorite-room",
-                label: <FormattedMessage id="more-menu.favorite-room" defaultMessage="Favorite Room"/>,
-                icon: StarOutlineIcon,
-                onClick: () => this.toggleFavorited()
-              },
+            ? {
+              id: "unfavorite-room",
+              label: <FormattedMessage id="more-menu.unfavorite-room" defaultMessage="Unfavorite Room"/>,
+              icon: StarIcon,
+              onClick: () => this.toggleFavorited()
+            }
+            : {
+              id: "favorite-room",
+              label: <FormattedMessage id="more-menu.favorite-room" defaultMessage="Favorite Room"/>,
+              icon: StarOutlineIcon,
+              onClick: () => this.toggleFavorited()
+            },
           isModerator &&
           entered && {
             id: "streamer-mode",
             label: streaming ? (
-                <FormattedMessage id="more-menu.exit-streamer-mode" defaultMessage="Exit Streamer Mode"/>
+              <FormattedMessage id="more-menu.exit-streamer-mode" defaultMessage="Exit Streamer Mode"/>
             ) : (
-                <FormattedMessage id="more-menu.enter-streamer-mode" defaultMessage="Enter Streamer Mode"/>
+              <FormattedMessage id="more-menu.enter-streamer-mode" defaultMessage="Enter Streamer Mode"/>
             ),
             icon: CameraIcon,
             onClick: () => this.toggleStreamerMode()
@@ -1404,18 +1384,18 @@ export class UIRoot extends Component {
             label: <FormattedMessage id="more-menu.close-room" defaultMessage="Close Room"/>,
             icon: DeleteIcon,
             onClick: () =>
-                this.props.performConditionalSignIn(
-                    () => this.props.hubChannel.can("update_hub"),
-                    () => {
-                      this.showNonHistoriedDialog(CloseRoomModal, {
-                        roomName: this.props.hub.name,
-                        onConfirm: () => {
-                          this.props.hubChannel.closeHub();
-                        }
-                      });
-                    },
-                    SignInMessages.closeRoom
-                )
+              this.props.performConditionalSignIn(
+                () => this.props.hubChannel.can("update_hub"),
+                () => {
+                  this.showNonHistoriedDialog(CloseRoomModal, {
+                    roomName: this.props.hub.name,
+                    onConfirm: () => {
+                      this.props.hubChannel.closeHub();
+                    }
+                  });
+                },
+                SignInMessages.closeRoom
+              )
           }
         ].filter(item => item)
       },
@@ -1484,13 +1464,13 @@ export class UIRoot extends Component {
       }
     ];
 
-    if(msTeams()){
+    if (msTeamsAPILight().msTeams() && this.state.msTeamsAPI) {
       moreMenu = [
         {
           id: "user",
           label:
-              "You" +
-              (this.state.signedIn ? ` (Signed in as: ${maskEmail(this.props.store.state.credentials.email)})` : ""),
+            "You" +
+            (this.state.signedIn ? ` (Signed in as: ${maskEmail(this.props.store.state.credentials.email)})` : ""),
           items: [
             {
               id: "user-profile",
@@ -1502,21 +1482,21 @@ export class UIRoot extends Component {
               id: "preferences",
               label: "Preferences",
               icon: SettingsIcon,
-              onClick: () => this.setState({showPrefs: true})
+              onClick: () => this.setState({ showPrefs: true })
             },
-            microsoftLoginService.isSignedIn()?{
+            this.state.msTeamsAPI.getLoginService().isSignedIn() ? {
               id: "authorize",
               label: "Sign Out",
               icon: SettingsIcon,
               onClick: () => {
-                microsoftLoginService.logout();
+                this.state.msTeamsAPI.getLoginService().logout();
               }
-            }:{
+            } : {
               id: "authorize",
               label: "Sign In",
               icon: SettingsIcon,
               onClick: () => {
-                microsoftLoginService.login();
+                this.state.msTeamsAPI.getLoginService().login();
               }
             }
           ].filter(item => item)
@@ -1544,25 +1524,25 @@ export class UIRoot extends Component {
               onClick: () => this.setSidebar("objects")
             },
             this.isFavorited()
-                ? {
-                  id: "unfavorite-room",
-                  label: <FormattedMessage id="more-menu.unfavorite-room" defaultMessage="Unfavorite Room"/>,
-                  icon: StarIcon,
-                  onClick: () => this.toggleFavorited()
-                }
-                : {
-                  id: "favorite-room",
-                  label: <FormattedMessage id="more-menu.favorite-room" defaultMessage="Favorite Room"/>,
-                  icon: StarOutlineIcon,
-                  onClick: () => this.toggleFavorited()
-                },
+              ? {
+                id: "unfavorite-room",
+                label: <FormattedMessage id="more-menu.unfavorite-room" defaultMessage="Unfavorite Room"/>,
+                icon: StarIcon,
+                onClick: () => this.toggleFavorited()
+              }
+              : {
+                id: "favorite-room",
+                label: <FormattedMessage id="more-menu.favorite-room" defaultMessage="Favorite Room"/>,
+                icon: StarOutlineIcon,
+                onClick: () => this.toggleFavorited()
+              },
             isModerator &&
             entered && {
               id: "streamer-mode",
               label: streaming ? (
-                  <FormattedMessage id="more-menu.exit-streamer-mode" defaultMessage="Exit Streamer Mode"/>
+                <FormattedMessage id="more-menu.exit-streamer-mode" defaultMessage="Exit Streamer Mode"/>
               ) : (
-                  <FormattedMessage id="more-menu.enter-streamer-mode" defaultMessage="Enter Streamer Mode"/>
+                <FormattedMessage id="more-menu.enter-streamer-mode" defaultMessage="Enter Streamer Mode"/>
               ),
               icon: CameraIcon,
               onClick: () => this.toggleStreamerMode()
@@ -1635,8 +1615,8 @@ export class UIRoot extends Component {
       ];
     }
 
-    if(!this.getSelectedUser() && (this.state.sidebarId === "display_user_panel" ||  this.state.sidebarId ==="user")){
-      this.setState({sidebarId:null});
+    if (!this.getSelectedUser() && (this.state.sidebarId === "display_user_panel" || this.state.sidebarId === "user")) {
+      this.setState({ sidebarId: null });
     }
 
     return (
@@ -1711,7 +1691,7 @@ export class UIRoot extends Component {
                 viewport={
                   <>
                     {!this.state.dialog && renderEntryFlow ? entryDialog : undefined}
-                    {!this.props.selectedObject && <CompactMoreMenuButton />}
+                    {!this.props.selectedObject && <CompactMoreMenuButton/>}
                     {(aptGuiVisible) &&
                       (!this.props.selectedObject ||
                         (this.props.breakpoint !== "sm" && this.props.breakpoint !== "md")) && (
@@ -1735,7 +1715,7 @@ export class UIRoot extends Component {
                           />
                         </ContentMenu>
                       )}
-                    {!entered && !streaming && !isMobile && streamerName && <SpectatingLabel name={streamerName} />}
+                    {!entered && !streaming && !isMobile && streamerName && <SpectatingLabel name={streamerName}/>}
                     {this.props.activeObject && (
                       <ObjectMenuContainer
                         hubChannel={this.props.hubChannel}
@@ -1786,7 +1766,7 @@ export class UIRoot extends Component {
                   this.state.sidebarId ? (
                     <>
                       {this.state.sidebarId === "custom" && (
-                        <CustomSidebarContainer onClose={() => this.setSidebar(null)} />
+                        <CustomSidebarContainer onClose={() => this.setSidebar(null)}/>
                       )}
 
                       {this.state.sidebarId === "chat" && (
@@ -1809,8 +1789,8 @@ export class UIRoot extends Component {
                       )}
                       {this.state.sidebarId === "people" && (
                         <PeopleSidebarContainer
-                          signedIn={()=>this.showContextualSignInDialog()}
-                          signedInMicorsoft={()=>this.showContextualMicrosoftSignInDialog()}
+                          signedIn={() => this.showContextualSignInDialog()}
+                          signedInMicorsoft={() => this.showContextualMicrosoftSignInDialog()}
                           displayNameOverride={displayNameOverride}
                           store={this.props.store}
                           mediaSearchStore={this.props.mediaSearchStore}
@@ -1822,7 +1802,7 @@ export class UIRoot extends Component {
                           onCloseDialog={() => this.closeDialog()}
                           showNonHistoriedDialog={this.showNonHistoriedDialog}
                           performConditionalSignIn={this.props.performConditionalSignIn}
-                          toggleChatSidebar={(type, userid,onBack) => this.toggleSidebar(type, userid,onBack)}
+                          toggleChatSidebar={(type, userid, onBack) => this.toggleSidebar(type, userid, onBack)}
                         />
                       )}
                       {this.state.sidebarId === "profile" && (
@@ -1842,21 +1822,21 @@ export class UIRoot extends Component {
                           performConditionalSignIn={this.props.performConditionalSignIn}
                           onClose={() => this.setSidebar(null)}
                           onCloseDialog={() => this.closeDialog()}
-                          toggleSidebar={(type)=>this.toggleSidebar(type)}
+                          toggleSidebar={(type) => this.toggleSidebar(type)}
                           showNonHistoriedDialog={this.showNonHistoriedDialog}
                         />
                       )}
-                      
+
                       {(this.state.sidebarId === "display_user_panel" && this.getSelectedUser()) && (
                         <UserProfileSidebarContainer
                           user={this.getSelectedUser()}
                           performConditionalSignIn={this.props.performConditionalSignIn}
                           onClose={() => this.setSidebar(null)}
                           onCloseDialog={() => this.closeDialog()}
-                          toggleSidebar={(type)=>this.toggleSidebar(type)}
+                          toggleSidebar={(type) => this.toggleSidebar(type)}
                           showNonHistoriedDialog={this.showNonHistoriedDialog}
-                          signedIn={()=>this.showContextualSignInDialog()}
-                          signedInMicorsoft={()=>this.showContextualMicrosoftSignInDialog()}
+                          signedIn={() => this.showContextualSignInDialog()}
+                          signedInMicorsoft={() => this.showContextualMicrosoftSignInDialog()}
                           displayNameOverride={displayNameOverride}
                           store={this.props.store}
                           mediaSearchStore={this.props.mediaSearchStore}
@@ -1864,10 +1844,10 @@ export class UIRoot extends Component {
                           history={this.props.history}
                           mySessionId={this.props.sessionId}
                           presences={this.props.presences}
-                          toggleChatSidebar={(type, userid,onBack) => this.toggleSidebar(type, userid,onBack)}
+                          toggleChatSidebar={(type, userid, onBack) => this.toggleSidebar(type, userid, onBack)}
                         />
                       )}
-                         {this.state.sidebarId === "cardVisit" && (
+                      {this.state.sidebarId === "cardVisit" && (
                         <UserProfileVisitCardContainer
                           mySessionId={this.props.sessionId}
                           presences={this.props.presences}
@@ -1877,7 +1857,7 @@ export class UIRoot extends Component {
                           performConditionalSignIn={this.props.performConditionalSignIn}
                           onClose={() => this.setSidebar(null)}
                           onCloseDialog={() => this.closeDialog()}
-                          toggleSidebar={(type)=>this.toggleSidebar(type)}
+                          toggleSidebar={(type) => this.toggleSidebar(type)}
                           showNonHistoriedDialog={this.showNonHistoriedDialog}
                         />
                       )}
@@ -1926,57 +1906,57 @@ export class UIRoot extends Component {
                 }
                 toolbarCenter={
                   !aptGuiVisible ? null : (
-                  <>
-                  {(!msTeams()) && <>
-                  {watching && (
                     <>
-                      <ToolbarButton
-                        icon={<EnterIcon/>}
-                        label={<FormattedMessage id="toolbar.join-room-button" defaultMessage="Join Room"/>}
-                        preset="accept"
-                        onClick={() => this.setState({ watching: false })}
-                      />
-                      {enableSpectateVRButton && (
-                        <ToolbarButton
-                          icon={<VRIcon/>}
-                          preset="accent5"
-                          label={
-                            <FormattedMessage id="toolbar.spectate-in-vr-button" defaultMessage="Spectate in VR"/>
-                          }
-                          onClick={() => this.props.scene.enterVR()}
-                        />
-                      )}
+                      {(!msTeamsAPILight().msTeams()) && <>
+                        {watching && (
+                          <>
+                            <ToolbarButton
+                              icon={<EnterIcon/>}
+                              label={<FormattedMessage id="toolbar.join-room-button" defaultMessage="Join Room"/>}
+                              preset="accept"
+                              onClick={() => this.setState({ watching: false })}
+                            />
+                            {enableSpectateVRButton && (
+                              <ToolbarButton
+                                icon={<VRIcon/>}
+                                preset="accent5"
+                                label={
+                                  <FormattedMessage id="toolbar.spectate-in-vr-button" defaultMessage="Spectate in VR"/>
+                                }
+                                onClick={() => this.props.scene.enterVR()}
+                              />
+                            )}
+                          </>
+                        )}
+                        {entered && (
+                          <>
+                            <VoiceButtonContainer
+                              scene={this.props.scene}
+                              microphoneEnabled={this.mediaDevicesManager.isMicShared}
+                            />
+                            <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel}/>
+                            <PlacePopoverContainer
+                              scene={this.props.scene}
+                              hubChannel={this.props.hubChannel}
+                              mediaSearchStore={this.props.mediaSearchStore}
+                              showNonHistoriedDialog={this.showNonHistoriedDialog}
+                            />
+                            {this.props.hubChannel.can("spawn_emoji") && <ReactionPopoverContainer/>}
+                          </>
+                        )}
+                        <ChatToolbarButtonContainer onClick={() => this.toggleSidebar("chat", "everyone")}/>
+                        {entered && isMobileVR && (
+                          <ToolbarButton
+                            className={styleUtils.hideLg}
+                            icon={<VRIcon/>}
+                            preset="accept"
+                            label={<FormattedMessage id="toolbar.enter-vr-button" defaultMessage="Enter VR"/>}
+                            onClick={() => exit2DInterstitialAndEnterVR(true)}
+                          />
+                        )}
+                      </>
+                      }
                     </>
-                  )}
-                  {entered && (
-                    <>
-                      <VoiceButtonContainer
-                        scene={this.props.scene}
-                        microphoneEnabled={this.mediaDevicesManager.isMicShared}
-                      />
-                      <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel}/>
-                      <PlacePopoverContainer
-                        scene={this.props.scene}
-                        hubChannel={this.props.hubChannel}
-                        mediaSearchStore={this.props.mediaSearchStore}
-                        showNonHistoriedDialog={this.showNonHistoriedDialog}
-                      />
-                      {this.props.hubChannel.can("spawn_emoji") && <ReactionPopoverContainer/>}
-                    </>
-                  )}
-                  <ChatToolbarButtonContainer onClick={() => this.toggleSidebar("chat", "everyone")} />
-                  {entered && isMobileVR && (
-                    <ToolbarButton
-                      className={styleUtils.hideLg}
-                      icon={<VRIcon/>}
-                      preset="accept"
-                      label={<FormattedMessage id="toolbar.enter-vr-button" defaultMessage="Enter VR"/>}
-                      onClick={() => exit2DInterstitialAndEnterVR(true)}
-                    />
-                  )}
-                  </>
-                  }
-                  </>
                   )
                 }
                 toolbarRight={
@@ -1984,19 +1964,19 @@ export class UIRoot extends Component {
                     <>
                       {entered && isMobileVR && (
                         <ToolbarButton
-                          icon={<VRIcon />}
+                          icon={<VRIcon/>}
                           preset="accept"
-                          label={<FormattedMessage id="toolbar.enter-vr-button" defaultMessage="Enter VR" />}
+                          label={<FormattedMessage id="toolbar.enter-vr-button" defaultMessage="Enter VR"/>}
                           onClick={() => exit2DInterstitialAndEnterVR(true)}
                         />
                       )}
-                      <MoreMenuPopoverButton menu={moreMenu} />{/*Aptero*/}
+                      <MoreMenuPopoverButton menu={moreMenu}/>{/*Aptero*/}
                       {!aptGuiVisible ? null : (
-                      <InvitePopoverContainer className={styles.inviteButtonContainer}
-                        hub={this.props.hub}
-                        hubChannel={this.props.hubChannel}
-                        scene={this.props.scene}
-                      />)}
+                        <InvitePopoverContainer className={styles.inviteButtonContainer}
+                                                hub={this.props.hub}
+                                                hubChannel={this.props.hubChannel}
+                                                scene={this.props.scene}
+                        />)}
                     </>
                   )
                 }
@@ -2008,7 +1988,11 @@ export class UIRoot extends Component {
     );
   }
 }
+
 function usePeopleList(presences, mySessionId) {
+  if (!presences || !mySessionId) {
+    return [];
+  }
   let people;
 
   const micPresences = getMicrophonePresences();
@@ -2022,6 +2006,7 @@ function usePeopleList(presences, mySessionId) {
   });
   return people;
 }
+
 function getUrl(avatarGlb) {
   return new Promise(function(resolve) {
     const params = {
@@ -2037,28 +2022,29 @@ function getUrl(avatarGlb) {
     http.onload = function() {
       // Do whatever with response
       let str = http.responseText;
-      str = str.replace('{"renders":[', "");
+      str = str.replace("{\"renders\":[", "");
       str = str.replace("]}", "");
       resolve(str);
     };
   });
 }
+
 async function getUserProfile(store) {
-  const mail=store.state.credentials.email;
-  return axios.get(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER+"/service/user/get/user/"+mail).then(resp => {
-    let data=resp.data;
+  const mail = store.state.credentials.email;
+  return axios.get(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/user/get/user/" + mail).then(resp => {
+    let data = resp.data;
     //this.setState({displayName:data.displayName});
     //this.setState({jobTitle:data.jobTitle});
     //this.setState({companyName:data.companyName});
     //this.setState({phoneNumber:data.phoneNumber});
     store.update({
       profile: {
-        displayName:data.displayName,
+        displayName: data.displayName,
         //avatarId: this.state.avatarId,
-        companyName:data.companyName,
-        jobTitle:data.jobTitle,
-        email:store.state.credentials.email,
-        phoneNumber:data.phoneNumber,
+        companyName: data.companyName,
+        jobTitle: data.jobTitle,
+        email: store.state.credentials.email,
+        phoneNumber: data.phoneNumber
       }
     });
 
@@ -2071,10 +2057,11 @@ async function getUserProfile(store) {
 export function getAvatarPreview() {
   return ImageList;
 }
-export function getProfileList()
-{
+
+export function getProfileList() {
   return profileList;
 }
+
 /*
 export async function getAllUsersMail(presences,sessionId)
 {
@@ -2116,10 +2103,7 @@ export async function  getUserProfile(mail,userId) {
 function UIRootHooksWrapper(props) {
   useAccessibleOutlineStyle();
   const breakpoint = useCssBreakpoints();
-  var people = [];
-  if (props.presences != null && props.sessionId != null) {
-    people = usePeopleList(props.presences, props.sessionId);
-  }
+  let people = usePeopleList(props.presences, props.sessionId);
   useEffect(() => {
     const el = document.getElementById("preload-overlay");
     el.classList.add("loaded");
@@ -2147,15 +2131,18 @@ function UIRootHooksWrapper(props) {
     >
       <ObjectListProvider scene={props.scene}>
         <UIRoot breakpoint={breakpoint} {...props} />
-        <AptRoot />
+        <AptRoot/>
       </ObjectListProvider>
     </ChatContextProvider>
   );
 }
+
 UIRootHooksWrapper.propTypes = {
   scene: PropTypes.object.isRequired,
   messageDispatch: PropTypes.object,
-  store: PropTypes.object.isRequired
+  store: PropTypes.object.isRequired,
+  presences: PropTypes.object,
+  sessionId: PropTypes.string
 };
 
 export default UIRootHooksWrapper;

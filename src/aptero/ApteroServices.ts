@@ -22,7 +22,6 @@ import { testServiceNotifySceneEntered, startSelfTest, testTick } from "./module
 import { setlistenerEndShareVideo } from "./module/webRTCadapter/adapter-config";
 import { remoteControlServiceV2 } from "./module/RemoteScreen/RemoteControlServiceV2";
 import { wait } from "./util/AsyncWaiter";
-import { initAxolotisPlayer } from "./module/axolotis/AxolotisSystem";
 import { networkService } from "./module/HubsBridge/service/NetworkService";
 import { roomParameters } from "./module/HubsBridge/service/RoomParameters";
 
@@ -30,6 +29,12 @@ declare let window:any;
 declare let AFRAME:any;
 
 export const ENTERED_EVENT = 'apt:room:entered';
+
+function sendIframeMessage(type, data) {
+  if (window.parent && window.parent.postMessage) {
+    window.parent.postMessage(JSON.stringify({type, data}), "*");
+  }
+}
 
 //event handling for iframe #morgane
 window.focus();
@@ -68,12 +73,6 @@ if (new URL(window.location.href).searchParams.get("hideui")) {
   e.preventDefault();
 });*/
 
-function sendIframeMessage(type, data) {
-  if (window.top) {
-    window.top.postMessage(JSON.stringify({ type, data }), "*");
-  }
-}
-
 export class ApteroServices {
   thirdPersonService = new ThirdPersonService();
   private audioSettingsSystem: any;
@@ -84,16 +83,9 @@ export class ApteroServices {
     aptLogger.setAdditionalData("version", process.env.BUILD_VERSION);
   }
 
-  applySoftRedirect() {
-    if (window.location.host === "hub.aptero.co") {
-      window.location.href = window.location.href.replace("hub.aptero.co", "meet.aptero.co");
-    }
-  }
-
   start(audioSettingsSystem) {
     this.audioSettingsSystem = audioSettingsSystem;
     waitForDOMContentLoaded().then(async () => {
-      await initAxolotisPlayer();
       await networkService.start();
       await new SoundSystem(networkService).start();
       //await new DistributedSoundSystem(networkService).start();
@@ -127,6 +119,7 @@ export class ApteroServices {
     });
     await roomParameters.applyDefaultAudioSettingsSystem(this.audioSettingsSystem);
     window.document.dispatchEvent(new Event(ENTERED_EVENT))
+    sendIframeMessage(ENTERED_EVENT,{});
   }
 
   tick() {

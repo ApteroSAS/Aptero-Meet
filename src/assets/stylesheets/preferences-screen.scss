@@ -1,4 +1,5 @@
 @use "../../react-components/styles/theme.scss";
+@use "sass:math";
 @import 'shared.scss';
 
 $fontSize: 16px;
@@ -433,7 +434,7 @@ $ie-bottom-track-color: $track-color !default;
 [type='range'] {
   -webkit-appearance: none;
   background: transparent;
-  margin: $thumb-height / 2 0;
+  margin: math.div($thumb-height , 2) 0;
   width: $track-width;
   cursor: pointer;
 
@@ -468,7 +469,7 @@ $ie-bottom-track-color: $track-color !default;
     @include thumb;
     cursor: pointer;
     -webkit-appearance: none;
-    margin-top: ((-$track-border-width * 2 + $track-height) / 2 - $thumb-height / 2);
+    margin-top: (math.div((-$track-border-width * 2 + $track-height) , 2) - math.div($thumb-height , 2));
   }
 
   &::-moz-range-track {
@@ -476,7 +477,7 @@ $ie-bottom-track-color: $track-color !default;
     background: $track-color;
     border: $track-border-width solid $track-border-color;
     border-radius: $track-radius;
-    height: $track-height / 2;
+    height: math.div($track-height , 2);
   }
 
   &::-moz-range-thumb {
@@ -488,7 +489,7 @@ $ie-bottom-track-color: $track-color !default;
     @include track;
     background: transparent;
     border-color: transparent;
-    border-width: ($thumb-height / 2) 0;
+    border-width: math.div($thumb-height , 2) 0;
     color: transparent;
   }
 
@@ -507,7 +508,7 @@ $ie-bottom-track-color: $track-color !default;
   &::-ms-thumb {
     @include thumb;
     cursor: pointer;
-    margin-top: $track-height / 4;
+    margin-top: math.div($track-height , 4);
   }
 
   &:disabled {

@@ -6,7 +6,7 @@
   "short_name": "Aptero",
   "icons": [
     {
-      "src": "https://hub.aptero.co/data/data/Aptero_Logo_512x512.png",
+      "src": "https://meet.aptero.co/data/data/Aptero_Logo_512x512.png",
       "sizes": "512x512",
       "type": "image/png"
     }

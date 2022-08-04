@@ -1,7 +1,13 @@
 FROM node:16-alpine
-RUN apk add git
+RUN apk add git openssh
 COPY ./package.json .
 COPY ./yarn.lock .
+
+COPY ./modules/ ./modules/
+RUN yarn --cwd ./modules/basic-modules install && \
+    yarn --cwd ./modules/basic-modules run build
+RUN yarn --cwd ./modules/teams-module install && \
+    yarn --cwd ./modules/teams-module run build
 RUN yarn install
 COPY . .
 RUN yarn run build

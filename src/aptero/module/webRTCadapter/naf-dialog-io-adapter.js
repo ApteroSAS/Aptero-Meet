@@ -1,8 +1,7 @@
 import * as mediasoupClient from "mediasoup-client";
 import protooClient from "protoo-client";
-import { debug as newDebug } from "debug";
 import EventEmitter from "eventemitter3";
-import { addIceServers, getAdapterConfig } from "./adapter-config";
+import { addIceServers, getAdapterParams } from "./adapter-config";
 import AdapterUserListener from "./AdapterUserListener";
 
 // Used for VP9 webcam video.
@@ -23,12 +22,6 @@ import AdapterUserListener from "./AdapterUserListener";
 let debug = console.log;
 let error = console.error;
 let info = console.log;
-if (newDebug) {
-  debug = newDebug("naf-dialog-adapter:debug");
-  //const warn = newDebug("naf-dialog-adapter:warn");
-  error = newDebug("naf-dialog-adapter:error");
-  info = newDebug("naf-dialog-adapter:info");
-}
 
 const PC_PROPRIETARY_CONSTRAINTS = {
   optional: [{ googDscp: true }]
@@ -275,7 +268,7 @@ export default class DialogAdapter extends EventEmitter {
     // TODO: Establishing connection could take a very long time.
     //       Inform the user if we are stuck here.
     let protooTransport;
-    if (getAdapterConfig().transport && getAdapterConfig().transport === "WebSocketTransport") {
+    if (getAdapterParams().transport && getAdapterParams().transport === "WebSocketTransport") {
       protooTransport = new protooClient.WebSocketTransport(urlWithParams.toString(), {
         retry: { retries: 2 }
       });
