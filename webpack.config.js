@@ -94,8 +94,8 @@ module.exports = async (env, argv) => {
       hub: path.join(__dirname, "src", "hub.async.ts"),
       scene: path.join(__dirname, "src", "scene.js"),
       link: path.join(__dirname, "src", "link.js"),
-      signin: path.join(__dirname, "src", "signin.js"),
-      verify: path.join(__dirname, "src", "verify.js")
+      signin: path.join(__dirname, "src", "signin.async.ts"),
+      verify: path.join(__dirname, "src", "verify.async.ts")
     },
     output: {
       filename: "assets/js/[name]-[chunkhash].js",
