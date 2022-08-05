@@ -60,6 +60,7 @@ export class TabConfig extends React.Component {
           let token = await (await roomService()).getEmbedToken(data.roomSID, data.origin);
           roomurl.searchParams.append("embed_token", token);
           this.fullUrl = roomurl.toString();
+          console.log(this.fullUrl);
         } catch (ex) {
           console.error(ex);
         }
@@ -132,14 +133,15 @@ export class TabConfig extends React.Component {
             <RoomSection
               roomUrl={roomUrl}
               suggestedDisplayName={this.state.suggestedDisplayName}
-              onChangeRoomUrl={(text) => {
-                if (!text) {
-                  (async ()=>{
+              onChangeRoomUrl={async (url) => {
+                if (!url) {
+                  await (async () => {
                     let msTeamsAPI1 = await msTeamsAPI();
                     msTeamsAPI1.getTeamsApp().pages.config.setValidityState(false);
                   })()
+                }else {
+                  await (await msTeamsAPI()).changeUrlSettings(url);
                 }
-                this.setState({ url: text });
               }}
               onChangeSuggestedDisplayName={(text) => {
                 this.setState({ suggestedDisplayName: text });

@@ -335,6 +335,26 @@ module.exports = async (env, argv) => {
             from: "node_modules/@aptero/axolotis-module-basic/build/library/",
             to: "assets/js/library"
           },
+            /* hack for async library https://localhost:53000/assets/js/library/@azure/library/jsonschema.780f037a457e3b4aa643.js
+            https://localhost:53000/assets/js/library/@microsoft/library/jsonschema.780f037a457e3b4aa643.js
+            * */
+          {
+            from: "node_modules/@aptero/axolotis-module-teams/build/library/",
+            to: "assets/js/library/@azure/library"
+          },
+          {
+            from: "node_modules/@aptero/axolotis-module-basic/build/library/",
+            to: "assets/js/library/@azure/library"
+          },
+          {
+            from: "node_modules/@aptero/axolotis-module-teams/build/library/",
+            to: "assets/js/library/@microsoft/library"
+          },
+          {
+            from: "node_modules/@aptero/axolotis-module-basic/build/library/",
+            to: "assets/js/library/@microsoft/library"
+          },
+            /*end hack*/
           {
             from: "node_modules/@aptero/axolotis-module-teams/build/library/@aptero/axolotis-module-teams/assets/auth-start.html",
             to: "auth-start.html"

@@ -215,7 +215,6 @@ export function RoomSection(props: {
                           if (window.location.origin.startsWith("https://localhost")) {
                             roomurl = window.location.origin + "/hub.html?hub_id=" + room.id;
                           }
-                          console.log(roomurl);
                           await (await msTeamsAPI()).changeUrlSettings(roomurl);
                         }}
                         key={room.id}

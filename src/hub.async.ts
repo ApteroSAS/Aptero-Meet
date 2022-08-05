@@ -1,4 +1,3 @@
-
 import "@babel/polyfill";
 
 import "aframe";
@@ -9,7 +8,8 @@ import "aframe";
 THREE.Cache.enabled = false;
 
 import "./utils/logging";
-import { patchWebGLRenderingContext } from "./utils/webgl";
+import {patchWebGLRenderingContext} from "./utils/webgl";
+
 patchWebGLRenderingContext();
 
 // It seems we need to use require to import modules
@@ -131,8 +131,8 @@ import "./systems/audio-gain-system";
 
 import "./gltf-component-mappings";
 
-import { App } from "./App";
-import { AdapterWarpper } from "./aptero/module/webRTCadapter/AdapterWrapper";
+import {App} from "./App";
+import {AdapterWarpper} from "./aptero/module/webRTCadapter/AdapterWrapper";
 
 window.APP = new App();
 window.APP.dialog = new AdapterWarpper();
@@ -170,14 +170,41 @@ import {getService} from "@aptero/axolotis-player"
 
 declare const window;
 
+async function domReady() {
+  return new Promise((resolve, reject) => {
+    try {
+      // If we're early to the party
+      document.addEventListener("DOMContentLoaded", resolve);
+      // If late; I mean on time.
+      if (document.readyState === "interactive" || document.readyState === "complete") {
+        resolve(true);
+      }
+    } catch (e) {
+      reject(e);
+    }
+  })
+}
+
+async function aframeReady() {
+  return new Promise((resolve, reject) => {
+    try {
+      document.querySelector('a-scene').addEventListener('loaded', resolve)
+    } catch (e) {
+      reject(e);
+    }
+  })
+}
+
 export {};
 (async () => {
   const {initAxolotisPlayer} = await import("./aptero/module/axolotis/AxInit");
   await initAxolotisPlayer();
-  const {PROPERTIES_SERVICE,MICROSOFT_STATIC_SERVICE} = await import("@aptero/axolotis-module-teams");
+  const {PROPERTIES_SERVICE, MICROSOFT_STATIC_SERVICE} = await import("@aptero/axolotis-module-teams");
   await getService(PROPERTIES_SERVICE);
   await getService(MICROSOFT_STATIC_SERVICE);
   console.log("Start hub");
+  await domReady();
+  console.log("dom loaded");
   await import("./hub.js");
   console.log("Start hub finished");
 })();
