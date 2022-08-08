@@ -1,10 +1,19 @@
 const qs = new URLSearchParams(location.search);
-import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
+
+export function isMsTeams(){
+  /*if(msTeamsAPILight().msTeams()){
+    //MSTeams App import causes issue
+    return;
+  }*/
+  const qs = new URLSearchParams(location.search);
+  return !!qs.get("msteams")
+}
 
 export function addEntryModeIfNotExist(entryMode){
-  if(msTeamsAPILight().msTeams()){
+  if(isMsTeams()){
     return;
   }
+
   const urlToConstruct = new URL(location.href);
   if (!urlToConstruct.searchParams.has("vr_entry_type")) {
     urlToConstruct.searchParams.set("vr_entry_type",entryMode);
@@ -14,7 +23,7 @@ export function addEntryModeIfNotExist(entryMode){
 
 export function getEntryMode(){
   let qsVREntryType = qs.get("vr_entry_type");
-  if(msTeamsAPILight().msTeams()){
+  if(isMsTeams()){
     qsVREntryType="2d_now";
   }
   return qsVREntryType;

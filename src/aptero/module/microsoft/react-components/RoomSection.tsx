@@ -53,9 +53,35 @@ export function RoomSection(props: {
   const { results: spokeProject } = useSpokeProject();
 
   const sortedFeaturedScene = [
-    roomServiceSync().createRoomEntry("Room 1", "pywjaKD", "https://meet.aptero.co/files/20c63c61-0eb1-4945-a0dc-82e041983d17.jpg"),
-    roomServiceSync().createRoomEntry("Room 2", "ttQn7dJ", "https://meet.aptero.co/files/b3b8c2c8-3508-4916-a70e-4928eb23d380.jpg"),
-    roomServiceSync().createRoomEntry("Room 3", "HkZhZjU", "https://meet.aptero.co/files/9574cccb-5241-4900-b2f5-4af780ec714d.jpg")
+    {
+     onClick : async ()=>{
+       await (await msTeamsAPI()).changeUrlSettings("https://meet.aptero.co/q2XuoUT/tutorial-room?offline2=true");
+     },
+      entry:roomServiceSync().createRoomEntry("Tutorial Space", "", "https://files.aptero.co/api/public/dl/DHeO0e4p?inline=true"),
+    },
+    {
+      onClick : async ()=>{
+        let url = await (await roomService()).createAndSelect("ttQn7dJ");
+        console.log("created room : " + url);
+        await (await msTeamsAPI()).changeUrlSettings(url);
+      },
+      entry:roomServiceSync().createRoomEntry("Virtual Amphitheater", "", "https://meet.aptero.co/files/bf2638b2-a5ce-4a88-aa35-bed41717a741.jpg"),
+    },
+    {
+      onClick : async ()=>{
+        let url = await (await roomService()).createAndSelect("HkZhZjU");
+        console.log("created room : " + url);
+        await (await msTeamsAPI()).changeUrlSettings(url);
+      },
+      entry:roomServiceSync().createRoomEntry("Virtual Meeting", "", "https://meet.aptero.co/files/38a5ab95-9d64-4c57-89a3-dcd53d63d4b8.jpg")
+    },
+    {
+      onClick : async ()=>{
+        await (await msTeamsAPI()).changeUrlSettings("https://microverse.aptero.co/");
+      },
+      entry:roomServiceSync().createRoomEntry("Virtual training", "", "https://files.aptero.co/api/public/dl/vndZrWGi?inline=true")
+    },
+
   ];
   const sortedFavoriteRooms = Array.from(favoriteRooms).sort((a, b) => b.member_count - a.member_count);
   const sortedSpokeProject = Array.from(spokeProject).sort((a, b) => b.member_count - a.member_count);
@@ -148,16 +174,14 @@ export function RoomSection(props: {
                       <MediaTile
                         onClick={async (event) => {
                           event.preventDefault();
-                          let url = await (await roomService()).createAndSelect(room.id);
-                          console.log("created room : " + url);
-                          await (await msTeamsAPI()).changeUrlSettings(url);
+                          await room.onClick();
                         }}
                         onEdit={(event) => {
                           event.preventDefault();
-                          console.log("edit : " + room.id);
+                          console.log("edit : " + room.entry.id);
                         }}
-                        key={room.id}
-                        entry={room}
+                        key={room.entry.id}
+                        entry={room.entry}
                         processThumbnailUrl={(entry, width, height) => {
                           //TODO add a thumbnail service here
                           return entry.images.preview.url;
