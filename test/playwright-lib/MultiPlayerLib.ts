@@ -35,7 +35,7 @@ export async function runMultiplayer(playersNumber,page,url){
   const allPages = context.pages();
   for (const page of allPages) {
     //https://alphahub.aptero.co/bxmhkMb/playwright-network
-    await page.goto(url)
+    await page.goto(url);
     await startErrorWatch(page);
     await waitInitialSceneLoad(page);
     await stopErrorWatch(page);
