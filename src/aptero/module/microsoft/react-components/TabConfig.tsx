@@ -54,13 +54,18 @@ export class TabConfig extends React.Component {
           let url=msg.url;
           this.setState({ url: url });
           const roomurl = new URL(url); //test url valide
-          const teamsParams = btoa(encodeURIComponent(JSON.stringify(await loginService.getTeamsLoginService().getCredential().getUserInfo())));
-          roomurl.searchParams.append(MSTEAMS_QUERY_PARAM, teamsParams);
-          let data = (await roomService()).parseUrl(roomurl.toString());
-          let token = await (await roomService()).getEmbedToken(data.roomSID, data.origin);
-          roomurl.searchParams.append("embed_token", token);
-          this.fullUrl = roomurl.toString();
-          console.log(this.fullUrl);
+          if(url.startsWith("https://microverse")){
+            console.log("croquet url detected");
+            this.fullUrl = url;
+          }else {
+            const teamsParams = btoa(encodeURIComponent(JSON.stringify(await loginService.getTeamsLoginService().getCredential().getUserInfo())));
+            roomurl.searchParams.append(MSTEAMS_QUERY_PARAM, teamsParams);
+            let data = (await roomService()).parseUrl(roomurl.toString());
+            let token = await (await roomService()).getEmbedToken(data.roomSID, data.origin);
+            roomurl.searchParams.append("embed_token", token);
+            this.fullUrl = roomurl.toString();
+            console.log(this.fullUrl);
+          }
         } catch (ex) {
           console.error(ex);
         }

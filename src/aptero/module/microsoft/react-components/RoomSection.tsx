@@ -169,7 +169,7 @@ export function RoomSection(props: {
             <Container as={undefined} className={undefined}>
               <Column2 grow padding>
                 <MediaGrid center className={undefined} isVariableWidth={undefined} sm={undefined}>
-                  {sortedFeaturedScene.map((room) => {
+                  {sortedFeaturedScene.map((room,index) => {
                     return (
                       <MediaTile
                         onClick={async (event) => {
@@ -180,7 +180,7 @@ export function RoomSection(props: {
                           event.preventDefault();
                           console.log("edit : " + room.entry.id);
                         }}
-                        key={room.entry.id}
+                        key={index}
                         entry={room.entry}
                         processThumbnailUrl={(entry, width, height) => {
                           //TODO add a thumbnail service here
