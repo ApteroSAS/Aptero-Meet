@@ -1,6 +1,7 @@
 import configs from "../../../utils/configs";
 import { lazyLoad } from "./adapterRegistrer";
 import { propertiesService } from "../properties/propertiesService";
+import type NafTwilioAdapter from "./naf-twilio-adapter";
 
 let defaultAdapter = configs.APP_CONFIG.adapterParams.adapter;
 
@@ -27,7 +28,7 @@ export async function adapterReady() {
 export function getAdapterParams(): {
   adapter: string,//dialog,dialog-io,janus,twilio,agora,default,none,socketio
   transport: string,
-  url?:string
+  url?: string
 } {
   return profile || {};
 }
@@ -95,10 +96,10 @@ export async function setlistenerEndShareVideo() {
 }
 
 export async function createTrack(constraints, isDisplayDevice) {
-  console.log("createTrack");
+  console.log("createTrack :", constraints, isDisplayDevice);
   const adapterParams = getAdapterParams();
   if (adapterParams.adapter === "twilio" || adapterParams.adapter === "agora") {
-    return window.APP.dialog.subAdapter.createTrack(constraints, isDisplayDevice);
+    return (window.APP.dialog as NafTwilioAdapter).createTrack(constraints);
   } else {
     if (isDisplayDevice) {
       return await navigator.mediaDevices.getDisplayMedia(constraints);

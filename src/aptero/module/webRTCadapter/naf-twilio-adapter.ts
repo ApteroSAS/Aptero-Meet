@@ -35,10 +35,11 @@ export default class NafTwilioAdapter extends EventEmitter {
   private _clientId: any;
   private _roomId: any;
   private _joinToken: any;
-  private subAdapter: any;
+  private subAdapter: TwilioAdapter;
   private _closed: boolean;
   private _micEnabled: Boolean;
   private _micShouldBeEnabled: any;
+  private lastTrack = null;
 
   constructor() {
     super();
@@ -111,7 +112,22 @@ export default class NafTwilioAdapter extends EventEmitter {
   checkRecvIceStatus(connectionState) {
   }
   
+  async reconnect(){
+    await this.disconnect();
 
+    await new Promise(resolve => setTimeout(resolve,4000));
+    await this.connect({
+       serverUrl:this._serverUrl,
+       roomId:this._roomId,
+       joinToken:this._joinToken,
+       serverParams:this._serverParams,
+       clientId:this._clientId,
+       scene:this.scene,
+       forceTcp:this._forceTcp,
+       forceTurn:this._forceTurn,
+       iceTransportPolicy:this._iceTransportPolicy
+    })
+  }
 
   async connect({
     serverUrl,
@@ -137,7 +153,7 @@ export default class NafTwilioAdapter extends EventEmitter {
     this.subAdapter = new TwilioAdapter(this.adapterUserListener);
     this.subAdapter.setOnTrack((track, peerId,trackid)=>{
       //RemoteAudioTrack
-      console.log(" Add consumer:",track);
+      console.log("Add consumer:",track);
       track.appData = {peerId};
       this._consumers.set(trackid, track);
       this.resolvePendingMediaRequestForTrack(peerId, track.track);
@@ -163,6 +179,9 @@ export default class NafTwilioAdapter extends EventEmitter {
     return new Promise(async (resolve, reject) => {
       try {
         await this._joinRoom();
+        if(this.lastTrack){
+          this.createTrack(this.lastTrack);
+        }
         resolve(true);
       } catch (err) {
         this.emitRTCEvent("warn", "Adapter", () => `Error during connect: ${error}`);
@@ -404,7 +423,7 @@ export default class NafTwilioAdapter extends EventEmitter {
     }
     if (this._closed) return;
 
-    debug("disconnect()");
+    debug("disconnected()");
     this.cleanUpLocalState();
     this.adapterUserListener.disconnect();
   }
@@ -432,5 +451,10 @@ export default class NafTwilioAdapter extends EventEmitter {
       second: "numeric"
     });
     this.scene.emit("rtc_event", { level, tag, time, msg: msgFunc() });
+  }
+
+  async createTrack(constraints) {
+    this.lastTrack = constraints;
+    return this.subAdapter.createTrack(constraints);
   }
 }
