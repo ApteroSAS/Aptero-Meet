@@ -448,6 +448,12 @@ class MediaBrowserContainer extends Component {
         banner = {()=>{
           if(urlSource === "avatars"){
             return createAvatarCustomTileV2((evt,entry)=> {
+              //Aptero
+              const { scene, store} = this.props;
+              const url = entry.gltfs.avatar;
+              store.update({ profile: { ...store.state.profile, ...{ avatarId: url } } });
+              scene.emit("avatar_updated");
+              //End Of Aptero
               this.handleEntryClicked(evt, entry);
             })
           }else{
