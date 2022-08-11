@@ -92,7 +92,8 @@ test('teams setting up', async ({ page }) => {
     const frame = page.frameLocator('iframe[name="embedded-page-container"]');
 
     // Click button:has-text("Sign In")
-    await frame.locator('button:has-text("Sign In")').click();
+    //NOTE auto sign in is activated
+    // await frame.locator('button:has-text("Sign In")').click();
 
     // Click text=My Room
     await frame.locator('text=My Room').click();
