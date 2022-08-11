@@ -115,12 +115,16 @@ export default class MediaDevicesManager {
     if(msTeamsAPILight().msTeams()){
       console.error("no audio device in Teams");
     }
+    if(JSON.stringify(deviceId) === JSON.stringify(this.lastDeviceId)){
+      return this.lastResult;
+    }
+    this.lastDeviceId = deviceId;
     let constraints = { audio: {} };
     if (deviceId) {
       constraints = { audio: { deviceId: { exact: [deviceId] } } };
     }
 
-    const result = await this._startMicShare(constraints);
+    this.lastResult = await this._startMicShare(constraints);
 
     await this.fetchMediaDevices();
 
@@ -138,7 +142,7 @@ export default class MediaDevicesManager {
 
     await APP.dialog.setLocalMediaStream(this._mediaStream);
 
-    return result;
+    return this.lastResult;
   }
 
   async startLastUsedMicShare() {

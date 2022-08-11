@@ -68,6 +68,7 @@ window.APP_PROPS = {
       }
     },
     features: {
+      fast_room_switching:true,
       hide_powered_by: true,
       show_feedback_ui: false,
       disable_room_creation: true,
