@@ -1,12 +1,13 @@
 FROM node:16-alpine
 RUN apk add git openssh
+RUN npm i -g cross-env
 COPY ./package.json .
 COPY ./yarn.lock .
 
 COPY ./modules/ ./modules/
-RUN yarn --cwd ./modules/basic-modules install && \
+RUN yarn --cwd ./modules/basic-modules run setup && \
     yarn --cwd ./modules/basic-modules run build
-RUN yarn --cwd ./modules/teams-module install && \
+RUN yarn --cwd ./modules/teams-module run setup && \
     yarn --cwd ./modules/teams-module run build
 RUN yarn install
 COPY . .
