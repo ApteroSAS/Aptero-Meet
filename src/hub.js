@@ -1,3 +1,5 @@
+
+
 console.log(`App version: ${process.env.BUILD_VERSION || "?"}`);
 
 import {
@@ -69,10 +71,10 @@ import { platformUnsupported } from "./support";
 import { apteroService } from "./aptero/ApteroServices";
 import { roomController } from "./aptero/module/ButtonAPI/api/RoomController";
 import { fetchICEservers } from "./aptero/module/webRTCadapter/adapter-config";
-//aptero service end
 
-import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
+import {msTeamsAPILight} from "./aptero/module/axolotis/modules/teams";
 msTeamsAPILight().redirectToTeamsSidePanel();
+//aptero service end
 
 const store = window.APP.store;
 store.update({ preferences: { shouldPromptForRefresh: undefined } }); // Clear flag that prompts for refresh from preference screen

@@ -7,12 +7,12 @@ import { MediaGrid } from "./hubs/react-components/room/MediaGrid";
 import { usePaginatedAPI } from "./hubs/react-components/home/usePaginatedAPI";
 import { Container } from "./hubs/react-components/layout/Container";
 import { Column } from "./hubs/react-components/layout/Column";
-import { roomService, ROOM_SERVICE, RoomService } from "@aptero/axolotis-module-basic";
 import { AuthContext } from "../../../../react-components/auth/AuthContext";
 import { MediaTile } from "../../../../react-components/room/MediaTiles";
-import { msTeamsAPI } from "@aptero/axolotis-module-teams";
 import { PadNumber } from "./PadNumber";
 import { getServiceSync } from "@aptero/axolotis-player";
+import {ROOM_SERVICE, roomService, RoomService} from "../../axolotis/modules/basic";
+import {msTeamsAPI} from "../../axolotis/modules/teams";
 
 //https://fluentsite.z22.web.core.windows.net/0.60.1
 

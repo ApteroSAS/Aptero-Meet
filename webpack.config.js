@@ -328,14 +328,14 @@ module.exports = async (env, argv) => {
           { from: "src/aptero/module/properties/properties.js", to: "properties.js" },
           { from: "src/assets/images/favicon.ico", to: "favicon.ico" },
           //3rd party axolotis modules
-          {
+          /*{
             from: "node_modules/@aptero/axolotis-module-teams/build/library/",
             to: "assets/js/library"
           },
           {
             from: "node_modules/@aptero/axolotis-module-basic/build/library/",
             to: "assets/js/library"
-          },
+          },*/
           {
             from: "node_modules/@aptero/axolotis-module-teams/build/library/@aptero/axolotis-module-teams/assets/auth-start.html",
             to: "auth-start.html"

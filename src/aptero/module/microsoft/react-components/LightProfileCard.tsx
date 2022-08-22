@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Avatar, Flex, Segment, Text } from "@fluentui/react-northstar";
 import { useEffect, useState } from "react";
-import {msTeamsAPI} from "@aptero/axolotis-module-teams";
+import {msTeamsAPI} from "../../axolotis/modules/teams";
 
 export function LightProfileCard() {
   const [userProfile, setUserProfile] = useState(null);
