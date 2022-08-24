@@ -10,34 +10,18 @@
     "@jridgewell/gen-mapping" "^0.1.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@aptero/axolotis-module-basic-async@file:./modules/basic-modules/src-async":
-  version "1.0.0"
-  dependencies:
-    deepmerge "^4.2.2"
-    event-target-shim "^6.0.2"
-    eventemitter3 "^4.0.7"
-    jsonschema "^1.4.1"
-    tsutils "^3.21.0"
-    uuid "^3.2.1"
-
 "@aptero/axolotis-module-basic@file:./modules/basic-modules":
   version "1.0.0"
   dependencies:
-    "@aptero/axolotis-module-basic-async" "file:./../../../Users/Pierre-HenriFRICOT/AppData/Local/Yarn/Cache/v6/npm-@aptero-axolotis-module-basic-1.0.0-9686e20c-a055-4779-bfff-035a4d9acaa2-1660658179964/node_modules/@aptero/axolotis-module-basic/src-async"
-
-"@aptero/axolotis-module-basic@file:./modules/teams-module/modules/basic-modules":
-  version "1.0.0"
-  dependencies:
     deepmerge "^4.2.2"
     event-target-shim "^6.0.2"
     eventemitter3 "^4.0.7"
-    js-cookie "^2.2.1"
     jsonschema "^1.4.1"
     phoenix "github:gfodor/phoenix-js#f4cebf1534dd7c503fe797ef396709c4d3ea8d69"
     tsutils "^3.21.0"
     uuid "^3.2.1"
 
-"@aptero/axolotis-module-teams-async@file:./modules/teams-module/src-async":
+"@aptero/axolotis-module-teams@file:./modules/teams-module":
   version "1.0.0"
   dependencies:
     "@azure/msal-browser" "2.28.1"
@@ -45,12 +29,6 @@
     "@microsoft/teams-js" "^2.2.0"
     "@microsoft/teamsfx" "^1.1.0"
     tsutils "^3.21.0"
-
-"@aptero/axolotis-module-teams@file:./modules/teams-module":
-  version "1.0.0"
-  dependencies:
-    "@aptero/axolotis-module-basic" "file:./../../../Users/Pierre-HenriFRICOT/AppData/Local/Yarn/Cache/v6/npm-@aptero-axolotis-module-teams-1.0.0-cf9c6733-cfec-42c9-8a17-56d42cb43a26-1660658179974/node_modules/@aptero/axolotis-module-teams/modules/basic-modules"
-    "@aptero/axolotis-module-teams-async" "file:./../../../Users/Pierre-HenriFRICOT/AppData/Local/Yarn/Cache/v6/npm-@aptero-axolotis-module-teams-1.0.0-cf9c6733-cfec-42c9-8a17-56d42cb43a26-1660658179974/node_modules/@aptero/axolotis-module-teams/src-async"
 
 "@aptero/axolotis-player@github:ApteroSAS/axolotis-player.git#semver:^1.1.2":
   version "2.0.0"
@@ -10923,7 +10901,7 @@ jquery@^3.5.1:
   resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.6.0.tgz#c72a09f15c1bdce142f49dbf1170bdf8adac2470"
   integrity sha512-JVzAR/AjBvVt2BmYhxRCSYysDsPcssdmTFnzyLEts9qNwmjmu4JTAMYubEfwVOSwpQ1I1sKKFcxhZCI2buerfw==
 
-js-cookie@^2.2.0, js-cookie@^2.2.1:
+js-cookie@^2.2.0:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/js-cookie/-/js-cookie-2.2.1.tgz#69e106dc5d5806894562902aa5baec3744e9b2b8"
   integrity sha512-HvdH2LzI/EAZcUwA8+0nKNtWHqS+ZmijLA30RwZA0bo7ToCckjK5MkGhjED9KoRcXO6BaGI3I9UIzSA1FKFPOQ==

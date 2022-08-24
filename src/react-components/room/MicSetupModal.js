@@ -34,6 +34,9 @@ export function MicSetupModal({
   onBack,
   ...rest
 }) {
+  if(!selectedMicrophone){
+    return <div></div>;
+  }
   minimumQualityService.startFPSTest();
   return (
     <Modal

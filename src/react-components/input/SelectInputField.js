@@ -17,7 +17,9 @@ function getSelectedItem(value, options) {
   if (options.length > 0 && typeof options[0] === "object") {
     return options.find(item => item.value === selectedItemValue);
   }
-
+  if (!selectedItemValue){
+    throw new Error();
+  }
   return selectedItemValue;
 }
 
