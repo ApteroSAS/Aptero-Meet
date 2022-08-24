@@ -11,27 +11,27 @@ export class AxItem implements Item {
     let ret: { [id: string]: ModulePromise } = {};
     ret[PROPERTIES_SERVICE] = async () => {
       let module = await import("@aptero/axolotis-module-basic");
-      return { module, classname: module.Properties.name };
+      return { module, classname: "Properties" /*module.Properties.name*/ };
     };
     ret[STORE_SERVICE] = async () => {
       let module = await import("@aptero/axolotis-module-basic");
-      return { module, classname: module.Store.name };
+      return { module, classname: "Store" /*module.Store.name*/ };
     };
     ret[PHX_AUTH_SERVICE] = async () => {
       let module = await import("@aptero/axolotis-module-basic");
-      return { module, classname: module.PhoenixAuthServiceFactory.name };
+      return { module, classname: "PhoenixAuthServiceFactory" /*module.PhoenixAuthServiceFactory.name*/ };
     };
     ret[NAME_SERVICE] = async () => {
       let module = await import("@aptero/axolotis-module-basic");
-      return { module, classname: module.NameGenerationService.name };
+      return { module, classname: "NameGenerationService" /*module.NameGenerationService.name*/ };
     };
     ret[COOKIE_STORE_SERVICE] = async () => {
       let module = await import("@aptero/axolotis-module-basic");
-      return { module, classname: module.CookieStore.name };
+      return { module, classname: "CookieStore" /*module.CookieStore.name*/ };
     };
     ret[ROOM_SERVICE] = async () => {
       let module = await import("@aptero/axolotis-module-basic");
-      return { module, classname: module.RoomService.name };
+      return { module, classname: "RoomService" /*module.RoomService.name*/ };
     };
     return ret;
   }
