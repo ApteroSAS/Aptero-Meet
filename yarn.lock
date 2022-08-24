@@ -30,7 +30,7 @@
     "@microsoft/teamsfx" "^1.1.0"
     tsutils "^3.21.0"
 
-"@aptero/axolotis-player@github:ApteroSAS/axolotis-player.git#semver:^1.1.3":
+"@aptero/axolotis-player@github:ApteroSAS/axolotis-player.git#semver:^2.1.3":
   version "2.0.0"
   resolved "https://codeload.github.com/ApteroSAS/axolotis-player/tar.gz/3f8fff8508fa9dcb18c40214685ab28027e104a1"
 
