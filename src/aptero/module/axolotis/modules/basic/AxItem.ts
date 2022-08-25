@@ -31,7 +31,7 @@ export class AxItem implements Item {
     };
     ret[ROOM_SERVICE] = async () => {
       let module = await import("@aptero/axolotis-module-basic");
-      return { module, classname: "RoomService" /*module.RoomService.name*/ };
+      return { module, classname: "RoomServiceFactory" /*module.RoomService.name*/ };
     };
     return ret;
   }
