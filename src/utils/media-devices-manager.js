@@ -115,7 +115,7 @@ export default class MediaDevicesManager {
     if(msTeamsAPILight().msTeams()){
       console.error("no audio device in Teams");
     }
-    if(JSON.stringify(deviceId) === JSON.stringify(this.lastDeviceId)){
+    if(this.lastDeviceId && JSON.stringify(deviceId) === JSON.stringify(this.lastDeviceId)){
       return this.lastResult;
     }
     this.lastDeviceId = deviceId;

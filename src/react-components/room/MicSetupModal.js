@@ -34,9 +34,6 @@ export function MicSetupModal({
   onBack,
   ...rest
 }) {
-  if(!selectedMicrophone){
-    return <div></div>;
-  }
   minimumQualityService.startFPSTest();
   return (
     <Modal
@@ -120,6 +117,7 @@ export function MicSetupModal({
             large
           />
         </div>
+        {selectedMicrophone&&
         <>
           <SelectInputField value={selectedMicrophone} options={microphoneOptions} onChange={onChangeMicrophone} />
           <ToggleInput
@@ -130,7 +128,7 @@ export function MicSetupModal({
                 minimumQualityService.notifyMicChanged();
               }}
           />
-        </>
+        </>}
 
         <Button preset="accept" onClick={onEnterRoom}>
           <FormattedMessage id="mic-setup-modal.enter-room-button" defaultMessage="Enter Room" />
