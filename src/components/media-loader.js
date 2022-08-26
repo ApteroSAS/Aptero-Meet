@@ -25,7 +25,7 @@ import { waitForDOMContentLoaded } from "../utils/async-utils";
 
 import { SHAPE } from "three-ammo/constants";
 import { IN_APP_WEB_BROWSER_PROTOCOL } from "../aptero/module/HubsBridge/react-components/media-utils-lib";
-import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
+import {msTeamsAPILight} from "../aptero/module/axolotis/modules/teams";
 
 let loadingObjectEnvMap;
 let loadingObject;

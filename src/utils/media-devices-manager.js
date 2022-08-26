@@ -1,5 +1,5 @@
 import { createTrack } from "../aptero/module/webRTCadapter/adapter-config";
-import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
+import {msTeamsAPILight} from "../aptero/module/axolotis/modules/teams";
 
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
@@ -115,7 +115,7 @@ export default class MediaDevicesManager {
     if(msTeamsAPILight().msTeams()){
       console.error("no audio device in Teams");
     }
-    if(JSON.stringify(deviceId) === JSON.stringify(this.lastDeviceId)){
+    if(this.lastDeviceId && JSON.stringify(deviceId) === JSON.stringify(this.lastDeviceId)){
       return this.lastResult;
     }
     this.lastDeviceId = deviceId;

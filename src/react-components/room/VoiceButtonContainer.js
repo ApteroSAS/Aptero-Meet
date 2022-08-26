@@ -5,8 +5,8 @@ import { ReactComponent as MicrophoneMutedIcon } from "../icons/MicrophoneMuted.
 import { ToolbarButton } from "../input/ToolbarButton";
 import { useMicrophone } from "./useMicrophone";
 import { FormattedMessage } from "react-intl";
-import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
 import { getAdapterParams } from "../../aptero/module/webRTCadapter/adapter-config";
+import {msTeamsAPILight} from "../../aptero/module/axolotis/modules/teams";
 
 export function VoiceButtonContainer({ scene, microphoneEnabled }) {
   if(getAdapterParams().adapter === "none" || msTeamsAPILight().msTeams()){

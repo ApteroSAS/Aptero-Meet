@@ -8,7 +8,7 @@ import {FormattedMessage, useIntl} from "react-intl";
 import {rotateInPlaceAroundWorldUp, affixToWorldUp} from "../../utils/three-utils";
 import {UserProfileVisitCardContainer} from "./UserProfileVisitCardContainer";
 import {PeopleSidebarContainer, usePeopleList} from "./PeopleSidebarContainer";
-import {msTeamsAPI,msTeamsAPILight} from "@aptero/axolotis-module-teams";
+import {msTeamsAPILight} from "../../aptero/module/axolotis/modules/teams";
 
 function useGoToSelectedAvatar(entity) {
     const targetMatrix = new THREE.Matrix4();

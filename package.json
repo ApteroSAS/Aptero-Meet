@@ -6,9 +6,11 @@
   "scripts": {
     "info": "npm-scripts-info",
     "start": "webpack-dev-server --mode=development",
+    "setup": "rimraf ./dist && yarn --cwd ./modules/basic-modules run setup && yarn --cwd ./modules/teams-module run setup",
     "start-prod": "webpack-dev-server --mode=production",
     "dev": "webpack-dev-server --mode=development",
-    "build": "rimraf ./dist && tsc && webpack --mode=production",
+    "build": "rimraf ./dist && yarn build:dep && tsc && webpack --mode=production",
+    "build:dep": "rimraf ./dist && yarn --cwd ./modules/basic-modules run build && yarn --cwd ./modules/teams-module run build",
     "prettier": "prettier --write 'src/**/*.js'",
     "lint:js": "eslint 'src/**/*.js'",
     "lint:html": "htmlhint 'src/**/*.html' && node scripts/indent-linter.js 'src/**/*.html'",
@@ -59,9 +61,9 @@
     ]
   },
   "dependencies": {
-    "@aptero/axolotis-module-basic": "./modules/basic-modules",
-    "@aptero/axolotis-module-teams": "./modules/teams-module",
-    "@aptero/axolotis-player": "github:ApteroSAS/axolotis-player.git#semver:^1.1.2",
+    "@aptero/axolotis-module-basic": "file:./modules/basic-modules",
+    "@aptero/axolotis-module-teams": "file:./modules/teams-module",
+    "@aptero/axolotis-player": "github:ApteroSAS/axolotis-player.git#semver:^2.1.6",
     "@braintree/sanitize-url": "^5.0.0",
     "@fluentui/react-northstar": "^0.61.0",
     "@formatjs/intl-locale": "^2.4.13",

@@ -1,5 +1,5 @@
 import uuid from "uuid/v4";
-import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
+import {msTeamsAPILight} from "../aptero/module/axolotis/modules/teams";
 
 export default class AuthChannel {
   constructor(store) {

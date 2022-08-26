@@ -65,7 +65,7 @@ export async function choseAdapterAuto() {
   }
   const qs = new URLSearchParams(location.search);
   const msmode = !!qs.get("msteams");
-  //const {msTeamsAPILight} = await import("@aptero/axolotis-module-teams");
+  //const {msTeamsAPILight} = await import("@aptero/axolotis-module-team");
   //if(msTeamsAPILight().msTeams()){
   if (msmode) {
     adapter = "none";

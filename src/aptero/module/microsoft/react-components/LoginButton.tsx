@@ -3,8 +3,7 @@ import { Button, Loader } from "@fluentui/react-northstar";
 import { LightProfileCard } from "./LightProfileCard";
 import { FormattedMessage } from "react-intl";
 import {useEffect, useState} from "react";
-import {msTeamsAPI} from "@aptero/axolotis-module-teams";
-import type { MicrosoftLoginService} from "@aptero/axolotis-module-teams/build/modules/microsoft/service/MicrosoftLoginService";
+import {MicrosoftLoginService, msTeamsAPI} from "../../axolotis/modules/teams";
 
 export function LoginButton(props) {
   const [loading, setLoading] = useState(true);
