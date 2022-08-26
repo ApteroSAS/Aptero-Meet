@@ -21,11 +21,6 @@ export class ShareScreenModal extends Component {
   }
 
   render() {
-    const items = [
-      { id: "camera", icon: VideoIcon, color: "accent5", label: "Camera" },
-      { id: "screen", icon: DesktopIcon, color: "accent5", label: "Screen" }
-    ];
-
     if (!this.state.visible) {
       return <></>;
     } else {
@@ -46,7 +41,7 @@ export class ShareScreenModal extends Component {
               <div style={{ "display": "flex",
                 "justifyContent": "center",
                 "alignItems": "center" }}>
-              <Column padding center className={styles.content}>
+              <Column padding center>
                 <ToolbarButton
                   icon={<VideoIcon />}
                   onClick={ () => {
@@ -59,7 +54,7 @@ export class ShareScreenModal extends Component {
                   statusColor={"accent5"}
                 />
               </Column>
-              <Column padding center className={styles.content}>
+              <Column padding center>
                 <ToolbarButton
                   icon={<DesktopIcon />}
                   onClick={ () => {
