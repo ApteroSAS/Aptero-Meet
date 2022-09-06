@@ -51,7 +51,7 @@ import { MicSetupModalContainer } from "./room/MicSetupModalContainer";
 import { InvitePopoverContainer } from "./room/InvitePopoverContainer";
 import { MoreMenuPopoverButton, CompactMoreMenuButton, MoreMenuContextProvider } from "./room/MoreMenuPopover";
 import { ChatSidebarContainer, ChatContextProvider, ChatToolbarButtonContainer } from "./room/ChatSidebarContainer";
-import { ContentMenu, PeopleMenuButton, ObjectsMenuButton, CustomMenuButton } from "./room/ContentMenu";
+import { ContentMenu, PeopleMenuButton, ObjectsMenuButton } from "./room/ContentMenu";
 import { ReactComponent as CameraIcon } from "./icons/Camera.svg";
 import { ReactComponent as AvatarIcon } from "./icons/Avatar.svg";
 import { ReactComponent as AddIcon } from "./icons/Add.svg";
@@ -106,6 +106,10 @@ import AptRoot from "../aptero/module/HubsBridge/AptRoot";
 import { minimumQualityService } from "../aptero/module/perf/MinimumQualityService";
 import { adapterReady, getAdapterParams } from "../aptero/module/webRTCadapter/adapter-config";
 import {msTeamsAPI, msTeamsAPILight} from "../aptero/module/axolotis/modules/teams";
+import {CustomMenuButton} from "../aptero/module/CustomPanel/react-component/CustomMenuButton";
+import {InstancesMenuButton} from "../aptero/module/load-balancer/ui/InstancesMenuButton";
+import {hasInstances} from "../aptero/module/load-balancer/LoadBalancer";
+import {InstancesSidebarContainer} from "../aptero/module/load-balancer/ui/InstancesSidebarContainer";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 const IN_ROOM_MODAL_ROUTER_PATHS = ["/media"];
@@ -1696,12 +1700,14 @@ export class UIRoot extends Component {
                       (!this.props.selectedObject ||
                         (this.props.breakpoint !== "sm" && this.props.breakpoint !== "md")) && (
                         <ContentMenu>
-                          {customMenuService.isActivated() && (
                             <CustomMenuButton
                               active={this.state.sidebarId === "custom"}
                               onClick={() => this.toggleSidebar("custom")}
                             />
-                          )}
+                            <InstancesMenuButton
+                                active={this.state.sidebarId === "instances"}
+                                onClick={() => this.toggleSidebar("instances")}
+                            />
                           {showObjectList && false && (//Aptero
                             <ObjectsMenuButton
                               active={this.state.sidebarId === "objects"}
@@ -1767,6 +1773,10 @@ export class UIRoot extends Component {
                     <>
                       {this.state.sidebarId === "custom" && (
                         <CustomSidebarContainer onClose={() => this.setSidebar(null)}/>
+                      )}
+
+                      {this.state.sidebarId === "instances" && (
+                          <InstancesSidebarContainer onClose={() => this.setSidebar(null)}/>
                       )}
 
                       {this.state.sidebarId === "chat" && (
