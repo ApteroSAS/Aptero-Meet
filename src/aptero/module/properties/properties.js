@@ -17,7 +17,7 @@ window.APP_PROPS = {
   THUMBNAIL_SERVER: "",
 
   // Comma-separated list of domains which are known to not need CORS proxying
-  NON_CORS_PROXY_DOMAINS: "alphahub.aptero.co,meet.aptero.co",
+  NON_CORS_PROXY_DOMAINS: "aptero.co",
 
   // A comma-separated list of environment URLs to make available in the picker, besides the defaults.
   // These URLs are expected to be relative to ASSET_BUNDLE_SERVER.
