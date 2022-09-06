@@ -46,9 +46,9 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     {
       src: {
         w: paths.device.keyboard.key("arrowup"),
-        a: paths.device.keyboard.key("arrowleft"),
+        //a: paths.device.keyboard.key("arrowleft"),
         s: paths.device.keyboard.key("arrowdown"),
-        d: paths.device.keyboard.key("arrowright")
+        //d: paths.device.keyboard.key("arrowright")
       },
       dest: { vec2: arrows_vec2 },
       xform: xforms.wasd_to_vec2
@@ -62,6 +62,16 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       },
       dest: { vec2: wasd_vec2 },
       xform: xforms.wasd_to_vec2
+    },
+    {
+      src: { value: paths.device.keyboard.key("arrowleft") },
+      dest: { value: paths.actions.rotateLeft },
+      xform: xforms.copy
+    },
+    {
+      src: { value: paths.device.keyboard.key("arrowright") },
+      dest: { value: paths.actions.rotateRight },
+      xform: xforms.copy
     },
     {
       src: {
