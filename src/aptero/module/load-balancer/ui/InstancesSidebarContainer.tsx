@@ -1,24 +1,37 @@
-import React, {useEffect} from "react";
-import {Sidebar} from "../../../../react-components/sidebar/Sidebar";
-import {CloseButton} from "../../../../react-components/input/CloseButton";
-import {getClones} from "../LoadBalancer";
-
-export function InstancesSidebarContainer({onClose}) {
-    const [instances, setInstances] = React.useState({});
-    useEffect(() => {
-        (async () => {
-            let instances = (await getClones()).clones;
-            setInstances(instances);
-        })()
-    }, []);
-    return (
-        <Sidebar
-            title={"Instances"}
-            beforeTitle={<CloseButton onClick={onClose}/>}
-        >
-            <div>{Object.keys(instances).map(value => {
-                return <span key={value}>{JSON.stringify(instances[value])} </span>
-            })}</div>
-        </Sidebar>
-    );
+import React, { useEffect } from "react";
+import { Sidebar } from "../../../../react-components/sidebar/Sidebar";
+import { CloseButton } from "../../../../react-components/input/CloseButton";
+import { getClones } from "../LoadBalancer";
+import { List, ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
+import InboxIcon from "@material-ui/icons/Inbox";
+export function InstancesSidebarContainer({ onClose }) {
+  const [instances, setInstances] = React.useState({});
+  useEffect(() => {
+    (async () => {
+      let instances = (await getClones()).clones;
+      setInstances(instances);
+    })();
+  }, []);
+  return (
+    <Sidebar
+      title={"Instances"}
+      beforeTitle={<CloseButton onClick={onClose}/>}
+    >
+      <List>{Object.keys(instances).map(value => {
+        let instance = instances[value];
+        const line = instance.name + " (" + instance.people + "/" + instance.peopleMax + ")";
+        return <ListItem button key={value} onClick={async () => {
+          // move to new room without page load or entry flow
+          const { changeHub } = await import("../../../../change-hub");
+          changeHub(value);
+          onClose();
+        }}>
+          <ListItemIcon>
+            <InboxIcon/>
+          </ListItemIcon>
+          <ListItemText primary={instance.current?<b>{line}</b>:line}/>
+        </ListItem>;
+      })}</List>
+    </Sidebar>
+  );
 }

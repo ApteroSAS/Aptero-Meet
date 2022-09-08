@@ -1875,10 +1875,10 @@ export class UIRoot extends Component {
                         <RoomSidebar
                           accountId={this.props.sessionId}
                           room={this.props.hub}
-                          canEdit={this.props.hubChannel.canOrWillIfCreator("update_hub")}
+                          canEdit={this.props.hubChannel.canOrWillIfCreator("update_hub") || configs.isAdmin()}
                           onEdit={() => {
                             this.props.performConditionalSignIn(
-                              () => this.props.hubChannel.can("update_hub"),
+                              () => this.props.hubChannel.can("update_hub") || configs.isAdmin(),
                               () => this.setSidebar("room-info-settings"),
                               SignInMessages.roomSettings
                             );

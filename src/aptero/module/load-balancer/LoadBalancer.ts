@@ -1,57 +1,66 @@
 declare const window;
+const roomUrl = window.location.href;//initial room url
 
-let instances: {
-    roomSID: string,
-    clones: {
-        [id: string]: {
-            url: string,
-            people: number,
-            peopleMax: number,
-        }
-    },
-};
-
-export async function redirectIfNeeded() {
-    try {
-        let data = await getData();
-        console.log(data);
-        const roomUrl = window.location.href;
-        if (roomUrl !== data.url) {
-            window.location.href = data.url;
-        }
-        instances = data.instances;
-    } catch (e) {
-        console.error(e);
+export interface Instances {
+  roomSID: string,
+  clones: {
+    [id: string]: {
+      url: string,
+      name: string,
+      people: number,
+      peopleMax: number,
+      main?: boolean,
+      current: boolean,
     }
+  },
 }
 
-export async function getData() {
+let instances: Instances;
+
+export async function redirectIfNeeded() {
+  try {
     const host = window.APP_PROPS.RETICULUM_SERVER;
-    const roomUrl = window.location.href;
-    let response = await fetch(window.location.protocol + "//" + host + "/service/loadbalancer/redirect?url=" + roomUrl);
-    let data = await response.json();
+    console.log(roomUrl);
+    let response = await fetch(window.location.protocol + "//" + host + "/service/loadbalancer/redirect?url=" + encodeURIComponent(roomUrl));
+    let data: { url: string } = await response.json();
     if (!data.url) {
-        throw new Error();
+      throw new Error();
     }
-    return data;
+    if (roomUrl !== data.url) {
+      window.location.href = data.url;
+    }
+    //fetch meta data in a non blocking way
+    getClones();
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+export async function getData(): Promise<Instances> {
+  const host = window.APP_PROPS.RETICULUM_SERVER;
+  let response = await fetch(window.location.protocol + "//" + host + "/service/loadbalancer/meta?url=" + encodeURIComponent(window.location.href));
+  let data = await response.json();
+  if (!data.clones) {
+    throw new Error();
+  }
+  return data;
 }
 
 export async function getClones(): Promise<{
-    roomSID: string,
-    clones: {
-        [id: string]: {
-            url: string,
-            people: number,
-            peopleMax: number,
-        }
-    },
+  roomSID: string,
+  clones: {
+    [id: string]: {
+      url: string,
+      people: number,
+      peopleMax: number,
+    }
+  },
 }> {
-    let data = await getData();
-    instances = data.instances;
-    return instances;
+  instances = await getData();
+  return instances;
 }
 
 export function hasInstances(): boolean {
-    if (!instances) return false;
-    return Object.keys(instances.clones).length >= 1;
+  if (!instances) return false;
+  return Object.keys(instances.clones).length > 1;
 }
