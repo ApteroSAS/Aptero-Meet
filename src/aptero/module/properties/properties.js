@@ -9,6 +9,9 @@ window.APP_PROPS = {
 
   RETICULUM_SERVER: "alphahub.aptero.co",
 
+  //api for converting images into 360 scenes
+  API_360_TO_SCENE:"https://api3.aptero.co/service/360toscene/api/",
+
   // CORS proxy.
   CORS_PROXY_SERVER: "corsproxy.aptero.co",
 

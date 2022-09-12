@@ -28,3 +28,11 @@ export async function isValidSceneUrl(url) {
     return isValidGLB(proxiedUrlFor(url));
   }
 }
+
+//Aptero
+export async function isValidImage(url) {
+  url = await msTeamsAPILight().preFetchConvertMicrosoftUrl(url);
+  return await fetch(url,{method: 'HEAD'}).then(async r => {
+    return r.headers.get('content-type').includes('image');
+  })
+}
