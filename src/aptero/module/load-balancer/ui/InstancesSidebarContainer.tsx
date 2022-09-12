@@ -1,20 +1,29 @@
 import React, { useEffect } from "react";
 import { Sidebar } from "../../../../react-components/sidebar/Sidebar";
 import { CloseButton } from "../../../../react-components/input/CloseButton";
-import { getClones } from "../LoadBalancer";
+import { ClonesI, getClones } from "../LoadBalancer";
 import { List, ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import InboxIcon from "@material-ui/icons/Inbox";
 export function InstancesSidebarContainer({ onClose }) {
-  const [instances, setInstances] = React.useState({});
+  const [instances, setInstances] = React.useState<ClonesI>({});
   useEffect(() => {
     (async () => {
       let instances = (await getClones()).clones;
       setInstances(instances);
     })();
   }, []);
+
+  let totalPeople = 0;
+  let totalMaxPeople = 0;
+  for (const instancesKey in instances) {
+    const instance = instances[instancesKey];
+    totalMaxPeople+=instance.peopleMax;
+    totalPeople+=instance.people;
+  }
+
   return (
     <Sidebar
-      title={"Instances"}
+      title={`Instances (${totalPeople}/${totalMaxPeople})`}
       beforeTitle={<CloseButton onClick={onClose}/>}
     >
       <List>{Object.keys(instances).map(value => {
