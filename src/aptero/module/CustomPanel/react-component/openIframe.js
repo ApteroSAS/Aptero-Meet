@@ -9,7 +9,7 @@ export async function setupIframeButton(t) {
   ];
   let allowedSRC = false;
   for (let i = 0; i < allowedHosts.length; i++) {
-    if (allowedHosts[i] == link.host)
+    if (allowedHosts[i] === link.host)
       allowedSRC = true;
   }
   //test if url is allowed host

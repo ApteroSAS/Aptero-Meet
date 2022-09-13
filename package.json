@@ -73,6 +73,7 @@
     "@fortawesome/free-solid-svg-icons": "^5.2.0",
     "@fortawesome/react-fontawesome": "^0.1.0",
     "@material-ui/core": "^4.12.3",
+    "@material-ui/icons": "^4.11.3",
     "@mozillareality/easing-functions": "^0.1.1",
     "@mozillareality/three-batch-manager": "github:mozillareality/three-batch-manager",
     "@novnc/novnc": "^1.2.0",
@@ -80,6 +81,7 @@
     "@sentry/browser": "^6.19.6",
     "@sentry/integrations": "^6.19.6",
     "@sentry/utils": "^6.19.6",
+    "add": "^2.0.6",
     "aframe": "github:mozillareality/aframe#560c38311081fc5490931c369223f7e4da9f7f76",
     "aframe-rounded": "^1.0.3",
     "aframe-slice9-component": "github:takahirox/aframe-slice9-component#AlphaTest",
@@ -166,6 +168,7 @@
     "util": "^0.12.4",
     "uuid": "^3.2.1",
     "webrtc-adapter": "^7.7.0",
+    "yarn": "^1.22.19",
     "zip-loader": "^1.1.0"
   },
   "devDependencies": {
