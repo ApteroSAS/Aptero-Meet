@@ -16,7 +16,7 @@ import { ThemeProvider } from "../../../../react-components/styles/theme";
 import { WrappedIntlProvider } from "../../../../react-components/wrapped-intl-provider";
 import {MSettingsMain} from "../react-components/MSettingsMain";
 import {getService} from "@aptero/axolotis-player";
-import {MICROSOFT_STATIC_SERVICE, PROPERTIES_SERVICE} from "../../axolotis/modules/teams";
+import {MICROSOFT_STATIC_SERVICE, PROPERTIES_SERVICE} from "@aptero/axolotis-module-teams";
 import {ROOM_SERVICE} from "../../axolotis/modules/basic";
 
 const WrappedIntlProviderAny: any = WrappedIntlProvider;

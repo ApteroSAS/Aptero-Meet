@@ -14,7 +14,7 @@ import { ReactComponent as VolumeHighIcon } from "../icons/VolumeHigh.svg";
 import { ReactComponent as VolumeMutedIcon } from "../icons/VolumeMuted.svg";
 import { List, ButtonListItem } from "../layout/List";
 import { FormattedMessage, useIntl } from "react-intl";
-import {msTeamsAPILight} from "../../aptero/module/axolotis/modules/teams";
+import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
 
 function getDeviceLabel(ctx, intl) {
   if (ctx) {

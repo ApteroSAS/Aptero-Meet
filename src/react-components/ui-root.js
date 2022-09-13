@@ -105,10 +105,9 @@ import { propertiesService } from "../aptero/module/properties/propertiesService
 import AptRoot from "../aptero/module/HubsBridge/AptRoot";
 import { minimumQualityService } from "../aptero/module/perf/MinimumQualityService";
 import { adapterReady, getAdapterParams } from "../aptero/module/webRTCadapter/adapter-config";
-import {msTeamsAPI, msTeamsAPILight} from "../aptero/module/axolotis/modules/teams";
+import {msTeamsAPI, msTeamsAPILight} from "@aptero/axolotis-module-teams";
 import {CustomMenuButton} from "../aptero/module/CustomPanel/react-component/CustomMenuButton";
 import {InstancesMenuButton} from "../aptero/module/load-balancer/ui/InstancesMenuButton";
-import {hasInstances} from "../aptero/module/load-balancer/LoadBalancer";
 import {InstancesSidebarContainer} from "../aptero/module/load-balancer/ui/InstancesSidebarContainer";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
@@ -514,7 +513,7 @@ export class UIRoot extends Component {
           step: SignInStep.WaitForMicrosoftVerification,
           onClose: onContinueAfterSignIn || this.closeDialog
         });
-        await this.state.msTeamsAPI.getLoginService().login();
+        await (await msTeamsAPI()).getLoginService().login();
         this.showNonHistoriedDialog(RoomSignInModalContainer, {
           step: SignInStep.complete,
           onClose: onContinueAfterSignIn || this.closeDialog,

@@ -1,7 +1,7 @@
 import { MicSetupModalContainer } from "../../../react-components/room/MicSetupModalContainer";
 import React, { Component } from "react";
 import { getAdapterParams } from "../webRTCadapter/adapter-config";
-import {msTeamsAPILight} from "../axolotis/modules/teams";
+import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
 
 window.audioChangeHelperController = {};
 window.audioChangeHelperController.spawn = () => {

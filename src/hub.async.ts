@@ -166,7 +166,7 @@ import "./components/shape-helper";
 
 //ax
 import {getService} from "@aptero/axolotis-player"
-import {MICROSOFT_STATIC_SERVICE, PROPERTIES_SERVICE} from "./aptero/module/axolotis/modules/teams";
+import {MICROSOFT_STATIC_SERVICE, PROPERTIES_SERVICE} from "@aptero/axolotis-module-teams";
 import {redirectIfNeeded} from "./aptero/module/load-balancer/LoadBalancer";
 
 

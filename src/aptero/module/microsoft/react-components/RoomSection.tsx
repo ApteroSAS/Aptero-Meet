@@ -12,7 +12,7 @@ import { MediaTile } from "../../../../react-components/room/MediaTiles";
 import { PadNumber } from "./PadNumber";
 import { getServiceSync } from "@aptero/axolotis-player";
 import {ROOM_SERVICE, roomService, RoomService} from "../../axolotis/modules/basic";
-import {msTeamsAPI} from "../../axolotis/modules/teams";
+import {msTeamsAPI} from "@aptero/axolotis-module-teams";
 
 //https://fluentsite.z22.web.core.windows.net/0.60.1
 

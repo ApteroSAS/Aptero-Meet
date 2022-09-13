@@ -1,5 +1,5 @@
 import {getService} from "@aptero/axolotis-player";
-import {MICROSOFT_STATIC_SERVICE, PROPERTIES_SERVICE} from "./aptero/module/axolotis/modules/teams";
+import {MICROSOFT_STATIC_SERVICE, PROPERTIES_SERVICE} from "@aptero/axolotis-module-teams";
 
 (async () => {
   const {initAxolotisPlayer} = await import("./aptero/module/axolotis/AxInit");

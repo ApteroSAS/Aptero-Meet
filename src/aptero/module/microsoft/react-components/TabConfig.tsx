@@ -4,7 +4,7 @@ import { FormattedMessage } from "react-intl";
 import { LoginButton } from "./LoginButton";
 import { RoomSection } from "./RoomSection";
 import {roomService} from "../../axolotis/modules/basic";
-import {CHANGE_SETTINGS_URL, MSTEAMS_QUERY_PARAM, msTeamsAPI} from "../../axolotis/modules/teams";
+import {CHANGE_SETTINGS_URL, MSTEAMS_QUERY_PARAM, msTeamsAPI} from "@aptero/axolotis-module-teams";
 
 /**
  * The 'Config' component is used to display your group tabs

@@ -7,7 +7,7 @@ import { CancelButton, NextButton, ContinueButton, Button } from "../input/Butto
 import { TextInputField } from "../input/TextInputField";
 import { Column } from "../layout/Column";
 import { LegalMessage } from "./LegalMessage";
-import {msTeamsAPILight} from "../../aptero/module/axolotis/modules/teams";
+import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
 
 export const SignInStep = {
   submit: "submit",

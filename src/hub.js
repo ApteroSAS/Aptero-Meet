@@ -72,7 +72,7 @@ import { apteroService } from "./aptero/ApteroServices";
 import { roomController } from "./aptero/module/ButtonAPI/api/RoomController";
 import { fetchICEservers } from "./aptero/module/webRTCadapter/adapter-config";
 
-import {msTeamsAPILight} from "./aptero/module/axolotis/modules/teams";
+import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
 msTeamsAPILight().redirectToTeamsSidePanel();
 //aptero service end
 

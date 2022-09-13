@@ -5,7 +5,7 @@ import classNames from "classnames";
 import { useEffect, useState } from "react";
 import { Button, Loader } from "@fluentui/react-northstar";
 import { FormattedMessage } from "react-intl";
-import {msTeamsAPI, msTeamsAPILight} from "../../axolotis/modules/teams";
+import {msTeamsAPI, msTeamsAPILight} from "@aptero/axolotis-module-teams";
 
 //https://fluentsite.z22.web.core.windows.net/0.60.1
 
