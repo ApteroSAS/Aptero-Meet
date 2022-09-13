@@ -337,11 +337,11 @@ module.exports = async (env, argv) => {
             to: "assets/js/library"
           },*/
           {
-            from: "node_modules/@aptero/axolotis-module-teams/build/library/@aptero/axolotis-module-teams/assets/auth-start.html",
+            from: "node_modules/@aptero/axolotis-module-teams/lib/library/@aptero/axolotis-module-teams/assets/auth-start.html",
             to: "auth-start.html"
           },
           {
-            from: "node_modules/@aptero/axolotis-module-teams/build/library/@aptero/axolotis-module-teams/assets/auth-end.html",
+            from: "node_modules/@aptero/axolotis-module-teams/lib/library/@aptero/axolotis-module-teams/assets/auth-end.html",
             to: "auth-end.html"
           },
           { from: "src/assets/manifest.webmanifest", to: "manifest.webmanifest" },

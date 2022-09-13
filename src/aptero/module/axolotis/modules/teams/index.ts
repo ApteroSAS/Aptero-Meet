@@ -1,7 +1,7 @@
 import { getGlobalStorageValue, GLOBAL_WORLDS_ENTITY, registerItem, WorldEntity } from "@aptero/axolotis-player";
 import { AxItem } from "./AxItem";
 
-export type { MsTeamsAPILight } from "@aptero/axolotis-module-teams";
+export type { MsTeamsAPILight } from "@aptero/axolotis-module-teams/build/indexLight";
 export type { MsTeamsAPI } from "@aptero/axolotis-module-teams";
 export type { MicrosoftLoginService } from "@aptero/axolotis-module-teams";
 

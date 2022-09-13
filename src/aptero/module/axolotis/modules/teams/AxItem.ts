@@ -10,11 +10,11 @@ export class AxItem implements Item {
   modules(): { [id: string]: ModulePromise } {
     let ret: { [id: string]: ModulePromise } = {};
     ret[MICROSOFT_SERVICE] = async () => {
-      let module = await import("@aptero/axolotis-module-teams");
+      let module = await import("@aptero/axolotis-module-teams/dist-index");
       return { module, classname: "MsTeamsAPIFactory"/*module.MsTeamsAPIFactory.name*/};
     };
     ret[MICROSOFT_STATIC_SERVICE] = async () => {
-      let module = await import("@aptero/axolotis-module-teams");
+      let module = await import("@aptero/axolotis-module-teams/dist-index-light");
       return { module, classname: "MsTeamsAPILight" /*module.MsTeamsAPILight.name*/ };
     };
     return ret;
