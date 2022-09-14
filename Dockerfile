@@ -5,6 +5,7 @@ RUN npm i -g cross-env
 COPY ./modules/basic-modules/package.json ./modules/basic-modules/package.json
 COPY ./modules/basic-modules/yarn.lock ./modules/basic-modules/yarn.lock
 RUN yarn --cwd ./modules/basic-modules
+RUN yarn --cwd ./modules/basic-modules link
 
 COPY ./modules/teams-module/modules/basic-modules/package.json ./modules/teams-module/modules/basic-modules/package.json
 COPY ./modules/teams-module/modules/basic-modules/yarn.lock ./modules/teams-module/modules/basic-modules/yarn.lock
@@ -13,11 +14,14 @@ RUN yarn --cwd ./modules/teams-module/modules/basic-modules/
 COPY ./modules/teams-module/package.json ./modules/teams-module/package.json
 COPY ./modules/teams-module/yarn.lock ./modules/teams-module/yarn.lock
 RUN yarn --cwd ./modules/teams-module
+RUN yarn --cwd ./modules/teams-module link
 
 COPY ./package.json .
 COPY ./yarn.lock .
 
 RUN yarn install
+RUN yarn link @aptero/axolotis-module-basic
+RUN yarn link @aptero/axolotis-module-teams
 
 COPY ./modules/basic-modules/ ./modules/basic-modules/
 RUN yarn --cwd ./modules/basic-modules run build
