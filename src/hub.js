@@ -245,9 +245,15 @@ export async function getSceneUrlForHub(hub) {
   if (isLegacyBundle) {
     // Deprecated
     const res = await fetch(sceneUrl);
-    const data = await res.json();
-    const baseURL = new URL(THREE.LoaderUtils.extractUrlBase(sceneUrl), window.location.href);
-    sceneUrl = new URL(data.assets[0].src, baseURL).href;
+    try {//Aptero TryCatch (c'est ok de supprimer ce if)
+      const data = await res.json();
+      const baseURL = new URL(THREE.LoaderUtils.extractUrlBase(sceneUrl), window.location.href);
+      sceneUrl = new URL(data.assets[0].src, baseURL).href;
+    }
+    catch(e){
+      //The 360toScene api is misinterpreted as legacy while being a working glb. We can filter by looking for errors
+      sceneUrl = proxiedUrlFor(sceneUrl);
+    }
   } else {
     sceneUrl = proxiedUrlFor(sceneUrl);
   }

@@ -9,6 +9,9 @@ window.APP_PROPS = {
 
   RETICULUM_SERVER: "alphahub.aptero.co",
 
+  //api for converting images into 360 scenes
+  API_360_TO_SCENE:"https://api3.aptero.co/service/360toscene/api/",
+
   // CORS proxy.
   CORS_PROXY_SERVER: "corsproxy.aptero.co",
 
@@ -17,7 +20,7 @@ window.APP_PROPS = {
   THUMBNAIL_SERVER: "",
 
   // Comma-separated list of domains which are known to not need CORS proxying
-  NON_CORS_PROXY_DOMAINS: "alphahub.aptero.co,meet.aptero.co",
+  NON_CORS_PROXY_DOMAINS: "aptero.co",
 
   // A comma-separated list of environment URLs to make available in the picker, besides the defaults.
   // These URLs are expected to be relative to ASSET_BUNDLE_SERVER.

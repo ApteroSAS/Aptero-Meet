@@ -2,7 +2,7 @@ import { isLocalHubsSceneUrl, proxiedUrlFor } from "../utils/media-url-utils";
 import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
 
 export async function isValidGLB(url) {
-  url = msTeamsAPILight().preFetchConvertMicrosoftUrl(url);
+  url = await msTeamsAPILight().preFetchConvertMicrosoftUrl(url);
   return fetch(url).then(async r => {
     const reader = r.body.getReader();
     let header = "";
@@ -27,4 +27,12 @@ export async function isValidSceneUrl(url) {
   } else {
     return isValidGLB(proxiedUrlFor(url));
   }
+}
+
+//Aptero
+export async function isValidImage(url) {
+  url = await msTeamsAPILight().preFetchConvertMicrosoftUrl(url);
+  return await fetch(url,{method: 'HEAD'}).then(async r => {
+    return r.headers.get('content-type').includes('image');
+  })
 }
