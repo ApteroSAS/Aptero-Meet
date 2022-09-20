@@ -72,9 +72,9 @@ export function FallbackModal({ className, onEnterRoom, onBack, ...rest }) {
                 defaultMessage="Your PC does not seems to have the required performance to be able to run application."
             />
           </div>}
-          {(status["fps-issue"] || status["turn-udp-issue"] || status["turn-tcp-issue"] || status["mic-activity-issue"]) &&
+          {/*(status["fps-issue"] || status["turn-udp-issue"] || status["turn-tcp-issue"] || status["mic-activity-issue"]) &&
             fallbackVMButton()
-          }
+          */}
           <>
             <Button preset="accept" onClick={onEnterRoom}>
               <FormattedMessage id="fallback-modal.enter-room-button-anyway" defaultMessage="Enter Room Anyway"/>
