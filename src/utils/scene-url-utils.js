@@ -30,9 +30,40 @@ export async function isValidSceneUrl(url) {
 }
 
 //Aptero
-export async function isValidImage(url) {
+export async function isValidRemoteImage(url) {
   url = await msTeamsAPILight().preFetchConvertMicrosoftUrl(url);
-  return await fetch(url,{method: 'HEAD'}).then(async r => {
-    return r.headers.get('content-type').includes('image');
-  })
+  //try catch fausse url
+  try {
+    return await fetch(url,{method: 'HEAD'}).then(async r => {
+      return r.headers.get('content-type').includes('image');
+    })
+  }
+  catch(e){
+    return false;
+  }
+}
+
+export async function isValidImageFileName(url){
+  //tester if vrai nom de fichier
+  try {
+    new URL(url);
+    return false;
+  } catch (e) {
+    //we want this to fail
+  }
+  var allowedExtensions =
+      /(\.jpg|\.jpeg|\.png|\.gif)$/i;
+  if (!allowedExtensions.exec(url)) {
+    alert('Invalid file type');
+    return false;
+  }
+  return true;
+}
+export async function isValidImageFile(filelist){
+  //tester if vrai nom de fichier
+  const file = filelist[0]
+  if(!file || !file.name || !await isValidImageFileName(file.name)){
+    return false;
+  }
+  return file.type.includes("image");
 }
