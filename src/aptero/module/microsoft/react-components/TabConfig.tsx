@@ -140,9 +140,8 @@ export class TabConfig extends React.Component {
                     let msTeamsAPI1 = await msTeamsAPI();
                     msTeamsAPI1.getTeamsApp().pages.config.setValidityState(false);
                   })()
-                }else {
-                  await (await msTeamsAPI()).changeUrlSettings(url);
                 }
+                await (await msTeamsAPI()).changeUrlSettings(url);
               }}
               onChangeSuggestedDisplayName={(text) => {
                 this.setState({ suggestedDisplayName: text });
