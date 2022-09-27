@@ -10,7 +10,18 @@
     "@jridgewell/gen-mapping" "^0.1.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@aptero/axolotis-module-basic@./modules/basic-modules", "@aptero/axolotis-module-basic@file:./modules/basic-modules":
+"@aptero/axolotis-module-basic@file:./modules/basic-modules":
+  version "1.0.0"
+  dependencies:
+    deepmerge "^4.2.2"
+    event-target-shim "^6.0.2"
+    eventemitter3 "^4.0.7"
+    jsonschema "^1.4.1"
+    phoenix "github:gfodor/phoenix-js#f4cebf1534dd7c503fe797ef396709c4d3ea8d69"
+    tsutils "^3.21.0"
+    uuid "^3.2.1"
+
+"@aptero/axolotis-module-basic@file:./modules/teams-module/modules/basic-modules":
   version "1.0.0"
   dependencies:
     deepmerge "^4.2.2"
@@ -24,7 +35,7 @@
 "@aptero/axolotis-module-teams@file:./modules/teams-module":
   version "1.0.0"
   dependencies:
-    "@aptero/axolotis-module-basic" "./modules/basic-modules"
+    "@aptero/axolotis-module-basic" "file:./../../../AppData/Local/Yarn/Cache/v6/npm-@aptero-axolotis-module-teams-1.0.0-56568623-6898-4f5d-ace6-17e0c1fabd63-1663763129238/node_modules/@aptero/axolotis-module-teams/modules/basic-modules"
     "@azure/msal-browser" "2.28.1"
     "@microsoft/microsoft-graph-client" "^3.0.2"
     "@microsoft/teams-js" "^2.2.0"

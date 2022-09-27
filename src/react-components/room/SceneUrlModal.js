@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useCallback, useEffect} from "react";
 import PropTypes from "prop-types";
 import { Modal } from "../modal/Modal";
 import { CloseButton } from "../input/CloseButton";
@@ -7,9 +7,53 @@ import { useForm } from "react-hook-form";
 import { Button } from "../input/Button";
 import { FormattedMessage } from "react-intl";
 import { Column } from "../layout/Column";
+import {IconButton} from "../input/IconButton";
+import classNames from "classnames";
+import styles from "./ObjectUrlModal.scss";
+import {ReactComponent as AttachIcon} from "../icons/Attach.svg";
 
 export function SceneUrlModal({ enableSpoke, editorName, onValidateUrl, onSubmit, onClose }) {
-  const { isSubmitting, handleSubmit, register, errors } = useForm();
+  const { isSubmitting, handleSubmit, register, errors, watch, setValue } = useForm();
+
+    useEffect(
+        () => {
+            register("url");
+            register("file");
+        },
+        [register]
+    );
+
+    const file = watch("file");
+    const hasFile = file && file.length > 0;
+    const fileName = hasFile ? file[0].name : undefined;
+
+    const onClear = useCallback(
+        () => {
+            if (hasFile) {
+                setValue("file", undefined);
+            } else {
+                setValue("url", "");
+            }
+        },
+        [hasFile, setValue]
+    );
+
+    const onChange = useCallback(
+        e => {
+            console.log(hasFile)
+            if (hasFile) {
+                return;
+            }
+
+            setValue("url", e.target.value);
+        },
+        [hasFile, setValue]
+    );
+
+    const url = watch("url", "");
+
+    const showCloseButton = hasFile || url.length > 0;
+
   return (
     <Modal
       title={<FormattedMessage id="scene-url-modal.title" defaultMessage="Custom Scene URL" />}
@@ -38,7 +82,7 @@ export function SceneUrlModal({ enableSpoke, editorName, onValidateUrl, onSubmit
           ) : (
             <FormattedMessage
               id="scene-url-modal.message"
-              defaultMessage="Paste a URL to a scene or a URL to a <glblink>GLB</glblink>."
+              defaultMessage="Paste a URL to a scene or a URL to a <glblink>GLB</glblink> or an image."
               values={{
                 // eslint-disable-next-line react/display-name
                 glblink: chunks => (
@@ -54,10 +98,25 @@ export function SceneUrlModal({ enableSpoke, editorName, onValidateUrl, onSubmit
           name="url"
           label={<FormattedMessage id="scene-url-modal.url-input" defaultMessage="Scene URL" />}
           placeholder="https://example.com/scene.glb"
-          type="url"
+          type={hasFile ? "text" : "url"}
+          value={fileName || url || ""}
+          onChange={onChange}
           required
           ref={register({ validate: onValidateUrl })}
           error={errors.url && errors.url.message}
+          afterInput={
+              <>
+                  {showCloseButton && <CloseButton onClick={onClear} />}
+                  <IconButton as="label" className={classNames({ [styles.hidden]: showCloseButton })} htmlFor="file">
+                      <AttachIcon />
+                      <input id="file"
+                             className={styles.hidden}
+                             name="file"
+                             type="file"
+                             ref={register} />
+                  </IconButton>
+              </>
+          }
         />
         <Button type="submit" preset="accept" disabled={isSubmitting}>
           <FormattedMessage id="scene-url-modal.change-scene-button" defaultMessage="Change Scene" />
@@ -90,5 +149,5 @@ SceneUrlModal.propTypes = {
   editorName: PropTypes.string,
   onSubmit: PropTypes.func,
   onClose: PropTypes.func,
-  onValidateUrl: PropTypes.isRequired
+  onValidateUrl: PropTypes.func
 };
