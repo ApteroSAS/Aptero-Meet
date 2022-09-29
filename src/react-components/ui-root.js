@@ -720,7 +720,7 @@ export class UIRoot extends Component {
   };
 
   onAudioReadyButton = async () => {
-    if (!this.state.enterInVR) {
+    if (!this.state.enterInVR && !this.props.forcedVREntryType.endsWith("vr_now")) {
       await showFullScreenIfAvailable();
     }
 
@@ -1976,7 +1976,10 @@ export class UIRoot extends Component {
                           icon={<VRIcon/>}
                           preset="accept"
                           label={<FormattedMessage id="toolbar.enter-vr-button" defaultMessage="Enter VR"/>}
-                          onClick={() => exit2DInterstitialAndEnterVR(true)}
+                          onClick={
+                            () => this.props.scene.enterVR()//APTERO
+                            //() => exit2DInterstitialAndEnterVR(true)
+                          }
                         />
                       )}
                       <MoreMenuPopoverButton menu={moreMenu}/>{/*Aptero*/}

@@ -5,6 +5,7 @@ import { ShareScreenModal } from "./react-components/ShareScreenModal";
 import AudioChangeHelper from "../AudioZone/AudioChangeHelper";
 import GaugeModal from "../perf/Gauge/react-component/GaugeModal";
 import UnderPage from "./react-components/UnderPage";
+import { EnterVrModal } from "./react-components/EnterVrModal";
 
 export default class AptRoot extends Component {
   render() {
@@ -15,6 +16,7 @@ export default class AptRoot extends Component {
         <AudioChangeHelper/>
         <GaugeModal/>
         <UnderPage/>
+        <EnterVrModal />
         <AptStyles/>
       </>
     );
