@@ -1,4 +1,6 @@
 import { SOUND_SPAWN_PEN } from "../systems/sound-effects-system";
+import { adapterReady, getAdapterParams } from "../aptero/module/webRTCadapter/adapter-config";
+
 /**
  * HUD panel for muting, freezing, and other controls that don't necessarily have hardware buttons.
  * @namespace ui
@@ -27,6 +29,9 @@ AFRAME.registerComponent("in-world-hud", {
       if (window.APP.hubChannel) {
         this.spawn.setAttribute("icon-button", "disabled", !window.APP.hubChannel.can("show_spawn_and_move_media"));
         this.pen.setAttribute("icon-button", "disabled", !window.APP.hubChannel.can("spawn_drawing"));
+        adapterReady().then(() => {
+          this.mic.setAttribute("visible", getAdapterParams().adapter !== "none");
+        });
         //this.cameraBtn.setAttribute("icon-button", "disabled", !window.APP.hubChannel.can("spawn_camera"));
       }
     };
@@ -65,6 +70,7 @@ AFRAME.registerComponent("in-world-hud", {
     };
     this.onHubUpdated = e => {
       this.inviteBtn.object3D.visible = e.detail.hub.entry_mode !== "invite";
+      this.inviteBtn.setAttribute("visible", false);//Aptero Disable visibility
     };
   },
 

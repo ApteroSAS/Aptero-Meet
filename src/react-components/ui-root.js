@@ -720,7 +720,7 @@ export class UIRoot extends Component {
   };
 
   onAudioReadyButton = async () => {
-    if (!this.state.enterInVR && !this.props.forcedVREntryType.endsWith("vr_now")) {
+    if (!this.state.enterInVR && !(this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("vr_now"))) {
       await showFullScreenIfAvailable();
     }
 
