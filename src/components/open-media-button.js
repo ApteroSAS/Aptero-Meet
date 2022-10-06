@@ -77,7 +77,7 @@ AFRAME.registerComponent("open-media-button", {
 
     this.onClick = async () => {
       const mayChangeScene = this.el.sceneEl.systems.permissions.canOrWillIfCreator("update_hub");
-
+      const wurl = new URL(window.location.href);
       const exitImmersive = async () => await handleExitTo2DInterstitial(false, () => {}, true);
 
       let hubId;
@@ -95,7 +95,11 @@ AFRAME.registerComponent("open-media-button", {
         if (url.hash && window.APP.hub.hub_id === hubId) {
           // move to waypoint w/o writing to history
           window.history.replaceState(null, null, window.location.href.split("#")[0] + url.hash);
-        } else if (window.APP_PROPS.APP_CONFIG.features.fast_room_switching && isLocalHubsUrl(this.src)) {
+        } else if (
+          window.APP_PROPS.APP_CONFIG.features.fast_room_switching &&
+          isLocalHubsUrl(this.src) &&
+          !wurl.searchParams.get("offline2")
+        ) {
           // move to new room without page load or entry flow
           const { changeHub } = await import("../change-hub");
           changeHub(hubId);
