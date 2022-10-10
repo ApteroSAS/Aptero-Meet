@@ -23,7 +23,7 @@ export function addEntryModeIfNotExist(entryMode){
 
 export function getEntryMode(){
   let qsVREntryType = qs.get("vr_entry_type");
-  if(isMsTeams() && !qsVREntryType.endsWith("_now")){
+  if(isMsTeams() && !(qsVREntryType && qsVREntryType.endsWith("_now"))){
     qsVREntryType="2d_now";
   }
   return qsVREntryType;

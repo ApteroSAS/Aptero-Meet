@@ -629,9 +629,10 @@ export function ChatSidebarContainer({
         }
         afterInput={
           <>
-            {!isMobile && (
+            {/* APTERO Disable Emoji picker
+            !isMobile && (
               <EmojiPickerPopoverButton onSelectEmoji={emoji => setMessage(message => message + emoji.native)} />
-            )}
+            )*/}
             {message.length === 0 && canSpawnMessages ? (
               <MessageAttachmentButton onChange={onUploadAttachments} />
             ) : (
