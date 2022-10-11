@@ -64,12 +64,6 @@ window.APP_PROPS = {
       adapter: "twilio",//dialog,dialog-io,janus,twilio,agora,default,none,socketio
       transport:"WebSocketTransport"
     },
-    turn:{
-      twilio:{
-        SID:"AC2b4884e41acc8b8ed9f7ee795969d76b",
-        auth:"U0tjYzMxZDM0N2YxOGVlYmM3MjNiMDgzNTc0ZTE2MWJjMDp6bFM1TjNmbGhWMEdOc0ZLcG1vbFBucW1TcWdMbEliNQ=="
-      }
-    },
     features: {
       fast_room_switching:true,
       hide_powered_by: true,

@@ -117,23 +117,12 @@ export async function createTrack(constraints, isDisplayDevice) {
 export async function fetchICEservers() {
   window.iceServers = [];
   try {
-    const myHeaders = new Headers();
-    myHeaders.append(
-      "Authorization",
-      "Basic " + configs.APP_CONFIG.turn.twilio.auth
-    );
-
-    const requestOptions: any = {
-      method: "POST",
-      headers: myHeaders,
-      redirect: "follow"
-    };
-    const twilioApi = "https://api.twilio.com/2010-04-01/Accounts/" + configs.APP_CONFIG.turn.twilio.SID + "/Tokens.json";
-    const resp = await fetch(twilioApi, requestOptions);
+    const twilioApi = propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER +"/service/twilio/ice";
+    const resp = await fetch(twilioApi);
     const servers = await resp.json();
-    window.iceServers = [...servers.ice_servers];
+    window.iceServers = [...servers.iceServers];
   } catch (error) {
-    //just log not app break this is optional
+    //just log no app break this is optional
     console.error(error);
   }
   return window.iceServers;
