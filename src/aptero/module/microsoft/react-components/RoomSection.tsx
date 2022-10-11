@@ -65,7 +65,7 @@ export function RoomSection(props: {
         console.log("created room : " + url);
         await (await msTeamsAPI()).changeUrlSettings(url);
       },
-      entry:roomServiceSync().createRoomEntry("Virtual Amphitheater", "", "https://meet.aptero.co/files/bf2638b2-a5ce-4a88-aa35-bed41717a741.jpg"),
+      entry:roomServiceSync().createRoomEntry("Event", "", "https://meet.aptero.co/files/ddce4f1e-7794-4f1f-87bc-19ec991adc19.jpg"),
     },
     {
       onClick : async ()=>{
@@ -79,7 +79,7 @@ export function RoomSection(props: {
       onClick : async ()=>{
         await (await msTeamsAPI()).changeUrlSettings("https://microverse.aptero.co/");
       },
-      entry:roomServiceSync().createRoomEntry("Virtual training", "", "https://files.aptero.co/api/public/dl/vndZrWGi?inline=true")
+      entry:roomServiceSync().createRoomEntry("Virtual Amphitheater", "", "https://meet.aptero.co/files/bf2638b2-a5ce-4a88-aa35-bed41717a741.jpg")
     },
 
   ];
