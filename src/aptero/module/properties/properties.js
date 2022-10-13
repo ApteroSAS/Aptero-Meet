@@ -46,6 +46,7 @@ window.APP_PROPS = {
     MICROSOFT_APP_ID: "c89c5d54-37ec-49d6-952a-befc9b770079",
     //MICROSOFT_APP_AUTHORITY: "https://login.microsoftonline.com/apteroco.onmicrosoft.com",
     MICROSOFT_APP_AUTHORITY:"https://login.microsoftonline.com/common",
+    LIMITED:"true"//for publication we limit bugged feature
   },
   "@aptero/axolotis-module-phoenix-auth":{
     RETICULUM_SERVER: "alphahub.aptero.co",

@@ -5,7 +5,7 @@
 
 /* Card Customizations */
 
-.sample_container.card_sample .e-custom-card {
+.e-custom-card {
   position: relative;
   margin-top: 80px;
   overflow: visible;
@@ -17,11 +17,18 @@
   width: 300px;
 }
 
-body.bootstrap-dark .e-custom-card .avatar-content {
+.e-avatar-circle {
+  width: 250px;
+  height: 250px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.e-custom-card .avatar-content {
   color: #ffffff;
 }
 
-.tailwind .e-custom-card .e-avatar,
+.e-custom-card .e-avatar,
 body.tailwind-dark .e-custom-card .e-avatar,
 .bootstrap5 .e-custom-card .e-avatar,
 .bootstrap5-dark .e-custom-card .e-avatar {

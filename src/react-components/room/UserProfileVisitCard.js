@@ -1,10 +1,11 @@
 import React from "react";
 import PropTypes from "prop-types";
-import "./UserProfileVisitCard.css";
+import classNames from "classnames";
 import { FormattedMessage } from "react-intl";
 import { ReactComponent as PhoneIcon } from "../icons/Phone.svg";
 import { ReactComponent as AcountIcon } from "../icons/Acount.svg";
 import { ReactComponent as EmailIcon } from "../icons/Email.svg";
+import styles from  "./UserProfileVisitCard.scss";
 
 export function UserProfileVisitCard({
                                        displayName,
@@ -17,37 +18,35 @@ export function UserProfileVisitCard({
     profilePicture = "data:image/jpeg;base64, " + profilePicture;
   }
   return (
-    <div className="control-pane">
-      <div className="sample_container card_sample">
+    <div className={classNames("control-pane")}>
+      <div className={classNames(styles.sample_container,styles.card_sample)}>
 
-        <div className="e-card e-custom-card">
-          <div className="e-card-header">
+        <div className={classNames(styles.eCard,styles.eCustomCard)}>
+          <div className={classNames(styles.eCardHeader)}>
 
-            <div className="e-avatar e-avatar-circle">
+            <div className={classNames(styles.eAvatar,styles.eAvatarCircle)}>
               {!profilePicture && (
-                <AcountIcon className="acount-icon"/>
+                <AcountIcon className={classNames(styles.acountIcon)}/>
               )}
               {profilePicture && (
-                <img src={profilePicture} className="avatar-image"/>)}
+                <img src={profilePicture} className={classNames(styles.avatarImage,styles.card_sample)}/>)}
             </div>
             &nbsp;
           </div>
-          <div className="e-card-header">
-            <div className="e-card-header-caption center">
-              <div className="e-card-header-title name">{displayName}</div>
-              <div className="e-card-sub-title">{jobTitle}</div>
+          <div className={classNames(styles.eCardHeader)}>
+            <div className={classNames(styles.eCardHeaderCaption,"center")} >
+              <div className={classNames(styles.eCardHeaderTitle,"name")}>{displayName}</div>
+              <div className={classNames(styles.eCardSubTitle)}>{jobTitle}</div>
             </div>
           </div>
-          <div className="e-card-content">
-            <div className="phone-number"><PhoneIcon className="icon-phone"/><span
-              className="phone-number-text">{phoneNumber ??
+          <div className={classNames(styles.eCardContent)}>
+            {phoneNumber &&<div className={classNames(styles.phoneNumber)}><PhoneIcon className={classNames(styles.iconPhone)}/><span
+              className={classNames(styles.phoneNumberText)}>
               <FormattedMessage id="user-profile-visit-card-no-data"
-                                defaultMessage="Information not provided"/>}</span></div>
-            <div className="email"><EmailIcon className="icon-phone"/><span
-              className="email-text">{email ??
-              <FormattedMessage id="user-profile-visit-card-no-data"
-                                defaultMessage="Information not provided"/>
-            }</span></div>
+                                defaultMessage="Information not provided"/></span></div>}
+            {email && <div className={classNames(styles.email)}><EmailIcon className={classNames(styles.iconPhone)}/><span
+              className={classNames(styles.emailText)}><FormattedMessage id="user-profile-visit-card-no-data" defaultMessage="Information not provided"/>
+            </span></div>}
           </div>
         </div>
       </div>

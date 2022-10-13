@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import UserProfileVisitCard from "./UserProfileVisitCard";
-import {getProfileList} from "./../ui-root";
+import {getProfileList} from "../ui-root";
 import {usePeopleList} from "./PeopleSidebarContainer";
 // get the profile of the selected user
 let profileList = [];
