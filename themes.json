@@ -6,9 +6,9 @@
     "variables": {}
   },
   {
-    "id": "hubs-dark-mode",
+    "id": "default-dark-mode",
     "darkModeDefault": true,
-    "name": "Hubs Dark Mode",
+    "name": "Default Dark Mode",
     "variables": {
       "text1-color": "#ffffff",
       "text1-color-hover": "#E7E7E7",

@@ -3,8 +3,9 @@ import { Loader } from "@fluentui/react-northstar"; //https://fluentsite.z22.web
 import { FormattedMessage } from "react-intl";
 import { LoginButton } from "./LoginButton";
 import { RoomSection } from "./RoomSection";
-import {roomService} from "../../axolotis/modules/basic";
-import {CHANGE_SETTINGS_URL, MSTEAMS_QUERY_PARAM, msTeamsAPI} from "@aptero/axolotis-module-teams";
+import { roomService } from "../../axolotis/modules/basic";
+import { CHANGE_SETTINGS_URL, MSTEAMS_QUERY_PARAM, msTeamsAPI } from "@aptero/axolotis-module-teams";
+import { changeTheme } from "../../../../react-components/styles/theme.js";
 
 /**
  * The 'Config' component is used to display your group tabs
@@ -21,13 +22,19 @@ export class TabConfig extends React.Component {
     //url:"https://alphahub.aptero.co/fTj63Hg",
     url: "",
     initialized: null,
-    suggestedDisplayName: "Virtual Meeting",
+    suggestedDisplayName: "Virtual Meeting"
   };
-  removeListeners = () => {};
+  removeListeners = () => {
+  };
 
   componentDidMount() {
-    (async ()=>{
+    (async () => {
       let msTeamsAPI1 = await msTeamsAPI();
+      await (await msTeamsAPI()).getContext((context) => {
+        //https://learn.microsoft.com/en-us/microsoftteams/platform/tabs/how-to/access-teams-context?tabs=teamsjs-v2
+        //console.log(context.app.theme);//"default","dark"
+        changeTheme(context.app.theme === "default" ? "light-default" : "dark-default");
+      });
       let loginService = msTeamsAPI1.getLoginService();
       await loginService.onReady();
       try {
@@ -47,13 +54,13 @@ export class TabConfig extends React.Component {
       }
       const callbackUrl = async (msg) => {
         try {
-          let url=msg.url;
+          let url = msg.url;
           this.setState({ url: url });
           const roomurl = new URL(url); //test url valide
-          if(url.startsWith("https://microverse")){
+          if (url.startsWith("https://microverse")) {
             console.log("croquet url detected");
             this.fullUrl = url;
-          }else {
+          } else {
             const teamsParams = btoa(encodeURIComponent(JSON.stringify(await loginService.getTeamsLoginService().getCredential().getUserInfo())));
             roomurl.searchParams.append(MSTEAMS_QUERY_PARAM, teamsParams);
             let data = (await roomService()).parseUrl(roomurl.toString());
@@ -81,7 +88,7 @@ export class TabConfig extends React.Component {
           suggestedDisplayName: this.state.suggestedDisplayName,
           entityId: "sceneConfig",
           contentUrl: this.fullUrl,
-          websiteUrl: this.fullUrl,
+          websiteUrl: this.fullUrl
         });
         saveEvent.notifySuccess();
       });
@@ -106,10 +113,10 @@ export class TabConfig extends React.Component {
       //form validation
       try {
         new URL(this.state.url);
-        (async ()=>{
+        (async () => {
           let msTeamsAPI1 = await msTeamsAPI();
           msTeamsAPI1.getTeamsApp().pages.config.setValidityState(true);
-        })()
+        })();
       } catch (e) {
         //ignore error
       }
@@ -124,13 +131,13 @@ export class TabConfig extends React.Component {
 
     return (
       <div style={{ margin: "8px" }}>
-        {!this.state.initialized && <Loader />}
+        {!this.state.initialized && <Loader/>}
         {this.state.initialized && (
           <>
             <h2>
-              <FormattedMessage id="microsoft.settings.identity" defaultMessage="Identity" />
+              <FormattedMessage id="microsoft.settings.identity" defaultMessage="Identity"/>
             </h2>
-            <LoginButton />
+            <LoginButton/>
             <RoomSection
               roomUrl={roomUrl}
               suggestedDisplayName={this.state.suggestedDisplayName}
@@ -139,7 +146,7 @@ export class TabConfig extends React.Component {
                   await (async () => {
                     let msTeamsAPI1 = await msTeamsAPI();
                     msTeamsAPI1.getTeamsApp().pages.config.setValidityState(false);
-                  })()
+                  })();
                 }
                 await (await msTeamsAPI()).changeUrlSettings(url);
               }}

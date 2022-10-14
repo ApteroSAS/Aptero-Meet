@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Button, Loader } from "@fluentui/react-northstar";
 import { FormattedMessage } from "react-intl";
 import {msTeamsAPI, msTeamsAPILight} from "@aptero/axolotis-module-teams";
+import { changeTheme } from "../../../../react-components/styles/theme.js";
 
 //https://fluentsite.z22.web.core.windows.net/0.60.1
 
@@ -25,6 +26,9 @@ export function MeetingSidePanel() {
     if(loading) {
       if (msTeamsAPILight().msTeams()) {
         await (await msTeamsAPI()).getContext((context) => {
+
+          //https://learn.microsoft.com/en-us/microsoftteams/platform/tabs/how-to/access-teams-context?tabs=teamsjs-v2
+          changeTheme(context.app.theme === "default" ? "light-default" : "dark-default");
           const clientType = context.app.host.clientType;
           if (context.page.frameContext === "sidePanel" && (clientType === "android" || clientType === "ios")) {
             setContext("mobile");

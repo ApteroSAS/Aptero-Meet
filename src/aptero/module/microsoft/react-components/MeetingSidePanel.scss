@@ -1,9 +1,11 @@
+@use "./hubs/react-components/styles/theme.scss";
+
 :local(.side-panel-body) {
   margin: 0;
   font-family: "Montserrat", sans-serif;
   text-align: center;
-  color: #172540;
-  background-color: white;
+  background-color: theme.$background1-color;
+  color: theme.$text1-color;
   scroll-behavior: smooth;
   width: 100%;
   min-height: 99vh;

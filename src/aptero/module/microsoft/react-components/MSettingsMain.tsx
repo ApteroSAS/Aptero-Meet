@@ -3,6 +3,8 @@ import {Provider, Loader, teamsTheme} from "@fluentui/react-northstar";//https:/
 import {MeetingSidePanel} from "./MeetingSidePanel";
 import {TabConfig} from "./TabConfig";
 import {msTeamsAPI, msTeamsAPILight} from "@aptero/axolotis-module-teams";
+import classNames from "classnames";
+import styles from "./MSettingsMain.scss";
 
 
 
@@ -10,6 +12,7 @@ export class MSettingsMain extends React.Component {
   url = new URL(window.location.href);
   state = {
     page: this.url.searchParams.get("mode") || "loading"
+    //Note to debug use window.location.href='https://localhost:53000/microsoft-settings.html?msteams=true&mode=sidePanel'
   };
 
   constructor(props) {
@@ -40,10 +43,12 @@ export class MSettingsMain extends React.Component {
 
   render() {
     return <Provider theme={teamsTheme}>
-      {this.state.page === "loading" && <Loader/>}
-      {this.state.page === "no-msteams" && <div>Please Open in MS Teams</div>}
-      {this.state.page === "sidePanel" && <MeetingSidePanel/>}
-      {this.state.page === "settings" && <TabConfig/>}
+      <div className={classNames(styles.themedBackground)}>
+        {this.state.page === "loading" && <Loader/>}
+        {this.state.page === "no-msteams" && <div>Please Open in MS Teams</div>}
+        {this.state.page === "sidePanel" && <MeetingSidePanel/>}
+        {this.state.page === "settings" && <TabConfig/>}
+      </div>
     </Provider>
   }
 }

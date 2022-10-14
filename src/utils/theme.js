@@ -4,6 +4,7 @@ import configs from "./configs";
 // Node these should be synchronized with the top of shared.scss
 const DEFAULT_ACTION_COLOR = "#FF3464";
 const DEFAULT_ACTION_COLOR_LIGHT = "#FF74A4";
+let transientTheme = null;
 
 const DEFAULT_COLORS = {
   "action-color": DEFAULT_ACTION_COLOR,
@@ -18,9 +19,7 @@ const DEFAULT_COLORS = {
 };
 
 function getThemeColor(name) {
-  //Aptero default
-  const themeId = window.APP?.store?.state?.preferences?.theme || "Aptero-default";
-
+  const themeId = transientTheme || window.APP?.store?.state?.preferences?.theme || "light-default";
   const theme = themeId && configs.APP_CONFIG?.theme?.themes?.find(theme => theme.id === themeId);
   if (theme?.variables?.[name]) {
     return theme.variables[name];
@@ -65,6 +64,18 @@ function activateTheme() {
         `textHoverColor: #fff; textColor: #fff; backgroundColor: ${actionColor}; backgroundHoverColor: ${actionHoverColor}`
       );
   }
+}
+
+export function changeTheme(newThemeId){
+  transientTheme = newThemeId;
+  const theme = transientTheme && configs.APP_CONFIG?.theme?.themes?.find(theme => theme.id === transientTheme);
+  if (theme["dark-theme"]) {
+    document.body.classList.add("dark-theme");
+  } else {
+    document.body.classList.add("light-theme");
+  }
+  activateTheme();
+  console.log("change theme :"+transientTheme)
 }
 
 const onStoreChanged = (function() {

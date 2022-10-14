@@ -92,9 +92,9 @@ window.APP_PROPS = {
       themes:
           [
             {
-              "id": "Aptero-default",
+              "id": "light-default",
               "default": true,
-              "name": "Aptero default",
+              "name": "Default Light Mode",
               "variables": {
                 "dark-theme": false,
                 "apt-bleu": "#172540",
@@ -142,7 +142,44 @@ window.APP_PROPS = {
                 "link-color-hover": "var(--apt-bleu-1)",
                 "link-color-pressed": "var(--apt-bleu)",
               }
-            }],
+            },{
+            "id": "dark-default",
+            "darkModeDefault": true,
+            "name": "Default Dark Mode",
+            "variables": {
+              "text1-color": "#ffffff",
+              "text1-color-hover": "#E7E7E7",
+              "text1-color-pressed": "#DBDBDB",
+              "text2-color": "#E7E7E7",
+              "text2-color-hover": "#F5F5F5",
+              "text2-color-pressed": "#DBDBDB",
+              "text3-color": "#BBBBBB",
+              "text3-color-hover": "#C7C7C7",
+              "text3-color-pressed": "#ADADAD",
+              "text4-color": "#E7E7E7",
+              "basic-color": "#3A4048",
+              "basic-color-hover": "#4B5562",
+              "basic-color-pressed": "#636F80",
+              "basic-border-color": "#5D646C",
+              "secondary-color": "#3A4048",
+              "secondary-color-hover": "#5D646C",
+              "secondary-color-pressed": "#282C31",
+              "background1-color": "#15171B",
+              "background2-color": "#282C31",
+              "background3-color": "#3A4048",
+              "background4-color": "#5D646C",
+              "loading-screen-background": "radial-gradient(50% 50% at 50% 50%, #15171B 0%, #282C31 100%)",
+              "border1-color": "#3A4048",
+              "border2-color": "#5D646C",
+              "border3-color": "#5D646C",
+              "outline-color": "#ffffff",
+              "action-color": "#ff3464",
+              "action-color-highlight": "#ff74a4",
+              "background-hover-color": "#aaaaaa",
+              "notice-background-color": "#2f80ed"
+            }
+          }
+            ],
     }
   }
 

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
+import { changeTheme as changeTheme2 } from "./../../utils/theme";
 
 let config = process.env.APP_CONFIG;
 
@@ -30,7 +31,7 @@ function useDarkMode() {
 
   useEffect(() => {
     const darkmodeQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    if(darkmodeQuery && darkmodeQuery.addEventListener) {
+    if (darkmodeQuery && darkmodeQuery.addEventListener) {
       setDarkMode(darkmodeQuery.matches);
 
       darkmodeQuery.addEventListener("change", event => {
@@ -91,10 +92,22 @@ export function useTheme(themeId) {
   );
 }
 
+export function changeTheme(newThemeId) {
+  changeTheme2(newThemeId);
+  window.theme.requestChangeTheme(newThemeId);
+}
+
+
 export function useThemeFromStore(store) {
   const [themeId, setThemeId] = useState(store?.state?.preferences?.theme);
 
   useEffect(() => {
+    window.theme = {
+      requestChangeTheme: (newThemeId) => {
+        setThemeId(newThemeId);
+      }
+    };
+
     function onStoreChanged() {
       const nextThemeId = store.state?.preferences?.theme;
       if (themeId !== nextThemeId) {
