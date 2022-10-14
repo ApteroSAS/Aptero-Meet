@@ -201,7 +201,7 @@ class MediaBrowserContainer extends Component {
 
     const newState = { result, query: this.state.query || searchParams.get("q") || "" };
     const urlSource = this.getUrlSource(searchParams);
-    newState.showNav = !!(searchParams.get("media_nav") !== "false");
+    newState.showNav = (searchParams.get("media_nav") !== "false");
     newState.selectAction = searchParams.get("selectAction") || "spawn";
 
     if (result && result.suggestions && result.suggestions.length > 0) {
@@ -374,6 +374,8 @@ class MediaBrowserContainer extends Component {
     const hideSearch = urlSource === "favorites";
     const showEmptyStringOnNoResult = urlSource == "avatars" || urlSource == "scenes" || mediaTilesLib.showEmptyStringOnNoResult();
 
+    //In case of media_nav on false we do not display the sources
+    const mediaSources = ((searchParams.get("media_nav") === "false") || urlSource === "favorites") ? undefined : SOURCES;
     const facets = this.state.facets && this.state.facets.length > 0 ? this.state.facets : undefined;
 
     // Don't render anything if we just did a feeling lucky query and are waiting on result.
@@ -446,7 +448,7 @@ class MediaBrowserContainer extends Component {
     return (
       <MediaBrowser
         banner = {()=>{
-          if(urlSource === "avatars"){
+          if(urlSource === "avatars" && !configs.feature("teams_limited")){
             return createAvatarCustomTileV2((evt,entry)=> {
               //Aptero
               const { scene, store} = this.props;
@@ -481,7 +483,7 @@ class MediaBrowserContainer extends Component {
           }
         }}
         onClearSearch={() => this.handleQueryUpdated("", true)}
-        mediaSources={urlSource === "favorites" ? undefined : SOURCES}
+        mediaSources={mediaSources}
         selectedSource={urlSource}
         onSelectSource={this.handleSourceClicked}
         activeFilter={activeFilter}

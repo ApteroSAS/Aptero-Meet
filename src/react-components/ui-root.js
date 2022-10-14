@@ -96,7 +96,6 @@ import { SpectatingLabel } from "./room/SpectatingLabel";
 import { SignInMessages } from "./auth/SignInModal";
 import { apteroService } from "../aptero/ApteroServices";
 import { CustomSidebarContainer } from "../aptero/module/CustomPanel/react-component/CustomSidebarContainer";
-import { customMenuService } from "../aptero/module/CustomPanel/CustomMenuService";
 import { getSelectedPersonName } from "./room/PeopleSidebarContainer";
 import { Promise } from "core-js";
 import { UserProfileVisitCardContainer } from "./room/UserProfileVisitCardContainer";
@@ -1539,8 +1538,7 @@ export class UIRoot extends Component {
                 icon: StarOutlineIcon,
                 onClick: () => this.toggleFavorited()
               },
-            isModerator &&
-            entered && {
+            (isModerator && entered && !configs.feature("teams_limited")) && {
               id: "streamer-mode",
               label: streaming ? (
                 <FormattedMessage id="more-menu.exit-streamer-mode" defaultMessage="Exit Streamer Mode"/>
@@ -1554,7 +1552,7 @@ export class UIRoot extends Component {
         },
         {
           id: "support",
-          label: <FormattedMessage id="more-menu.support" defaultMessage="Support"/>,
+          label: configs.feature("teams_limited") ? <></>:<FormattedMessage id="more-menu.support" defaultMessage="Support"/>,
           items: [
             configs.feature("show_community_link") && {
               id: "community",
@@ -1568,7 +1566,7 @@ export class UIRoot extends Component {
               icon: WarningCircleIcon,
               href: configs.link("issue_report", "https://www.aptero.co/docs/help.html")
             },
-            entered && {
+            (entered && !configs.feature("teams_limited")) && {
               id: "start-tour",
               label: <FormattedMessage id="more-menu.start-tour" defaultMessage="Start Tour"/>,
               icon: SupportIcon,
@@ -1607,7 +1605,7 @@ export class UIRoot extends Component {
               icon: ShieldIcon,
               href: configs.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")
             },
-            {
+            (!configs.feature("teams_limited")) && {
               id: "faq",
               label: <FormattedMessage id="more-menu.faq" defaultMessage="FAQ"/>,
               icon: SupportIcon,
