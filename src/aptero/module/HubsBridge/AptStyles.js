@@ -134,8 +134,8 @@ export default class AptStyle extends Component {
             .ApteroStyles {loadingScreenCenter} p
             {`{
               position: relative;
-              max-width: 85%;
               width: 500px;
+              max-width: 85vw;
               height:38px;
               margin-top: 30px;
               padding: 10px 20px;
