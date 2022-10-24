@@ -213,7 +213,6 @@ AFRAME.registerComponent("personal-space-invader", {
 
   setInvading(invading) {
     if (this.invading === invading) return;
-
     this.applyInvasionToMesh(invading);
     this.invading = invading;
   },

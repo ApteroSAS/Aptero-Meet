@@ -36,7 +36,7 @@ function ensureAvatarNodes(json) {
 AFRAME.registerComponent("identity-name-click", {
   init() {
     this.onClick = async () => {
-     
+      if(this.el.children[0].childNodes[0].components["personal-space-invader"] && this.el.children[0].childNodes[0].components["personal-space-invader"].invading) return;
       this.el.sceneEl.emit("avatarClick", this.el.components['networked-audio-analyser'].playerSessionId);
     }
   },
