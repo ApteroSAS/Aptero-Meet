@@ -6,6 +6,7 @@ import { RoomSection } from "./RoomSection";
 import { roomService } from "../../axolotis/modules/basic";
 import { CHANGE_SETTINGS_URL, MSTEAMS_QUERY_PARAM, msTeamsAPI } from "@aptero/axolotis-module-teams";
 import { changeTheme } from "../../../../react-components/styles/theme.js";
+import { tryMSMatchTheme } from "./MSThemeMatcher";
 
 /**
  * The 'Config' component is used to display your group tabs
@@ -30,11 +31,7 @@ export class TabConfig extends React.Component {
   componentDidMount() {
     (async () => {
       let msTeamsAPI1 = await msTeamsAPI();
-      await (await msTeamsAPI()).getContext((context) => {
-        //https://learn.microsoft.com/en-us/microsoftteams/platform/tabs/how-to/access-teams-context?tabs=teamsjs-v2
-        //console.log(context.app.theme);//"default","dark"
-        changeTheme(context.app.theme === "default" ? "light-default" : "dark-default");
-      });
+      await tryMSMatchTheme();
       let loginService = msTeamsAPI1.getLoginService();
       await loginService.onReady();
       try {

@@ -22,7 +22,7 @@ if (config?.theme?.error) {
   );
 }
 
-export const defaultTheme = "default";
+export let currentTheme = "default";
 
 export const themes = config?.theme?.themes || [];
 
@@ -93,13 +93,14 @@ export function useTheme(themeId) {
 }
 
 export function changeTheme(newThemeId) {
+  currentTheme = newThemeId;
   changeTheme2(newThemeId);
   window.theme.requestChangeTheme(newThemeId);
 }
 
 
 export function useThemeFromStore(store) {
-  const [themeId, setThemeId] = useState(store?.state?.preferences?.theme);
+  const [themeId, setThemeId] = useState(currentTheme || store?.state?.preferences?.theme);
 
   useEffect(() => {
     window.theme = {
@@ -109,7 +110,7 @@ export function useThemeFromStore(store) {
     };
 
     function onStoreChanged() {
-      const nextThemeId = store.state?.preferences?.theme;
+      const nextThemeId = currentTheme || store.state?.preferences?.theme;
       if (themeId !== nextThemeId) {
         setThemeId(nextThemeId);
       }

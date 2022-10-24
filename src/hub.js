@@ -1,3 +1,4 @@
+import { tryMSMatchTheme } from "./aptero/module/microsoft/react-components/MSThemeMatcher";
 
 
 console.log(`App version: ${process.env.BUILD_VERSION || "?"}`);
