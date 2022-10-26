@@ -65,7 +65,7 @@ window.APP_PROPS = {
       transport:"WebSocketTransport"
     },
     features: {
-      teams_limited:true,//for publication we limit bugged feature
+      teams_limited:false,//for publication we limit bugged feature
       fast_room_switching:true,
       hide_powered_by: true,
       show_feedback_ui: false,

@@ -1,6 +1,14 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 
+function parse(event) {
+  try {
+    return JSON.parse(event.data);
+  } catch (error) {
+    return null;
+  }
+}
+
 export default class CreateAvatar extends Component {
 
   static propTypes = {
@@ -12,33 +20,44 @@ export default class CreateAvatar extends Component {
   };
 
   listener = (event) => {
-    if (event.data.startsWith && event.data.startsWith("https://")) {
+    const json = parse(event);
+    if (json?.source !== 'readyplayerme') {
+      return;
+    }
+    const iframe = document.getElementById("iframe");
+    if (json.eventName === 'v1.frame.ready') {
+      iframe.contentWindow.postMessage(
+          JSON.stringify({
+            target: 'readyplayerme',
+            type: 'subscribe',
+            eventName: 'v1.**'
+          }),
+          '*'
+      );
+    }
+    if (json.eventName === 'v1.avatar.exported') {
       window.removeEventListener("message", this.listener, false);
-      this.props.onAvatar(event,event.data);
+      document.removeEventListener("message", this.listener, false);
+      this.props.onAvatar(event,json.data.url);
       this.setState({ done:true });
     }
   };
 
   componentDidMount = async () => {
     window.addEventListener("message", this.listener, false);
+    document.addEventListener("message", this.listener, false);
     let iframe = document.getElementById("iframe");
-    if (iframe) {
-      iframe.id = "iframe";
-      iframe.src = "https://aptero.readyplayer.me/";
-      iframe.className = "content";
-      iframe.style.width = "100%";
-      iframe.style.height = "100%";
-      iframe.allow = "camera *; microphone *";
-    } else {
+    if (!iframe) {
       iframe = document.createElement("iframe");
-      iframe.id = "iframe";
-      iframe.src = "https://aptero.readyplayer.me/";
-      iframe.className = "content";
-      iframe.style.width = "100%";
-      iframe.style.height = "100%";
-      iframe.allow = "camera *; microphone *";
       document.querySelector(".container").appendChild(iframe);
     }
+    iframe.id = "iframe";
+    iframe.src = "https://aptero.readyplayer.me/avatar?frameApi";
+    iframe.className = "content";
+    iframe.style.width = "100%";
+    iframe.style.height = "100%";
+    iframe.allow = "camera *; microphone *";
+
   };
 
   componentWillUnmount() {

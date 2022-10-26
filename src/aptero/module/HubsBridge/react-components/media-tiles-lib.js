@@ -276,6 +276,6 @@ export function createAvatarCustomTileV2(onclick) {
     };
 
     onclick(evt, entry);
-    console.log(url);
+    console.log(evt,url);
   }} />;
 }
