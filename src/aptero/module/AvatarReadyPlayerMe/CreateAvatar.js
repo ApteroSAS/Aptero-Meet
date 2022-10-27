@@ -24,6 +24,7 @@ export default class CreateAvatar extends Component {
     if (json?.source !== 'readyplayerme') {
       return;
     }
+    console.log(json)
     const iframe = document.getElementById("iframe");
     if (json.eventName === 'v1.frame.ready') {
       iframe.contentWindow.postMessage(
@@ -52,7 +53,7 @@ export default class CreateAvatar extends Component {
       document.querySelector(".container").appendChild(iframe);
     }
     iframe.id = "iframe";
-    iframe.src = "https://aptero.readyplayer.me/avatar?frameApi";
+    iframe.src = "https://aptero.readyplayer.me/avatar?frameApi&bodyType=halfbody";
     iframe.className = "content";
     iframe.style.width = "100%";
     iframe.style.height = "100%";
