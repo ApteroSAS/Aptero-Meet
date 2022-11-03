@@ -18,6 +18,7 @@ import { proxiedUrlFor, scaledThumbnailUrlFor } from "../utils/media-url-utils";
 import { CreateTile, MediaTile } from "./room/MediaTiles";
 import { SignInMessages } from "./auth/SignInModal";
 import { createAvatarCustomTileV2, MediaTilesLib, mlHandleEntryClicked } from "../aptero/module/HubsBridge/react-components/media-tiles-lib";
+import {isTeamsLimitedOK} from "../aptero/module/microsoft/TeamsLimit";
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
 
@@ -448,7 +449,7 @@ class MediaBrowserContainer extends Component {
     return (
       <MediaBrowser
         banner = {()=>{
-          if(urlSource === "avatars" && !configs.feature("teams_limited")){
+          if(urlSource === "avatars" && isTeamsLimitedOK()){
             return createAvatarCustomTileV2((evt,entry)=> {
               //Aptero
               const { scene, store} = this.props;

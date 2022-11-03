@@ -108,6 +108,7 @@ import {msTeamsAPI, msTeamsAPILight} from "@aptero/axolotis-module-teams";
 import {CustomMenuButton} from "../aptero/module/CustomPanel/react-component/CustomMenuButton";
 import {InstancesMenuButton} from "../aptero/module/load-balancer/ui/InstancesMenuButton";
 import {InstancesSidebarContainer} from "../aptero/module/load-balancer/ui/InstancesSidebarContainer";
+import {isTeamsLimitedOK} from "../aptero/module/microsoft/TeamsLimit";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 const IN_ROOM_MODAL_ROUTER_PATHS = ["/media"];
@@ -1519,7 +1520,7 @@ export class UIRoot extends Component {
               icon: HomeIcon,
               onClick: () => this.setSidebar("room-info")
             },
-            {
+            (isTeamsLimitedOK()) && {
               id: "objects",
               label: <FormattedMessage id="more-menu.objects" defaultMessage="Objects"/>,
               icon: ObjectsIcon,
@@ -1538,7 +1539,7 @@ export class UIRoot extends Component {
                 icon: StarOutlineIcon,
                 onClick: () => this.toggleFavorited()
               },
-            (isModerator && entered && !configs.feature("teams_limited")) && {
+            (isModerator && entered && isTeamsLimitedOK()) && {
               id: "streamer-mode",
               label: streaming ? (
                 <FormattedMessage id="more-menu.exit-streamer-mode" defaultMessage="Exit Streamer Mode"/>
@@ -1552,7 +1553,7 @@ export class UIRoot extends Component {
         },
         {
           id: "support",
-          label: configs.feature("teams_limited") ? <></>:<FormattedMessage id="more-menu.support" defaultMessage="Support"/>,
+          label: isTeamsLimitedOK() ?<FormattedMessage id="more-menu.support" defaultMessage="Support"/>: <></>,
           items: [
             configs.feature("show_community_link") && {
               id: "community",
@@ -1566,7 +1567,7 @@ export class UIRoot extends Component {
               icon: WarningCircleIcon,
               href: configs.link("issue_report", "https://www.aptero.co/docs/help.html")
             },
-            (entered && !configs.feature("teams_limited")) && {
+            (entered && isTeamsLimitedOK()) && {
               id: "start-tour",
               label: <FormattedMessage id="more-menu.start-tour" defaultMessage="Start Tour"/>,
               icon: SupportIcon,
@@ -1605,7 +1606,7 @@ export class UIRoot extends Component {
               icon: ShieldIcon,
               href: configs.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")
             },
-            (!configs.feature("teams_limited")) && {
+            (isTeamsLimitedOK()) && {
               id: "faq",
               label: <FormattedMessage id="more-menu.faq" defaultMessage="FAQ"/>,
               icon: SupportIcon,
