@@ -45,8 +45,6 @@ export default class CreateAvatar extends Component {
   };
 
   componentDidMount = async () => {
-    window.addEventListener("message", this.listener, false);
-    document.addEventListener("message", this.listener, false);
     let iframe = document.getElementById("iframe");
     if (!iframe) {
       iframe = document.createElement("iframe");
@@ -58,6 +56,9 @@ export default class CreateAvatar extends Component {
     iframe.style.width = "100%";
     iframe.style.height = "100%";
     iframe.allow = "camera *; microphone *";
+
+    window.addEventListener("message", this.listener, false);
+    document.addEventListener("message", this.listener, false);
 
   };
 

@@ -22,24 +22,16 @@
     uuid "^3.2.1"
 
 "@aptero/axolotis-module-basic@file:./modules/teams-module/modules/basic-modules":
-  version "1.0.0"
-  dependencies:
-    deepmerge "^4.2.2"
-    event-target-shim "^6.0.2"
-    eventemitter3 "^4.0.7"
-    jsonschema "^1.4.1"
-    phoenix "github:gfodor/phoenix-js#f4cebf1534dd7c503fe797ef396709c4d3ea8d69"
-    tsutils "^3.21.0"
-    uuid "^3.2.1"
+  version "0.0.0"
 
 "@aptero/axolotis-module-teams@file:./modules/teams-module":
   version "1.0.0"
   dependencies:
-    "@aptero/axolotis-module-basic" "file:./../../../AppData/Local/Yarn/Cache/v6/npm-@aptero-axolotis-module-teams-1.0.0-56568623-6898-4f5d-ace6-17e0c1fabd63-1663763129238/node_modules/@aptero/axolotis-module-teams/modules/basic-modules"
-    "@azure/msal-browser" "2.28.1"
+    "@aptero/axolotis-module-basic" "file:./../../../AppData/Local/Yarn/Cache/v6/npm-@aptero-axolotis-module-teams-1.0.0-7bb0425a-d2fd-474a-8150-3dad43e120a1-1667828314896/node_modules/@aptero/axolotis-module-teams/modules/basic-modules"
+    "@azure/msal-browser" "2.30.0"
     "@microsoft/microsoft-graph-client" "^3.0.2"
-    "@microsoft/teams-js" "^2.2.0"
-    "@microsoft/teamsfx" "^1.1.0"
+    "@microsoft/teams-js" "^2.4.1"
+    "@microsoft/teamsfx" "^1.2.0"
     tsutils "^3.21.0"
 
 "@aptero/axolotis-player@github:ApteroSAS/axolotis-player.git#semver:^2.1.6":
@@ -255,7 +247,14 @@
     uuid "^3.2.1"
     xml2js "^0.4.19"
 
-"@azure/msal-browser@2.28.1", "@azure/msal-browser@^2.16.0", "@azure/msal-browser@^2.21.0", "@azure/msal-browser@^2.26.0":
+"@azure/msal-browser@2.30.0":
+  version "2.30.0"
+  resolved "https://registry.yarnpkg.com/@azure/msal-browser/-/msal-browser-2.30.0.tgz#9d6545df9604554cd0eb8d6f0292d732ec564d2e"
+  integrity sha512-4Y9+rjJiTFP7KEmuq1btmIrBgk0ImNyKsXj6A6NHZALd1X0M6W7L7kxpH6F+d1tEkMv8bYnZdn7IcauXbL8Llw==
+  dependencies:
+    "@azure/msal-common" "^7.6.0"
+
+"@azure/msal-browser@^2.16.0", "@azure/msal-browser@^2.21.0", "@azure/msal-browser@^2.26.0":
   version "2.28.1"
   resolved "https://registry.yarnpkg.com/@azure/msal-browser/-/msal-browser-2.28.1.tgz#68432ba789f1d2e7a67a38743fbbbb3fbbc5430b"
   integrity sha512-5uAfwpNGBSRzBGTSS+5l4Zw6msPV7bEmq99n0U3n/N++iTcha+nIp1QujxTPuOLHmTNCeySdMx9qzGqWuy22zQ==
@@ -273,6 +272,11 @@
   version "7.3.0"
   resolved "https://registry.yarnpkg.com/@azure/msal-common/-/msal-common-7.3.0.tgz#63778ca00a41e3160842b0ee2134cfa92b524820"
   integrity sha512-revxB3z+QLjwAtU1d04nC1voFr+i3LfqTpUfgrWZVqKh/sSgg0mZZUvw4vKVWB57qtL95sul06G+TfdFZny1Xw==
+
+"@azure/msal-common@^7.6.0":
+  version "7.6.0"
+  resolved "https://registry.yarnpkg.com/@azure/msal-common/-/msal-common-7.6.0.tgz#b52e97ef540275f72611cff57937dfa0b34cdcca"
+  integrity sha512-XqfbglUTVLdkHQ8F9UQJtKseRr3sSnr9ysboxtoswvaMVaEfvyLtMoHv9XdKUfOc0qKGzNgRFd9yRjIWVepl6Q==
 
 "@azure/msal-node@^1.10.0", "@azure/msal-node@^1.3.0":
   version "1.12.1"
@@ -2056,14 +2060,14 @@
   resolved "https://registry.yarnpkg.com/@mdx-js/util/-/util-1.6.22.tgz#219dfd89ae5b97a8801f015323ffa4b62f45718b"
   integrity sha512-H1rQc1ZOHANWBvPcW+JpGwr+juXSxM8Q8YCkm3GhZd8REu1fHR3z99CErO1p9pkcfcxZnMdIZdIsXkOHY0NilA==
 
-"@microsoft/adaptivecards-tools@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@microsoft/adaptivecards-tools/-/adaptivecards-tools-1.0.1.tgz#d35737251443cf25f43961e27b9d156a89357b29"
-  integrity sha512-DA5ppm3EERqThcF+WY2YoBG/o191m4pQOlXdTr1eLYfjHwzcvBZHl4F4qx5itrmMmX9LZcI79NU42Ncuu61HJg==
+"@microsoft/adaptivecards-tools@^1.1.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@microsoft/adaptivecards-tools/-/adaptivecards-tools-1.2.0.tgz#8a3d2478c95a87885a05fc9fca948b8ea6a20ae9"
+  integrity sha512-+96PJYwsFXZi8IGbP3TnayWlZEGpqXpXTEE40W1oWRo00MlcsPVFnsTqU7V6CxoLyO8eiQaPZUycq3dlx57pkQ==
   dependencies:
     "@types/react" "^17.0.14"
     adaptive-expressions "^4.15.0"
-    adaptivecards "^2.10.0"
+    adaptivecards "~2.10.0"
     adaptivecards-templating "^2.1.0"
     markdown-it "^12.2.0"
     react "^17.0.2"
@@ -2147,22 +2151,22 @@
   resolved "https://registry.yarnpkg.com/@microsoft/recognizers-text/-/recognizers-text-1.1.4.tgz#264530f748b2cad3fac54d53538f88ad2bf99b7e"
   integrity sha512-hlSVXcaX5i8JcjuUJpVxmy2Z/GxvFXarF0KVySCFop57wNEnrLWMHe4I4DjP866G19VyIKRw+vPA32pkGhZgTg==
 
-"@microsoft/teams-js@^2.2.0":
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/@microsoft/teams-js/-/teams-js-2.2.0.tgz#1975faf006423bc46efe73de32f1be5e797c19dc"
-  integrity sha512-nzAunhIK7MZtVRNbamP0LOHZrlKffjOpKy0Qv3iQVfemxBKrWfPRgPrhV1wSmyqOqU8IvJOV2COCt+/sEgQGsQ==
+"@microsoft/teams-js@^2.4.1":
+  version "2.5.0"
+  resolved "https://registry.yarnpkg.com/@microsoft/teams-js/-/teams-js-2.5.0.tgz#0367554bf6826313d91ed2c1a65cd0fda0d5dbd5"
+  integrity sha512-9dD6E2tzWpvykMeXCru3crw1V1hlozpLRidJJFoLxv2f6OtpbL93PWl/KZnvnNVYJQmp06404IgyzcbSa07gnA==
   dependencies:
     debug "4.3.3"
 
-"@microsoft/teamsfx@^1.1.0":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@microsoft/teamsfx/-/teamsfx-1.1.1.tgz#d2dc725e032da2832c01d9015ca022e6da024400"
-  integrity sha512-y9M4EtN8z/gnTiX/x71yoMa2vaWZPBb0Ms4LAaT2SLOo7ApYpDPRc4SVk/ohmTav6aR2Mgc2NTQwU5nbXaHulg==
+"@microsoft/teamsfx@^1.2.0":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@microsoft/teamsfx/-/teamsfx-1.2.1.tgz#89efc8c5111cbab06cc6c93224b272903b2561ed"
+  integrity sha512-5FKJpkwZAkXtm1eqSmScv720498OqPdbe9WjwqVPXWp2fQPbU4rl4gt9H4oS2xhHMcnFV+jc/O6afLDhJmF4ag==
   dependencies:
     "@azure/identity" "^2.0.1"
     "@azure/msal-browser" "^2.21.0"
     "@azure/msal-node" "~1.1.0"
-    "@microsoft/adaptivecards-tools" "^1.0.1"
+    "@microsoft/adaptivecards-tools" "^1.1.0"
     "@microsoft/microsoft-graph-client" "^3.0.1"
     axios "^0.27.2"
     botbuilder ">=4.15.0 <5.0.0"
@@ -4293,7 +4297,7 @@ adaptivecards-templating@^2.1.0:
   resolved "https://registry.yarnpkg.com/adaptivecards-templating/-/adaptivecards-templating-2.2.0.tgz#7bcc549bf7378226d2269d75815e7b4ecff4d50b"
   integrity sha512-xZy+g2DdI2xFvqGjGYqqcLYJ+373o1JlTX2g6Zclav3r+3ri40qsrKKwM3oNS61MbgicXsuvli2RbTOGsts1sw==
 
-adaptivecards@^2.10.0:
+adaptivecards@~2.10.0:
   version "2.10.0"
   resolved "https://registry.yarnpkg.com/adaptivecards/-/adaptivecards-2.10.0.tgz#1c94e84491afe5a4f2d4060f6e0fc57b895205e3"
   integrity sha512-QcgXGFlX3rgIfZkxvQY896zEVBh30mE37z3XKhcQW2OqSUrVH6dNT78MkM//W4wRdrZizSHqXKLaKyVVxAgVFg==
