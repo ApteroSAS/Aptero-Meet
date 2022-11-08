@@ -26,7 +26,7 @@ function loadRoomObjects(hubId) {
   objectsScene.appendChild(objectsEl);
 }
 
-export async function changeHub(hubId, addToHistory = true) {
+export async function changeHub(hubId, addToHistory = true, waypoint = null) {
   if (hubId === APP.hub.hub_id) {
     console.log("Change hub called with the current hub id. This is a noop.");
     return;
@@ -47,11 +47,11 @@ export async function changeHub(hubId, addToHistory = true) {
   const hub = data.hubs[0];
 
   if (addToHistory) {
-    window.history.pushState(null, null, hubUrl(hubId, {}, hub.slug));
+    window.history.pushState(null, null, hubUrl(hubId, {}, hub.slug, waypoint));
   }
 
   APP.hub = hub;
-  updateUIForHub(hub, APP.hubChannel);
+  await updateUIForHub(hub, APP.hubChannel);
   scene.emit("hub_updated", { hub });
 
   APP.subscriptions.setSubscribed(data.subscriptions.web_push);
@@ -70,15 +70,11 @@ export async function changeHub(hubId, addToHistory = true) {
 
   NAF.room = hub.hub_id;
 
-  if (
-    document.querySelector("#environment-scene").childNodes[0].components["gltf-model-plus"].data.src !==
-    (await getSceneUrlForHub(hub))
-  ) {
-    const fader = document.getElementById("viewing-camera").components["fader"];
-    fader.fadeOut().then(() => {
-      updateEnvironmentForHub(hub, APP.entryManager);
-    });
-  }
+  const fader = document.getElementById("viewing-camera").components["fader"];
+  fader.fadeOut().then(async () => {
+    scene.emit("reset_scene");
+    await updateEnvironmentForHub(hub, APP.entryManager);
+  });
 
   APP.retChannel.push("change_hub", { hub_id: hub.hub_id });
 
@@ -100,7 +96,7 @@ export async function changeHub(hubId, addToHistory = true) {
 
   loadRoomObjects(hubId);
 
-  APP.hubChannel.sendEnteredEvent();
+  await APP.hubChannel.sendEnteredEvent();
 
   APP.messageDispatch.receive({
     type: "hub_changed",
