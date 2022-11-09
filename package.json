@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "info": "npm-scripts-info",
-	"sub": "git submodule update --init --recursive --remote",
+    "sub": "git submodule update --init --recursive --remote",
     "start": "webpack-dev-server --mode=development",
     "setup": "rimraf ./dist && yarn --cwd ./modules/basic-modules run setup && yarn --cwd ./modules/teams-module run setup",
     "start-prod": "webpack-dev-server --mode=production",
@@ -247,6 +247,7 @@
     "stylelint-config-recommended-scss": "^6.0.0",
     "stylelint-scss": "^4.2.0",
     "tar": "^5.0.5",
+    "ttypescript": "^1.5.13",
     "typescript": "^4.7.2",
     "url-loader": "^1.0.1",
     "webpack": "^5.72.1",

@@ -412,28 +412,33 @@ AFRAME.registerComponent("media-loader", {
       const isLocalModelAsset =
         isNonCorsProxyDomain(parsedUrl.hostname) && (guessContentType(src) || "").startsWith("model/gltf");
 
-      if (this.data.resolve && !src.startsWith(IN_APP_WEB_BROWSER_PROTOCOL) && !src.startsWith("data:") && !src.startsWith("hubs:") && !isLocalModelAsset) {
-        const is360 = !!(this.data.mediaOptions.projection && this.data.mediaOptions.projection.startsWith("360"));
-        const quality = getDefaultResolveQuality(is360);
-        const result = await resolveUrl(src, quality, version, forceLocalRefresh);
-        canonicalUrl = result.origin;
+      try {
+        if (this.data.resolve && !src.startsWith(IN_APP_WEB_BROWSER_PROTOCOL) && !src.startsWith("data:") && !src.startsWith("hubs:") && !isLocalModelAsset) {
+          const is360 = !!(this.data.mediaOptions.projection && this.data.mediaOptions.projection.startsWith("360"));
+          const quality = getDefaultResolveQuality(is360);
+          const result = await resolveUrl(src, quality, version, forceLocalRefresh);
+          canonicalUrl = result.origin;
 
-        // handle protocol relative urls
-        if (canonicalUrl.startsWith("//")) {
-          canonicalUrl = location.protocol + canonicalUrl;
-        }
+          // handle protocol relative urls
+          if (canonicalUrl.startsWith("//")) {
+            canonicalUrl = location.protocol + canonicalUrl;
+          }
 
-        canonicalAudioUrl = result.origin_audio;
-        if (canonicalAudioUrl && canonicalAudioUrl.startsWith("//")) {
-          canonicalAudioUrl = location.protocol + canonicalAudioUrl;
-        }
+          canonicalAudioUrl = result.origin_audio;
+          if (canonicalAudioUrl && canonicalAudioUrl.startsWith("//")) {
+            canonicalAudioUrl = location.protocol + canonicalAudioUrl;
+          }
 
-        contentType = (result.meta && result.meta.expected_content_type) || contentType;
-        thumbnail = result.meta && result.meta.thumbnail && proxiedUrlFor(result.meta.thumbnail);
-        //TODO still necessary?
-        if(!thumbnail){
-          thumbnail = window.APP_CONFIG.GLOBAL_ASSETS_PATH+"app-thumbnail.png";
+          contentType = (result.meta && result.meta.expected_content_type) || contentType;
+          thumbnail = result.meta && result.meta.thumbnail && proxiedUrlFor(result.meta.thumbnail);
         }
+      }catch(ex){
+        contentType = "text/html; charset=utf-8";
+        console.error(ex);
+      }
+
+      if (!thumbnail) {
+        thumbnail = window.APP_PROPS.APP_CONFIG.GLOBAL_ASSETS_PATH + "app-thumbnail.png";
       }
 
       // todo: we don't need to proxy for many things if the canonical URL has permissive CORS headers
