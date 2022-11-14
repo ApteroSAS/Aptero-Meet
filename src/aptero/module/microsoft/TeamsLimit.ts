@@ -3,5 +3,5 @@ import {propertiesService} from "../properties/propertiesService";
 const configs = propertiesService;
 
 export function isTeamsLimitedOK(){
-    return msTeamsAPILight().msTeams() && !configs.feature("teams_limited")
+    return !msTeamsAPILight().msTeams() || !configs.feature("teams_limited")
 }

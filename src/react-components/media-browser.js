@@ -54,9 +54,10 @@ const DEFAULT_FACETS = {
     { text: "Weapons", params: { filter: "weapons-military" } }
   ],
   avatars: [
-    { text: "Featured", params: { filter: "featured" } },
-    { text: "My Avatars", params: { filter: "my-avatars" } },
-    { text: "Newest", params: { filter: "" } }
+    { text: "Featured", params: { filter: "featured",create:false  } },
+    { text: "My Avatars", params: { filter: "my-avatars",create:false  } },
+    { text: "Newest", params: { filter: "",create:false } },
+    { text: "Create new avatar", params: { create:true} },
   ],
   favorites: [],
   scenes: [{ text: "Featured", params: { filter: "featured" } }, { text: "My Scenes", params: { filter: "my-scenes" } }],
@@ -449,7 +450,8 @@ class MediaBrowserContainer extends Component {
     return (
       <MediaBrowser
         banner = {()=>{
-          if(urlSource === "avatars" && isTeamsLimitedOK()){
+          console.log(searchParams.get("create"))
+          if(urlSource === "avatars" && searchParams.get("create") === "true" && isTeamsLimitedOK()){
             return createAvatarCustomTileV2((evt,entry)=> {
               //Aptero
               const { scene, store} = this.props;

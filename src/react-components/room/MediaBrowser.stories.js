@@ -39,7 +39,8 @@ const FACETS = {
   avatars: [
     { text: "Featured", params: { filter: "featured" } },
     { text: "My Avatars", params: { filter: "my-avatars" } },
-    { text: "Newest", params: { filter: "" } }
+    { text: "Newest", params: { filter: "" } },
+    { text: "Create new avatar", params: { create:"true"} },
   ],
   favorites: [],
   scenes: [{ text: "Featured", params: { filter: "featured" } }, { text: "My Scenes", params: { filter: "my-scenes" } }]
