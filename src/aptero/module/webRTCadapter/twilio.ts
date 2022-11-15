@@ -6,7 +6,7 @@ export class TwilioAdapter {
   currentRoom = null;
   videoTrack = null;
   twilioMicEnable = false;
-  onTrack = (a:any,b:any,c:any) => {console.error("invalid")};
+  onTrack:(a:any,b:any,c:any)=>void = () => {console.error("invalid")};
   private adapterUserListener: any;
   private onParticipantDisconnected: any;
 
@@ -51,6 +51,7 @@ export class TwilioAdapter {
   }
 
   enableMicrophone(enabled) {
+    console.log("mic :",enabled)
     if (this.currentRoom) {
       if (enabled) {
         this.currentRoom.localParticipant.audioTracks.forEach(publication => {
@@ -87,7 +88,7 @@ export class TwilioAdapter {
         let localTracks:any = await Video.createLocalTracks(constraints);
         console.log("currentTracks updated: " + localTracks);
         if (room) {
-          room.localParticipant?.publishTrack(localTracks[0]);
+          await room.localParticipant?.publishTrack(localTracks[0]);
         }
         this.videoTrack = localTracks[0];
         return new MediaStream([localTracks[0].mediaStreamTrack]);
@@ -97,7 +98,7 @@ export class TwilioAdapter {
         let localTracks:any = await new Video.LocalVideoTrack(stream.getTracks()[0]);
         console.log("currentTracks updated: " + localTracks);
         if (room) {
-          room.localParticipant?.publishTrack(localTracks);
+          await room.localParticipant?.publishTrack(localTracks);
         }
         this.videoTrack = localTracks;
         return new MediaStream([localTracks.mediaStreamTrack]);
@@ -108,13 +109,15 @@ export class TwilioAdapter {
       let localTracks:any = await Video.createLocalTracks(constraints);
       console.log("currentTracks updated: " + localTracks);
       if (room) {
-        room.localParticipant?.publishTrack(localTracks[0]);
+        await room.localParticipant?.publishTrack(localTracks[0]);
       }
+      this.enableMicrophone(this.twilioMicEnable);
       return new MediaStream([localTracks[0].mediaStreamTrack]);
     }
   }
 
   async connectRoom(clientId, roomId) {
+    this.disconnect();//disconnect before connecting
     clientId = clientId + "/" + Math.ceil(Math.random() * 10000);
     console.log("Twilio Connect Room");
     const { connect } = require('twilio-video');
@@ -132,8 +135,7 @@ export class TwilioAdapter {
     const response = await fetch(apiUrl + `?identity=${clientId}&roomName=${roomName}`);
     // Extract the AccessToken from the Response.
     const token = await response.text();
-    const room = await connect(token, { audio: false, video: false });
-    this.currentRoom = room;
+    this.currentRoom = await connect(token, { audio: false, video: false });
 
 
     const onTwilioParticipant = participant => {

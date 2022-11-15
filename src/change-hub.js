@@ -107,7 +107,12 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
 window.changeHub = changeHub;
 
 // TODO see if there is a better way to do this with react router
+//https://developer.mozilla.org/en-US/docs/Web/API/Window/popstate_event
 window.addEventListener("popstate", function() {
+  if(!APP.hub){
+    console.warn("No APP.hub");
+    return;
+  }
   const qs = new URLSearchParams(location.search);
   const newHubId = qs.get("hub_id") || document.location.pathname.substring(1).split("/")[0];
   if (newHubId !== APP.hub.hub_id) {
