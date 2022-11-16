@@ -1,3 +1,5 @@
+import { networkService } from "../HubsBridge/service/NetworkService";
+
 declare const window;
 const roomUrl = window.location.href;//initial room url
 
@@ -17,6 +19,8 @@ export interface Instances {
 
 let instances: Instances;
 
+const EVENT = "room-updated";
+
 export async function redirectIfNeeded() {
   try {
     const url = new URL(roomUrl);
@@ -27,6 +31,11 @@ export async function redirectIfNeeded() {
     const host = window.APP_PROPS.RETICULUM_SERVER;
     let response = await fetch(window.location.protocol + "//" + host + "/service/loadbalancer/redirect?url=" + encodeURIComponent(roomUrl));
     let data: { url: string } = await response.json();
+    networkService.onMessage(EVENT,() => {
+      console.log("room update recived");
+      //fetch meta data in a non blocking way
+      getClones();
+    })
     if (!data.url) {
       console.error("invalid return data");
       return;
@@ -36,7 +45,7 @@ export async function redirectIfNeeded() {
       window.location.href=data.url;
       console.log("redirect to :" + roomUrl);
     }
-    //fetch meta data in a non blocking way
+    //initial fetch meta data in a non blocking way
     getClones();
   } catch (e) {
     console.error(e);
