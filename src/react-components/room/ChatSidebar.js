@@ -237,6 +237,10 @@ const logMessages = defineMessages({
 
 // TODO: use react-intl's defineMessages to get proper extraction
 export function formatSystemMessage(entry, intl) {
+  if(!entry.name){
+    //APTERO name empty is used for aptero system message
+    return;
+  }
   switch (entry.type) {
     case "join":
       return intl.formatMessage(joinedMessages[entry.presence], { name: <b>{entry.name}</b> });

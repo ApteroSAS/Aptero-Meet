@@ -1,7 +1,10 @@
 const EventEmitter = require("eventemitter3");
 
+declare const NAF;
+
 export class NetworkService {
   eventEmitter = new EventEmitter();
+  private hubPhxChannel: any;
 
   constructor() {
   }
@@ -18,11 +21,11 @@ export class NetworkService {
     });
   }
 
-  sendMessage(type, data) {
+  sendMessage(type: string, data: any) {
     this.hubPhxChannel.push("message", { type: type, body: data });
   }
 
-  onMessage(type, callback) {
+  onMessage(type, callback: (data: { session_id: string, type: string, body: any, from: string }) => void) {
     this.eventEmitter.on(type, callback);
     return () => {
       this.eventEmitter.off(type, callback);
