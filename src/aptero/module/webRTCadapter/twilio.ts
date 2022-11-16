@@ -44,14 +44,14 @@ export class TwilioAdapter {
       //if(publication.track === videoTrack){
       await this.unpublishGivenVideoTrack(publication.track);
       publication.unpublish();
-      console.log('unpublish')
+      //console.log('unpublish')
       //}
     }
     this.videoTrack = null
   }
 
   enableMicrophone(enabled) {
-    console.log("mic :",enabled)
+    //console.log("mic :",enabled)
     if (this.currentRoom) {
       if (enabled) {
         this.currentRoom.localParticipant.audioTracks.forEach(publication => {
@@ -79,14 +79,14 @@ export class TwilioAdapter {
   }
 
   async createTrack(constraints) {
-    console.log("createTwilioTrack");
+    //console.log("createTwilioTrack");
     let room = this.currentRoom;
     if (constraints.video) { //First check if constraint video because we can have an audio constraint in case of a share screen
       await this.unpublishVideoTrack();
       if (constraints.video.mediaSource === "camera") {
         //https://www.twilio.com/docs/video/javascript-v1-getting-started#specify-constraints
         let localTracks:any = await Video.createLocalTracks(constraints);
-        console.log("currentTracks updated: " + localTracks);
+        //console.log("currentTracks updated: " + localTracks);
         if (room) {
           await room.localParticipant?.publishTrack(localTracks[0]);
         }
@@ -96,7 +96,7 @@ export class TwilioAdapter {
         //https://www.twilio.com/docs/video/javascript-v1-screen-capture-chrome
         let stream = await navigator.mediaDevices.getDisplayMedia(constraints);
         let localTracks:any = await new Video.LocalVideoTrack(stream.getTracks()[0]);
-        console.log("currentTracks updated: " + localTracks);
+        //console.log("currentTracks updated: " + localTracks);
         if (room) {
           await room.localParticipant?.publishTrack(localTracks);
         }
@@ -107,7 +107,7 @@ export class TwilioAdapter {
       await this.unpublishAudioTrack();
       //https://www.twilio.com/docs/video/javascript-v1-getting-started#specify-constraints
       let localTracks:any = await Video.createLocalTracks(constraints);
-      console.log("currentTracks updated: " + localTracks);
+      //console.log("currentTracks updated: " + localTracks);
       if (room) {
         await room.localParticipant?.publishTrack(localTracks[0]);
       }
@@ -119,7 +119,7 @@ export class TwilioAdapter {
   async connectRoom(clientId, roomId) {
     this.disconnect();//disconnect before connecting
     clientId = clientId + "/" + Math.ceil(Math.random() * 10000);
-    console.log("Twilio Connect Room");
+    //console.log("Twilio Connect Room");
     const { connect } = require('twilio-video');
     // Join to the Room with the given AccessToken and ConnectOptions.
     const roomName = roomId;
@@ -139,7 +139,7 @@ export class TwilioAdapter {
 
 
     const onTwilioParticipant = participant => {
-      console.log(`Participant connected: ${participant.identity}`);
+      //console.log(`Participant connected: ${participant.identity}`);
       let peerId = this.convertId(participant.identity);
       this.adapterUserListener.notifyUserEnter(peerId);
       participant.tracks.forEach(publication => {
@@ -149,10 +149,10 @@ export class TwilioAdapter {
           this.onTrack(track,peerId,track.name);
         }
         publication.on("subscribed", track => {
-          console.log(`publication subscribed`, track);
+          //console.log(`publication subscribed`, track);
         });
         publication.on("unsubscribed", track => {
-          console.log(`publication unsubscribed`, track);
+          //console.log(`publication unsubscribed`, track);
         });
       });
 
@@ -164,13 +164,13 @@ export class TwilioAdapter {
       participant.on("trackUnsubscribed", track => {
         this.unpublishGivenVideoTrack(track);
         this.onTrackRemoved(track.name);
-        console.log(`Participant trackUnsubscribed`, track);
+        //console.log(`Participant trackUnsubscribed`, track);
       });
       participant.on("trackPublished", track => {
-        console.log(`Participant trackPublished`, track);
+        //console.log(`Participant trackPublished`, track);
       });
       participant.on("trackUnpublished", track => {
-        console.log(`Participant trackUnpublished`, track);
+        //console.log(`Participant trackUnpublished`, track);
       });
     };
     this.currentRoom.participants.forEach(participant => {
@@ -179,7 +179,7 @@ export class TwilioAdapter {
     this.currentRoom.on("participantConnected", onTwilioParticipant);
 
     this.currentRoom.on("participantDisconnected", participant => {
-      console.log(`Participant disconnected: ${participant.identity}`);
+      //console.log(`Participant disconnected: ${participant.identity}`);
       let peerId = this.convertId(participant.identity);
       this.adapterUserListener.notifyUserLeave(peerId);
       this.onParticipantDisconnected(peerId);
@@ -210,7 +210,7 @@ export class TwilioAdapter {
       if(publication.track.kind === "audio"){
         publication.track.stop()
         publication.unpublish();
-        console.log('unpublish audio')
+        //console.log('unpublish audio')
       }
     }
     this.videoTrack = null
