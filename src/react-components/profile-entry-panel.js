@@ -170,21 +170,22 @@ export default class ProfileEntryPanel extends Component {
     const mail = this.props.store.state.credentials.email;
     return axios.get(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/user/get/user/" + mail).then(resp => {
       let data = resp.data;
-      this.setState({ displayName: data.displayName });
-      this.setState({ jobTitle: data.jobTitle });
-      this.setState({ companyName: data.companyName });
-      this.setState({ phoneNumber: data.phoneNumber });
-      this.props.store.update({
-        profile: {
-          displayName: data.displayName,
-          avatarId: this.state.avatarId,
-          companyName: this.state.companyName,
-          jobTitle: data.jobTitle,
-          email: this.props.store.state.credentials.email,
-          phoneNumber: data.phoneNumber
-        }
-      });
-
+      if(data) {
+        this.setState({ displayName: data.displayName });
+        this.setState({ jobTitle: data.jobTitle });
+        this.setState({ companyName: data.companyName });
+        this.setState({ phoneNumber: data.phoneNumber });
+        this.props.store.update({
+          profile: {
+            displayName: data.displayName,
+            avatarId: this.state.avatarId,
+            companyName: this.state.companyName,
+            jobTitle: data.jobTitle,
+            email: this.props.store.state.credentials.email,
+            phoneNumber: data.phoneNumber
+          }
+        });
+      }
     }).catch(reason => {
       console.error(reason);
     });
