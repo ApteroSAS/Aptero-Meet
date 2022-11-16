@@ -40,7 +40,7 @@ const FACETS = {
     { text: "Featured", params: { filter: "featured" , create:"false" } },
     { text: "My Avatars", params: { filter: "my-avatars" , create:"false" } },
     { text: "Newest", params: { filter: "", create:"false" } },
-    { text: "Create new avatar", params: { filter: "create-avatar", create:"true"} },
+    { text: "Create new avatar", params: { filter: "create-avatar", create:"true"} },//Aptero
   ],
   favorites: [],
   scenes: [{ text: "Featured", params: { filter: "featured" } }, { text: "My Scenes", params: { filter: "my-scenes" } }]
