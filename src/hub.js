@@ -263,6 +263,12 @@ export async function getSceneUrlForHub(hub) {
 
 export async function updateEnvironmentForHub(hub, entryManager) {
   const sceneUrl = await getSceneUrlForHub(hub);
+  let sameSceneAsBefore;
+  try {
+    sameSceneAsBefore = document.querySelector("#environment-scene").childNodes[0].components["gltf-model-plus"].data.src === sceneUrl;
+  }catch (e) {
+    sameSceneAsBefore = false;
+  }
 
   const sceneErrorHandler = () => {
     remountUI({ roomUnavailableReason: ExitReason.sceneError });
@@ -317,9 +323,11 @@ export async function updateEnvironmentForHub(hub, entryManager) {
             environmentEl.removeEventListener("model-error", sceneErrorHandler);
             traverseMeshesAndAddShapes(environmentEl);
 
-            // We've already entered, so move to new spawn point once new environment is loaded
-            if (sceneEl.is("entered")) {
-              waypointSystem.moveToSpawnPoint();
+            if(!sameSceneAsBefore) {
+              // We've already entered, so move to new spawn point once new environment is loaded
+              if (sceneEl.is("entered")) {
+                waypointSystem.moveToSpawnPoint();
+              }
             }
 
             const fader = document.getElementById("viewing-camera").components["fader"];

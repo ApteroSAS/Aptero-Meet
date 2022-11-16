@@ -32,7 +32,8 @@ export async function redirectIfNeeded() {
       return;
     }
     if (roomUrl !== data.url) {
-      window.location.replace(data.url);
+      //window.location.replace(data.url);
+      window.location.href=data.url;
       console.log("redirect to :" + roomUrl);
     }
     //fetch meta data in a non blocking way

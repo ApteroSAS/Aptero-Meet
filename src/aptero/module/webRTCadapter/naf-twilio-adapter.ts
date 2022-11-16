@@ -38,7 +38,7 @@ export default class NafTwilioAdapter extends EventEmitter {
   private subAdapter: TwilioAdapter;
   private _closed: boolean;
   private _micEnabled: Boolean;
-  private _micShouldBeEnabled: any;
+  private _micShouldBeEnabled: boolean;
   private lastTrack = null;
 
   constructor() {
@@ -316,6 +316,7 @@ export default class NafTwilioAdapter extends EventEmitter {
     if (this._localMediaStream) {
       // TODO: Refactor to be "Create producers"
       await this.setLocalMediaStream(this._localMediaStream);
+      this.enableMicrophone(this._micShouldBeEnabled);//use last state for mic (useful for fast room switching)
     }
   }
 
@@ -398,7 +399,7 @@ export default class NafTwilioAdapter extends EventEmitter {
     }
   }
 
-  enableMicrophone(enabled) {
+  enableMicrophone(enabled:boolean) {
     this.subAdapter.enableMicrophone(enabled);
     this._micShouldBeEnabled = enabled;
     this.emit("mic-state-changed", { enabled: this.isMicEnabled });
