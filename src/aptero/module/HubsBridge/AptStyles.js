@@ -14,6 +14,7 @@ import stylesLoadingScreenLayout from "../../../react-components/layout/LoadingS
 import anim_bg_svg from "../../../assets/aptero/loadingPage/anim_bg.svg"
 import gif_tuto_svg from "../../../assets/aptero/loadingPage/gif_tuto.gif"
 import logo_svg from "../../../assets/aptero/loadingPage/logo.svg"
+import stylesToolBarButton from "../../../react-components/input/ToolbarButton.scss"
 
 const inviteSelector = `.ApteroStyles .${stylesUtils.showLg}.${stylesToolbar.content}:first-child > *:first-child`; //Also present before loading
 const leaveSelector = ".ApteroStyles.entered " + `.${stylesUtils.showLg}.${stylesToolbar.content}:last-child > *:first-child`;
@@ -62,7 +63,6 @@ export default class AptStyle extends Component {
 
     const logo = document.querySelector(loadingScreenLogo)
     logo.src = logo_url;
-
     //We apply class to inform the styles about the state of the room
     scene.addEventListener("entered", () => {
       document.body.classList.add("entered");
@@ -245,6 +245,10 @@ export default class AptStyle extends Component {
             padding: 12px;
             position: relative;
           }`}
+            .ApteroStyles .{stylesToolbarButton.toolbarButton}
+            {`{
+            justify-self:center;
+          }`}
             .ApteroStyles .{stylesRoomEntryModal.buttons}
             {`{
                 flex-direction: row;
@@ -300,6 +304,12 @@ export default class AptStyle extends Component {
             max-height: calc(100vh - 170px);
             overflow-y: auto; 
           }`}
+            @media (max-width: 991px), (max-height: 499px){`{ 
+            .ApteroStyles .${stylesModal.content}
+              {
+                max-height:100%;
+              }
+            }`}
             .ApteroStyles .{styleRoomLayout.roomLayout}
             {`{
             display:grid;

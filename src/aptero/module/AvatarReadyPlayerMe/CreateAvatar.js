@@ -24,7 +24,6 @@ export default class CreateAvatar extends Component {
     if (json?.source !== 'readyplayerme') {
       return;
     }
-    console.log(json)
     const iframe = document.getElementById("iframe");
     if (json.eventName === 'v1.frame.ready') {
       iframe.contentWindow.postMessage(
