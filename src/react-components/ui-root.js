@@ -2048,21 +2048,22 @@ async function getUserProfile(store) {
   const mail = store.state.credentials.email;
   return axios.get(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/user/get/user/" + mail).then(resp => {
     let data = resp.data;
-    //this.setState({displayName:data.displayName});
-    //this.setState({jobTitle:data.jobTitle});
-    //this.setState({companyName:data.companyName});
-    //this.setState({phoneNumber:data.phoneNumber});
-    store.update({
-      profile: {
-        displayName: data.displayName,
-        //avatarId: this.state.avatarId,
-        companyName: data.companyName,
-        jobTitle: data.jobTitle,
-        email: store.state.credentials.email,
-        phoneNumber: data.phoneNumber
-      }
-    });
-
+    if(data) {
+      //this.setState({displayName:data.displayName});
+      //this.setState({jobTitle:data.jobTitle});
+      //this.setState({companyName:data.companyName});
+      //this.setState({phoneNumber:data.phoneNumber});
+      store.update({
+        profile: {
+          displayName: data.displayName,
+          //avatarId: this.state.avatarId,
+          companyName: data.companyName,
+          jobTitle: data.jobTitle,
+          email: store.state.credentials.email,
+          phoneNumber: data.phoneNumber
+        }
+      });
+    }
   }).catch(reason => {
     console.error(reason);
   });

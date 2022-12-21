@@ -23,6 +23,32 @@ const EVENT = "room-updated";
 
 export async function redirectIfNeeded() {
   try {
+    //initial fetch load balancer meta data in a non blocking way
+    if (window.location.host!=="localhost") {
+      //at this point the body corespond to the right room we just need to update the url to be coherent with the body
+      let roomUrl = new URL((document.querySelector('[property~="og:url"][content]') as any).content);
+      let windowUrl = new URL(window.location);
+      if (roomUrl.pathname !== windowUrl.pathname) {
+        roomUrl.search = windowUrl.search;//the search param does not apear in the og:url
+        window.history.pushState(null, null, roomUrl);
+      }
+    }
+
+    //loadbalancer clones data
+    getClones();
+    networkService.onMessage(EVENT,() => {
+      console.log("room update received");
+      //fetch meta data in a non blocking way
+      getClones();
+    })
+
+  }catch (e) {
+    console.error(e);
+  }
+}
+
+export async function redirectIfNeededV1() {
+  try {
     const url = new URL(roomUrl);
     let offline = url.searchParams.get("offline2");
     if (offline === "true") {
