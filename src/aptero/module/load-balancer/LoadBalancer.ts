@@ -27,7 +27,7 @@ export async function redirectIfNeeded() {
     if (window.location.host!=="localhost") {
       //at this point the body corespond to the right room we just need to update the url to be coherent with the body
       let roomUrl = new URL((document.querySelector('[property~="og:url"][content]') as any).content);
-      let windowUrl = new URL((document.querySelector('[property~="og:url"][content]') as any).content);
+      let windowUrl = new URL(window.location);
       if (roomUrl.pathname !== windowUrl.pathname) {
         roomUrl.search = windowUrl.search;//the search param does not apear in the og:url
         window.history.pushState(null, null, roomUrl);
