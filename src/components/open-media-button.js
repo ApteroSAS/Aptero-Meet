@@ -67,7 +67,6 @@ AFRAME.registerComponent("open-media-button", {
           else {
             //Aptero
             label = await setupIframeButton(this) || label;
-            console.log(label)
           }
         }
         this.label.setAttribute("text", "value", label);
@@ -92,17 +91,26 @@ AFRAME.registerComponent("open-media-button", {
         this.el.sceneEl.emit("scene_media_selected", this.src);
       } else if ((hubId = await isHubsRoomUrl(this.src))) {
         const url = new URL(this.src);
+        const wurlSearchParams = new URLSearchParams(wurl.searchParams);
+        const urlSearchParams = new URLSearchParams(url.searchParams);
+        for (const sp of [wurlSearchParams, urlSearchParams]) {
+          sp.sort();
+          //Ignore this list of option
+          sp.delete("hub_id");
+          sp.delete("vr_entry_type");
+        }
+
         if (url.hash && window.APP.hub.hub_id === hubId) {
           // move to waypoint w/o writing to history
           window.history.replaceState(null, null, window.location.href.split("#")[0] + url.hash);
         } else if (
           window.APP_PROPS.APP_CONFIG.features.fast_room_switching &&
-          isLocalHubsUrl(this.src) &&
-          !wurl.searchParams.get("offline2")
+          await isLocalHubsUrl(this.src) &&
+          wurlSearchParams.toString() === urlSearchParams.toString() //If we have different option do not FRS
         ) {
           // move to new room without page load or entry flow
           const { changeHub } = await import("../change-hub");
-          changeHub(hubId);
+          await changeHub(hubId);
         } else {
           //aptero
           this.src = duplicateEntryModeOnSrc(this.src, this.el.sceneEl);

@@ -883,11 +883,7 @@ AFRAME.registerComponent("media-video", {
             });
 
             texture.hls = hls;
-            try {
-              hls.loadSource(url);
-            }catch (e) {
-              /* ignore */
-            }
+            hls.loadSource(baseUrl);//Aptero use baseURL/de-proxyfied-url to avoid loading the video via cors proxy
             hls.attachMedia(videoEl);
 
             /*
