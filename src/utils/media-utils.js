@@ -2,24 +2,40 @@ import { objectTypeForOriginAndContentType } from "../object-types";
 import { getReticulumFetchUrl, getDirectReticulumFetchUrl } from "./phoenix-utils";
 import { ObjectContentOrigins } from "../object-types";
 import mediaHighlightFrag from "./media-highlight-frag.glsl";
-import { mapMaterials } from "./material-utils";
+import { updateMaterials } from "./material-utils";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";
 import { validMaterials } from "../components/hoverable-visuals";
-import { proxiedUrlFor, guessContentType } from "../utils/media-url-utils";
+import { isNonCorsProxyDomain, proxiedUrlFor, guessContentType } from "../utils/media-url-utils";
+import { isIOS as detectIOS } from "./is-mobile";
 import Linkify from "linkify-it";
 import tlds from "tlds";
+import { mediaTypeFor } from "./media-type";
 import { processWebBrowserEntity } from "../aptero/module/HubsBridge/react-components/media-utils-lib";
 import { WEB_BROWSER_URL_MODE } from "../aptero/module/HubsBridge/react-components/media-tiles-lib";
 
 import anime from "animejs";
+
 export const MediaType = {
-  ALL: "all",
-  ALL_2D: "all-2d",
-  MODEL: "model",
-  IMAGE: "image",
-  VIDEO: "video",
-  PDF: "pdf"
+  MODEL: 1 << 0,
+  IMAGE: 1 << 1,
+  VIDEO: 1 << 2,
+  PDF: 1 << 3,
+  HTML: 1 << 4,
+  AUDIO: 1 << 5
 };
+MediaType.ALL = MediaType.MODEL | MediaType.IMAGE | MediaType.VIDEO | MediaType.PDF | MediaType.HTML | MediaType.AUDIO;
+MediaType.ALL_2D = MediaType.IMAGE | MediaType.VIDEO | MediaType.PDF | MediaType.HTML;
+const MediaTypeName = new Map([
+  [MediaType.MODEL, "model"],
+  [MediaType.IMAGE, "image"],
+  [MediaType.VIDEO, "video"],
+  [MediaType.PDF, "pdf"],
+  [MediaType.HTML, "html"],
+  [MediaType.AUDIO, "audio"]
+]);
+export function mediaTypeName(type) {
+  return MediaTypeName.get(type) || "unknown";
+}
 
 const linkify = Linkify();
 linkify.tlds(tlds);
@@ -105,7 +121,7 @@ export const upload = (file, desiredContentType) => {
 // https://stackoverflow.com/questions/7584794/accessing-jpeg-exif-rotation-data-in-javascript-on-the-client-side/32490603#32490603
 function getOrientation(file, callback) {
   const reader = new FileReader();
-  reader.onload = function(e) {
+  reader.onload = function (e) {
     const view = new DataView(e.target.result);
     if (view.getUint16(0, false) != 0xffd8) {
       return callback(-2);
@@ -180,8 +196,9 @@ export const addMedia = (
 
   const entity = document.createElement("a-entity");
 
+  const nid = NAF.utils.createNetworkId();
   if (networked) {
-    entity.setAttribute("networked", { template: template });
+    entity.setAttribute("networked", { template: template, networkId: nid });
   } else {
     const templateBody = document
       .importNode(document.body.querySelector(template).content, true)
@@ -221,7 +238,7 @@ export const addMedia = (
 
   (parentEl || scene).appendChild(entity);
 
-  const orientation = new Promise(function(resolve) {
+  const orientation = new Promise(function (resolve) {
     if (needsToBeUploaded) {
       getOrientation(src, x => {
         resolve(x);
@@ -292,16 +309,15 @@ export const cloneMedia = (sourceEl, template, src = null, networked = true, lin
 };
 
 export function injectCustomShaderChunks(obj) {
-  const vertexRegex = /\bskinning_vertex\b/;
-  const fragRegex = /\bgl_FragColor\b/;
-
   const shaderUniforms = [];
-  const batchManagerSystem = AFRAME.scenes[0].systems["hubs-systems"].batchManagerSystem;
 
   obj.traverse(object => {
-    if (!object.material) return;
+    if (!object.material || object.isTroikaText) return;
 
-    object.material = mapMaterials(object, material => {
+    // TODO this does not really belong here
+    object.reflectionProbeMode = "dynamic";
+
+    updateMaterials(object, material => {
       if (material.hubs_InjectedCustomShaderChunks) return material;
       if (!validMaterials.includes(material.type)) {
         return material;
@@ -312,21 +328,17 @@ export function injectCustomShaderChunks(obj) {
       // hover/toggle state, so for now just skip these while we figure out a more correct
       // solution.
       if (
-        object.el.classList.contains("ui") ||
-        object.el.classList.contains("hud") ||
-        object.el.getAttribute("text-button")
+        object.el &&
+        (object.el.classList.contains("ui") ||
+          object.el.classList.contains("hud") ||
+          object.el.getAttribute("text-button"))
       )
         return material;
 
-      // Used when the object is batched
-      if (batchManagerSystem.batchingEnabled) {
-        batchManagerSystem.meshToEl.set(object, obj.el);
-      }
-
       const newMaterial = material.clone();
-      // This will not run if the object is never rendered unbatched, since its unbatched shader will never be compiled
+      newMaterial.onBeforeRender = material.onBeforeRender;
       newMaterial.onBeforeCompile = (shader, renderer) => {
-        if (!vertexRegex.test(shader.vertexShader)) return;
+        if (shader.vertexShader.indexOf("#include <skinning_vertex>") == -1) return;
 
         if (material.onBeforeCompile) {
           material.onBeforeCompile(shader, renderer);
@@ -341,37 +353,40 @@ export function injectCustomShaderChunks(obj) {
         shader.uniforms.hubs_HighlightInteractorTwo = { value: false };
         shader.uniforms.hubs_Time = { value: 0 };
 
-        const vchunk = `
-        if (hubs_HighlightInteractorOne || hubs_HighlightInteractorTwo || hubs_IsFrozen) {
-          vec4 wt = modelMatrix * vec4(transformed, 1);
+        shader.vertexShader =
+          [
+            "varying vec3 hubs_WorldPosition;",
+            "uniform bool hubs_IsFrozen;",
+            "uniform bool hubs_HighlightInteractorOne;",
+            "uniform bool hubs_HighlightInteractorTwo;\n"
+          ].join("\n") +
+          shader.vertexShader.replace(
+            "#include <skinning_vertex>",
+            `#include <skinning_vertex>
+             if (hubs_HighlightInteractorOne || hubs_HighlightInteractorTwo || hubs_IsFrozen) {
+              vec4 wt = modelMatrix * vec4(transformed, 1);
 
-          // Used in the fragment shader below.
-          hubs_WorldPosition = wt.xyz;
-        }
-        `;
+              // Used in the fragment shader below.
+              hubs_WorldPosition = wt.xyz;
+            }`
+          );
 
-        const vlines = shader.vertexShader.split("\n");
-        const vindex = vlines.findIndex(line => vertexRegex.test(line));
-        vlines.splice(vindex + 1, 0, vchunk);
-        vlines.unshift("varying vec3 hubs_WorldPosition;");
-        vlines.unshift("uniform bool hubs_IsFrozen;");
-        vlines.unshift("uniform bool hubs_HighlightInteractorOne;");
-        vlines.unshift("uniform bool hubs_HighlightInteractorTwo;");
-        shader.vertexShader = vlines.join("\n");
-
-        const flines = shader.fragmentShader.split("\n");
-        const findex = flines.findIndex(line => fragRegex.test(line));
-        flines.splice(findex + 1, 0, mediaHighlightFrag);
-        flines.unshift("varying vec3 hubs_WorldPosition;");
-        flines.unshift("uniform bool hubs_IsFrozen;");
-        flines.unshift("uniform bool hubs_EnableSweepingEffect;");
-        flines.unshift("uniform vec2 hubs_SweepParams;");
-        flines.unshift("uniform bool hubs_HighlightInteractorOne;");
-        flines.unshift("uniform vec3 hubs_InteractorOnePos;");
-        flines.unshift("uniform bool hubs_HighlightInteractorTwo;");
-        flines.unshift("uniform vec3 hubs_InteractorTwoPos;");
-        flines.unshift("uniform float hubs_Time;");
-        shader.fragmentShader = flines.join("\n");
+        shader.fragmentShader =
+          [
+            "varying vec3 hubs_WorldPosition;",
+            "uniform bool hubs_IsFrozen;",
+            "uniform bool hubs_EnableSweepingEffect;",
+            "uniform vec2 hubs_SweepParams;",
+            "uniform bool hubs_HighlightInteractorOne;",
+            "uniform vec3 hubs_InteractorOnePos;",
+            "uniform bool hubs_HighlightInteractorTwo;",
+            "uniform vec3 hubs_InteractorTwoPos;",
+            "uniform float hubs_Time;\n"
+          ].join("\n") +
+          shader.fragmentShader.replace(
+            "#include <output_fragment>",
+            "#include <output_fragment>\n" + mediaHighlightFrag
+          );
 
         shaderUniforms.push(shader.uniforms);
       };
@@ -486,7 +501,7 @@ export async function createImageTexture(url, filter) {
   return texture;
 }
 
-const isIOS = AFRAME.utils.device.isIOS();
+const isIOS = detectIOS();
 
 /**
  * Create video element to be used as a texture.
@@ -505,14 +520,15 @@ export function createVideoOrAudioEl(type) {
   el.muted = isIOS;
   el.preload = "auto";
   el.crossOrigin = "anonymous";
-
+  // Audio should default to zero or it be heard before it is positioning and adjusted
+  el.volume = 0;
   return el;
 }
 
 export function addMeshScaleAnimation(mesh, initialScale, onComplete) {
-  const step = (function() {
+  const step = (function () {
     const lastValue = {};
-    return function(anim) {
+    return function (anim) {
       const value = anim.animatables[0].target;
 
       value.x = Math.max(Number.MIN_VALUE, value.x);
@@ -576,4 +592,100 @@ export function closeExistingMediaMirror() {
       });
     });
   }
+}
+
+export function hasAudioTracks(el) {
+  if (!el) return false;
+
+  // `audioTracks` is the "correct" way to check this but is not implemented by most browsers
+  // The rest of the checks are a bit of a race condition, but when loading videos we wait for
+  // the first frame to load, so audio should exist by then. We special case audio-only by checkin
+  // for a 0 size video. Not great...
+  if (el.audioTracks !== undefined) {
+    return el.audioTracks.length > 0;
+  } else if (el.videoWidth === 0 && el.videoHeight === 0) {
+    return true;
+  } else if (el.mozHasAudio !== undefined) {
+    return el.mozHasAudio;
+  } else if (el.webkitAudioDecodedByteCount !== undefined) {
+    return el.webkitAudioDecodedByteCount > 0;
+  } else {
+    return false;
+  }
+}
+
+export function fetchContentType(url) {
+  return fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
+}
+
+export function parseURL(text) {
+  let url;
+  try {
+    url = new URL(text);
+  } catch (e) {
+    try {
+      url = new URL(`https://${text}`);
+    } catch (e) {
+      return null;
+    }
+  }
+  return url;
+}
+
+export async function resolveMediaInfo(urlString) {
+  const url = parseURL(urlString);
+  if (!url) {
+    throw new Error(`Cannot fetch data for URL: ${urlString}`);
+  }
+  let canonicalUrl = url.href;
+  let canonicalAudioUrl = null; // set non-null only if audio track is separated from video track (eg. 360 video)
+  let contentType;
+  let thumbnail;
+
+  // We want to resolve and proxy some hubs urls, like rooms and scene links,
+  // but want to avoid proxying assets in order for this to work in dev environments
+  const isLocalModelAsset =
+    isNonCorsProxyDomain(url.hostname) && (guessContentType(url.href) || "").startsWith("model/gltf");
+
+  if (url.protocol != "data:" && url.protocol != "hubs:" && !isLocalModelAsset) {
+    const response = await resolveUrl(url.href);
+    canonicalUrl = response.origin;
+    if (canonicalUrl.startsWith("//")) {
+      canonicalUrl = `${location.protocol}${canonicalUrl}`;
+    }
+
+    canonicalAudioUrl = response.origin_audio;
+    if (canonicalAudioUrl && canonicalAudioUrl.startsWith("//")) {
+      canonicalAudioUrl = location.protocol + canonicalAudioUrl;
+    }
+
+    contentType = (response.meta && response.meta.expected_content_type) || contentType;
+    thumbnail = response.meta && response.meta.thumbnail && proxiedUrlFor(response.meta.thumbnail);
+  }
+
+  const accessibleUrl = proxiedUrlFor(canonicalUrl);
+  if (!contentType) {
+    contentType = guessContentType(canonicalUrl) || (await fetchContentType(accessibleUrl));
+  }
+
+  // TODO we should probably just never return "application/octet-stream" as expectedContentType, since its not really useful
+  if (contentType === "application/octet-stream") {
+    contentType = guessContentType(canonicalUrl) || contentType;
+  }
+
+  // Some servers treat m3u8 playlists as "audio/x-mpegurl", we always want to treat them as HLS videos
+  if (contentType === "audio/x-mpegurl" || contentType === "audio/mpegurl") {
+    contentType = "application/vnd.apple.mpegurl";
+  }
+
+  const mediaType = mediaTypeFor(contentType, canonicalUrl);
+
+  return {
+    accessibleUrl,
+    canonicalUrl,
+    canonicalAudioUrl,
+    contentType,
+    mediaType,
+    thumbnail
+  };
 }

@@ -1,0 +1,125 @@
+import React from "react";
+<<<<<<< .merge_file_a17068
+=======
+import { TERMS, PRIVACY } from "../../constants";
+>>>>>>> .merge_file_a12344
+// import { Center } from "../layout/Center";
+// import { Page } from "../layout/Page";
+import { RoomLayout } from "../layout/RoomLayout";
+import { SignInModal, SubmitEmail, WaitForVerification } from "./SignInModal";
+// import backgroundUrl from "../../assets/images/home-hero-background-unbranded.png";
+
+export default {
+  title: "Auth/SignInModal",
+  parameters: {
+    layout: "fullscreen"
+  }
+};
+
+// TODO: Page contains global typography styles which conflict with all the other stories.
+// Uncomment this code when we migrate the Page component to the new design.
+// export const PageSubmit = () => (
+//   <Page style={{ backgroundImage: `url(${backgroundUrl})`, backgroundSize: "cover" }}>
+//     <Center>
+//       <SignInModal disableFullscreen>
+//         <SubmitEmail
+<<<<<<< .merge_file_a17068
+//           termsUrl="https://github.com/mozilla/hubs/blob/master/TERMS.md"
+//           showTerms
+//           privacyUrl="https://github.com/mozilla/hubs/blob/master/PRIVACY.md"
+=======
+//           termsUrl={TERMS}
+//           showTerms
+//           privacyUrl={PRIVACY}
+>>>>>>> .merge_file_a12344
+//           showPrivacy
+//         />
+//       </SignInModal>
+//     </Center>
+//   </Page>
+// );
+
+// export const PageWaitForVerification = () => (
+//   <Page style={{ backgroundImage: `url(${backgroundUrl})`, backgroundSize: "cover" }}>
+//     <Center>
+//       <SignInModal disableFullscreen>
+//         <WaitForVerification email="example@example.com" showNewsletterSignup />
+//       </SignInModal>
+//     </Center>
+//   </Page>
+// );
+
+export const RoomSubmit = () => (
+  <RoomLayout
+    modal={
+      <SignInModal closeable>
+<<<<<<< .merge_file_a17068
+        <SubmitEmail
+          termsUrl="https://github.com/mozilla/hubs/blob/master/TERMS.md"
+          privacyUrl="https://github.com/mozilla/hubs/blob/master/PRIVACY.md"
+        />
+=======
+        <SubmitEmail termsUrl={TERMS} privacyUrl={PRIVACY} />
+>>>>>>> .merge_file_a12344
+      </SignInModal>
+    }
+  />
+);
+
+export const RoomSubmitNoTOS = () => (
+  <RoomLayout
+    modal={
+      <SignInModal closeable>
+<<<<<<< .merge_file_a17068
+        <SubmitEmail privacyUrl="https://github.com/mozilla/hubs/blob/master/PRIVACY.md" />
+=======
+        <SubmitEmail privacyUrl={PRIVACY} />
+>>>>>>> .merge_file_a12344
+      </SignInModal>
+    }
+  />
+);
+
+export const RoomSubmitNoPrivacyPolicy = () => (
+  <RoomLayout
+    modal={
+      <SignInModal closeable>
+<<<<<<< .merge_file_a17068
+        <SubmitEmail termsUrl="https://github.com/mozilla/hubs/blob/master/TERMS.md" />
+=======
+        <SubmitEmail termsUrl={TERMS} />
+>>>>>>> .merge_file_a12344
+      </SignInModal>
+    }
+  />
+);
+
+export const RoomSubmitNoTOSOrPrivacyPolicy = () => (
+  <RoomLayout
+    modal={
+      <SignInModal closeable>
+        <SubmitEmail />
+      </SignInModal>
+    }
+  />
+);
+
+export const RoomWaitForVerification = () => (
+  <RoomLayout
+    modal={
+      <SignInModal closeable>
+        <WaitForVerification email="example@example.com" showNewsletterSignup />
+      </SignInModal>
+    }
+  />
+);
+
+export const RoomWaitForVerificationNoNewsletterSignup = () => (
+  <RoomLayout
+    modal={
+      <SignInModal closeable>
+        <WaitForVerification email="example@example.com" />
+      </SignInModal>
+    }
+  />
+);

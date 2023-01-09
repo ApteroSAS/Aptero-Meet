@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import PropTypes from "prop-types";
 import { Sidebar } from "../sidebar/Sidebar";
+import { CloseButton } from "../input/CloseButton";
 import { BackButton } from "../input/BackButton";
 import { Button } from "../input/Button";
 import { Column } from "../layout/Column";
+import styles from "./UserProfileSidebar.scss";
 import { FormattedMessage, useIntl } from "react-intl";
 import { rotateInPlaceAroundWorldUp, affixToWorldUp } from "../../utils/three-utils";
 import { UserProfileVisitCardContainer } from "./UserProfileVisitCardContainer";
@@ -36,7 +38,7 @@ export function UserProfileSidebar({
                                      displayName,
                                      identityName,
                                      avatarPreview,
-                                     // eslint-disable-next-line no-unused-vars
+  hasMicPresence,
                                      avatarId,
                                      userId,
                                      isSignedIn,
@@ -241,11 +243,12 @@ export function UserProfileSidebar({
 UserProfileSidebar.propTypes = {
   mySessionId: PropTypes.string,
   className: PropTypes.string,
+  userId: PropTypes.string,
   displayName: PropTypes.string,
   identityName: PropTypes.string,
   avatarPreview: PropTypes.node,
   avatarId: PropTypes.string,
-  userId: PropTypes.string,
+  hasMicPresence: PropTypes.bool,
   isSignedIn: PropTypes.bool,
   canPromote: PropTypes.bool,
   onPromote: PropTypes.func,
@@ -254,6 +257,7 @@ UserProfileSidebar.propTypes = {
   isHidden: PropTypes.bool,
   onToggleHidden: PropTypes.func,
   canMute: PropTypes.bool,
+  isNetworkMuted: PropTypes.bool,
   onMute: PropTypes.func,
   canKick: PropTypes.bool,
   onKick: PropTypes.func,

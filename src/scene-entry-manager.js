@@ -1,8 +1,8 @@
 import qsTruthy from "./utils/qs_truthy";
 import nextTick from "./utils/next-tick";
-import pinnedEntityToGltf from "./utils/pinned-entity-to-gltf";
 import { hackyMobileSafariTest } from "./utils/detect-touchscreen";
 import { SignInMessages } from "./react-components/auth/SignInModal";
+import { createNetworkedEntity } from "./utils/create-networked-entity";
 
 const isBotMode = qsTruthy("bot");
 const isMobile = AFRAME.utils.device.isMobile();
@@ -11,7 +11,7 @@ const isMobileVR = AFRAME.utils.device.isMobileVR();
 const isDebug = qsTruthy("debug");
 const qs = new URLSearchParams(location.search);
 
-import { addMedia, getPromotionTokenForFile } from "./utils/media-utils";
+import { addMedia } from "./utils/media-utils";
 import {
   isIn2DInterstitial,
   handleExitTo2DInterstitial,
@@ -25,8 +25,10 @@ import { SOUND_ENTER_SCENE } from "./systems/sound-effects-system";
 import { mediaViewEventEmitter, lastVideoShareData } from "./aptero/module/ButtonAPI/service/ChangeVideoService";
 import { searchService } from "./aptero/module/ButtonAPI/service/SearchService";
 import { networkService } from "./aptero/module/HubsBridge/service/NetworkService";
-
-const isIOS = AFRAME.utils.device.isIOS();
+import { MediaDevices, MediaDevicesEvents } from "./utils/media-devices-utils";
+import { addComponent, removeEntity } from "bitecs";
+import { MyCameraTool } from "./bit-components";
+import { anyEntityWith } from "./utils/bit-utils";
 
 export default class SceneEntryManager {
   constructor(hubChannel, authChannel, history) {
@@ -45,9 +47,10 @@ export default class SceneEntryManager {
 
   init = () => {
     this.whenSceneLoaded(() => {
+      console.log("Scene is loaded so setting up controllers");
       this.rightCursorController.components["cursor-controller"].enabled = false;
       this.leftCursorController.components["cursor-controller"].enabled = false;
-      this.mediaDevicesManager = window.APP.mediaDevicesManager;
+      this.mediaDevicesManager = APP.mediaDevicesManager;
       this._setupBlocking();
     });
   };
@@ -57,6 +60,7 @@ export default class SceneEntryManager {
   };
 
   enterScene = async (enterInVR, muteOnEntry) => {
+    console.log("Entering scene...");
     document.getElementById("viewing-camera").removeAttribute("scene-preview-camera");
 
     if (isDebug && NAF.connection.adapter.session) {
@@ -123,21 +127,23 @@ export default class SceneEntryManager {
 
     this.scene.addState("entered");
 
-    APP.dialog.enableMicrophone(!muteOnEntry);
+    APP.mediaDevicesManager.micEnabled = !muteOnEntry;
     //aptero
     networkService.notifyAdapterReady();
   };
 
   whenSceneLoaded = callback => {
     if (this.scene.hasLoaded) {
+      console.log("Scene already loaded so callback invoked directly");
       callback();
     } else {
+      console.log("Scene not yet loaded so callback is deferred");
       this.scene.addEventListener("loaded", callback);
     }
   };
 
-  enterSceneWhenLoaded = enterInVR => {
-    this.whenSceneLoaded(() => this.enterScene(enterInVR));
+  enterSceneWhenLoaded = (enterInVR, muteOnEntry) => {
+    this.whenSceneLoaded(() => this.enterScene(enterInVR, muteOnEntry));
   };
 
   exitScene = () => {
@@ -190,7 +196,7 @@ export default class SceneEntryManager {
 
         if (entity.components.networked.data.persistent) {
           NAF.utils.takeOwnership(entity);
-          this._unpinElement(entity);
+          window.APP.pinningHelper.unpinElement(entity);
           entity.parentNode.removeChild(entity);
         } else {
           NAF.entities.removeEntity(id);
@@ -207,74 +213,6 @@ export default class SceneEntryManager {
     document.body.addEventListener("unblocked", ev => {
       NAF.connection.entities.completeSync(ev.detail.clientId, true);
     });
-  };
-
-  _pinElement = async el => {
-    const { networkId } = el.components.networked.data;
-
-    const { fileId, src } = el.components["media-loader"].data;
-
-    let fileAccessToken, promotionToken;
-    if (fileId) {
-      fileAccessToken = new URL(src).searchParams.get("token");
-      const storedPromotionToken = getPromotionTokenForFile(fileId);
-      if (storedPromotionToken) {
-        promotionToken = storedPromotionToken.promotionToken;
-      }
-    }
-
-    const gltfNode = pinnedEntityToGltf(el);
-    if (!gltfNode) return;
-    el.setAttribute("networked", { persistent: true });
-    el.setAttribute("media-loader", { fileIsOwned: true });
-
-    try {
-      await this.hubChannel.pin(networkId, gltfNode, fileId, fileAccessToken, promotionToken);
-      this.store.update({ activity: { hasPinned: true } });
-    } catch (e) {
-      if (e.reason === "invalid_token") {
-        await this.authChannel.signOut(this.hubChannel);
-        this._signInAndPinOrUnpinElement(el);
-      } else {
-        console.warn("Pin failed for unknown reason", e);
-      }
-    }
-  };
-
-  _signInAndPinOrUnpinElement = (el, pin) => {
-    const action = pin
-      ? () => this._pinElement(el)
-      : async () => {
-          await this._unpinElement(el);
-        };
-
-    this.performConditionalSignIn(
-      () => this.hubChannel.signedIn,
-      action,
-      pin ? SignInMessages.pin : SignInMessages.unpin,
-      () => {
-        // UI pins/un-pins the entity optimistically, so we undo that here.
-        // Note we have to disable the sign in flow here otherwise this will recurse.
-        this._disableSignInOnPinAction = true;
-        el.setAttribute("pinnable", "pinned", !pin);
-        this._disableSignInOnPinAction = false;
-      }
-    );
-  };
-
-  _unpinElement = el => {
-    const components = el.components;
-    const networked = components.networked;
-
-    if (!networked || !networked.data || !NAF.utils.isMine(el)) return;
-
-    const networkId = components.networked.data.networkId;
-    el.setAttribute("networked", { persistent: false });
-
-    const mediaLoader = components["media-loader"];
-    const fileId = mediaLoader.data && mediaLoader.data.fileId;
-
-    this.hubChannel.unpin(networkId, fileId);
   };
 
   _setupMedia = () => {
@@ -315,18 +253,6 @@ export default class SceneEntryManager {
       spawnMediaInfrontOfPlayer(e.detail, contentOrigin);
     });
 
-    const handlePinEvent = (e, pinned) => {
-      if (this._disableSignInOnPinAction) return;
-      const el = e.detail.el;
-
-      if (NAF.utils.isMine(el)) {
-        this._signInAndPinOrUnpinElement(e.detail.el, pinned);
-      }
-    };
-
-    this.scene.addEventListener("pinned", e => handlePinEvent(e, true));
-    this.scene.addEventListener("unpinned", e => handlePinEvent(e, false));
-
     this.scene.addEventListener("object_spawned", e => {
       this.hubChannel.sendObjectSpawnedEvent(e.detail.objectType);
     });
@@ -354,54 +280,65 @@ export default class SceneEntryManager {
 
     this.scene.addEventListener("action_vr_notice_closed", () => forceExitFrom2DInterstitial());
 
-    document.addEventListener("paste", e => {
-      if (
-        (e.target.matches("input, textarea") || e.target.contentEditable === "true") &&
-        document.activeElement === e.target
-      )
-        return;
+    if (!qsTruthy("newLoader")) {
+      document.addEventListener("paste", e => {
+        if (
+          (e.target.matches("input, textarea") || e.target.contentEditable === "true") &&
+          document.activeElement === e.target
+        )
+          return;
 
-      // Never paste into scene if dialog is open
-      const uiRoot = document.querySelector(".ui-root");
-      if (uiRoot && uiRoot.classList.contains("in-modal-or-overlay")) return;
+        // Never paste into scene if dialog is open
+        const uiRoot = document.querySelector(".ui-root");
+        if (uiRoot && uiRoot.classList.contains("in-modal-or-overlay")) return;
 
-      const url = e.clipboardData.getData("text");
-      const files = e.clipboardData.files && e.clipboardData.files;
-      if (url) {
-        spawnMediaInfrontOfPlayer(url, ObjectContentOrigins.URL);
-      } else {
-        for (const file of files) {
-          spawnMediaInfrontOfPlayer(file, ObjectContentOrigins.CLIPBOARD);
+        const url = e.clipboardData.getData("text");
+        const files = e.clipboardData.files && e.clipboardData.files;
+        if (url) {
+          spawnMediaInfrontOfPlayer(url, ObjectContentOrigins.URL);
+        } else {
+          for (const file of files) {
+            spawnMediaInfrontOfPlayer(file, ObjectContentOrigins.CLIPBOARD);
+          }
         }
-      }
-    });
+      });
+
+      let lastDebugScene;
+      document.addEventListener("drop", e => {
+        e.preventDefault();
+
+        if (qsTruthy("debugLocalScene")) {
+          URL.revokeObjectURL(lastDebugScene);
+          const url = URL.createObjectURL(e.dataTransfer.files[0]);
+          this.hubChannel.updateScene(url);
+          lastDebugScene = url;
+          return;
+        }
+
+        let url = e.dataTransfer.getData("url");
+
+        if (!url) {
+          // Sometimes dataTransfer text contains a valid URL, so try for that.
+          try {
+            url = new URL(e.dataTransfer.getData("text")).href;
+          } catch (e) {
+            // Nope, not this time.
+          }
+        }
+
+        const files = e.dataTransfer.files;
+
+        if (url) {
+          spawnMediaInfrontOfPlayer(url, ObjectContentOrigins.URL);
+        } else {
+          for (const file of files) {
+            spawnMediaInfrontOfPlayer(file, ObjectContentOrigins.FILE);
+          }
+        }
+      });
+    }
 
     document.addEventListener("dragover", e => e.preventDefault());
-
-    document.addEventListener("drop", e => {
-      e.preventDefault();
-
-      let url = e.dataTransfer.getData("url");
-
-      if (!url) {
-        // Sometimes dataTransfer text contains a valid URL, so try for that.
-        try {
-          url = new URL(e.dataTransfer.getData("text")).href;
-        } catch (e) {
-          // Nope, not this time.
-        }
-      }
-
-      const files = e.dataTransfer.files;
-
-      if (url) {
-        spawnMediaInfrontOfPlayer(url, ObjectContentOrigins.URL);
-      } else {
-        for (const file of files) {
-          spawnMediaInfrontOfPlayer(file, ObjectContentOrigins.FILE);
-        }
-      }
-    });
 
     let currentVideoShareEntity;
     let isHandlingVideoShare = false;
@@ -418,13 +355,16 @@ export default class SceneEntryManager {
           lastVideoShareData.data = null;
         } else if (target === "avatar") {
           this.avatarRig.setAttribute("player-info", { isSharingAvatarCamera: true });
-        } else{
+        } else {
           currentVideoShareEntity = spawnMediaInfrontOfPlayer(this.mediaDevicesManager.mediaStream, undefined);
           // Wire up custom removal event which will stop the stream.
-          currentVideoShareEntity.setAttribute("emit-scene-event-on-remove", "event:action_end_video_sharing");
+          currentVideoShareEntity.setAttribute(
+            "emit-scene-event-on-remove",
+            `event:${MediaDevicesEvents.VIDEO_SHARE_ENDED}`
+          );
         }
 
-        this.scene.emit("share_video_enabled", { source: isDisplayMedia ? "screen" : "camera" });
+        this.scene.emit("share_video_enabled", { source: isDisplayMedia ? MediaDevices.SCREEN : MediaDevices.CAMERA });
         this.scene.addState("sharing_video");
       }
     };
@@ -438,61 +378,26 @@ export default class SceneEntryManager {
     this.scene.addEventListener("action_share_camera", event => {
       if (isHandlingVideoShare) return;
       isHandlingVideoShare = true;
-
-      const constraints = {
-        video: {
-          width: isIOS ? { max: 1280 } : { max: 1280, ideal: 720 },
-          frameRate: 30
-        }
-        //TODO: Capture audio from camera?
-      };
-
-      // check preferences
-      const store = window.APP.store;
-      const preferredCamera = store.state.preferences.preferredCamera || "default";
-      switch (preferredCamera) {
-        case "default":
-          constraints.video.mediaSource = "camera";
-          break;
-        case "user":
-        case "environment":
-          constraints.video.facingMode = preferredCamera;
-          break;
-        default:
-          constraints.video.deviceId = preferredCamera;
-          break;
-      }
-
-      this.mediaDevicesManager.startVideoShare(constraints, false, event.detail?.target, shareSuccess, shareError);
+      this.mediaDevicesManager.startVideoShare({
+        isDisplayMedia: false,
+        target: event.detail?.target,
+        success: shareSuccess,
+        error: shareError
+      });
     });
 
     this.scene.addEventListener("action_share_screen", () => {
       if (isHandlingVideoShare) return;
       isHandlingVideoShare = true;
-
-      this.mediaDevicesManager.startVideoShare(
-        {
-          video: {
-            // Work around BMO 1449832 by calculating the width. This will break for multi monitors if you share anything
-            // other than your current monitor that has a different aspect ratio.
-            //width: 720 * (screen.width / screen.height),
-            height: {ideal: 900},
-            frameRate: {ideal: 15},
-          },
-          audio: {
-            echoCancellation: window.APP.store.state.preferences.disableEchoCancellation === true ? false : true,
-            noiseSuppression: window.APP.store.state.preferences.disableNoiseSuppression === true ? false : true,
-            autoGainControl: window.APP.store.state.preferences.disableAutoGainControl === true ? false : true
-          }
-        },
-        true,
-        null,
-        shareSuccess,
-        shareError
-      );
+      this.mediaDevicesManager.startVideoShare({
+        isDisplayMedia: true,
+        target: null,
+        success: shareSuccess,
+        error: shareError
+      });
     });
 
-    this.scene.addEventListener("action_end_video_sharing", async () => {
+    this.scene.addEventListener(MediaDevicesEvents.VIDEO_SHARE_ENDED, async () => {
       if (isHandlingVideoShare) return;
       isHandlingVideoShare = true;
 
@@ -510,7 +415,7 @@ export default class SceneEntryManager {
       isHandlingVideoShare = false;
     });
 
-    this.scene.addEventListener("action_end_mic_sharing", async () => {
+    this.scene.addEventListener(MediaDevicesEvents.MIC_SHARE_ENDED, async () => {
       await this.mediaDevicesManager.stopMicShare();
     });
 
@@ -541,24 +446,22 @@ export default class SceneEntryManager {
 
   _setupCamera = () => {
     this.scene.addEventListener("action_toggle_camera", () => {
-      if (!this.hubChannel.can("spawn_camera")) return;
-      const myCamera = this.scene.systems["camera-tools"].getMyCamera();
-
-      if (myCamera) {
-        myCamera.parentNode.removeChild(myCamera);
+      const myCam = anyEntityWith(APP.world, MyCameraTool);
+      if (myCam) {
+        removeEntity(APP.world, myCam);
+        this.scene.removeState("camera");
       } else {
-        const entity = document.createElement("a-entity");
-        entity.setAttribute("networked", { template: "#interactable-camera" });
-        entity.setAttribute("offset-relative-to", {
-          target: "#avatar-pov-node",
-          offset: { x: 0, y: 0, z: -1.5 }
-        });
-        this.scene.appendChild(entity);
+        const avatarPov = document.querySelector("#avatar-pov-node").object3D;
+        const eid = createNetworkedEntity(APP.world, "camera");
+        addComponent(APP.world, MyCameraTool, eid);
+
+        const obj = APP.world.eid2obj.get(eid);
+        obj.position.copy(avatarPov.localToWorld(new THREE.Vector3(0, 0, -1.5)));
+        obj.lookAt(avatarPov.getWorldPosition(new THREE.Vector3()));
+
+        this.scene.addState("camera");
       }
     });
-
-    this.scene.addEventListener("photo_taken", e => this.hubChannel.sendMessage({ src: e.detail }, "photo"));
-    this.scene.addEventListener("video_taken", e => this.hubChannel.sendMessage({ src: e.detail }, "video"));
   };
 
   _spawnAvatar = () => {
@@ -628,8 +531,8 @@ export default class SceneEntryManager {
     const audioStream = audioEl.captureStream
       ? audioEl.captureStream()
       : audioEl.mozCaptureStream
-        ? audioEl.mozCaptureStream()
-        : null;
+      ? audioEl.mozCaptureStream()
+      : null;
 
     if (audioStream) {
       let audioVolume = Number(qs.get("audio_volume") || "1.0");
@@ -643,10 +546,19 @@ export default class SceneEntryManager {
       audioSource.connect(gainNode);
       gainNode.connect(audioDestination);
       gainNode.gain.value = audioVolume;
-      this.mediaDevicesManager.mediaStream.addTrack(audioDestination.stream.getAudioTracks()[0]);
+
+      const audioSystem = AFRAME.scenes[0].systems["hubs-systems"].audioSystem;
+      audioSystem.addStreamToOutboundAudio("microphone", audioDestination.stream);
     }
 
-    await APP.dialog.setLocalMediaStream(this.mediaDevicesManager.mediaStream);
-    audioEl.play();
+    const connect = async () => {
+      await APP.dialog.setLocalMediaStream(this.mediaDevicesManager.mediaStream);
+      audioEl.play();
+    };
+    if (APP.dialog._sendTransport) {
+      connect();
+    } else {
+      this.scene.addEventListener("didConnectToDialog", connect);
+    }
   };
 }

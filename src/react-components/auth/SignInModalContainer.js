@@ -1,4 +1,5 @@
 import React, { useCallback, useReducer, useContext, useEffect } from "react";
+import { TERMS, PRIVACY } from "../../constants";
 import configs from "../../utils/configs";
 import { AuthContext } from "./AuthContext";
 import { SignInModal, SignInStep, WaitForVerification, SubmitEmail,WaitForMicrosoftVerification } from "./SignInModal";
@@ -95,6 +96,7 @@ export function SignInModalContainer() {
     },
     [step, redirectUrl]
   );
+<<<<<<< HEAD
   if(!authenticationType.microsoftAuhtentication) {
     return (
       <SignInModal disableFullscreen>
@@ -122,6 +124,23 @@ export function SignInModalContainer() {
     return (
       <SignInModal disableFullscreen>
       <WaitForMicrosoftVerification 
+=======
+
+  return (
+    <SignInModal disableFullscreen>
+      {step === SignInStep.submit ? (
+        <SubmitEmail
+          onSubmitEmail={submitEmail}
+          initialEmail={email}
+          signInReason={qs.get("sign_in_reason")}
+          termsUrl={configs.link("terms_of_use", TERMS)}
+          showTerms={configs.feature("show_terms")}
+          privacyUrl={configs.link("privacy_notice", PRIVACY)}
+          showPrivacy={configs.feature("show_privacy")}
+        />
+      ) : (
+        <WaitForVerification
+>>>>>>> 5a4d3b54dea82f259cfa2e74517406a074ddf81a
           onCancel={cancel}
         />
       </SignInModal>

@@ -12,8 +12,10 @@ import { ReactComponent as VRIcon } from "../icons/VR.svg";
 import { ReactComponent as VolumeOffIcon } from "../icons/VolumeOff.svg";
 import { ReactComponent as VolumeHighIcon } from "../icons/VolumeHigh.svg";
 import { ReactComponent as VolumeMutedIcon } from "../icons/VolumeMuted.svg";
+import { ReactComponent as HandRaisedIcon } from "../icons/HandRaised.svg";
 import { List, ButtonListItem } from "../layout/List";
 import { FormattedMessage, useIntl } from "react-intl";
+import { PermissionNotification } from "./PermissionNotifications";
 import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
 
 function getDeviceLabel(ctx, intl) {
@@ -90,9 +92,8 @@ function getPersonName(person, intl) {
   return person.profile.displayName + (person.isMe ? ` (${you})` : "");
 }
 
-export function PeopleSidebar({ people, onSelectPerson, onClose, showMuteAll, onMuteAll }) {
+export function PeopleSidebar({ people, onSelectPerson, onClose, showMuteAll, onMuteAll, canVoiceChat, voiceChatEnabled, isMod }) {
   const intl = useIntl();
-
   return (
     <Sidebar
       title={
@@ -113,19 +114,21 @@ export function PeopleSidebar({ people, onSelectPerson, onClose, showMuteAll, on
         )
       }
     >
+      {!canVoiceChat && <PermissionNotification permission={"voice_chat"} />}
+      {!voiceChatEnabled && isMod && <PermissionNotification permission={"voice_chat"} isMod={true}/>}
       <List>
         {people.map(person => {
           const DeviceIcon = getDeviceIconComponent(person.context);
           const VoiceIcon = getVoiceIconComponent(person.micPresence);
+
           return (
             <ButtonListItem
               className={styles.person}
               key={person.id}
               type="button"
-              onClick={e => {
-                  onSelectPerson(person, e)
-              }}
+              onClick={e => onSelectPerson(person, e)}
             >
+              {person.hand_raised && <HandRaisedIcon />}
               {<DeviceIcon title={getDeviceLabel(person.context, intl)} />}
               {!person.context.discord && VoiceIcon && <VoiceIcon title={getVoiceLabel(person.micPresence, intl)} />}
               <p>{getPersonName(person, intl)}</p>
@@ -151,10 +154,14 @@ PeopleSidebar.propTypes = {
   onSelectPerson: PropTypes.func,
   showMuteAll: PropTypes.bool,
   onMuteAll: PropTypes.func,
-  onClose: PropTypes.func
+  onClose: PropTypes.func,
+  canVoiceChat: PropTypes.bool,
+  voiceChatEnabled: PropTypes.bool,
+  isMod: PropTypes.bool
 };
 
 PeopleSidebar.defaultProps = {
   people: [],
-  onSelectPerson: () => {}
+  onSelectPerson: () => {},
+  isMod: false
 };

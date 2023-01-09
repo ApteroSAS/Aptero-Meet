@@ -2,6 +2,9 @@ import { injectCustomShaderChunks } from "../utils/media-utils";
 import { AVATAR_TYPES } from "../utils/avatar-utils";
 import { registerComponentInstance, deregisterComponentInstance } from "../utils/component-utils";
 import defaultAvatar from "../assets/models/DefaultAvatar.glb";
+import { MediaDevicesEvents } from "../utils/media-devices-utils";
+import { createHeadlessModelForSkinnedMesh } from "../utils/three-utils";
+import { Layers } from "../camera-layers";
 
 function ensureAvatarNodes(json) {
   const { nodes } = json;
@@ -28,6 +31,7 @@ function ensureAvatarNodes(json) {
   return json;
 }
 
+<<<<<<< .merge_file_a03908
 /**
  * Sets player info state, including avatar choice and display name.
  * @namespace avatar
@@ -49,6 +53,8 @@ AFRAME.registerComponent("identity-name-click", {
   },
 });
 
+=======
+>>>>>>> .merge_file_a11480
 AFRAME.registerComponent("player-info", {
   schema: {
     avatarSrc: { type: "string" },
@@ -57,18 +63,21 @@ AFRAME.registerComponent("player-info", {
     isSharingAvatarCamera: { default: false }
   },
   init() {
+<<<<<<< .merge_file_a03908
     this.displayName = null;
     this.companyName=null;
     this.identityName = null;
     this.isOwner = false;
     this.isRecording = false;
+=======
+>>>>>>> .merge_file_a11480
     this.applyProperties = this.applyProperties.bind(this);
-    this.updateDisplayName = this.updateDisplayName.bind(this);
-    this.applyDisplayName = this.applyDisplayName.bind(this);
     this.handleModelError = this.handleModelError.bind(this);
     this.handleRemoteModelError = this.handleRemoteModelError.bind(this);
     this.update = this.update.bind(this);
+    this.onPresenceUpdated = this.onPresenceUpdated.bind(this);
     this.onMicStateChanged = this.onMicStateChanged.bind(this);
+    this.onAvatarModelLoaded = this.onAvatarModelLoaded.bind(this);
 
     this.isLocalPlayerInfo = this.el.id === "avatar-rig";
     this.playerSessionId = null;
@@ -82,15 +91,50 @@ AFRAME.registerComponent("player-info", {
         }
       });
     }
+
     registerComponentInstance(this, "player-info");
   },
+
   remove() {
+    const avatarEl = this.el.querySelector("[avatar-audio-source]");
+    APP.isAudioPaused.delete(avatarEl);
     deregisterComponentInstance(this, "player-info");
   },
+
+  onAvatarModelLoaded(e) {
+    this.applyProperties(e);
+
+    const modelEl = this.el.querySelector(".model");
+    if (this.isLocalPlayerInfo && e.target === modelEl) {
+      let isSkinnedAvatar = false;
+      modelEl.object3D.traverse(function (o) {
+        if (o.isSkinnedMesh) {
+          const headlessMesh = createHeadlessModelForSkinnedMesh(o);
+          if (headlessMesh) {
+            isSkinnedAvatar = true;
+            o.parent.add(headlessMesh);
+          }
+        }
+      });
+      // This is to support using arbitrary models as avatars.
+      // TODO We can drop support for this when we go full VRM, or at least handle it earlier in the process.
+      if (!isSkinnedAvatar) {
+        modelEl.object3D.traverse(function (o) {
+          if (o.isMesh) o.layers.set(Layers.CAMERA_LAYER_THIRD_PERSON_ONLY);
+        });
+      }
+    }
+  },
+
   play() {
+<<<<<<< .merge_file_a03908
    
     this.el.addEventListener("model-loaded", this.applyProperties);
     this.el.sceneEl.addEventListener("presence_updated", this.updateDisplayName);
+=======
+    this.el.addEventListener("model-loaded", this.onAvatarModelLoaded);
+    this.el.sceneEl.addEventListener("presence_updated", this.onPresenceUpdated);
+>>>>>>> .merge_file_a11480
     if (this.isLocalPlayerInfo) {
       this.el.querySelector(".model").addEventListener("model-error", this.handleModelError);
     } else {
@@ -105,9 +149,10 @@ AFRAME.registerComponent("player-info", {
       APP.dialog.on("mic-state-changed", this.onMicStateChanged);
     }
   },
+
   pause() {
-    this.el.removeEventListener("model-loaded", this.applyProperties);
-    this.el.sceneEl.removeEventListener("presence_updated", this.updateDisplayName);
+    this.el.removeEventListener("model-loaded", this.onAvatarModelLoaded);
+    this.el.sceneEl.removeEventListener("presence_updated", this.onPresenceUpdated);
     if (this.isLocalPlayerInfo) {
       this.el.querySelector(".model").removeEventListener("model-error", this.handleModelError);
     } else {
@@ -122,20 +167,19 @@ AFRAME.registerComponent("player-info", {
     }
   },
 
-  update() {
-    this.applyProperties();
+  onPresenceUpdated(e) {
+    this.updateFromPresenceMeta(e.detail);
   },
-  updateDisplayName(e) {
+
+  updateFromPresenceMeta(presenceMeta) {
     if (!this.playerSessionId && this.isLocalPlayerInfo) {
       this.playerSessionId = NAF.clientId;
     }
     if (!this.playerSessionId) return;
-    if (this.playerSessionId !== e.detail.sessionId) return;
+    if (this.playerSessionId !== presenceMeta.sessionId) return;
 
-    this.updateFromPresenceMeta(e.detail);
-  },
-  updateFromPresenceMeta(presenceMeta) {
     this.permissions = presenceMeta.permissions;
+<<<<<<< .merge_file_a03908
     this.displayName = presenceMeta.profile.displayName;
     this.companyName=presenceMeta.profile.companyName;
     this.identityName = presenceMeta.profile.identityName;
@@ -174,17 +218,29 @@ AFRAME.registerComponent("player-info", {
     const recordingBadgeEl = this.el.querySelector(".recordingBadge");
     if (recordingBadgeEl) {
       recordingBadgeEl.object3D.visible = this.isRecording && !infoShouldBeHidden;
-    }
-
-    const modBadgeEl = this.el.querySelector(".modBadge");
-    if (modBadgeEl) {
-      modBadgeEl.object3D.visible = !this.isRecording && this.isOwner && !infoShouldBeHidden;
-    }
+=======
   },
+
+  update(oldData) {
+    if (this.data.muted !== oldData.muted) {
+      this.el.emit("remote_mute_updated", { muted: this.data.muted });
+>>>>>>> .merge_file_a11480
+    }
+    this.applyProperties();
+  },
+
+  can(perm) {
+    return !!this.permissions && this.permissions[perm];
+  },
+<<<<<<< .merge_file_a03908
   applyProperties(e) {
     this.applyDisplayName();
     //this.el.addEventListener("click",this.test)
     //cursorEl.components.raycaster.refreshObjects();
+=======
+
+  applyProperties(e) {
+>>>>>>> .merge_file_a11480
     const modelEl = this.el.querySelector(".model");
     if (this.data.avatarSrc && modelEl) {
       modelEl.components["gltf-model-plus"].jsonPreprocessor = ensureAvatarNodes;
@@ -208,18 +264,27 @@ AFRAME.registerComponent("player-info", {
       });
 
       if (this.isLocalPlayerInfo) {
-        el.setAttribute("emit-scene-event-on-remove", "event:action_end_video_sharing");
+        el.setAttribute("emit-scene-event-on-remove", `event:${MediaDevicesEvents.VIDEO_SHARE_ENDED}`);
       }
     }
-    this.el.querySelector("[audio-params]")?.setAttribute("audio-params", { enabled: !this.data.muted });
+
+    const avatarEl = this.el.querySelector("[avatar-audio-source]");
+    if (this.data.muted) {
+      APP.isAudioPaused.add(avatarEl);
+    } else {
+      APP.isAudioPaused.delete(avatarEl);
+    }
   },
+
   handleModelError() {
     window.APP.store.resetToRandomDefaultAvatar();
   },
+
   handleRemoteModelError() {
     this.data.avatarSrc = defaultAvatar;
     this.applyProperties();
   },
+
   onMicStateChanged({ enabled }) {
     this.el.setAttribute("player-info", { muted: !enabled });
   }

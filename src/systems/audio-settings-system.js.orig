@@ -1,0 +1,87 @@
+import { SourceType } from "../components/audio-params";
+import { updateAudioSettings } from "../update-audio-settings";
+
+export class AudioSettingsSystem {
+  constructor(sceneEl) {
+    sceneEl.addEventListener("reset_scene", this.onSceneReset);
+
+<<<<<<< .merge_file_a17176
+    if (window.getPreferences("audioOutputMode") === "audio") {
+      //hack to always reset to "panner"
+      window.APP.store.update({
+        preferences: { audioOutputMode: "panner" }
+      });
+    }
+=======
+>>>>>>> .merge_file_a14112
+    if (window.APP.store.state.preferences.audioNormalization !== 0.0) {
+      //hack to always reset to 0.0 (disabled)
+      window.APP.store.update({
+        preferences: { audioNormalization: 0.0 }
+      });
+    }
+<<<<<<< .merge_file_a17176
+
+    this.audioOutputMode = window.getPreferences("audioOutputMode");
+    this.onPreferenceChanged = () => {
+      const newPref = window.getPreferences("audioOutputMode");
+      const shouldUpdateAudioSettings = this.audioOutputMode !== newPref;
+      this.audioOutputMode = newPref;
+      if (shouldUpdateAudioSettings) {
+        this.updateAudioSettings(this.audioSettings);
+      }
+    };
+    window.APP.store.addEventListener("statechanged", this.onPreferenceChanged);
+  }
+
+  registerMediaAudioSource(mediaVideo) {
+    const index = this.mediaVideos.indexOf(mediaVideo);
+    if (index === -1) {
+      this.mediaVideos.push(mediaVideo);
+    }
+    updateMediaAudioSettings(mediaVideo, this.audioSettings);
+  }
+
+  unregisterMediaAudioSource(mediaVideo) {
+    this.mediaVideos.splice(this.mediaVideos.indexOf(mediaVideo), 1);
+  }
+
+  registerAvatarAudioSource(avatarAudioSource) {
+    const index = this.avatarAudioSources.indexOf(avatarAudioSource);
+    if (index === -1) {
+      this.avatarAudioSources.push(avatarAudioSource);
+    }
+    const positional = window.APP.store.state.preferences.audioOutputMode !== "audio";
+    updateAvatarAudioSettings(avatarAudioSource, this.audioSettings);
+  }
+
+  unregisterAvatarAudioSource(avatarAudioSource) {
+    const index = this.avatarAudioSources.indexOf(avatarAudioSource);
+    if (index !== -1) {
+      this.avatarAudioSources.splice(index, 1);
+    }
+  }
+
+  updateAudioSettings(settings) {
+    this.audioSettings = Object.assign({}, this.defaultSettings, settings);
+
+    for (const mediaVideo of this.mediaVideos) {
+      updateMediaAudioSettings(mediaVideo, settings);
+    }
+
+    const positional = window.APP.store.state.preferences.audioOutputMode !== "audio";
+    for (const avatarAudioSource of this.avatarAudioSources) {
+      updateAvatarAudioSettings(avatarAudioSource, settings);
+    }
+=======
+>>>>>>> .merge_file_a14112
+  }
+
+  onSceneReset = () => {
+    APP.sceneAudioDefaults.delete(SourceType.AVATAR_AUDIO_SOURCE);
+    APP.sceneAudioDefaults.delete(SourceType.MEDIA_VIDEO);
+    for (const [el, audio] of APP.audios.entries()) {
+      updateAudioSettings(el, audio);
+    }
+  };
+}

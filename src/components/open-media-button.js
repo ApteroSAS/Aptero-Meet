@@ -100,9 +100,10 @@ AFRAME.registerComponent("open-media-button", {
           isLocalHubsUrl(this.src) &&
           !wurl.searchParams.get("offline2")
         ) {
+         const waypoint = url.hash && url.hash.substring(1)
           // move to new room without page load or entry flow
           const { changeHub } = await import("../change-hub");
-          changeHub(hubId);
+          changeHub(hubId, true, waypoint);
         } else {
           //aptero
           this.src = duplicateEntryModeOnSrc(this.src, this.el.sceneEl);

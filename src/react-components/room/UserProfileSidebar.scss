@@ -5,25 +5,22 @@
   flex-direction: column;
   position: relative;
   align-items: center;
-  overflow: hidden;
-  width: 160px;
-  height: 299px;
-  border-radius: 8px;
 
   /* TODO: This styling into AvatarPreview */
   & > :first-child {
-    max-width: none;
-    width: 350px;
-    /* height: 329px; */
+    width: 168px;
+    height: 300px;
     min-height: 300px;
-    /* overflow: hidden; */
     border-radius: 8px;
-    background-color: var(--tile-bg-color);
+    background-color: theme.$tile-bg-color;
   }
-
 }
-.div_spinner{
+
+:local(.slider-container) {
   display: flex;
-  justify-content: center;
-  padding-top: 50%;
+  flex-direction: row;
+}
+
+:local(.slider-input-container) {
+  width: 209px;
 }

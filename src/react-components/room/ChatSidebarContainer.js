@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useState, useRef } from "react";
 import PropTypes from "prop-types";
 import DropDownChatList, { getPersonName } from "./DropDownChatList";
 import { getPresences } from "./DropDownChatList";
@@ -13,13 +13,19 @@ import {
   ChatToolbarButton,
   SendMessageButton,
   EmojiPickerPopoverButton,
-  ChatLengthWarning
+  ChatLengthWarning,
+  PermissionMessageGroup
+  
 } from "./ChatSidebar";
 import { useMaintainScrollPosition } from "../misc/useMaintainScrollPosition";
 import { spawnChatMessage } from "../chat-message";
 import { discordBridgesForPresences } from "../../utils/phoenix-utils";
-import { useIntl } from "react-intl";
+import { defineMessages, useIntl } from "react-intl";
 import { MAX_MESSAGE_LENGTH } from "../../utils/chat-message";
+import { PermissionNotification } from "./PermissionNotifications";
+import { usePermissions } from "./usePermissions";
+import { useRoomPermissions } from "./useRoomPermissions";
+import { useRole } from "./useRole";
 import { PrivatechatBubbles } from "../input/PrivatechatBubbles";
 import { usePeopleList } from "./PeopleSidebarContainer";
 import { Prop } from "../debug-panel/Prop";
@@ -33,6 +39,31 @@ const everyone_value = {
 var bulles_list = [everyone_value];
 const NEW_MESSAGE_GROUP_TIMEOUT = 1000 * 60;
 var deleted_item_id='';
+const chatSidebarMessages = defineMessages({
+  emmptyRoom: {
+    id: "chat-sidebar-container.input-placeholder.empty-room",
+    defaultMessage: "Nobody is here yet..."
+  },
+  emmptyRoomBot: {
+    id: "chat-sidebar-container.input-placeholder.empty-room-bot",
+    defaultMessage: "Send message to {discordChannels}"
+  },
+  occupants: {
+    id: "chat-sidebar-container.input-placeholder.occupants",
+    defaultMessage:
+      "{occupantCount, plural, one {Send message to one other...} other {Send message to {occupantCount} others...} }"
+  },
+  occupantsAndBot: {
+    id: "chat-sidebar-container.input-placeholder.occupants-and-bot",
+    defaultMessage:
+      "{occupantCount, plural, one {Send message to one other and {discordChannels}...} other {Send message to {occupantCount} others and {discordChannels}...} }"
+  },
+  textChatOff: {
+    id: "chat-sidebar-container.input-send-button.disabled",
+    defaultMessage: "Text Chat Off"
+  }
+});
+
 function shouldCreateNewMessageGroup(messageGroups, newMessage, now) {
   if (messageGroups.length === 0) {
     return true;
@@ -41,6 +72,9 @@ function shouldCreateNewMessageGroup(messageGroups, newMessage, now) {
   const lastMessageGroup = messageGroups[messageGroups.length - 1];
 
   if (lastMessageGroup.senderSessionId !== newMessage.sessionId) {
+    return true;
+  }
+  if (lastMessageGroup.type !== newMessage.type) {
     return true;
   }
 
@@ -80,7 +114,8 @@ function processChatMessage(messageGroups, newMessage) {
         sent,
         sender: name,
         senderSessionId: sessionId,
-        messages: [{ id: uniqueMessageId++, timestamp: now, ...messageProps }]
+        messages: [{ id: uniqueMessageId++, timestamp: now, ...messageProps }],
+        type: newMessage.type
       }
     ];
   }
@@ -145,6 +180,7 @@ function updateMessageGroups(messageGroups, newMessage) {
     case "image":
     case "photo":
     case "video":
+    case "permission":
       return processChatMessage(messageGroups, newMessage);
     default:
       return messageGroups;
@@ -183,14 +219,16 @@ export function ChatContextProvider({ messageDispatch, children, people }) {
   const [messageGroups, setMessageGroups] = useState([]);
   const [privateMessages, setPrivateMessage] = useState([]);
   const [unreadMessages, setUnreadMessages] = useState(false);
+  const isMod = useRole("owner");
   const [test_messages, settestmessage] = useState([]);
   const [test_messages_public, settestmessagepublic] = useState([]);
   var bulles_list_chat = bulles_list;
   //getPeople();
-  useEffect(() => {
-    function onReceiveMessage(event) {
-      const newMessage = event.detail;
 
+  useEffect(
+    () => {
+      function onReceiveMessage(event) {
+        const newMessage = event.detail;
       if (newMessage.type == "chat" && newMessage.sessionId != NAF.clientId) {
         bulles_list.map(option => {
           if (option.id == "everyone") {
@@ -201,13 +239,18 @@ export function ChatContextProvider({ messageDispatch, children, people }) {
       settestmessagepublic(test_messages_public => [...test_messages_public, newMessage]);
       setMessageGroups(messages => updateMessageGroups(messages, newMessage));
 
-      if (
-        newMessage.type === "chat" ||
-        newMessage.type === "image" ||
-        newMessage.type === "photo" ||
-        newMessage.type === "video"
-      ) {
-        setUnreadMessages(true);
+        if (isMod && newMessage.sessionId === NAF.clientId && newMessage.type === "permission") return;
+
+        setMessageGroups(messages => updateMessageGroups(messages, newMessage));
+
+        if (
+          newMessage.type === "chat" ||
+          newMessage.type === "image" ||
+          newMessage.type === "photo" ||
+          newMessage.type === "video" ||
+          newMessage.type === "permission"
+        ) {
+          setUnreadMessages(true);
       }
     }
     function onReceivePrivateMessage(event) {
@@ -264,7 +307,9 @@ export function ChatContextProvider({ messageDispatch, children, people }) {
         messageDispatch.removeEventListener("private", onReceivePrivateMessage);
       }
     };
-  }, [messageDispatch, setMessageGroups, setPrivateMessage, setUnreadMessages]);
+  },
+    [messageDispatch, setMessageGroups, setPrivateMessage, setUnreadMessages, isMod]
+  );
 
   const sendMessage = useCallback(
     message => {
@@ -275,23 +320,15 @@ export function ChatContextProvider({ messageDispatch, children, people }) {
     [messageDispatch]
   );
 
-  const setMessagesRead = useCallback(() => {
-    setUnreadMessages(false);
-  }, [setUnreadMessages]);
+  const setMessagesRead = useCallback(
+    () => {
+      setUnreadMessages(false);
+    },
+    [setUnreadMessages]
+  );
 
   return (
-    <ChatContext.Provider
-      value={{
-        messageGroups,
-        privateMessages,
-        test_messages,
-        test_messages_public,
-        unreadMessages,
-        sendMessage,
-        setMessagesRead,
-        bulles_list_chat
-      }}
-    >
+    <ChatContext.Provider value={{ messageGroups, privateMessages, test_messages, test_messages_public, unreadMessages, sendMessage, setMessagesRead, bulles_list_chat }}>
       {children}
     </ChatContext.Provider>
   );
@@ -312,6 +349,7 @@ export function ChatSidebarContainer({
   canSpawnMessages,
   presences,
   occupantCount,
+  inputEffect,
   onClose,
   toggleChatSidebar
 }) {
@@ -326,7 +364,13 @@ export function ChatSidebarContainer({
   } = useContext(ChatContext);
   const [onScrollList, listRef, scrolledToBottom] = useMaintainScrollPosition(messageGroups);
   const [message, setMessage] = useState("");
+  const [isCommand, setIsCommand] = useState(false);
+  const { text_chat: canTextChat } = usePermissions();
+  const isMod = useRole("owner");
+  const { text_chat: textChatEnabled } = useRoomPermissions();
+  const typingTimeoutRef = useRef();
   const intl = useIntl();
+  const inputRef = useRef();
   var name;
   const people = usePeopleList(presences, NAF.clientId);
   bulles_list = bulles_list_chat;
@@ -346,6 +390,8 @@ export function ChatSidebarContainer({
   }
   const onKeyDown = useCallback(
     e => {
+      setIsCommand(e.target.value.startsWith("/"));
+      if (!canTextChat && !isCommand) return;
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
         if (e.target.value.length <= MAX_MESSAGE_LENGTH) {
@@ -356,10 +402,19 @@ export function ChatSidebarContainer({
             NAF.connection.adapter.hubChannel.receivePrivateClientId(userId, e.target.value);
           }
           setMessage("");
+          // intentionally only doing this on "enter" press and not clicking of send button
+          if (e.target.value.startsWith("/")) {
+            onClose();
+          }
         }
+      } else if (e.key === "Escape") {
+        onClose();
       }
+      clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = setTimeout(() => window.APP.hubChannel.endTyping(), 500);
+      window.APP.hubChannel.beginTyping();
     },
-    [sendMessage, setMessage, userId]
+    [sendMessage, setMessage, userId, onClose, canTextChat, isCommand]
   );
 
   const onSendMessage = useCallback(() => {
@@ -369,8 +424,10 @@ export function ChatSidebarContainer({
       NAF.connection.adapter.hubChannel.receivePrivateClientId(userId, message.substring(0, MAX_MESSAGE_LENGTH));
     }
 
-    setMessage("");
-  }, [message, sendMessage, setMessage]);
+      setMessage("");
+    },
+    [message, sendMessage, setMessage]
+  );
 
   const onSpawnMessage = () => {
     spawnChatMessage(message);
@@ -389,11 +446,26 @@ export function ChatSidebarContainer({
     [scene]
   );
 
-  useEffect(() => {
-    if (scrolledToBottom) {
-      setMessagesRead();
-    }
-  }, [messageGroups, scrolledToBottom, setMessagesRead]);
+  const onSelectEmoji = useCallback(
+    ({ emoji, pickerRemainedOpen }) => {
+      setMessage(message => message + emoji.native);
+      // If the picker remained open, avoid selecting the input so that the
+      // user can keep picking emojis.
+      if (!pickerRemainedOpen) inputRef.current.select();
+    },
+    [setMessage, inputRef]
+  );
+
+  useEffect(() => inputEffect(inputRef.current), [inputEffect, inputRef]);
+
+  useEffect(
+    () => {
+      if (scrolledToBottom) {
+        setMessagesRead();
+      }
+    },
+    [messageGroups, scrolledToBottom, setMessagesRead]
+  );
 
   const discordBridges = discordBridgesForPresences(presences);
   const discordSnippet = discordBridges.map(ch => "#" + ch).join(", ");
@@ -401,30 +473,18 @@ export function ChatSidebarContainer({
 
   if (occupantCount <= 1) {
     if (discordBridges.length === 0) {
-      placeholder = intl.formatMessage({
-        id: "chat-sidebar-container.input-placeholder.empty-room",
-        defaultMessage: "Nobody is here yet..."
-      });
+      placeholder = intl.formatMessage(chatSidebarMessages["emmptyRoom"]);
     } else {
-      placeholder = intl.formatMessage(
-        {
-          id: "chat-sidebar-container.input-placeholder.empty-room-bot",
-          defaultMessage: "Send message to {discordChannels}"
-        },
+      placeholder = intl.formatMessage(chatSidebarMessages["emmptyRoomBot"],
         { discordChannels: discordSnippet }
       );
     }
   } else {
     if (discordBridges.length === 0) {
       if (userId == "everyone") {
-        placeholder = intl.formatMessage(
-          {
-            id: "chat-sidebar-container.input-placeholder.occupants",
-            defaultMessage:
-              "{occupantCount, plural, one {Send message  to one other...} other {Send message  to {occupantCount} others...} }"
-          },
-          { discordChannels: discordSnippet, occupantCount: occupantCount - 1 }
-        );
+      placeholder = intl.formatMessage(chatSidebarMessages["occupants"],
+        { discordChannels: discordSnippet, occupantCount: occupantCount - 1 }
+      );
       } else {
         placeholder = intl.formatMessage(
           {
@@ -435,12 +495,7 @@ export function ChatSidebarContainer({
         );
       }
     } else {
-      placeholder = intl.formatMessage(
-        {
-          id: "chat-sidebar-container.input-placeholder.occupants-and-bot",
-          defaultMessage:
-            "{occupantCount, plural, one {Send message to one other and {discordChannels}...} other {Send message to {occupantCount} others and {discordChannels}...} }"
-        },
+      placeholder = intl.formatMessage(chatSidebarMessages["occupantsAndBot"],
         { discordChannels: discordSnippet, occupantCount: occupantCount - 1 }
       );
     }
@@ -451,12 +506,20 @@ export function ChatSidebarContainer({
   const users = [];
   const users_private = [];
   var i = 1;
+  const isDisabled = message.length === 0 || isOverMaxLength || !canTextChat;
   return (
     <ChatSidebar onClose={onClose} userName={name}>
       <ChatMessageList ref={listRef} onScroll={onScrollList}>
         {messageGroups.map(option => {
           const message_list = [];
           const message_list_private = [];
+
+	  const { id, systemMessage, type } = option;
+          if (systemMessage) {
+            return <SystemMessage key={id} {...entry} />;
+          } else if (type === "permission") {
+              return <PermissionMessageGroup key={id} {...entry} />;
+          }
 
           if (userId == "everyone") {
             var public_chat = false;
@@ -563,6 +626,8 @@ export function ChatSidebarContainer({
           }
         })}
       </ChatMessageList>
+      {!canTextChat && <PermissionNotification permission={"text_chat"} />}
+      {!textChatEnabled && isMod && <PermissionNotification permission={"text_chat"} isMod={true}/>}
       <div>
         <ul className="bubbles-container">
           {bulles_list.map(bulles => {
@@ -615,6 +680,7 @@ export function ChatSidebarContainer({
       </div>
       <ChatInput
         id="chat-input"
+        ref={inputRef}
         onKeyDown={onKeyDown}
         onChange={e => setMessage(e.target.value)}
         placeholder={placeholder}
@@ -630,25 +696,25 @@ export function ChatSidebarContainer({
         afterInput={
           <>
             {/* APTERO Disable Emoji picker
-            !isMobile && (
-              <EmojiPickerPopoverButton onSelectEmoji={emoji => setMessage(message => message + emoji.native)} />
+            !isMobile && <EmojiPickerPopoverButton onSelectEmoji={onSelectEmoji} />
             )*/}
             {message.length === 0 && canSpawnMessages ? (
               <MessageAttachmentButton onChange={onUploadAttachments} />
             ) : (
-              <SendMessageButton onClick={onSendMessage} disabled={message.length === 0 || isOverMaxLength} />
+              <SendMessageButton onClick={onSendMessage} as={"button"} disabled={isDisabled && !isCommand} title={isDisabled && !isCommand ? intl.formatMessage(
+                chatSidebarMessages["textChatOff"]
+              ) : undefined} />
             )}
             {canSpawnMessages && (
-              <SpawnMessageButton disabled={message.length === 0 || isOverMaxLength} onClick={onSpawnMessage} />
+              <SpawnMessageButton disabled={isDisabled} onClick={onSpawnMessage} title={isDisabled ? intl.formatMessage(
+                chatSidebarMessages["textChatOff"]
+              ) : undefined} />
             )}
           </>
         }
       />
-     
     </ChatSidebar>
-     
   );
-
 }
 
 ChatSidebarContainer.propTypes = {
@@ -659,6 +725,7 @@ ChatSidebarContainer.propTypes = {
   occupantCount: PropTypes.number.isRequired,
   scene: PropTypes.object.isRequired,
   onClose: PropTypes.func.isRequired,
+  inputEffect: PropTypes.func.isRequired
   toggleChatSidebar: PropTypes.func.isRequired
 };
 

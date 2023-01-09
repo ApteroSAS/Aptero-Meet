@@ -1,57 +1,4 @@
-import { CAMERA_MODE_INSPECT } from "./camera-system";
-
-export class SingleActionButtonSystem {
-  lastClicked = false;
-  initialized = false;
-  trySetup(){
-    if(!this.initialized) {
-      if (AFRAME.utils.device.isMobile()) {
-        AFRAME.scenes[0].canvas.addEventListener("click", () => {
-          this.lastClicked = true;
-        });
-      }
-      this.initialized = true
-    }
-  }
-  tick() {
-    this.trySetup();
-    this.didInteractThisFrame = false;
-    const interaction = AFRAME.scenes[0].systems.interaction;
-    const userinput = AFRAME.scenes[0].systems.userinput;
-    if (AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT) {
-      // TODO: Fix issue where button objects are "visible" but not on the inspect layer,
-      // which makes it so we can interact with them but cannot see them.
-      return;
-    }
-    const hovered = interaction.state.rightRemote.hovered;
-    if (
-      hovered &&
-        (userinput.get(interaction.options.rightRemote.grabPath)||this.lastClicked) &&
-      hovered.components.tags &&
-      hovered.components.tags.data.singleActionButton
-    ) {
-      this.didInteractThisFrame = true;
-      hovered.object3D.dispatchEvent({
-        type: "interact",
-        object3D: interaction.options.rightRemote.entity.object3D
-      });
-    }
-    const hovered2 = interaction.state.leftRemote.hovered;
-    if (
-      hovered2 &&
-      userinput.get(interaction.options.leftRemote.grabPath) &&
-      hovered2.components.tags &&
-      hovered2.components.tags.data.singleActionButton
-    ) {
-      this.didInteractThisFrame = true;
-      hovered2.object3D.dispatchEvent({
-        type: "interact",
-        object3D: interaction.options.leftRemote.entity.object3D
-      });
-    }
-    this.lastClicked=false;
-  }
-}
+import { isTagged } from "../components/tags";
 
 export class HoldableButtonSystem {
   tick() {
@@ -59,6 +6,7 @@ export class HoldableButtonSystem {
     const held = interaction.state.rightRemote.held;
 
     if (this.prevHeld && this.prevHeld !== held) {
+      // TODO: Should this check for holdable button?
       this.prevHeld.object3D.dispatchEvent({
         type: "holdable-button-up",
         object3D: interaction.options.rightRemote.entity.object3D
@@ -76,16 +24,18 @@ export class HoldableButtonSystem {
     const heldLeft = interaction.state.leftRemote.held;
 
     if (this.prevHeldLeft && this.prevHeldLeft !== heldLeft) {
-      this.prevHeldLeft.object3D.dispatchEvent({
-        type: "holdable-button-up",
-        object3D: interaction.options.leftRemote.entity.object3D
-      });
+      isTagged(this.prevHeldLeft, "holdableButton") &&
+        this.prevHeldLeft.object3D.dispatchEvent({
+          type: "holdable-button-up",
+          object3D: interaction.options.leftRemote.entity.object3D
+        });
     }
     if (heldLeft && this.prevHeldLeft !== heldLeft) {
-      heldLeft.object3D.dispatchEvent({
-        type: "holdable-button-down",
-        object3D: interaction.options.leftRemote.entity.object3D
-      });
+      isTagged(this.heldLeft, "holdableButton") &&
+        heldLeft.object3D.dispatchEvent({
+          type: "holdable-button-down",
+          object3D: interaction.options.leftRemote.entity.object3D
+        });
     }
 
     this.prevHeldLeft = heldLeft;
@@ -112,6 +62,7 @@ const hasButtonComponent = (function() {
 
 function getHoverableButton(hovered) {
   if (!hovered) return null;
+
   if (
     hasButtonComponent(hovered.components) ||
     hovered.classList.contains("teleport-waypoint-icon") ||
@@ -122,9 +73,6 @@ function getHoverableButton(hovered) {
   if (hovered.children) {
     // TODO: not sure if looping thru children here is desireable, but we did this to accomodate the rounded-button mixins
     for (let i = 0; i < hovered.children.length; i++) {
-      if(!hovered.children[i].components){
-        break;//aptero
-      }
       if (
         hasButtonComponent(hovered.children[i].components) ||
         hovered.children[i].classList.contains("teleport-waypoint-icon") ||

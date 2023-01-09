@@ -1,14 +1,27 @@
 // We apply the most restrictive audio parameters
 function paramsReducer(acc, curr) {
-  if (acc === null) acc = curr;
-  acc.gain = Math.min(acc.gain, curr.gain);
-  acc.maxDistance = Math.min(acc.maxDistance, curr.maxDistance);
-  acc.refDistance = Math.min(acc.refDistance, curr.refDistance);
-  acc.rolloffFactor = Math.max(acc.rolloffFactor, curr.rolloffFactor);
-  acc.coneInnerAngle = Math.min(acc.coneInnerAngle, curr.coneInnerAngle);
-  acc.coneOuterAngle = Math.min(acc.coneOuterAngle, curr.coneOuterAngle);
-  acc.coneOuterGain = Math.min(acc.coneOuterGain, curr.coneOuterGain);
-  return acc;
+  if (!curr && !acc) return {};
+  else if (curr && !acc) return curr;
+  else if (!curr && acc) return acc;
+  else
+    return [
+      "gain",
+      "maxDistance",
+      "refDistance",
+      "rolloffFactor",
+      "coneInnerAngle",
+      "coneOuterAngle",
+      "coneOuterGain"
+    ].reduce((result, key) => {
+      if (curr[key] !== undefined && acc[key] !== undefined) {
+        result[key] = Math.min(acc[key], curr[key]);
+      } else if (curr[key] !== undefined && acc[key] === undefined) {
+        result[key] = curr[key];
+      } else if (curr[key] === undefined && acc[key] !== undefined) {
+        result[key] = acc[key];
+      }
+      return result;
+    }, {});
 }
 
 function addOrRemoveZone(zones, zone, position) {
@@ -80,23 +93,27 @@ const updateSource = (function() {
     } else if (!outInParams && inOutParams) {
       source.apply(inOutParams);
     } else {
-      const params = outInParams;
-      params.gain = Math.min(outInParams.gain, inOutParams.gain);
-      params.coneOuterAngle = Math.min(outInParams.coneOuterAngle, inOutParams.coneOuterAngle);
-      source.apply(params);
+      // In this case two zones ar acting over the same source simultaneously.
+      // We apply the closest zone params with the lowest gain
+      source.apply(
+        Object.assign(
+          {},
+          inOutParams,
+          outInParams,
+          paramsReducer(
+            {
+              gain: outInParams.gain
+            },
+            {
+              gain: inOutParams.gain
+            }
+          )
+        )
+      );
     }
   };
 })();
-/**
- * This system updates audio-zone-sources audio-params based on the audioListener position.
- * On every tick it computes the audio-zone-source and audioListeners positions to check
- * if the listener is inside/outside an audio-zone and applies the zone's audio parameters.
- * It only updates when a source or the listener has changed which zones they are in.
- * If several audio-zones are in between the audioListener and the audio-zone-source, the applied
- * audio parameters is a reduction of the audio-zones most restrictive audio parameters.
- * i.e. If there are two audio-zones in between the listener and the source and the first one has gain == 0.1
- * and the other has gain == 1.0, gain == 0.1 is applied to the source.
- */
+
 export class AudioZonesSystem {
   constructor() {
     this.zones = [];

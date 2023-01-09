@@ -1,0 +1,214 @@
+import React, { useCallback, useEffect, useState } from "react";
+import PropTypes from "prop-types";
+import { PeopleSidebar } from "./PeopleSidebar";
+import { getMicrophonePresences } from "../../utils/microphone-presence";
+import ProfileEntryPanel from "../profile-entry-panel";
+import { UserProfileSidebarContainer } from "./UserProfileSidebarContainer";
+<<<<<<< .merge_file_a15116
+var selectedId;
+var selectedName;
+export function userFromPresence(sessionId, presence, micPresences, mySessionId) {
+=======
+import { useCan } from "./useCan";
+import { useRoomPermissions } from "./useRoomPermissions";
+import { useRole } from "./useRole";
+
+export function userFromPresence(sessionId, presence, micPresences, mySessionId, voiceEnabled) {
+>>>>>>> .merge_file_a08532
+  const meta = presence.metas[presence.metas.length - 1];
+  const micPresence = micPresences.get(sessionId);
+  if (micPresence && !voiceEnabled && !meta.permissions.voice_chat) {
+    micPresence.muted = true;
+  }
+  return { id: sessionId, isMe: mySessionId === sessionId, micPresence, ...meta };
+}
+
+<<<<<<< .merge_file_a15116
+export function usePeopleList(presences, mySessionId, micUpdateFrequency = 500) {
+  let [people, setPeople] = useState([]);
+=======
+function usePeopleList(presences, mySessionId, micUpdateFrequency = 500) {
+  const [people, setPeople] = useState([]);
+  const { voice_chat: voiceChatEnabled } = useRoomPermissions();
+>>>>>>> .merge_file_a08532
+
+  useEffect(() => {
+    let timeout;
+
+    function updateMicrophoneState() {
+      const micPresences = getMicrophonePresences();
+
+<<<<<<< .merge_file_a15116
+      setPeople(
+        Object.entries(presences).map(([id, presence]) => {
+          return userFromPresence(id, presence, micPresences, mySessionId);
+        })
+      );
+=======
+        setPeople(
+          Object.entries(presences).map(([id, presence]) => {
+            return userFromPresence(id, presence, micPresences, mySessionId, voiceChatEnabled);
+          })
+        );
+>>>>>>> .merge_file_a08532
+
+      timeout = setTimeout(updateMicrophoneState, micUpdateFrequency);
+    }
+
+    updateMicrophoneState();
+
+<<<<<<< .merge_file_a15116
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [presences, micUpdateFrequency, setPeople, mySessionId]);
+=======
+      return () => {
+        clearTimeout(timeout);
+      };
+    },
+    [presences, micUpdateFrequency, setPeople, mySessionId, voiceChatEnabled]
+  );
+>>>>>>> .merge_file_a08532
+
+  //aptero state cleanup
+  people = people.filter(value => {
+    return presences[value.id];
+  });
+  return people;
+}
+export function PeopleListContainer({ hubChannel, people, onSelectPerson, onClose }) {
+  const onMuteAll = useCallback(() => {
+    for (const person of people) {
+      if (person.presence === "room" && person.permissions && !person.permissions.mute_users) {
+        hubChannel.mute(person.id);
+      }
+<<<<<<< .merge_file_a15116
+    }
+  }, [people, hubChannel]);
+=======
+    },
+    [people, hubChannel]
+  );
+  const canVoiceChat = useCan("voice_chat");
+  const { voice_chat: voiceChatEnabled } = useRoomPermissions();
+  const isMod = useRole("owner");
+
+>>>>>>> .merge_file_a08532
+  return (
+    <PeopleSidebar
+      people={people}
+      onSelectPerson={onSelectPerson}
+      onClose={onClose}
+      onMuteAll={onMuteAll}
+      showMuteAll={hubChannel.can("mute_users")}
+      canVoiceChat={canVoiceChat}
+      voiceChatEnabled={voiceChatEnabled}
+      isMod={isMod}
+    />
+  );
+}
+
+PeopleListContainer.propTypes = {
+  onSelectPerson: PropTypes.func.isRequired,
+  hubChannel: PropTypes.object.isRequired,
+  onClose: PropTypes.func.isRequired,
+  people: PropTypes.array.isRequired
+};
+
+export function PeopleSidebarContainer({
+  hubChannel,
+  presences,
+  mySessionId,
+  displayNameOverride,
+  store,
+  mediaSearchStore,
+  performConditionalSignIn,
+  onCloseDialog,
+  showNonHistoriedDialog,
+  onClose,
+  toggleChatSidebar,
+  signedIn
+}) {
+  const people = usePeopleList(presences, mySessionId);
+  const [selectedPersonId, setSelectedPersonId] = useState(null);
+  const selectedPerson = people.find(person => person.id === selectedPersonId);
+  var iSignedIn=true;
+  if(selectedPerson)
+  {
+    iSignedIn=selectedPerson.roles.signed_in;
+  }
+
+  const setSelectedPerson = useCallback(
+    person => {
+      setSelectedPersonId(person.id);
+    },
+    [setSelectedPersonId]
+  );
+  if (selectedPerson) {
+    if (selectedPerson.id === mySessionId) {
+      return (
+        <ProfileEntryPanel
+          isSignedIn={iSignedIn}
+          people={people}
+          containerType="sidebar"
+          displayNameOverride={displayNameOverride}
+          store={store}
+          mediaSearchStore={mediaSearchStore}
+          finished={() => setSelectedPersonId(null)}
+          history={history}
+          showBackButton
+          onBack={() => setSelectedPersonId(null)}
+          signedIn={signedIn}
+        />
+      );
+    } else {
+    
+      return (
+        <UserProfileSidebarContainer
+          mySessionId={mySessionId}
+          user={selectedPerson}
+          toggleChatSidebar={toggleChatSidebar}
+          hubChannel={hubChannel}
+          presences={presences}
+          performConditionalSignIn={performConditionalSignIn}
+          showBackButton
+          onBack={() => setSelectedPersonId(null)}
+          onSelectPerson={setSelectedPerson}
+          onClose={onClose}
+          onCloseDialog={onCloseDialog}
+          showNonHistoriedDialog={showNonHistoriedDialog}
+          store={store}
+          mediaSearchStore={mediaSearchStore}
+          signedIn={signedIn}
+        />
+      );
+    }
+  }
+
+  return (
+    <PeopleListContainer onSelectPerson={setSelectedPerson} onClose={onClose} hubChannel={hubChannel} people={people} />
+  );
+}
+export function getSelectedPersonId() {
+  return selectedId;
+}
+export function getSelectedPersonName() {
+  return selectedName;
+}
+
+PeopleSidebarContainer.propTypes = {
+  displayNameOverride: PropTypes.string,
+  store: PropTypes.object.isRequired,
+  mediaSearchStore: PropTypes.object.isRequired,
+  hubChannel: PropTypes.object.isRequired,
+  history: PropTypes.object,
+  onClose: PropTypes.func.isRequired,
+  mySessionId: PropTypes.string.isRequired,
+  presences: PropTypes.object.isRequired,
+  performConditionalSignIn: PropTypes.func.isRequired,
+  onCloseDialog: PropTypes.func.isRequired,
+  showNonHistoriedDialog: PropTypes.func.isRequired,
+  toggleChatSidebar: PropTypes.func,
+  signedIn:PropTypes.func
+};

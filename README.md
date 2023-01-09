@@ -21,7 +21,7 @@ If you just want to check out how Hubs works and make your own modifications con
 
 ### Quick Start
 
-[Install NodeJS](https://nodejs.org) if you haven't already. We recommend version 12 or above.
+[Install NodeJS](https://nodejs.org) if you haven't already. We use 16.16.0 on our build servers. If you work on multiple javascript projects it may be useful to use something like [NVM](https://github.com/nvm-sh/nvm) to manage multiple versions of node for you.
 
 Run the following commands:
 
@@ -50,7 +50,7 @@ Read our [contributor guide](./CONTRIBUTING.md) to learn how you can submit bug 
 
 We're also looking for help with localization. The Hubs redesign has a lot of new text and we need help from people like you to translate it. Follow the [localization docs](./src/assets/locales/README.md) to get started.
 
-Contributors are expected to abide by the project's [Code of Conduct](./CODE_OF_CONDUCT.md) and to be respectful of the project and people working on it. 
+Contributors are expected to abide by the project's [Code of Conduct](./CODE_OF_CONDUCT.md) and to be respectful of the project and people working on it.
 
 ## Additional Resources
 

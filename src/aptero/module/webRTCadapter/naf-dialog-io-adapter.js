@@ -1,8 +1,8 @@
 import * as mediasoupClient from "mediasoup-client";
 import protooClient from "protoo-client";
+import { debug as newDebug } from "debug";
 import EventEmitter from "eventemitter3";
-import { addIceServers, getAdapterParams } from "./adapter-config";
-import AdapterUserListener from "./AdapterUserListener";
+import { MediaDevices } from "./utils/media-devices-utils";
 
 // Used for VP9 webcam video.
 //const VIDEO_KSVC_ENCODINGS = [{ scalabilityMode: "S3T3_KEY" }];
@@ -19,9 +19,10 @@ import AdapterUserListener from "./AdapterUserListener";
 
 // Based upon mediasoup-demo RoomClient
 
-let debug = console.log;
-let error = console.error;
-let info = console.log;
+const debug = newDebug("naf-dialog-adapter:debug");
+//const warn = newDebug("naf-dialog-adapter:warn");
+const error = newDebug("naf-dialog-adapter:error");
+const info = newDebug("naf-dialog-adapter:info");
 
 const PC_PROPRIETARY_CONSTRAINTS = {
   optional: [{ googDscp: true }]
@@ -34,14 +35,12 @@ const WEBCAM_SIMULCAST_ENCODINGS = [
 ];
 
 // Used for simulcast screen sharing.
-const SCREEN_SHARING_SIMULCAST_ENCODINGS = [
-  { dtx: true, maxBitrate: 1500000 },
-  { dtx: true, maxBitrate: 6000000 }
-];
+const SCREEN_SHARING_SIMULCAST_ENCODINGS = [{ dtx: true, maxBitrate: 1500000 }, { dtx: true, maxBitrate: 6000000 }];
 
+export const DIALOG_CONNECTION_CONNECTED = "dialog-connection-connected";
 export const DIALOG_CONNECTION_ERROR_FATAL = "dialog-connection-error-fatal";
 
-export default class DialogAdapter extends EventEmitter {
+export class DialogAdapter extends EventEmitter {
   constructor() {
     super();
 
@@ -59,7 +58,6 @@ export default class DialogAdapter extends EventEmitter {
     this.scene = null;
     this._serverParams = {};
     this._consumerStats = {};
-    this.adapterUserListener = new AdapterUserListener();
   }
 
   get consumerStats() {
@@ -71,7 +69,7 @@ export default class DialogAdapter extends EventEmitter {
   }
 
   getIceServers(host, port, turn) {
-    let iceServers = [];
+    const iceServers = [];
 
     this._serverUrl = `wss://${host}:${port}`;
 
@@ -96,7 +94,7 @@ export default class DialogAdapter extends EventEmitter {
     } else {
       iceServers.push({ urls: "stun:stun1.l.google.com:19302" }, { urls: "stun:stun2.l.google.com:19302" });
     }
-    iceServers = addIceServers(iceServers);
+
     return iceServers;
   }
 
@@ -267,16 +265,9 @@ export default class DialogAdapter extends EventEmitter {
 
     // TODO: Establishing connection could take a very long time.
     //       Inform the user if we are stuck here.
-    let protooTransport;
-    if (getAdapterParams().transport && getAdapterParams().transport === "WebSocketTransport") {
-      protooTransport = new protooClient.WebSocketTransport(urlWithParams.toString(), {
-        retry: { retries: 2 }
-      });
-    } else {
-      protooTransport = new protooClient.WebSocketIOTransport(urlWithParams.toString(), {
-        retry: { retries: 2 }
-      });
-    }
+    const protooTransport = new protooClient.WebSocketTransport(urlWithParams.toString(), {
+      retry: { retries: 2 }
+    });
     this._protoo = new protooClient.Peer(protooTransport);
 
     this._protoo.on("disconnected", () => {
@@ -286,7 +277,6 @@ export default class DialogAdapter extends EventEmitter {
 
     this._protoo.on("failed", attempt => {
       this.emitRTCEvent("error", "Signaling", () => `Failed: ${attempt}, retrying...`);
-      console.warn("protoo failed", attempt);
     });
 
     this._protoo.on("close", async () => {
@@ -354,7 +344,6 @@ export default class DialogAdapter extends EventEmitter {
             throw err;
           }
 
-          this.adapterUserListener.notifyUserEnter(peerId);
           break;
         }
       }
@@ -371,7 +360,7 @@ export default class DialogAdapter extends EventEmitter {
         case "peerClosed": {
           const { peerId } = notification.data;
           this.closePeer(peerId);
-          this.adapterUserListener.notifyUserLeave(peerId);
+
           break;
         }
 
@@ -584,33 +573,30 @@ export default class DialogAdapter extends EventEmitter {
       proprietaryConstraints: PC_PROPRIETARY_CONSTRAINTS
     });
 
-    this._sendTransport.on(
-      "connect",
-      (
-        { dtlsParameters },
-        callback,
-        errback // eslint-disable-line no-shadow
-      ) => {
-        this.emitRTCEvent("info", "RTC", () => `Send transport [connect]`);
-        this._sendTransport.observer.on("close", () => {
-          this.emitRTCEvent("info", "RTC", () => `Send transport [close]`);
-        });
-        this._sendTransport.observer.on("newproducer", producer => {
-          this.emitRTCEvent("info", "RTC", () => `Send transport [newproducer]: ${producer.id}`);
-        });
-        this._sendTransport.observer.on("newconsumer", consumer => {
-          this.emitRTCEvent("info", "RTC", () => `Send transport [newconsumer]: ${consumer.id}`);
-        });
+    this._sendTransport.on("connect", (
+      { dtlsParameters },
+      callback,
+      errback // eslint-disable-line no-shadow
+    ) => {
+      this.emitRTCEvent("info", "RTC", () => `Send transport [connect]`);
+      this._sendTransport.observer.on("close", () => {
+        this.emitRTCEvent("info", "RTC", () => `Send transport [close]`);
+      });
+      this._sendTransport.observer.on("newproducer", producer => {
+        this.emitRTCEvent("info", "RTC", () => `Send transport [newproducer]: ${producer.id}`);
+      });
+      this._sendTransport.observer.on("newconsumer", consumer => {
+        this.emitRTCEvent("info", "RTC", () => `Send transport [newconsumer]: ${consumer.id}`);
+      });
 
-        this._protoo
-          .request("connectWebRtcTransport", {
-            transportId: this._sendTransport.id,
-            dtlsParameters
-          })
-          .then(callback)
-          .catch(errback);
-      }
-    );
+      this._protoo
+        .request("connectWebRtcTransport", {
+          transportId: this._sendTransport.id,
+          dtlsParameters
+        })
+        .then(callback)
+        .catch(errback);
+    });
 
     this._sendTransport.on("connectionstatechange", connectionState => {
       let level = "info";
@@ -688,33 +674,30 @@ export default class DialogAdapter extends EventEmitter {
       iceTransportPolicy: this._iceTransportPolicy
     });
 
-    this._recvTransport.on(
-      "connect",
-      (
-        { dtlsParameters },
-        callback,
-        errback // eslint-disable-line no-shadow
-      ) => {
-        this.emitRTCEvent("info", "RTC", () => `Receive transport [connect]`);
-        this._recvTransport.observer.on("close", () => {
-          this.emitRTCEvent("info", "RTC", () => `Receive transport [close]`);
-        });
-        this._recvTransport.observer.on("newproducer", producer => {
-          this.emitRTCEvent("info", "RTC", () => `Receive transport [newproducer]: ${producer.id}`);
-        });
-        this._recvTransport.observer.on("newconsumer", consumer => {
-          this.emitRTCEvent("info", "RTC", () => `Receive transport [newconsumer]: ${consumer.id}`);
-        });
+    this._recvTransport.on("connect", (
+      { dtlsParameters },
+      callback,
+      errback // eslint-disable-line no-shadow
+    ) => {
+      this.emitRTCEvent("info", "RTC", () => `Receive transport [connect]`);
+      this._recvTransport.observer.on("close", () => {
+        this.emitRTCEvent("info", "RTC", () => `Receive transport [close]`);
+      });
+      this._recvTransport.observer.on("newproducer", producer => {
+        this.emitRTCEvent("info", "RTC", () => `Receive transport [newproducer]: ${producer.id}`);
+      });
+      this._recvTransport.observer.on("newconsumer", consumer => {
+        this.emitRTCEvent("info", "RTC", () => `Receive transport [newconsumer]: ${consumer.id}`);
+      });
 
-        this._protoo
-          .request("connectWebRtcTransport", {
-            transportId: this._recvTransport.id,
-            dtlsParameters
-          })
-          .then(callback)
-          .catch(errback);
-      }
-    );
+      this._protoo
+        .request("connectWebRtcTransport", {
+          transportId: this._recvTransport.id,
+          dtlsParameters
+        })
+        .then(callback)
+        .catch(errback);
+    });
 
     this._recvTransport.on("connectionstatechange", connectionState => {
       let level = "info";
@@ -794,8 +777,8 @@ export default class DialogAdapter extends EventEmitter {
           } else {
             // stopTracks = false because otherwise the track will end during a temporary disconnect
             this._micProducer = await this._sendTransport.produce({
-              paused: !this._micShouldBeEnabled,
               track,
+              pause: !this._micShouldBeEnabled,
               stopTracks: false,
               codecOptions: { opusStereo: false, opusDtx: true },
               zeroRtpOnPause: true,
@@ -806,14 +789,16 @@ export default class DialogAdapter extends EventEmitter {
               this.emitRTCEvent("info", "RTC", () => `Mic transport closed`);
               this._micProducer = null;
             });
+
+            this.emit("mic-state-changed", { enabled: this.isMicEnabled });
           }
         } else {
           sawVideo = true;
 
-          if (track._hubs_contentHint === "share") {
+          if (track._hubs_contentHint === MediaDevices.SCREEN) {
             await this.disableCamera();
             await this.enableShare(track);
-          } else if (track._hubs_contentHint === "camera") {
+          } else if (track._hubs_contentHint === MediaDevices.CAMERA) {
             await this.disableShare();
             await this.enableCamera(track);
           }
@@ -942,13 +927,9 @@ export default class DialogAdapter extends EventEmitter {
   }
 
   cleanUpLocalState() {
-    try {
-      this._sendTransport && this._sendTransport.close();
-      this._recvTransport && this._recvTransport.close();
-    }catch (e) {
-      /* ignore cleanup error */
-    }
+    this._sendTransport && this._sendTransport.close();
     this._sendTransport = null;
+    this._recvTransport && this._recvTransport.close();
     this._recvTransport = null;
     this._micProducer = null;
     this._shareProducer = null;
@@ -965,7 +946,6 @@ export default class DialogAdapter extends EventEmitter {
         this.emitRTCEvent("info", "Signaling", () => `[close]`);
       }
     }
-    this.adapterUserListener.disconnect();
   }
 
   kick(clientId, permsToken) {

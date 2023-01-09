@@ -32,6 +32,7 @@ export function SelectInputField({
   error,
   description,
   inputClassName,
+  buttonClassName,
   label,
   onChange,
   value,
@@ -70,7 +71,11 @@ export function SelectInputField({
       fullWidth={fullWidth}
     >
       <div className={classNames(styles.selectInput, { [styles.open]: isOpen }, inputClassName)}>
-        <button className={styles.dropdownButton} type="button" {...getToggleButtonProps()}>
+        <button
+          className={classNames(styles.dropdownButton, buttonClassName)}
+          type="button"
+          {...getToggleButtonProps()}
+        >
           <span>
             {selectedItemLabel !== undefined ? (
               selectedItemLabel
@@ -106,6 +111,7 @@ SelectInputField.propTypes = {
   description: PropTypes.node,
   labelClassName: PropTypes.string,
   inputClassName: PropTypes.string,
+  buttonClassName: PropTypes.string,
   value: PropTypes.any,
   options: PropTypes.arrayOf(
     PropTypes.oneOfType([

@@ -1,0 +1,9 @@
+{
+  "printWidth": 120,
+<<<<<<< .merge_file_a03148
+  "parser": "babylon"
+=======
+  "trailingComma": "none",
+  "arrowParens": "avoid"
+>>>>>>> .merge_file_a17164
+}

@@ -2,6 +2,7 @@ import React, { useCallback, useState } from "react";
 import PropTypes from "prop-types";
 import { FormattedMessage, useIntl, defineMessages } from "react-intl";
 import { Tip } from "./Tip";
+import { ToastTip } from "./ToastTip";
 import { useEffect } from "react";
 import { discordBridgesForPresences, hasEmbedPresences } from "../../utils/phoenix-utils";
 import configs from "../../utils/configs";
@@ -13,18 +14,19 @@ let turnRightKey = "E";
 
 // TODO The API to map from physical key to character is experimental. Depending on prospects of this getting wider
 // implimentation we may want to cook up our own polyfill based on observing key inputs
-// edit : added iframe testing before asking for keyboard in order to fix "getLayoutMap() must be called from a top-level browsing context." error
-if (
-  window.location == window.parent.location &&
-  window.navigator.keyboard !== undefined &&
-  window.navigator.keyboard.getLayoutMap
-) {
-  window.navigator.keyboard.getLayoutMap().then(function(map) {
-    moveKeys = `${map.get("KeyW") || "W"} ${map.get("KeyA") || "A"} ${map.get("KeyS") || "S"} ${map.get("KeyD") ||
-      "D"}`.toUpperCase();
-    turnLeftKey = map.get("KeyQ")?.toUpperCase();
-    turnRightKey = map.get("KeyE")?.toUpperCase();
-  });
+if (window.navigator.keyboard !== undefined && window.navigator.keyboard.getLayoutMap) {
+  window.navigator.keyboard
+    .getLayoutMap()
+    .then(function(map) {
+      moveKeys = `${map.get("KeyW") || "W"} ${map.get("KeyA") || "A"} ${map.get("KeyS") || "S"} ${map.get("KeyD") ||
+        "D"}`.toUpperCase();
+      turnLeftKey = map.get("KeyQ")?.toUpperCase();
+      turnRightKey = map.get("KeyE")?.toUpperCase();
+    })
+    .catch(function(e) {
+      // This occurs on Chrome 93 when the Hubs page is in an iframe
+      console.warn(`Unable to remap keyboard: ${e}`);
+    });
 }
 
 const onboardingMessages = defineMessages({
@@ -74,6 +76,14 @@ export function FullscreenTip(props) {
   );
 }
 
+export function RecordModeTip() {
+  return (
+    <ToastTip>
+      <FormattedMessage id="record-mode-enabled-tip" defaultMessage="Record mode on, press 'B' to toggle off" />
+    </ToastTip>
+  );
+}
+
 export function TipContainer({ hide, inLobby, inRoom, isStreaming, isEmbedded, scene, store, hubId, presences }) {
   const intl = useIntl();
   const [lobbyTipDismissed, setLobbyTipDismissed] = useState(false);
@@ -84,11 +94,15 @@ export function TipContainer({ hide, inLobby, inRoom, isStreaming, isEmbedded, s
   const [embeddedTipDismissed, setEmbeddedTipDismissed] = useState(false);
   const [onboardingTipId, setOnboardingTipId] = useState(null);
 
-  const onSkipOnboarding = useCallback(() => {
-    scene.systems.tips.skipTips();
-  }, [scene]);
+  const onSkipOnboarding = useCallback(
+    () => {
+      scene.systems.tips.skipTips();
+    },
+    [scene]
+  );
 
-  useEffect(() => {
+  useEffect(
+    () => {
     function onSceneTipChanged({ detail: tipId }) {
       setOnboardingTipId(tipId);
     }
@@ -96,7 +110,9 @@ export function TipContainer({ hide, inLobby, inRoom, isStreaming, isEmbedded, s
     scene.addEventListener("tip-changed", onSceneTipChanged);
 
     setOnboardingTipId(scene.systems.tips.activeTip);
-  }, [scene]);
+  },
+  [scene]
+  );
 
   const discordBridges = presences ? discordBridgesForPresences(presences) : [];
   const isBroadcasting = discordBridges.length > 0;

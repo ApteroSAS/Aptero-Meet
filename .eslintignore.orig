@@ -1,0 +1,10 @@
+!.eslintrc.js
+src/vendor/*
+src/loaders/basis_transcoder.worker.js
+scripts/bot/node_modules/
+<<<<<<< .merge_file_a06428
+*.ts
+*.tsx
+=======
+scripts/docker/turkey-swaps/
+>>>>>>> .merge_file_a13160

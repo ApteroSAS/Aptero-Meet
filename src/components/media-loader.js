@@ -1,6 +1,7 @@
 import { computeObjectAABB, getBox, getScaleCoefficient } from "../utils/auto-box-collider";
 import {
   resolveUrl,
+  fetchContentType,
   getDefaultResolveQuality,
   injectCustomShaderChunks,
   addMeshScaleAnimation,
@@ -15,7 +16,6 @@ import {
   isLocalHubsAvatarUrl
 } from "../utils/media-url-utils";
 import { addAnimationComponents } from "../utils/animation";
-import qsTruthy from "../utils/qs_truthy";
 
 import loadingObjectSrc from "../assets/models/LoadingObject_Atom.glb";
 import { SOUND_MEDIA_LOADING, SOUND_MEDIA_LOADED } from "../systems/sound-effects-system";
@@ -24,6 +24,8 @@ import { cloneObject3D, setMatrixWorld } from "../utils/three-utils";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 
 import { SHAPE } from "three-ammo/constants";
+import { addComponent, entityExists, removeComponent } from "bitecs";
+import { MediaLoading } from "../bit-components";
 import { IN_APP_WEB_BROWSER_PROTOCOL } from "../aptero/module/HubsBridge/react-components/media-utils-lib";
 import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
 
@@ -55,8 +57,6 @@ AFRAME.registerComponent("media-loader", {
     moveTheParentNotTheMesh: { default: false },
     resolve: { default: false },
     contentType: { default: null },
-    type: { default: "none" },
-    contentChanged: { default: null },
     contentSubtype: { default: null },
     animate: { default: true },
     linkedEl: { default: null }, // This is the element of which this is a linked derivative. See linked-media.js
@@ -381,6 +381,7 @@ AFRAME.registerComponent("media-loader", {
     try {
       if ((forceLocalRefresh || srcChanged) && !this.showLoaderTimeout) {
         this.showLoaderTimeout = setTimeout(this.showLoader, 100);
+        addComponent(APP.world, MediaLoading, this.el.eid);
       }
 
       //check if url is an anchor hash e.g. #Spawn_Point_1
@@ -412,33 +413,24 @@ AFRAME.registerComponent("media-loader", {
       const isLocalModelAsset =
         isNonCorsProxyDomain(parsedUrl.hostname) && (guessContentType(src) || "").startsWith("model/gltf");
 
-      try {
-        if (this.data.resolve && !src.startsWith(IN_APP_WEB_BROWSER_PROTOCOL) && !src.startsWith("data:") && !src.startsWith("hubs:") && !isLocalModelAsset) {
-          const is360 = !!(this.data.mediaOptions.projection && this.data.mediaOptions.projection.startsWith("360"));
-          const quality = getDefaultResolveQuality(is360);
-          const result = await resolveUrl(src, quality, version, forceLocalRefresh);
-          canonicalUrl = result.origin;
+      if (this.data.resolve && !src.startsWith("data:") && !src.startsWith("hubs:") && !isLocalModelAsset) {
+        const is360 = !!(this.data.mediaOptions.projection && this.data.mediaOptions.projection.startsWith("360"));
+        const quality = getDefaultResolveQuality(is360);
+        const result = await resolveUrl(src, quality, version, forceLocalRefresh);
+        canonicalUrl = result.origin;
 
-          // handle protocol relative urls
-          if (canonicalUrl.startsWith("//")) {
-            canonicalUrl = location.protocol + canonicalUrl;
-          }
-
-          canonicalAudioUrl = result.origin_audio;
-          if (canonicalAudioUrl && canonicalAudioUrl.startsWith("//")) {
-            canonicalAudioUrl = location.protocol + canonicalAudioUrl;
-          }
-
-          contentType = (result.meta && result.meta.expected_content_type) || contentType;
-          thumbnail = result.meta && result.meta.thumbnail && proxiedUrlFor(result.meta.thumbnail);
+        // handle protocol relative urls
+        if (canonicalUrl.startsWith("//")) {
+          canonicalUrl = location.protocol + canonicalUrl;
         }
-      }catch(ex){
-        contentType = "text/html; charset=utf-8";
-        console.error(ex);
-      }
 
-      if (!thumbnail) {
-        thumbnail = window.APP_PROPS.APP_CONFIG.GLOBAL_ASSETS_PATH + "app-thumbnail.png";
+        canonicalAudioUrl = result.origin_audio;
+        if (canonicalAudioUrl && canonicalAudioUrl.startsWith("//")) {
+          canonicalAudioUrl = location.protocol + canonicalAudioUrl;
+        }
+
+        contentType = (result.meta && result.meta.expected_content_type) || contentType;
+        thumbnail = result.meta && result.meta.thumbnail && proxiedUrlFor(result.meta.thumbnail);
       }
 
       // todo: we don't need to proxy for many things if the canonical URL has permissive CORS headers
@@ -790,6 +782,12 @@ AFRAME.registerComponent("media-pager", {
       this.networkedEl.removeEventListener("unpinned", this.update);
     }
 
+    this.nextButton.object3D.removeEventListener("interact", this.onNext);
+    this.prevButton.object3D.removeEventListener("interact", this.onPrev);
+    this.snapButton.object3D.removeEventListener("interact", this.onSnap);
+
     window.APP.hubChannel.removeEventListener("permissions_updated", this.update);
+
+    this.el.removeEventListener("pdf-loaded", this.update);
   }
 });

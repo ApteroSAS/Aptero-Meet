@@ -1,10 +1,10 @@
 {
   "compilerOptions": {
-    "noImplicitAny": false,
-    "outDir": "build/types",
-    "module": "esnext",
-    "target": "ES5",
-    "allowJs": false,
+    "noImplicitAny": true,
+    "outDir": "./dist/",
+    "module": "es6",
+    "target": "es6",
+    "allowJs": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
@@ -20,9 +20,17 @@
     "baseUrl": "./",
     // Ensure that Babel can safely transpile files in the TypeScript project
     "isolatedModules": true,
-    "jsx": "react"
+    "jsx": "react",
+    "strictNullChecks": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "typeRoots": [
+      "./node_modules/@types",
+      "./types"
+    ]
   },
   "include": [
+    "types/",
     "src/**/*.ts",
     "src/**/*.tsx"
   ],
