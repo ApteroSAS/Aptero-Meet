@@ -1,11 +1,11 @@
 import React, { useEffect } from "react";
 import { Sidebar } from "../../../../react-components/sidebar/Sidebar";
 import { CloseButton } from "../../../../react-components/input/CloseButton";
-import { ClonesI, getClones } from "../LoadBalancer";
+import { ClonesI, getClones, getClonesSync } from "../LoadBalancer";
 import { List, ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import InboxIcon from "@material-ui/icons/Inbox";
 export function InstancesSidebarContainer({ onClose }) {
-  const [instances, setInstances] = React.useState<ClonesI>({});
+  const [instances, setInstances] = React.useState<ClonesI>(getClonesSync().clones);
   useEffect(() => {
     (async () => {
       let instances = (await getClones()).clones;
