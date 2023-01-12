@@ -1,7 +1,6 @@
 /* global APP*/
 import { getReticulumFetchUrl, hubUrl } from "./utils/phoenix-utils";
-import { updateEnvironmentForHub, getSceneUrlForHub, updateUIForHub, remountUI } from "./hub";
-import { propertiesService } from "./aptero/module/properties/propertiesService";
+import { updateEnvironmentForHub, updateUIForHub, remountUI } from "./hub";
 
 function unloadRoomObjects() {
   document.querySelectorAll("[pinnable]").forEach(el => {
@@ -70,22 +69,31 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
     initialIsFavorited: data.subscriptions.favorites
   });
 
-  NAF.entities.removeRemoteEntities();
-  await NAF.connection.adapter.disconnect();
   await APP.dialog.disconnect();
-  unloadRoomObjects();
+
+  //Naf Disconnect see NAF.connection.disconnect();
+  //We do not disconnect at connection level to keep the adapter
+  NAF.connection.entities.removeRemoteEntities();
+  NAF.connection.adapter.disconnect();
   NAF.connection.connectedClients = {};
   NAF.connection.activeDataChannels = {};
+  NAF.connection.setupDefaultDataSubscriptions();
+  document.body.removeEventListener('connected', NAF.connection.onConnectCallback);
+
+  unloadRoomObjects();//unload object after NAF is fully disconnected
+
+  const fader = document.getElementById("viewing-camera").components["fader"];
+  await fader.fadeOut();
+
+  scene.emit("reset_scene");
+  //update environment before connecting the network adapter to prevent visible invisible elements issue
+  await updateEnvironmentForHub(hub, APP.entryManager);//Note a priori c'est ce truc qui pose problem
+
+  APP.retChannel.push("change_hub", { hub_id: hub.hub_id });
 
   NAF.room = hub.hub_id;
 
-  const fader = document.getElementById("viewing-camera").components["fader"];
-  fader.fadeOut().then(async () => {
-    scene.emit("reset_scene");
-    await updateEnvironmentForHub(hub, APP.entryManager);
-  });
-
-  APP.retChannel.push("change_hub", { hub_id: hub.hub_id });
+  loadRoomObjects(hubId); // load object before NAF reconnection
 
   await Promise.all([
     APP.dialog.connect({
@@ -99,11 +107,9 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
       forceTurn: APP.dialog._forceTurn,
       iceTransportPolicy: APP.dialog._iceTransportPolicy
     }),
-
     NAF.connection.adapter.connect()
   ]);
 
-  loadRoomObjects(hubId);
 
   await APP.hubChannel.sendEnteredEvent();
 

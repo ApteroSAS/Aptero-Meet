@@ -317,46 +317,33 @@ export async function updateEnvironmentForHub(hub, entryManager) {
     environmentEl.addEventListener(
       "model-loaded",
       () => {
-        environmentEl.addEventListener(
-          "model-loaded",
-          () => {
-            environmentEl.removeEventListener("model-error", sceneErrorHandler);
-            traverseMeshesAndAddShapes(environmentEl);
+        environmentEl.removeEventListener("model-error", sceneErrorHandler);
+        traverseMeshesAndAddShapes(environmentEl);
 
-            if(!sameSceneAsBefore) {
-              // We've already entered, so move to new spawn point once new environment is loaded
-              if (sceneEl.is("entered")) {
-                waypointSystem.moveToSpawnPoint();
-              }
-            }
-
-            const fader = document.getElementById("viewing-camera").components["fader"];
-
-            // Add a slight delay before de-in to reduce hitching.
-            setTimeout(() => fader.fadeIn(), 2000);
-          },
-          { once: true }
-        );
-
-        sceneEl.emit("leaving_loading_environment");
-        if (environmentEl.components["gltf-model-plus"].data.src === sceneUrl) {
-          console.warn("Updating environment to the same url.");
-          environmentEl.setAttribute("gltf-model-plus", { src: "" });
+        if(!sameSceneAsBefore) {
+          // We've already entered, so move to new spawn point once new environment is loaded
+          if (sceneEl.is("entered")) {
+            waypointSystem.moveToSpawnPoint();
+          }
         }
-        environmentEl.setAttribute("gltf-model-plus", { src: sceneUrl });
+
+        const fader = document.getElementById("viewing-camera").components["fader"];
+
+        // Add a slight delay before de-in to reduce hitching.
+        setTimeout(() => fader.fadeIn(), 2000);
       },
       { once: true }
     );
 
+    sceneEl.emit("leaving_loading_environment");
+    if (environmentEl.components["gltf-model-plus"].data.src === sceneUrl) {
+      console.warn("Updating environment to the same url.");
+      environmentEl.setAttribute("gltf-model-plus", { src: "" });
+    }
+    environmentEl.setAttribute("gltf-model-plus", { src: sceneUrl });
     if (!sceneEl.is("entered")) {
       environmentEl.addEventListener("model-error", sceneErrorHandler, { once: true });
     }
-
-    if (environmentEl.components["gltf-model-plus"].data.src === loadingEnvironment) {
-      console.warn("Transitioning to loading environment but was already in loading environment.");
-      environmentEl.setAttribute("gltf-model-plus", { src: "" });
-    }
-    environmentEl.setAttribute("gltf-model-plus", { src: loadingEnvironment });
   }
 }
 
