@@ -1,6 +1,9 @@
 import { propertiesService } from "../properties/propertiesService";
 import axios from "axios";
 
+declare const window:any;
+declare const NAF:any;
+
 export class RemoteControlServiceV2 {
 
     remoteScreenSessionIdMap = {};
@@ -56,9 +59,14 @@ export class RemoteControlServiceV2 {
         this.remoteScreenSessionIdMap[data.localSessionID]=data.remoteScreenSessionId;
         return new Promise((resolve, reject) => {
             axios.post(propertiesService.PROTOCOL + propertiesService.REMOTE_VM_SERVICE.url + "/service/remote/orchestrator/create", data).then(async resp => {
-                resp=resp.data;
-                resp.url = "wss://" + propertiesService.REMOTE_VM_SERVICE.url+"/reverse/"+resp.ip+"/"+resp.port+"/websockify";
-                const rfb = await this.createRBF(screenElement.children[0],resp.url,{ credentials: { password: password } });
+                let resp2:{
+                    url:string,
+                    ip:string,
+                    port:string,
+                    vmsid:string
+                } = resp.data as any;
+                //resp2.url = "wss://" + propertiesService.REMOTE_VM_SERVICE.url+"/reverse/"+resp2.ip+"/"+resp2.port+"/websockify";
+                const rfb = await this.createRBF(screenElement.children[0],resp2.url,{ credentials: { password: password } });
                 this.remoteScreenSessionRfbMap[data.remoteScreenSessionId] = rfb;
                 resolve(rfb);
             }).catch(reason => {
