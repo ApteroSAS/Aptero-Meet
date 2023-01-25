@@ -4,12 +4,31 @@ import axios from "axios";
 declare const window:any;
 declare const NAF:any;
 
+export interface CreateDTO{
+    remoteScreenSessionId?: string,
+    screenSizeX?: number,
+    screenSizeY?: number,
+    dockerImage?: string,
+    imageParams?: ImgParams
+}
+
+export interface ImgParams{
+    EPHEMERAL?:"true"|"false",
+    URL?:string,
+    KIOSK_BTN?:"true"|"false",
+    MODE?:"kiosk"|"app",
+    EXTENSION_LIST?:string,//"[]"
+    LANG?:string,//"en_GB.UTF-8"
+    LANGUAGE?:string,//"en_GB.UTF-8"
+    PASSWORD?:string,
+}
+
 export class RemoteControlServiceV2 {
 
     remoteScreenSessionIdMap = {};
     remoteScreenSessionRfbMap = {};
     lastMoveTime = 0;
-    screenSize={};
+    screenSize:Record<string, { width: number, height: number }>={};
     lastX=0;
     lastY=0;
     lastSessionID = "";
@@ -28,11 +47,11 @@ export class RemoteControlServiceV2 {
         },5*60*1000);
     }
 
-    getNewRemoteSessionID() {
+    getNewRemoteSessionID():string {
         return window.APP.store.credentialsAccountId?window.APP.store.credentialsAccountId:("anonymous"+Math.floor(Math.random()*10000000));
     }
 
-    async generateFallBackUrl(urlToProxy,userId){
+    async generateFallBackUrl(urlToProxy:string,userId:string){
         urlToProxy = urlToProxy || window.location.href;
         let theURL= new URL('https://meet.aptero.co/service/remote/orchestrator/static/app/embed-app-v2.html');
         theURL.searchParams.set("q",btoa(urlToProxy));
@@ -40,25 +59,35 @@ export class RemoteControlServiceV2 {
         return theURL.toString();
     }
 
-    async getScreen(screenElement,data){
-        /*let data = {
-            localSessionID: NAFscreenID,
-            remoteScreenSessionId: remoteScreenSessionId,
-            screenSizeX:width,
-            screenSizeY:height,
-            metaData:metaData
-        }*/
+    async getScreen(screenElement:HTMLVideoElement,data:{
+        localSessionID: string,
+        remoteScreenSessionId: string,
+        screenSizeX: number,
+        screenSizeY: number,
+        metaData:{
+            "sessionID": string,
+            "width": number,
+            "height": number,
+            "image": string,
+            "imageParams":ImgParams
+        }
+    }){
         let password = null;
         try {
             password = data.metaData.imageParams.PASSWORD;
         }catch (er){ /* ignore error */ }
         this.screenSize[data.remoteScreenSessionId]={
-            width:data.screenSizeX,
-            height:data.screenSizeY
+            width:+data.screenSizeX,
+            height:+data.screenSizeY
         };
         this.remoteScreenSessionIdMap[data.localSessionID]=data.remoteScreenSessionId;
+        const dataCreate:CreateDTO = {
+            screenSizeX:+data.screenSizeX,
+            screenSizeY:+data.screenSizeY,
+            imageParams:data.metaData.imageParams || {},
+        }
         return new Promise((resolve, reject) => {
-            axios.post(propertiesService.PROTOCOL + propertiesService.REMOTE_VM_SERVICE.url + "/service/remote/orchestrator/create", data).then(async resp => {
+            axios.post(propertiesService.PROTOCOL + propertiesService.REMOTE_VM_SERVICE.url + "/service/remote/orchestrator/create", dataCreate).then(async resp => {
                 let resp2:{
                     url:string,
                     ip:string,

@@ -1,7 +1,10 @@
-import {remoteControlServiceV2} from "../../RemoteScreen/RemoteControlServiceV2";
+import { ImgParams, remoteControlServiceV2 } from "../../RemoteScreen/RemoteControlServiceV2";
 
 export const IN_APP_WEB_BROWSER_PROTOCOL = "web-browser:";
 export const IN_APP_WEB_BROWSER_TRAIL = "/web-browser.mp4";
+
+declare const NAF;
+declare const THREE;
 
 export const processWebBrowserEntity = (entity, mediaOptions) => {
   let objJsonStr = JSON.stringify({
@@ -22,7 +25,18 @@ export const proxyURL = (url) => {
   return null;
 };
 
-export const remoteWebBrowser = async (screenElement,texture,mediaData) => {
+export const remoteWebBrowser = async (screenElement:HTMLVideoElement,texture:any,mediaData:{
+  "src": string,
+  "audioSrc": string,
+  "time": number,
+  "contentType": string,
+  "loop": boolean,
+  "hidePlaybackControls": boolean,
+  "videoPaused": boolean,
+  "projection": string,
+  "tickRate": number,
+  "syncTolerance": number
+}) => {
   let screenSRC = mediaData.src;
   screenSRC = screenSRC.replace(IN_APP_WEB_BROWSER_PROTOCOL,"");
   screenSRC = screenSRC.replace(IN_APP_WEB_BROWSER_TRAIL,"");
@@ -30,11 +44,11 @@ export const remoteWebBrowser = async (screenElement,texture,mediaData) => {
   let remoteScreenSessionId = metaData.sessionID;
 
 
-  let screenId = await new Promise((resolve, reject) => {
+  let screenId = await new Promise<string>((resolve, reject) => {
     NAF.utils.getNetworkedEntity(screenElement).then(networkedEl => {
       //hovered
       //unhovered
-      delete screenElement.components["hover-menu__video"];
+      delete (screenElement as any).components["hover-menu__video"];
       let screenId = networkedEl.components.networked.data.networkId;
       //singleActionButton:true;
       //remoteControlService.registerEventOnElement(screenElement);
@@ -42,7 +56,21 @@ export const remoteWebBrowser = async (screenElement,texture,mediaData) => {
       resolve(screenId);
     });
   });
-  let connexionInfo = {
+  metaData.width = +metaData.width;//ensure int
+  metaData.height = +metaData.height;//ensure int
+  let connexionInfo:{
+    localSessionID: string,
+    remoteScreenSessionId: string,
+    screenSizeX: number,
+    screenSizeY: number,
+    metaData:{
+      "sessionID": string,
+      "width": number,
+      "height": number,
+      "image": string,
+      "imageParams":ImgParams
+    }
+  } = {
     localSessionID: screenId,
     remoteScreenSessionId: remoteScreenSessionId,
     screenSizeX:metaData.width,
@@ -53,7 +81,7 @@ export const remoteWebBrowser = async (screenElement,texture,mediaData) => {
   remoteControlServiceV2.registerEventOnElement(screenElement);
 
   // Setup a POT canvas
-  let canvas = rfb._canvas;
+  let canvas = (rfb as any)._canvas;
   canvas.width = metaData.width || 1024;
   canvas.height = metaData.height || 512;
   texture = new THREE.Texture(canvas);
