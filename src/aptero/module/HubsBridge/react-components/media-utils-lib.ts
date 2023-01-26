@@ -1,4 +1,4 @@
-import { ImgParams, remoteControlServiceV2 } from "../../RemoteScreen/RemoteControlServiceV2";
+import { ImgParams, MetaData, remoteControlServiceV2 } from "../../RemoteScreen/RemoteControlServiceV2";
 
 export const IN_APP_WEB_BROWSER_PROTOCOL = "web-browser:";
 export const IN_APP_WEB_BROWSER_TRAIL = "/web-browser.mp4";
@@ -63,13 +63,7 @@ export const remoteWebBrowser = async (screenElement:HTMLVideoElement,texture:an
     remoteScreenSessionId: string,
     screenSizeX: number,
     screenSizeY: number,
-    metaData:{
-      "sessionID": string,
-      "width": number,
-      "height": number,
-      "image": string,
-      "imageParams":ImgParams
-    }
+    metaData:MetaData
   } = {
     localSessionID: screenId,
     remoteScreenSessionId: remoteScreenSessionId,

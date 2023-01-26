@@ -23,6 +23,15 @@ export interface ImgParams{
     PASSWORD?:string,
 }
 
+export interface MetaData{
+    sessionID: string,
+    width: number,
+    height: number,
+    image: string,
+    imageParams:ImgParams,
+    agentServerUrl:string
+}
+
 export class RemoteControlServiceV2 {
 
     remoteScreenSessionIdMap = {};
@@ -64,13 +73,7 @@ export class RemoteControlServiceV2 {
         remoteScreenSessionId: string,
         screenSizeX: number,
         screenSizeY: number,
-        metaData:{
-            "sessionID": string,
-            "width": number,
-            "height": number,
-            "image": string,
-            "imageParams":ImgParams
-        }
+        metaData:MetaData
     }){
         let password = null;
         try {
@@ -81,11 +84,10 @@ export class RemoteControlServiceV2 {
             height:+data.screenSizeY
         };
         this.remoteScreenSessionIdMap[data.localSessionID]=data.remoteScreenSessionId;
-        const dataCreate:CreateDTO = {
+        const dataCreate:(any|CreateDTO) = {...{
             screenSizeX:+data.screenSizeX,
             screenSizeY:+data.screenSizeY,
-            imageParams:data.metaData.imageParams || {},
-        }
+        },...data.metaData}
         return new Promise((resolve, reject) => {
             axios.post(propertiesService.PROTOCOL + propertiesService.REMOTE_VM_SERVICE.url + "/service/remote/orchestrator/create", dataCreate).then(async resp => {
                 let resp2:{
