@@ -438,7 +438,7 @@ class MediaBrowserContainer extends Component {
             <a
               target="_blank"
               rel="noopener noreferrer"
-              href={configs.link("issue_report", "https://www.aptero.co/docs/help.html")}
+              href={configs.link("issue_report", "https://hubs.mozilla.com/docs/help.html")}
             >
               <FormattedMessage id="media-browser.report-issue" defaultMessage="Report Issue" />
             </a>
@@ -527,8 +527,7 @@ class MediaBrowserContainer extends Component {
                 label={<FormattedMessage id="media-browser.create-avatar" defaultMessage="Create Avatar" />}
               />
             )}
-            {urlSource === "scenes" &&
-              configs.feature("enable_spoke") && (
+            {urlSource === "scenes" && configs.feature("enable_spoke") && (
                 <CreateTile
                   as="a"
                   href="/spoke/new"

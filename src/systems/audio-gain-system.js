@@ -1,49 +1,78 @@
-const CLIPPING_GAIN = 0.0001;
+import {
+  getCurrentAudioSettings,
+  shouldAddSupplementaryAttenuation,
+  updateAudioSettings
+} from "../update-audio-settings";
 
-export class GainSystem {
-  constructor() {
-    this.sources = [];
-    this.onPrefsUpdated = this.updatePrefs.bind(this);
-    window.APP.store.addEventListener("statechanged", this.onPrefsUpdated);
+const distanceModels = {
+  linear: function (distance, rolloffFactor, refDistance, maxDistance) {
+    return 1.0 - rolloffFactor * ((distance - refDistance) / (maxDistance - refDistance));
+  },
+  inverse: function (distance, rolloffFactor, refDistance) {
+    return refDistance / (refDistance + rolloffFactor * (Math.max(distance, refDistance) - refDistance));
+  },
+  exponential: function (distance, rolloffFactor, refDistance) {
+    return Math.pow(Math.max(distance, refDistance) / refDistance, -rolloffFactor);
   }
+};
 
-  remove() {
-    this.sources = [];
-    window.APP.store.removeEventListener("statechanged", this.onPrefsUpdated);
-  }
-
-  registerSource(source) {
-    this.sources.push(source);
-  }
-
-  unregisterSource(source) {
-    const index = this.sources.indexOf(source);
-
-    if (index !== -1) {
-      this.sources.splice(index, 1);
-    }
-  }
-
-  tick() {
-    this.sources.forEach(source => {
-      if (source.data.clippingEnabled) {
-        const audio = source.getAudio();
-        if (source.data.attenuation < source.data.clippingThreshold) {
-          if (audio.gain.gain.value > 0 && !source.data.isClipped) {
-            source.clipGain(CLIPPING_GAIN);
-          }
-        } else if (source.data.isClipped) {
-          source.unclipGain();
-        }
-      } else if (source.data.isClipped) {
-        source.unclipGain();
+const calculateAttenuation = (() => {
+  const listenerPos = new THREE.Vector3();
+  const sourcePos = new THREE.Vector3();
+  return (el, audio) => {
+    APP.audioListener.getWorldPosition(listenerPos);
+    audio.getWorldPosition(sourcePos);
+    const distance = sourcePos.distanceTo(listenerPos);
+    if (audio.panner) {
+      return distanceModels[audio.panner.distanceModel](
+        distance,
+        audio.panner.rolloffFactor,
+        audio.panner.refDistance,
+        audio.panner.maxDistance
+        // TODO: Why are coneInnerAngle, coneOuterAngle and coneOuterGain not used?
+      );
+    } else {
+      const { distanceModel, rolloffFactor, refDistance, maxDistance } = getCurrentAudioSettings(el);
+      if (!distanceModel) {
+        // Apparently, it is valid to give null as your distanceModel
+        return 1.0;
       }
-    });
-  }
+      if (!distanceModels[distanceModel]) {
+        // TODO: Validate properties earlier in the process.
+        console.error("Unrecognized distance model.");
+        return 1.0;
+      }
 
-  updatePrefs() {
-    this.sources.forEach(source => {
-      source.updateClipping();
-    });
+      return distanceModels[distanceModel](distance, rolloffFactor, refDistance, maxDistance);
+    }
+  };
+})();
+
+// TODO: Rename "GainSystem" because the name is suspicious
+export class GainSystem {
+  tick() {
+    const { enableAudioClipping, audioClippingThreshold } = window.APP.store.state.preferences;
+    for (const [el, audio] of APP.audios.entries()) {
+      const attenuation = calculateAttenuation(el, audio);
+
+      if (shouldAddSupplementaryAttenuation(el, audio)) {
+        APP.supplementaryAttenuation.set(el, attenuation);
+        updateAudioSettings(el, audio);
+      } else if (APP.supplementaryAttenuation.has(el)) {
+        APP.supplementaryAttenuation.delete(el);
+        updateAudioSettings(el, audio);
+      }
+
+      const isClipped = APP.clippingState.has(el);
+      const shouldBeClipped = enableAudioClipping && attenuation < audioClippingThreshold;
+      if (isClipped !== shouldBeClipped) {
+        if (shouldBeClipped) {
+          APP.clippingState.add(el);
+        } else {
+          APP.clippingState.delete(el);
+        }
+        updateAudioSettings(el, audio);
+      }
+    }
   }
 }

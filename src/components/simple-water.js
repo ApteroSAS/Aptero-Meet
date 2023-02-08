@@ -36,7 +36,7 @@ export default class SimpleWater extends Mesh {
 
     normalMap.wrapS = normalMap.wrapT = RepeatWrapping;
 
-    const material = new materialClass({ color: 0x0054df, normalMap });
+    const material = new materialClass({ color: 0x0054df, normalMap, roughness: 0.5, metalness: 0.5 });
     material.name = "SimpleWaterMaterial";
 
     material.onBeforeCompile = shader => {
@@ -283,7 +283,7 @@ AFRAME.registerComponent("simple-water", {
       waterNormalMap = new HubsTextureLoader().load(waterNormalsUrl);
     }
 
-    const usePhongShader = window.APP.store.materialQualitySetting !== "high";
+    const usePhongShader = window.APP.store.state.preferences.materialQualitySetting !== "high";
     this.water = new SimpleWater(waterNormalMap, undefined, usePhongShader);
     this.el.setObject3D("mesh", this.water);
   },

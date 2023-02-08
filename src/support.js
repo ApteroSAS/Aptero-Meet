@@ -1,19 +1,19 @@
+/* eslint-disable @calm/react-intl/missing-formatted-message */
+
 /*
 NOTE: support.js needs to be as self-contained as possible, since it needs to work in legacy browers
 that we do not support. Avoid adding imports to libraries or other modules from our own codebase
 that might break the support UI in legacy browsers.
+We also do not support localization in this file, since it would require additional transpiliation
+and polyfilling.
 */
 
 import React from "react";
 import ReactDOM from "react-dom";
 import copy from "copy-to-clipboard";
 import { detectOS } from "detect-browser";
-import { FormattedMessage } from "react-intl";
-import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
 import "./react-components/styles/global.scss";
 import styles from "./assets/stylesheets/support.scss";
-import configs from "./utils/configs";
-import { ThemeProvider } from "./react-components/styles/theme";
 
 const SHORTHAND_INITIALIZER = "var foo = 'bar'; var baz = { foo };";
 const SPREAD_SYNTAX = "var foo = {}; var baz = { ...foo };";
@@ -42,14 +42,16 @@ function getPlatformSupport() {
       { name: "Optional catch syntax", supported: syntaxSupported(CATCH_SYNTAX) }
     ];
   }else {
-    return [
-      { name: "Web Assembly", supported: !!window.WebAssembly },
-      { name: "Media Devices", supported: !!navigator.mediaDevices },
-      { name: "Shorthand initializer syntax", supported: syntaxSupported(SHORTHAND_INITIALIZER) },
-      { name: "Spread syntax", supported: syntaxSupported(SPREAD_SYNTAX) },
-      { name: "Optional catch syntax", supported: syntaxSupported(CATCH_SYNTAX) }
-    ];
-  }
+  return [
+    { name: "Web Assembly", supported: !!window.WebAssembly },
+    { name: "Media Devices", supported: !!navigator.mediaDevices },
+    {
+      name: "Modern JavaScript Syntax",
+      supported:
+        syntaxSupported(CATCH_SYNTAX) && syntaxSupported(SPREAD_SYNTAX) && syntaxSupported(SHORTHAND_INITIALIZER)
+    }
+  ];
+}
 }
 
 function isInAppBrowser() {
@@ -100,66 +102,51 @@ class Support extends React.Component {
     const detectedOS = detectOS(navigator.userAgent);
 
     return (
-      <WrappedIntlProvider>
-        <ThemeProvider>
           <div className={styles.supportMain}>
             <div className={styles.supportContent}>
-              <div>
-                <img className={styles.logo} src={configs.image("logo")} />
-              </div>
+          <h1>Mozilla Hubs</h1>
+          <br />
+          <p className={styles.unsupportedLangs}>
+            · <span>Unsupported</span> · <span>No Soportado</span> · <span>Nicht Unterstützt</span>
+            {" · "}
+            <span>Sem Suporte</span> · <span>Non Compatible</span> · <span>不支援</span>
+            {" · "}
+            <span>не поддерживается</span> · <span>サポートされていません</span> ·
+          </p>
+          <br />
               <p>
-                <FormattedMessage
-                  id="support.missing-features"
-                  defaultMessage="Your browser is missing required features."
-                />
+            <span>Your browser is missing required features.</span>
                 <br />
                 {inAppBrowser ? (
                   detectedOS === "iOS" ? (
-                    <FormattedMessage
-                      id="support.in-app-browser-ios"
-                      defaultMessage="Copy and paste this link directly into Safari"
-                    />
+                <span>Copy and paste this link directly into Safari</span>
                   ) : (
-                    <FormattedMessage
-                      id="support.in-app-browser-android"
-                      defaultMessage="Copy and paste this link directly into Chrome or Firefox"
-                    />
+                <span>Copy and paste this link directly into Chrome or Firefox</span>
                   )
                 ) : (
-                  <FormattedMessage
-                    id="support.update-browser"
-                    defaultMessage="Please try switching or updating to a newer browser"
-                  />
+              <span>Please try switching or updating to a newer browser</span>
                 )}
                 <br />
                 <br />
                 <input type="text" readOnly onFocus={e => e.target.select()} value={document.location} />
                 <a className="copy-link" href="#" onClick={this.onCopyClicked}>
-                  {this.state.hasCopied ? (
-                    <FormattedMessage id="support.copied" defaultMessage="copied!" />
-                  ) : (
-                    <FormattedMessage id="support.copy" defaultMessage="copy" />
-                  )}
+              {this.state.hasCopied ? "copied!" : "copy"}
                 </a>
                 <br />
                 <br />
                 <a className={styles.detailsLink} href="#" onClick={this.toggleDetails}>
-                  <FormattedMessage id="support.details" defaultMessage="details" />
+              <span>details</span>
                 </a>
               </p>
               {this.state.showDetails && (
                 <table className={styles.details}>
                   <tbody>
-                    {platformSupport.sort((a, b) => (a.supported && !b.supported ? 1 : -1)).map(s => (
+                {platformSupport
+                  .sort((a, b) => (a.supported && !b.supported ? 1 : -1))
+                  .map(s => (
                       <tr key={s.name}>
                         <td>{s.name}</td>
-                        <td>
-                          {s.supported ? (
-                            <FormattedMessage id="support.supported" defaultMessage="supported" />
-                          ) : (
-                            <FormattedMessage id="support.unsupported" defaultMessage="unsupported" />
-                          )}
-                        </td>
+                      <td>{s.supported ? "supported" : "unsupported"}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -167,8 +154,6 @@ class Support extends React.Component {
               )}
             </div>
           </div>
-        </ThemeProvider>
-      </WrappedIntlProvider>
     );
   }
 }

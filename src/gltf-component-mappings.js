@@ -2,28 +2,12 @@ import { sanitizeUrl } from "@braintree/sanitize-url";
 import "./components/gltf-model-plus";
 import { getSanitizedComponentMapping } from "./utils/component-mappings";
 import { TYPE, SHAPE, FIT } from "three-ammo/constants";
-const COLLISION_LAYERS = require("./constants").COLLISION_LAYERS;
-import { AudioType, SourceType } from "./components/audio-params";
-import { register, registerCustomGLTFModelPlusComponents } from "./aptero/module/ButtonAPI/component/GLTFModelPlusRegistrer";
-
-function registerRootSceneComponent(componentName) {
-  AFRAME.GLTFModelPlus.registerComponent(componentName, componentName, (el, componentName, componentData) => {
-    const sceneEl = AFRAME.scenes[0];
-
-    sceneEl.setAttribute(componentName, componentData);
-
-    sceneEl.addEventListener(
-      "reset_scene",
-      () => {
-        sceneEl.removeAttribute(componentName);
-      },
-      { once: true }
-    );
-  });
-}
-
-registerRootSceneComponent("fog");
-registerRootSceneComponent("background");
+import { COLLISION_LAYERS } from "./constants";
+import { AudioType, DistanceModelType, SourceType } from "./components/audio-params";
+import { updateAudioSettings } from "./update-audio-settings";
+import { renderAsEntity } from "./utils/jsx-entity";
+import { Networked } from "./bit-components";
+import { addComponent } from "bitecs";
 
 AFRAME.GLTFModelPlus.registerComponent("sound", "sound");
 AFRAME.GLTFModelPlus.registerComponent("css-class", "css-class");
@@ -79,6 +63,8 @@ AFRAME.GLTFModelPlus.registerComponent("morph-audio-feedback", "morph-audio-feed
 AFRAME.GLTFModelPlus.registerComponent("animation-mixer", "animation-mixer");
 AFRAME.GLTFModelPlus.registerComponent("loop-animation", "loop-animation");
 AFRAME.GLTFModelPlus.registerComponent("uv-scroll", "uv-scroll");
+AFRAME.GLTFModelPlus.registerComponent("frustrum", "frustrum");
+AFRAME.GLTFModelPlus.registerComponent("mirror", "mirror");
 AFRAME.GLTFModelPlus.registerComponent(
   "box-collider",
   "shape-helper",
@@ -115,20 +101,8 @@ AFRAME.GLTFModelPlus.registerComponent("spawn-point", "spawn-point", el => {
     willMaintainWorldUp: true
   });
 });
-AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh", (el, _componentName, componentData) => {
-  const nav = AFRAME.scenes[0].systems.nav;
-  const zone = componentData.zone || "character";
-  let found = false;
-  el.object3D.traverse(node => {
-    if (node.isMesh && !found) {
-      found = true;
-      nav.loadMesh(node, zone);
-    }
-  });
   // There isn't actually an a-frame nav-mesh component, but we want to tag this el as a nav-mesh since
-  // nav-mesh-helper will query for it later.
-  el.setAttribute("nav-mesh");
-});
+AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh");
 
 AFRAME.GLTFModelPlus.registerComponent("pinnable", "pinnable");
 
@@ -145,23 +119,21 @@ AFRAME.GLTFModelPlus.registerComponent("waypoint", "waypoint", (el, componentNam
   el.setAttribute("waypoint", componentData);
 });
 
-AFRAME.GLTFModelPlus.registerComponent("media-frame", "media-frame", (el, componentName, componentData, components) => {
-  el.setAttribute("networked", {
-    template: "#interactable-media-frame",
-    owner: "scene",
-    persistent: true,
-    networkId: components.networked.id
-  });
-  el.setAttribute("shape-helper", {
-    type: "box",
-    fit: "manual",
-    halfExtents: {
-      x: componentData.bounds.x / 2,
-      y: componentData.bounds.y / 2,
-      z: componentData.bounds.z / 2
-    }
-  });
-  el.setAttribute("media-frame", componentData);
+import { findAncestorWithComponent } from "./utils/scene-graph";
+import { createElementEntity } from "./utils/jsx-entity";
+import { setInitialNetworkedData } from "./utils/assign-network-ids";
+/** @jsx createElementEntity */ createElementEntity;
+
+AFRAME.GLTFModelPlus.registerComponent("media-frame", "media-frame", (el, _componentName, componentData) => {
+  const eid = renderAsEntity(APP.world, <entity mediaFrame={componentData} />);
+
+  addComponent(APP.world, Networked, eid);
+
+  const networkedEl = findAncestorWithComponent(el, "networked");
+  const rootNid = (networkedEl && networkedEl.components.networked.data.networkId) || "scene";
+  setInitialNetworkedData(APP.world, eid, `${rootNid}.${el.object3D.children[0].userData.gltfIndex}`, rootNid);
+
+  el.object3D.add(APP.world.eid2obj.get(eid));
 });
 
 AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, componentData) => {
@@ -240,11 +212,26 @@ async function mediaInflator(el, componentName, componentData, components) {
     mediaOptions.hidePlaybackControls = !isControlled;
 
     if (componentData.audioType) {
-      el.setAttribute("audio-params", {
+      // This is an old version of this component, which had built-in audio parameters.
+      // The way we are handling it is wrong. If a user created a scene with this old version
+      // of the component, all of these parameters will be present whether the user explicitly set
+      // the values for them or not. But really, they should only count as "overrides" if the user
+      // meant for them to take precendence over the app and scene defaults.
+      // TODO: Fix this issue. One option is to just ignore this component data, which might break old scenes
+      //       but simplifying the handling. Another option is to compare the component data here with
+      //       the "defaults" and only save the values that are different from the defaults. However,
+      //       this loses information if the user changed the scene settings but wanted this specific
+      //       node to use the "defaults".
+      //       I don't see a perfect solution here and would prefer not to handle the "legacy" components.
+      //
+      // For legacy components we don't want artificial distance based attenuation to be applied to stereo audios
+      // so we set the distanceModel and rolloffFactor so the attenuation is always 1. The artificial distance based
+      // attenuation is calculated in the gain system for stereo audios.
+      APP.audioOverrides.set(el, {
         audioType: componentData.audioType,
-        sourceType: SourceType.MEDIA_VIDEO,
-        distanceModel: componentData.distanceModel,
-        rolloffFactor: componentData.rolloffFactor,
+        distanceModel:
+          componentData.audioType === AudioType.Stereo ? DistanceModelType.Linear : componentData.distanceModel,
+        rolloffFactor: componentData.audioType === AudioType.Stereo ? 0 : componentData.rolloffFactor,
         refDistance: componentData.refDistance,
         maxDistance: componentData.maxDistance,
         coneInnerAngle: componentData.coneInnerAngle,
@@ -252,6 +239,12 @@ async function mediaInflator(el, componentName, componentData, components) {
         coneOuterGain: componentData.coneOuterGain,
         gain: componentData.volume
       });
+      APP.sourceType.set(el, SourceType.MEDIA_VIDEO);
+
+      const audio = APP.audios.get(el);
+      if (audio) {
+        updateAudioSettings(el, audio);
+      }
     }
 
     el.setAttribute("video-pause-state", { paused: mediaOptions.videoPaused });
@@ -352,16 +345,8 @@ AFRAME.GLTFModelPlus.registerComponent(
   "trigger-volume",
   "trigger-volume",
   (el, componentName, componentData, components, indexToEntityMap) => {
-    const {
-      size,
-      target,
-      enterComponent,
-      enterProperty,
-      enterValue,
-      leaveComponent,
-      leaveProperty,
-      leaveValue
-    } = componentData;
+    const { size, target, enterComponent, enterProperty, enterValue, leaveComponent, leaveProperty, leaveValue } =
+      componentData;
 
     let enterComponentMapping, leaveComponentMapping, targetEntity;
 
@@ -369,7 +354,12 @@ AFRAME.GLTFModelPlus.registerComponent(
       enterComponentMapping = getSanitizedComponentMapping(enterComponent, enterProperty, publicComponents);
       leaveComponentMapping = getSanitizedComponentMapping(leaveComponent, leaveProperty, publicComponents);
 
+      // indexToEntityMap should be considered depredcated. These references are now resovled by the GLTFHubsComponentExtension
+      if (typeof target === "number") {
       targetEntity = indexToEntityMap[target];
+      } else {
+        targetEntity = target?.el;
+      }
 
       if (!targetEntity) {
         throw new Error(`Couldn't find target entity with index: ${target}.`);
@@ -419,7 +409,46 @@ AFRAME.GLTFModelPlus.registerComponent("particle-emitter", "particle-emitter");
 AFRAME.GLTFModelPlus.registerComponent("networked-drawing-buffer", "networked-drawing-buffer");
 
 AFRAME.GLTFModelPlus.registerComponent("audio-settings", "audio-settings", (el, _componentName, componentData) => {
-  el.sceneEl.systems["hubs-systems"].audioSettingsSystem.updateAudioSettings(componentData);
+  const removeUndefined = obj => {
+    return Object.entries(obj).reduce((result, [key, value]) => {
+      if (value !== undefined) {
+        result[key] = value;
+      }
+      return result;
+    }, {});
+  };
+  // TODO: This component should only overwrite the scene audio defaults if this
+  //       component is on the scene node. If this component is on some other node
+  //       we don't care about it and should ignore it.
+  APP.sceneAudioDefaults.set(
+    SourceType.MEDIA_VIDEO,
+    removeUndefined({
+      distanceModel: componentData.mediaDistanceModel,
+      rolloffFactor: componentData.mediaRolloffFactor,
+      refDistance: componentData.mediaRefDistance,
+      maxDistance: componentData.mediaMaxDistance,
+      coneInnerAngle: componentData.mediaConeInnerAngle,
+      coneOuterAngle: componentData.mediaConeOuterAngle,
+      coneOuterGain: componentData.mediaConeOuterGain,
+      gain: componentData.mediaVolume
+    })
+  );
+  APP.sceneAudioDefaults.set(
+    SourceType.AVATAR_AUDIO_SOURCE,
+    removeUndefined({
+      distanceModel: componentData.avatarDistanceModel,
+      rolloffFactor: componentData.avatarRolloffFactor,
+      refDistance: componentData.avatarRefDistance,
+      maxDistance: componentData.avatarMaxDistance,
+      coneInnerAngle: componentData.avatarConeInnerAngle,
+      coneOuterAngle: componentData.avatarConeOuterAngle,
+      coneOuterGain: componentData.avatarConeOuterGain,
+      gain: componentData.avatarVolume
+    })
+  );
+  for (const [el, audio] of APP.audios.entries()) {
+    updateAudioSettings(el, audio);
+  }
 });
 
 AFRAME.GLTFModelPlus.registerComponent(
@@ -430,7 +459,12 @@ AFRAME.GLTFModelPlus.registerComponent(
 
     let srcEl;
     if (srcNode !== undefined) {
+      // indexToEntityMap should be considered depredcated. These references are now resovled by the GLTFHubsComponentExtension
+      if (typeof srcNode === "number") {
       srcEl = indexToEntityMap[srcNode];
+      } else {
+        srcEl = srcNode?.el;
+      }
       if (!srcEl) {
         console.warn(
           `Error inflating gltf component "video-texture-srcEl": Couldn't find srcEl entity with index ${srcNode}`
@@ -450,6 +484,7 @@ AFRAME.GLTFModelPlus.registerComponent(
 AFRAME.GLTFModelPlus.registerComponent("video-texture-source", "video-texture-source");
 
 AFRAME.GLTFModelPlus.registerComponent("text", "text");
+
 AFRAME.GLTFModelPlus.registerComponent(
   "audio-target",
   "audio-target",
@@ -458,7 +493,12 @@ AFRAME.GLTFModelPlus.registerComponent(
 
     let srcEl;
     if (srcNode !== undefined) {
+      // indexToEntityMap should be considered depredcated. These references are now resovled by the GLTFHubsComponentExtension
+      if (typeof srcNode === "number") {
       srcEl = indexToEntityMap[srcNode];
+      } else {
+        srcEl = srcNode?.el;
+      }
       if (!srcEl) {
         console.warn(
           `Error inflating gltf component ${componentName}: Couldn't find srcEl entity with index ${srcNode}`
@@ -466,11 +506,20 @@ AFRAME.GLTFModelPlus.registerComponent(
       }
     }
 
+    if (componentData.positional !== undefined) {
     // Migrate audio-target component that has built-in audio params
-    if (componentData.positional) {
-      el.setAttribute("audio-params", {
+      // The way we are handling it is wrong. If a user created a scene in spoke with this old version
+      // of this component, all of these parameters will be present whether the user explicitly set
+      // the values for them or not. But really, they should only count as "overrides" if the user
+      // meant for them to take precendence over the app and scene defaults.
+      // TODO: Fix this issue. One option is to just ignore this component data, which might break old scenes
+      //       but simplifying the handling. Another option is to compare the component data here with
+      //       the "defaults" and only save the values that are different from the defaults. However,
+      //       this loses information if the user changed the scene settings but wanted this specific
+      //       node to use the "defaults".
+      //       I don't see a perfect solution here and would prefer not to handle the "legacy" components.
+      APP.audioOverrides.set(el, {
         audioType: componentData.positional ? AudioType.PannerNode : AudioType.Stereo,
-        sourceType: SourceType.MEDIA_VIDEO,
         distanceModel: componentData.distanceModel,
         rolloffFactor: componentData.rolloffFactor,
         refDistance: componentData.refDistance,
@@ -478,8 +527,14 @@ AFRAME.GLTFModelPlus.registerComponent(
         coneInnerAngle: componentData.coneInnerAngle,
         coneOuterAngle: componentData.coneOuterAngle,
         coneOuterGain: componentData.coneOuterGain,
-        gain: componentData.volume
+        gain: componentData.gain
       });
+      APP.sourceType.set(el, SourceType.AUDIO_TARGET);
+
+      const audio = APP.audios.get(el);
+      if (audio) {
+        updateAudioSettings(el, audio);
+      }
     }
 
     el.setAttribute(componentName, {
@@ -492,23 +547,60 @@ AFRAME.GLTFModelPlus.registerComponent(
 );
 AFRAME.GLTFModelPlus.registerComponent("zone-audio-source", "zone-audio-source");
 
-AFRAME.GLTFModelPlus.registerComponent(
-  "audio-params",
-  "audio-params",
-  (el, componentName, componentData, components) => {
-    if (components["audio"] || components["video"]) {
-      componentData["sourceType"] = SourceType.MEDIA_VIDEO;
-    } else if (components["audio-target"]) {
-      componentData["sourceType"] = SourceType.AUDIO_TARGET;
-    } else if (components["audio-zone"]) {
-      componentData["sourceType"] = SourceType.AUDIO_ZONE;
+AFRAME.GLTFModelPlus.registerComponent("audio-params", "audio-params", (el, componentName, componentData) => {
+  APP.audioOverrides.set(el, componentData);
+  const audio = APP.audios.get(el);
+  if (audio) {
+    updateAudioSettings(el, audio);
     }
+});
+
+AFRAME.GLTFModelPlus.registerComponent("audio-zone", "audio-zone", (el, componentName, componentData) => {
     el.setAttribute(componentName, { ...componentData });
+});
+
+AFRAME.GLTFModelPlus.registerComponent("background", "background", (el, _componentName, componentData) => {
+  console.warn(
+    "The `background` component is deprecated, use `backgroundColor` on the `environment-settings` component instead."
+  );
+  // This assumes the background component is on the root entity, which it is for spoke, the only thing using this component
+  el.setAttribute("environment-settings", { backgroundColor: new THREE.Color(componentData.color) });
+});
+
+AFRAME.GLTFModelPlus.registerComponent("fog", "fog", (el, _componentName, componentData) => {
+  // TODO need to actually implement this in blender exporter before showing this warning
+  // console.warn(
+  //   "The `fog` component is deprecated, use the fog properties on the `environment-settings` component instead."
+  // );
+  // This assumes the fog component is on the root entitycoco
+  el.setAttribute("environment-settings", {
+    fogType: componentData.type,
+    fogColor: new THREE.Color(componentData.color),
+    fogNear: componentData.near,
+    fogFar: componentData.far,
+    fogDensity: componentData.density
+  });
+});
+
+AFRAME.GLTFModelPlus.registerComponent(
+  "environment-settings",
+  "environment-settings",
+  (el, componentName, componentData) => {
+    // TODO a bit silly to be storing this as an aframe component. Use a glboal store of some sort
+    el.setAttribute(componentName, {
+      ...componentData,
+      backgroundColor: new THREE.Color(componentData.backgroundColor)
+    });
   }
 );
 
-AFRAME.GLTFModelPlus.registerComponent("audio-zone", "audio-zone", (el, componentName, componentData) => {
-  el.setAttribute(componentName, { ...componentData });
+AFRAME.GLTFModelPlus.registerComponent("reflection-probe", "reflection-probe", (el, componentName, componentData) => {
+  // TODO PMREMGenerator should be fixed to not assume this
+  componentData.envMapTexture.flipY = true;
+  // Assume texture is always an equirect for now
+  componentData.envMapTexture.mapping = THREE.EquirectangularReflectionMapping;
+
+  el.setAttribute(componentName, componentData);
 });
 
 registerCustomGLTFModelPlusComponents();

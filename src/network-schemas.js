@@ -164,22 +164,6 @@ function registerNetworkSchemas() {
   });
 
   NAF.schemas.add({
-    template: "#interactable-media-frame",
-    components: [
-      {
-        component: "media-frame",
-        property: "targetId"
-      },
-      {
-        component: "media-frame",
-        property: "originalTargetScale"
-      }
-    ],
-    // TODO we probably want media frames to support permissioning of some form
-    nonAuthorizedComponents: ["media-frame"]
-  });
-
-  NAF.schemas.add({
     template: "#static-media",
     components: [...getMediaVideoComponent(),
       // TODO: Optimize checking mediaOptions with requiresNetworkUpdate.
@@ -247,26 +231,6 @@ function registerNetworkSchemas() {
         requiresNetworkUpdate: vectorRequiresUpdate(0.001)
       },
       "networked-drawing"
-    ]
-  });
-
-  NAF.schemas.add({
-    template: "#interactable-camera",
-    components: [
-      "position",
-      "rotation",
-      {
-        component: "camera-tool",
-        property: "isSnapping"
-      },
-      {
-        component: "camera-tool",
-        property: "isRecording"
-      },
-      {
-        component: "camera-tool",
-        property: "label"
-      }
     ]
   });
 

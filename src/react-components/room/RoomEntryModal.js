@@ -11,11 +11,10 @@ import styles from "./RoomEntryModal.scss";
 import styleUtils from "../styles/style-utils.scss";
 import { useCssBreakpoints } from "react-use-css-breakpoints";
 import { Column } from "../layout/Column";
+import { AppLogo } from "../misc/AppLogo";
 import { FormattedMessage } from "react-intl";
 
 export function RoomEntryModal({
-  appName,
-  logoSrc,
   className,
   roomName,
   showJoinRoom,
@@ -35,12 +34,11 @@ export function RoomEntryModal({
   return (
     <Modal className={classNames(styles.roomEntryModal, className)} disableFullscreen {...rest}>
       <Column center className={styles.content}>
-        {breakpoint !== "sm" &&
-          breakpoint !== "md" && (
-            <div className={styles.logoContainer}>
-              <img src={logoSrc} alt={appName} />
-            </div>
-          )}
+        {breakpoint !== "sm" && breakpoint !== "md" && (
+          <div className={styles.logoContainer}>
+            <AppLogo />
+          </div>
+        )}
         <div className={styles.roomName}>
           <h5>
             <FormattedMessage id="room-entry-modal.room-name-label" defaultMessage="Room Name" />
@@ -72,18 +70,17 @@ export function RoomEntryModal({
               </span>
             </Button>
           )}
-          {showOptions &&
-            breakpoint !== "sm" && (
-              <>
-                <hr className={styleUtils.showLg} />
-                <Button preset="transparent" className={styleUtils.showLg} onClick={onOptions}>
-                  <SettingsIcon />
-                  <span>
-                    <FormattedMessage id="room-entry-modal.options-button" defaultMessage="Options" />
-                  </span>
-                </Button>
-              </>
-            )}
+          {showOptions && breakpoint !== "sm" && (
+            <>
+              <hr className={styleUtils.showLg} />
+              <Button preset="transparent" className={styleUtils.showLg} onClick={onOptions}>
+                <SettingsIcon />
+                <span>
+                  <FormattedMessage id="room-entry-modal.options-button" defaultMessage="Options" />
+                </span>
+              </Button>
+            </>
+          )}
         </Column>
       </Column>
     </Modal>
@@ -91,8 +88,6 @@ export function RoomEntryModal({
 }
 
 RoomEntryModal.propTypes = {
-  appName: PropTypes.string,
-  logoSrc: PropTypes.string,
   className: PropTypes.string,
   roomName: PropTypes.string.isRequired,
   showJoinRoom: PropTypes.bool,

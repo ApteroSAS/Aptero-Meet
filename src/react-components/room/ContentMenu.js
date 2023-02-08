@@ -20,6 +20,17 @@ ContentMenuButton.propTypes = {
   active: PropTypes.bool
 };
 
+export function ECSDebugMenuButton(props) {
+  return (
+    <ContentMenuButton {...props}>
+      <ObjectsIcon />
+      <span>
+        <FormattedMessage id="content-menu.ecs-debug-menu-button" defaultMessage="ECS Debug" />
+      </span>
+    </ContentMenuButton>
+  );
+}
+
 export function ObjectsMenuButton(props) {
   return (
     <ContentMenuButton {...props}>
@@ -32,21 +43,31 @@ export function ObjectsMenuButton(props) {
 }
 
 export function PeopleMenuButton(props) {
-    return (
-      <ContentMenuButton {...props}>
-        <PeopleIcon />
-        <span>
-        <FormattedMessage id="content-menu.people-menu-button" defaultMessage="People" />({`${props.presencecount}`})
-        </span>
-      </ContentMenuButton>
-    );
+  return (
+    <ContentMenuButton {...props}>
+      <PeopleIcon />
+      <span>
+        <FormattedMessage
+          id="content-menu.people-menu-button"
+          defaultMessage="People ({presenceCount})"
+          values={{ presenceCount: props.presencecount }}
+        />
+      </span>
+    </ContentMenuButton>
+  );
 }
 PeopleMenuButton.propTypes = {
   presencecount: PropTypes.number
 };
 
 export function ContentMenu({ children }) {
-  return <div className={styles.contentMenu}>{joinChildren(children, () => <div className={styles.separator} />)}</div>;
+  return (
+    <div className={styles.contentMenu}>
+      {joinChildren(children, () => (
+        <div className={styles.separator} />
+      ))}
+    </div>
+  );
 }
 
 ContentMenu.propTypes = {

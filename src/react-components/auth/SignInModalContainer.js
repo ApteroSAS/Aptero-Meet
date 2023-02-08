@@ -1,4 +1,5 @@
 import React, { useCallback, useReducer, useContext, useEffect } from "react";
+import { TERMS, PRIVACY } from "../../constants";
 import configs from "../../utils/configs";
 import { AuthContext } from "./AuthContext";
 import { SignInModal, SignInStep, WaitForVerification, SubmitEmail,WaitForMicrosoftVerification } from "./SignInModal";
@@ -42,7 +43,7 @@ function useSignIn() {
         dispatch({ type: SignInAction.verificationReceived });
       }).catch(e => {
         console.log(e);
-    });
+      });
       authenticationType.adresseMailAuhtentication=true;
       authenticationType.microsoftAuhtentication=false;
       dispatch({ type: SignInAction.submitEmail, email });
@@ -87,37 +88,34 @@ export function SignInModalContainer() {
   const { step, submitEmail, submitEmailMicrosoftLogin, cancel, email } = useSignIn();
   const redirectUrl = qs.get("sign_in_destination_url") || "/";
 
-  useEffect(
-    () => {
+  useEffect(() => {
       if (step === SignInStep.complete) {
         window.location = redirectUrl;
       }
-    },
-    [step, redirectUrl]
-  );
+  }, [step, redirectUrl]);
   if(!authenticationType.microsoftAuhtentication) {
-    return (
-      <SignInModal disableFullscreen>
-        {step === SignInStep.submit ? (
-          <SubmitEmail
-            onSubmitEmail={submitEmail}
+  return (
+    <SignInModal disableFullscreen>
+      {step === SignInStep.submit ? (
+        <SubmitEmail
+          onSubmitEmail={submitEmail}
             onSubmitEmailMicrosoftLogin={submitEmailMicrosoftLogin}
-            initialEmail={email}
-            signInReason={qs.get("sign_in_reason")}
-            termsUrl={configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
-            showTerms={configs.feature("show_terms")}
-            privacyUrl={configs.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")}
-            showPrivacy={configs.feature("show_privacy")}
-          />
-        ) : (
-          <WaitForVerification
-            onCancel={cancel}
-            email={email}
-            showNewsletterSignup={configs.feature("show_newsletter_signup")}
-          />
-        )}
-      </SignInModal>
-    );
+          initialEmail={email}
+          signInReason={qs.get("sign_in_reason")}
+          termsUrl={configs.link("terms_of_use", TERMS)}
+          showTerms={configs.feature("show_terms")}
+          privacyUrl={configs.link("privacy_notice", PRIVACY)}
+          showPrivacy={configs.feature("show_privacy")}
+        />
+      ) : (
+        <WaitForVerification
+          onCancel={cancel}
+          email={email}
+          showNewsletterSignup={configs.feature("show_newsletter_signup")}
+        />
+      )}
+    </SignInModal>
+  );
   } else{
     return (
       <SignInModal disableFullscreen>

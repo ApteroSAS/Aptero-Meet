@@ -1,9 +1,10 @@
-// babel.config.js
+
 const plugins = [
   // TODO: When i18n build pipeline is finished move to: [ "react-intl", { "removeDefaultMessage": true } ]
   "react-intl",
-  "transform-react-jsx-img-import",
   ["@babel/proposal-class-properties", { "loose": true }],
+  ["@babel/plugin-proposal-private-property-in-object", { loose: true }],
+  ["@babel/plugin-proposal-private-methods", { loose: true }],
   "@babel/proposal-object-rest-spread",
   // Samsung Internet on the Oculus Go version is stuck at version 5.2, which is a
   // Chromium 51, as of this writing. It needs babel to transpile async/await.
@@ -26,12 +27,15 @@ if (process.env.USE_BABEL_PLUGIN_ISTANBUL) {
 module.exports = {
   presets:  [
     "@babel/react",
-    "@babel/preset-typescript",
     ["@babel/env",
       {
+        useBuiltIns: "entry",
+	corejs: "3.24.1",
         "loose": true,
         "exclude": [
-          "transform-regenerator"
+          "transform-regenerator",
+          "es.array.push",
+          "es.array.unshift"
         ],
         "targets": {
           "browsers": [
@@ -50,9 +54,11 @@ module.exports = {
           ]
         },
         // false = do not polyfill stuff unneccessarily
-        "useBuiltIns": false
+        "useBuiltIns": false,
+	debug: false
       }
-    ]
+    ],
+    "@babel/typescript"
   ],
   plugins,
 };

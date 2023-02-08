@@ -105,16 +105,13 @@ export function AuthContextProvider({ children, store }) {
     [store]
   );
 
-  const signOut = useCallback(
-    async () => {
+  const signOut = useCallback(async () => {
       configs.setIsAdmin(false);
       store.update({ credentials: { token: null, email: null } });
       await store.resetToRandomDefaultAvatar();
       const authChannel=new AuthChannel(store);
       await authChannel.signOut(null);
-    },
-    [store]
-  );
+  }, [store]);
 
   const [context, setContext] = useState({
     initialized: false,
@@ -129,8 +126,7 @@ export function AuthContextProvider({ children, store }) {
   });
 
   // Trigger re-renders when the store updates
-  useEffect(
-    () => {
+  useEffect(() => {
       const onStoreChanged = () => {
         setContext(state => ({
           ...state,
@@ -165,9 +161,7 @@ export function AuthContextProvider({ children, store }) {
       return () => {
         store.removeEventListener("statechanged", onStoreChanged);
       };
-    },
-    [store, setContext]
-  );
+  }, [store, setContext]);
 
   return <AuthContext.Provider value={context}>{children}</AuthContext.Provider>;
 }

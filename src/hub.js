@@ -12,19 +12,40 @@ import {
 import "./utils/debug-log";
 import configs from "./utils/configs";
 import "./utils/theme";
+
+import "core-js/stable";
+import "regenerator-runtime/runtime";
+
+console.log(
+  `App version: ${
+    configs.IS_LOCAL_OR_CUSTOM_CLIENT
+      ? `Custom client or local client (undeploy custom client to run build ${process.env.BUILD_VERSION})`
+      : process.env.BUILD_VERSION || "?"
+  }`
+);
+
 import "./react-components/styles/global.scss";
 import "./assets/stylesheets/globals.scss";
 import "./assets/stylesheets/hub.scss";
-import initialBatchImage from "./assets/images/warning_icon.png";
 import loadingEnvironment from "./assets/models/LoadingEnvironment.glb";
+
+import "aframe";
+import "./utils/aframe-overrides";
 
 // A-Frame hardcodes THREE.Cache.enabled = true
 // But we don't want to use THREE.Cache because
 // web browser cache should work well.
 // So we disable it here.
+import * as THREE from "three";
 THREE.Cache.enabled = false;
+THREE.Object3D.DefaultMatrixAutoUpdate = false;
 
-import patchThreeAllocations from "./utils/threejs-allocation-patches";
+import "./utils/logging";
+import { patchWebGLRenderingContext } from "./utils/webgl";
+patchWebGLRenderingContext();
+
+import "networked-aframe/src/index";
+import "webrtc-adapter";
 import { detectOS, detect } from "detect-browser";
 import {
   getReticulumFetchUrl,
@@ -41,8 +62,85 @@ import { emitter } from "./emitter";
 import nextTick from "./utils/next-tick";
 import { addAnimationComponents } from "./utils/animation";
 import Cookies from "js-cookie";
-const DIALOG_CONNECTION_ERROR_FATAL = "dialog-connection-error-fatal";
+import { DIALOG_CONNECTION_ERROR_FATAL, DIALOG_CONNECTION_CONNECTED } from "./naf-dialog-adapter";
 import "./change-hub";
+
+import "./components/scene-components";
+import "./components/mute-mic";
+import "./components/bone-mute-state-indicator";
+import "./components/bone-visibility";
+import "./components/fader";
+import "./components/in-world-hud";
+import "./components/emoji";
+import "./components/emoji-hud";
+import "./components/virtual-gamepad-controls";
+import "./components/ik-controller";
+import "./components/hand-controls2";
+import "./components/hoverable-visuals";
+import "./components/hover-visuals";
+import "./components/offset-relative-to";
+import "./components/player-info";
+import "./components/name-tag";
+import "./components/debug";
+import "./components/hand-poses";
+import "./components/hud-controller";
+import "./components/freeze-controller";
+import "./components/icon-button";
+import "./components/text-button";
+import "./components/block-button";
+import "./components/mute-button";
+import "./components/kick-button";
+import "./components/close-vr-notice-button";
+import "./components/leave-room-button";
+import "./components/visible-if-permitted";
+import "./components/visibility-on-content-types";
+import "./components/hide-when-pinned-and-forbidden";
+import "./components/visibility-while-frozen";
+import "./components/stats-plus";
+import "./components/networked-avatar";
+import "./components/media-video";
+import "./components/media-pdf";
+import "./components/media-image";
+import "./components/avatar-volume-controls";
+import "./components/pinch-to-move";
+import "./components/pitch-yaw-rotator";
+import "./components/position-at-border";
+import "./components/pinnable";
+import "./components/pin-networked-object-button";
+import "./components/mirror-media-button";
+import "./components/close-mirrored-media-button";
+import "./components/drop-object-button";
+import "./components/camera-focus-button";
+import "./components/unmute-video-button";
+import "./components/visible-to-owner";
+import "./components/emit-state-change";
+import "./components/action-to-event";
+import "./components/action-to-remove";
+import "./components/emit-scene-event-on-remove";
+import "./components/follow-in-fov";
+import "./components/clone-media-button";
+import "./components/open-media-button";
+import "./components/refresh-media-button";
+import "./components/tweet-media-button";
+import "./components/remix-avatar-button";
+import "./components/transform-object-button";
+import "./components/scale-button";
+import "./components/hover-menu";
+import "./components/disable-frustum-culling";
+import "./components/teleporter";
+import "./components/track-pose";
+import "./components/replay";
+import "./components/visibility-by-path";
+import "./components/tags";
+import "./components/periodic-full-syncs";
+import "./components/inspect-button";
+import "./components/inspect-pivot-child-selector";
+import "./components/inspect-pivot-offset-from-camera";
+import "./components/optional-alternative-to-not-hide";
+import "./components/avatar-audio-source";
+import "./components/avatar-inspect-collider";
+import "./components/video-texture-target";
+import "./components/mirror";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -64,9 +162,39 @@ import SceneEntryManager from "./scene-entry-manager";
 import Subscriptions from "./subscriptions";
 import { createInWorldLogMessage } from "./react-components/chat-message";
 
+import "./systems/nav";
+import "./systems/frame-scheduler";
+import "./systems/personal-space-bubble";
+import "./systems/app-mode";
+import "./systems/permissions";
+import "./systems/exit-on-blur";
+import "./systems/auto-pixel-ratio";
+import "./systems/idle-detector";
+import "./systems/pen-tools";
+import "./systems/userinput/userinput";
+import "./systems/userinput/userinput-debug";
+import "./systems/ui-hotkeys";
+import "./systems/tips";
+import "./systems/interactions";
+import "./systems/hubs-systems";
+import "./systems/capture-system";
+import "./systems/listed-media";
+import "./systems/linked-media";
+import "./systems/audio-debug-system";
+import "./systems/audio-gain-system";
+
+import "./gltf-component-mappings";
+
+import { App, getScene } from "./app";
 import MediaDevicesManager from "./utils/media-devices-manager";
+import PinningHelper from "./utils/pinning-helper";
 import { sleep } from "./utils/async-utils";
 import { platformUnsupported } from "./support";
+import { renderAsEntity } from "./utils/jsx-entity";
+import { VideoMenuPrefab } from "./prefabs/video-menu";
+import { ObjectMenuPrefab } from "./prefabs/object-menu";
+import { loadWaypointPreviewModel, WaypointPreview } from "./prefabs/waypoint-preview";
+import { preload } from "./utils/preload";
 
 //aptero service
 import { apteroService } from "./aptero/ApteroServices";
@@ -76,9 +204,23 @@ import { fetchICEservers } from "./aptero/module/webRTCadapter/adapter-config";
 import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
 msTeamsAPILight().redirectToTeamsSidePanel();
 //aptero service end
+window.APP = new App();
+renderAsEntity(APP.world, VideoMenuPrefab());
+renderAsEntity(APP.world, VideoMenuPrefab());
+function addToScene(entityDef, visible) {
+  return getScene().then(scene => {
+    const eid = renderAsEntity(APP.world, entityDef);
+    const obj = APP.world.eid2obj.get(eid);
+    scene.add(obj);
+    obj.visible = !!visible;
+  });
+}
+preload(addToScene(ObjectMenuPrefab(), false));
+preload(addToScene(ObjectMenuPrefab(), false));
+preload(loadWaypointPreviewModel().then(() => addToScene(WaypointPreview(), false)));
 
 const store = window.APP.store;
-store.update({ preferences: { shouldPromptForRefresh: undefined } }); // Clear flag that prompts for refresh from preference screen
+store.update({ preferences: { shouldPromptForRefresh: false } }); // Clear flag that prompts for refresh from preference screen
 const mediaSearchStore = window.APP.mediaSearchStore;
 const OAUTH_FLOW_PERMS_TOKEN_KEY = "ret-oauth-flow-perms-token";
 const NOISY_OCCUPANT_COUNT = 30; // Above this # of occupants, we stop posting join/leaves/renames
@@ -93,7 +235,23 @@ if (isEmbed && !qs.get("embed_token")) {
   throw new Error("no embed token");
 }
 
-THREE.Object3D.DefaultMatrixAutoUpdate = false;
+import "./components/owned-object-limiter";
+import "./components/owned-object-cleanup-timeout";
+import "./components/set-unowned-body-kinematic";
+import "./components/scalable-when-grabbed";
+import "./components/networked-counter";
+import "./components/event-repeater";
+import "./components/set-yxz-order";
+
+import "./components/cursor-controller";
+
+import "./components/tools/pen";
+import "./components/tools/pen-laser";
+import "./components/tools/networked-drawing";
+import "./components/tools/drawing-manager";
+
+import "./components/body-helper";
+import "./components/shape-helper";
 
 import registerNetworkSchemas from "./network-schemas";
 import registerTelemetry from "./telemetry";
@@ -108,6 +266,13 @@ import { ExitReason } from "./react-components/room/ExitedRoomScreen";
 import { OAuthScreenContainer } from "./react-components/auth/OAuthScreenContainer";
 import { SignInMessages } from "./react-components/auth/SignInModal";
 import { ThemeProvider } from "./react-components/styles/theme";
+import { LogMessageType } from "./react-components/room/ChatSidebar";
+import "./load-media-on-paste-or-drop";
+import { swapActiveScene } from "./bit-systems/scene-loading";
+import { setLocalClientID } from "./bit-systems/networking";
+import { listenForNetworkMessages } from "./utils/listen-for-network-messages";
+import { exposeBitECSDebugHelpers } from "./bitecs-debug-helpers";
+import { loadStoredRoomData, loadLegacyRoomObjects } from "./utils/load-room-objects";
 import { wait } from "./aptero/util/AsyncWaiter";
 import { setupVersionComp } from "./aptero/module/HubsBridge/utils/Version";
 import { minimumQualityService } from "./aptero/module/perf/MinimumQualityService";
@@ -122,9 +287,14 @@ let isOAuthModal = false;
 
 // OAuth popup handler
 /*// TODO: Replace with a new oauth callback route that has this postMessage script.
+try {
 if (window.opener && window.opener.doingTwitterOAuth) {
   window.opener.postMessage("oauth-successful");
   isOAuthModal = true;
+    window.close();
+  }
+} catch (e) {
+  console.error("Exception in oauth processing code", e);
 }*/
 
 const isBotMode = qsTruthy("bot");
@@ -141,7 +311,12 @@ if (!isOAuthModal) {
   detectConcurrentLoad();
 }
 
+if (qsTruthy("ecsDebug")) {
+  exposeBitECSDebugHelpers();
+}
+
 function setupLobbyCamera() {
+  console.log("Setting up lobby camera");
   const camera = document.getElementById("scene-preview-node");
   const previewCamera = document.getElementById("environment-scene").object3D.getObjectByName("scene-preview-camera");
 
@@ -163,10 +338,7 @@ function setupLobbyCamera() {
 let uiProps = {};
 
 // Hub ID and slug are the basename
-let routerBaseName = document.location.pathname
-  .split("/")
-  .slice(0, 2)
-  .join("/");
+let routerBaseName = document.location.pathname.split("/").slice(0, 2).join("/");
 
 if (document.location.pathname.includes("hub.html")) {
   routerBaseName = "/";
@@ -243,13 +415,16 @@ export async function getSceneUrlForHub(hub) {
   //aptero
   //await microsoftUrlService.preFetchConvertMicrosoftUrl(sceneUrl);
 
-  if (isLegacyBundle) {
+  if (qsTruthy("debugLocalScene") && sceneUrl?.startsWith("blob:")) {
+    // we skip doing this if you haven't entered because refreshing the page will invalidate blob urls and break loading
+    sceneUrl = document.querySelector("a-scene").is("entered") ? sceneUrl : loadingEnvironment;
+  } else if (isLegacyBundle) {
     // Deprecated
     const res = await fetch(sceneUrl);
     try {//Aptero TryCatch (c'est ok de supprimer ce if)
-      const data = await res.json();
-      const baseURL = new URL(THREE.LoaderUtils.extractUrlBase(sceneUrl), window.location.href);
-      sceneUrl = new URL(data.assets[0].src, baseURL).href;
+    const data = await res.json();
+    const baseURL = new URL(THREE.LoaderUtils.extractUrlBase(sceneUrl), window.location.href);
+    sceneUrl = new URL(data.assets[0].src, baseURL).href;
     }
     catch(e){
       //The 360toScene api is misinterpreted as legacy while being a working glb. We can filter by looking for errors
@@ -262,12 +437,19 @@ export async function getSceneUrlForHub(hub) {
 }
 
 export async function updateEnvironmentForHub(hub, entryManager) {
+  console.log("Updating environment for hub");
   const sceneUrl = await getSceneUrlForHub(hub);
   let sameSceneAsBefore;
   try {
     sameSceneAsBefore = document.querySelector("#environment-scene").childNodes[0].components["gltf-model-plus"].data.src === sceneUrl;
   }catch (e) {
     sameSceneAsBefore = false;
+  }
+
+  if (qsTruthy("newLoader")) {
+    console.log("Using new loading path for scenes.");
+    swapActiveScene(APP.world, sceneUrl);
+    return;
   }
 
   const sceneErrorHandler = () => {
@@ -278,7 +460,10 @@ export async function updateEnvironmentForHub(hub, entryManager) {
   const environmentScene = document.querySelector("#environment-scene");
   const sceneEl = document.querySelector("a-scene");
 
+  const envSystem = sceneEl.systems["hubs-systems"].environmentSystem;
+
   console.log(`Scene URL: ${sceneUrl}`);
+  const loadStart = performance.now();
 
   let environmentEl = null;
 
@@ -290,10 +475,14 @@ export async function updateEnvironmentForHub(hub, entryManager) {
       () => {
         environmentEl.removeEventListener("model-error", sceneErrorHandler);
 
+        console.log(`Scene file initial load took ${Math.round(performance.now() - loadStart)}ms`);
+
         // Show the canvas once the model has loaded
         document.querySelector(".a-canvas").classList.remove("a-hidden");
 
         sceneEl.addState("visible");
+
+        envSystem.updateEnvironment(environmentEl);
 
         //TODO: check if the environment was made with spoke to determine if a shape should be added
         traverseMeshesAndAddShapes(environmentEl);
@@ -321,13 +510,18 @@ export async function updateEnvironmentForHub(hub, entryManager) {
           "model-loaded",
           () => {
             environmentEl.removeEventListener("model-error", sceneErrorHandler);
+
+            envSystem.updateEnvironment(environmentEl);
+
+            console.log(`Scene file update load took ${Math.round(performance.now() - loadStart)}ms`);
+
             traverseMeshesAndAddShapes(environmentEl);
 
             if(!sameSceneAsBefore) {
-              // We've already entered, so move to new spawn point once new environment is loaded
-              if (sceneEl.is("entered")) {
-                waypointSystem.moveToSpawnPoint();
-              }
+            // We've already entered, so move to new spawn point once new environment is loaded
+            if (sceneEl.is("entered")) {
+              waypointSystem.moveToSpawnPoint();
+            }
             }
 
             const fader = document.getElementById("viewing-camera").components["fader"];
@@ -376,7 +570,7 @@ function onConnectionError(entryManager, connectError) {
 // TODO: Find a home for this
 // TODO: Naming. Is this an "event bus"?
 const events = emitter();
-function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data, permsToken) {
+function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data) {
   const scene = document.querySelector("a-scene");
   const isRejoin = NAF.connection.isConnected();
 
@@ -405,15 +599,6 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data,
   if (qs.has("offline")) {
     hub.port = 666;
   }
-  let embedToken = hub.embed_token;
-
-  if (!embedToken) {
-    const embedTokenEntry = store.state.embedTokens && store.state.embedTokens.find(t => t.hubId === hub.hub_id);
-
-    if (embedTokenEntry) {
-      embedToken = embedTokenEntry.embedToken;
-    }
-  }
 
   console.log(`Dialog host: ${hub.host}:${hub.port}`);
 
@@ -426,8 +611,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data,
       scene.emit("action_selected_media_result_entry", { entry, selectAction });
     },
     onMediaSearchCancelled: entry => scene.emit("action_media_search_cancelled", entry),
-    onAvatarSaved: entry => scene.emit("action_avatar_saved", entry),
-    embedToken: embedToken
+    onAvatarSaved: entry => scene.emit("action_avatar_saved", entry)
   });
 
   scene.addEventListener("action_selected_media_result_entry", e => {
@@ -454,15 +638,19 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data,
   scene.addEventListener(
     "didConnectToNetworkedScene",
     () => {
+      if (qsTruthy("newLoader")) {
+        loadStoredRoomData(hub.hub_id);
+        loadLegacyRoomObjects(hub.hub_id);
+      } else {
       // Append objects once we are in the NAF room since ownership may be taken.
       const objectsScene = document.querySelector("#objects-scene");
       const objectsUrl = getReticulumFetchUrl(`/${hub.hub_id}/objects.gltf`);
       const objectsEl = document.createElement("a-entity");
-
       objectsEl.setAttribute("gltf-model-plus", { src: objectsUrl, useCache: false, inflate: true });
 
       if (!isBotMode) {
         objectsScene.appendChild(objectsEl);
+      }
       }
     },
     { once: true }
@@ -472,13 +660,15 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data,
     room: hub.hub_id,
     serverURL: hub.port == 443 ? `wss://${hub.host}` : `wss://${hub.host}:${hub.port}`,
     debug: !!isDebug,
-    adapter: "phoenix" //TODO aptero check that let adapter = await choseAdapter();
+    adapter: "phoenix"
   });
 
   (async () => {
     while (!scene.components["networked-scene"] || !scene.components["networked-scene"].data) await nextTick();
 
     const loadEnvironmentAndConnect = () => {
+      console.log("Loading environment and connecting to dialog servers");
+
       updateEnvironmentForHub(hub, entryManager);
 
       // Disconnect in case this is a re-entry
@@ -486,7 +676,6 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data,
       APP.dialog.connect({
         serverUrl: `wss://${hub.host}:${hub.port}`,
         roomId: hub.hub_id,
-        joinToken: permsToken,
         serverParams: { host: hub.host, port: hub.port, turn: hub.turn },
         scene,
         clientId: data.session_id,
@@ -518,10 +707,13 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data,
     scene.emit("hub_updated", { hub });
     const hideui = new URL(window.location.href).searchParams.get("hideui");
     if (!isEmbed || hideui || msTeamsAPILight().msTeams()) {
+      console.log("Page is not embedded so environment initialization will start immediately");
       loadEnvironmentAndConnect();
     } else {
+      console.log("Page is embedded so environment initialization will be deferred");
       remountUI({
         onPreloadLoadClicked: () => {
+          console.log("Preload has been activated");
           hubChannel.allowNAFTraffic(true);
           remountUI({ showPreload: false });
           loadEnvironmentAndConnect();
@@ -538,6 +730,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data,
 }
 
 async function runBotMode(scene, entryManager) {
+  console.log("Running in bot mode...");
   const noop = () => {};
   const alwaysFalse = () => false;
   scene.renderer = {
@@ -549,7 +742,7 @@ async function runBotMode(scene, entryManager) {
   };
 
   while (!NAF.connection.isConnected()) await nextTick();
-  entryManager.enterSceneWhenLoaded(false);
+  entryManager.enterSceneWhenLoaded(false, false);
 }
 
 const init = async () => {
@@ -577,21 +770,21 @@ const init = async () => {
   }
 
   if(!msTeamsAPILight().msTeams()) {
-    const detectedOS = detectOS(navigator.userAgent);
-    const browser = detect();
-    // HACK - it seems if we don't initialize the mic track up-front, voices can drop out on iOS
-    // safari when initializing it later.
-    if (["iOS", "Mac OS"].includes(detectedOS) && ["safari", "ios"].includes(browser.name)) {
-      try {
+  const detectedOS = detectOS(navigator.userAgent);
+  const browser = detect();
+  // HACK - it seems if we don't initialize the mic track up-front, voices can drop out on iOS
+  // safari when initializing it later.
+  if (["iOS", "Mac OS"].includes(detectedOS) && ["safari", "ios"].includes(browser.name)) {
+    try {
         //await createTrack({ audio: true });//Type MediaStream
         //note aptero we do not need to use create track here since this is just a hack to trigger safari audio authorization popup
-        await navigator.mediaDevices.getUserMedia({audio: true});
-      } catch (e) {
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (e) {
         console.error(e);
-        remountUI({showSafariMicDialog: true});
-        return;
-      }
+      remountUI({ showSafariMicDialog: true });
+      return;
     }
+  }
   }
 
   const hubId = getCurrentHubId();
@@ -614,18 +807,10 @@ const init = async () => {
   subscriptions.register();
 
   const scene = document.querySelector("a-scene");
-  window.APP.scene = scene;
-  scene.renderer.debug.checkShaderErrors = false;
-
-  // HACK - Trigger initial batch preparation with an invisible object
-  scene
-    .querySelector("#batch-prep")
-    .setAttribute("media-image", { batch: true, src: initialBatchImage, contentType: "image/png" });
 
   const onSceneLoaded = () => {
     const physicsSystem = scene.systems["hubs-systems"].physicsSystem;
     physicsSystem.setDebug(isDebug || physicsSystem.debug);
-    patchThreeAllocations();
   };
   if (scene.hasLoaded) {
     onSceneLoaded();
@@ -646,6 +831,9 @@ const init = async () => {
   const entryManager = new SceneEntryManager(hubChannel, authChannel, history);
   window.APP.entryManager = entryManager;
 
+  APP.dialog.on(DIALOG_CONNECTION_CONNECTED, () => {
+    scene.emit("didConnectToDialog");
+  });
   APP.dialog.on(DIALOG_CONNECTION_ERROR_FATAL, () => {
     // TODO: Change the wording of the connect error to match dialog connection error
     // TODO: Tell the user that dialog is broken, but don't completely end the experience
@@ -654,7 +842,7 @@ const init = async () => {
   });
 
   const audioSystem = scene.systems["hubs-systems"].audioSystem;
-  window.APP.mediaDevicesManager = new MediaDevicesManager(scene, store, audioSystem);
+  APP.mediaDevicesManager = new MediaDevicesManager(scene, store, audioSystem);
 
   const performConditionalSignIn = async (predicate, action, signInMessage, onFailure) => {
     if (predicate()) return action();
@@ -665,7 +853,7 @@ const init = async () => {
       showSignInDialog: true,
       signInMessage,
       onContinueAfterSignIn: async () => {
-        remountUI({ showSignInDialog: false });
+        remountUI({ showSignInDialog: false, onContinueAfterSignIn: null });
         let actionError = null;
         if (predicate()) {
           try {
@@ -682,6 +870,8 @@ const init = async () => {
       }
     });
   };
+
+  window.APP.pinningHelper = new PinningHelper(hubChannel, authChannel, store, performConditionalSignIn);
 
   window.addEventListener("action_create_avatar", () => {
     performConditionalSignIn(
@@ -891,6 +1081,8 @@ const init = async () => {
   );
 
   environmentScene.addEventListener("model-loaded", ({ detail: { model } }) => {
+    console.log("Environment scene has loaded");
+
     if (!scene.is("entered")) {
       setupLobbyCamera();
     }
@@ -898,9 +1090,6 @@ const init = async () => {
     // This will be run every time the environment is changed (including the first load.)
     remountUI({ environmentSceneLoaded: true });
     scene.emit("environment-scene-loaded", model);
-
-    // Re-bind the teleporter controls collision meshes in case the scene changed.
-    document.querySelectorAll("a-entity[teleporter]").forEach(x => x.components["teleporter"].queryCollisionEntities());
 
     for (const modelEl of environmentScene.children) {
       addAnimationComponents(modelEl);
@@ -1040,7 +1229,9 @@ const init = async () => {
       roles: meta.roles,
       permissions: meta.permissions,
       streaming: meta.streaming,
-      recording: meta.recording
+      recording: meta.recording,
+      hand_raised: meta.hand_raised,
+      typing: meta.typing
     });
   });
   events.on(`hub:join`, ({ key, meta }) => {
@@ -1093,7 +1284,27 @@ const init = async () => {
       });
     }
   });
-  //Aptero
+  events.on(`hub:change`, ({ key, previous, current }) => {
+    if (
+      key === hubChannel.channel.socket.params().session_id &&
+      previous.profile.avatarId !== current.profile.avatarId
+    ) {
+      messageDispatch.log(LogMessageType.avatarChanged);
+    }
+  });
+  events.on(`hub:change`, ({ key, current }) => {
+    scene.emit("presence_updated", {
+      sessionId: key,
+      profile: current.profile,
+      roles: current.roles,
+      permissions: current.permissions,
+      streaming: current.streaming,
+      recording: current.recording,
+      hand_raised: current.hand_raised,
+      typing: current.typing
+    });
+  });
+
   events.on(`hub:change`, ({ key, current }) => {
     scene.emit("presence_updated", {
       sessionId: key,
@@ -1130,9 +1341,11 @@ const init = async () => {
     });
   });
 
+  listenForNetworkMessages(hubPhxChannel, events);
   hubPhxChannel
     .join()
     .receive("ok", async data => {
+      setLocalClientID(data.session_id);
       APP.hideHubPresenceEvents = true;
       presenceSync.promise = new Promise(resolve => {
         presenceSync.resolve = resolve;
@@ -1153,7 +1366,7 @@ const init = async () => {
       });
 
       await presenceSync.promise;
-      handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data, permsToken, hubChannel, events);
+      handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data);
     })
     .receive("error", res => {
       if (res.reason === "closed") {
@@ -1264,7 +1477,7 @@ const init = async () => {
 
   hubPhxChannel.on("mute", ({ session_id }) => {
     if (session_id === NAF.clientId) {
-      APP.dialog.enableMicrophone(false);
+      APP.mediaDevicesManager.micEnabled = false;
     }
   });
 

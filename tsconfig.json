@@ -1,33 +1,40 @@
 {
-  "compilerOptions": {
-    "noImplicitAny": false,
-    "outDir": "build/types",
-    "module": "esnext",
-    "target": "ES5",
-    "allowJs": false,
-    "skipLibCheck": true,
-    "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
-    "sourceMap": true,
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "suppressImplicitAnyIndexErrors": true,
-    "lib": [ //https://www.typescriptlang.org/tsconfig#lib
-      "ESNext",
-      "DOM"
+    "compilerOptions": {
+        "allowJs": true,
+        "allowSyntheticDefaultImports": true,
+        "baseUrl": "./",
+        "declaration": true,
+        "emitDeclarationOnly": true,
+        "esModuleInterop": true,
+        "isolatedModules": true,
+        "jsx": "react",
+        "lib": [
+            "ESNext",
+            "DOM"
+        ],
+        "module": "esnext",
+        "moduleResolution": "node",
+        "noEmit": true,
+        "noImplicitAny": true,
+        "outDir": "./dist/",
+        "resolveJsonModule": true,
+        "skipLibCheck": true,
+        "sourceMap": true,
+        "strictNullChecks": true,
+        "suppressImplicitAnyIndexErrors": true,
+        "target": "esnext",
+        "typeRoots": [
+            "./node_modules/@types",
+            "./types"
+        ]
+    },
+    "exclude": [
+        "src/**/*.js",
+        "node_modules/**"
     ],
-    "moduleResolution": "node",//https://www.typescriptlang.org/docs/handbook/module-resolution.html
-    "baseUrl": "./",
-    // Ensure that Babel can safely transpile files in the TypeScript project
-    "isolatedModules": true,
-    "jsx": "react"
-  },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx"
-  ],
-  "exclude": [
-    "src/**/*.js",
-    "node_modules/**"
-  ]
+    "include": [
+        "types/",
+        "src/**/*.ts",
+        "src/**/*.tsx"
+    ]
 }

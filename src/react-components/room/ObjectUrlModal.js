@@ -15,27 +15,21 @@ import { FormattedMessage } from "react-intl";
 export function ObjectUrlModal({ showModelCollectionLink, modelCollectionUrl, onSubmit, onClose }) {
   const { handleSubmit, register, watch, setValue } = useForm();
 
-  useEffect(
-    () => {
-      register("url");
-    },
-    [register]
-  );
+  useEffect(() => {
+    register("url");
+  }, [register]);
 
   const file = watch("file");
   const hasFile = file && file.length > 0;
   const fileName = hasFile ? file[0].name : undefined;
 
-  const onClear = useCallback(
-    () => {
-      if (hasFile) {
-        setValue("file", undefined);
-      } else {
-        setValue("url", "");
-      }
-    },
-    [hasFile, setValue]
-  );
+  const onClear = useCallback(() => {
+    if (hasFile) {
+      setValue("file", undefined);
+    } else {
+      setValue("url", "");
+    }
+  }, [hasFile, setValue]);
 
   const onChange = useCallback(
     e => {
@@ -111,7 +105,11 @@ export function ObjectUrlModal({ showModelCollectionLink, modelCollectionUrl, on
           afterInput={
             <>
               {showCloseButton && <CloseButton onClick={onClear} />}
-              <IconButton as="label" className={classNames({ [styles.hidden]: showCloseButton })} htmlFor="file">
+              <IconButton
+                as="label"
+                className={classNames({ [styles.hidden]: showCloseButton }, styles.urlInput)}
+                htmlFor="file"
+              >
                 <AttachIcon />
                 <input id="file" className={styles.hidden} name="file" type="file" ref={register} />
               </IconButton>

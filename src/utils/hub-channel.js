@@ -33,7 +33,9 @@ const VALID_PERMISSIONS = HUB_CREATOR_PERMISSIONS.concat([
   "spawn_and_move_media",
   "pin_objects",
   "spawn_emoji",
-  "fly"
+  "fly",
+  "voice_chat",
+  "text_chat"
 ]).concat(roomParameters.customPermission()); //APTERO
 export default class HubChannel extends EventTarget {
   constructor(store, hubId) {
@@ -55,6 +57,16 @@ export default class HubChannel extends EventTarget {
   can(permission) {
     if (!VALID_PERMISSIONS.includes(permission)) throw new Error(`Invalid permission name: ${permission}`);
     return this._permissions && this._permissions[permission];
+  }
+
+  userCan(clientId, permission) {
+    const presenceState = this.presence.state[clientId];
+    if (!presenceState) {
+      console.warn(`userCan: Had no presence state for ${clientId}`);
+      return false;
+    }
+
+    return !!presenceState.metas[0].permissions[permission];
   }
 
   // Returns true if the current session has the given permission, *or* will get the permission
@@ -142,12 +154,11 @@ export default class HubChannel extends EventTarget {
     // Note: token is not verified.
     this.token = token;
     this._permissions = jwtDecode(token);
-
     configs.setIsAdmin(this._permissions.postgrest_role === "ret_admin");
     //aptero delayed permission set
     (async () => {
       this._permissions = await roomParameters.applyPermissionAsync(this._permissions, configs.isAdmin());
-      this.dispatchEvent(new CustomEvent("permissions_updated"));
+    this.dispatchEvent(new CustomEvent("permissions_updated"));
     })();
 
     // Refresh the token 1 minute before it expires.
@@ -155,10 +166,7 @@ export default class HubChannel extends EventTarget {
     if (this.fetchPermissionsTimeout) {
       clearTimeout(this.fetchPermissionsTimeout);
     }
-    this.fetchPermissionsTimeout = setTimeout(async () => {
-      const result = await this.fetchPermissions();
-      this.dispatchEvent(new CustomEvent("permissions-refreshed", { detail: result }));
-    }, nextRefresh);
+    this.fetchPermissionsTimeout = setTimeout(this.fetchPermissions, nextRefresh);
   };
 
   sendEnteringEvent = async () => {
@@ -190,7 +198,7 @@ export default class HubChannel extends EventTarget {
         return { key, entryState: presence.metas[presence.metas.length - 1].presence };
       })
       .filter(({ key, entryState }) => {
-        return key !== NAF.clientId && entryState === "entered";
+        return key !== NAF.clientId && entryState === "room";
       }).length;
 
     const entryTimingFlags = this.getEntryTimingFlags();
@@ -219,6 +227,22 @@ export default class HubChannel extends EventTarget {
 
   endRecording() {
     this.channel.push("events:end_recording", {});
+  }
+
+  raiseHand() {
+    this.channel.push("events:raise_hand", {});
+  }
+
+  lowerHand() {
+    this.channel.push("events:lower_hand", {});
+  }
+
+  beginTyping() {
+    this.channel.push("events:begin_typing", {});
+  }
+
+  endTyping() {
+    this.channel.push("events:end_typing", {});
   }
 
   getEntryTimingFlags = () => {
@@ -302,11 +326,7 @@ export default class HubChannel extends EventTarget {
   }
 
   sendMessage = (body, type = "chat") => {
-    //const receiverClientId = userId;
-    if (!body) {
-      return;
-    }
-
+    if (!body) return;
     this.channel.push("message", { body, type });
   };
 
@@ -383,7 +403,7 @@ export default class HubChannel extends EventTarget {
         .receive("ok", res => {
           resolve(res.oauth_url);
         })
-        .receive("error", reject);
+        .receive("error", err => reject(new Error(err.reason)));
     });
   };
 
@@ -400,10 +420,7 @@ export default class HubChannel extends EventTarget {
       payload.promotion_token = promotionToken;
     }
     return new Promise((resolve, reject) => {
-      this.channel
-        .push("pin", payload)
-        .receive("ok", resolve)
-        .receive("error", reject);
+      this.channel.push("pin", payload).receive("ok", resolve).receive("error", reject);
     });
   };
 
@@ -450,8 +467,7 @@ export default class HubChannel extends EventTarget {
   isHidden = sessionId => this._blockedSessionIds.has(sessionId);
 
   kick = async sessionId => {
-    const permsToken = await this.fetchPermissions();
-    APP.dialog.kick(sessionId, permsToken);
+    APP.dialog.kick(sessionId);
     this.channel.push("kick", { session_id: sessionId });
   };
 

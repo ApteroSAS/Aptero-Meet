@@ -3,6 +3,7 @@
 :local(.content) {
   //align-items: center;
   padding: 24px;
+  padding-top: 10px;
   text-align: center;
   flex-direction: column !important ;
   margin-bottom: 0px !important;
@@ -33,7 +34,12 @@
 
   /* TODO: This styling into AvatarPreview */
   & > :first-child {
+    /*
+    We need to set dimensions explicitly here, since AvatarPreview
+    resizes itself to its container's dimensions.
+    */
     width: 168px;
+    height: 250px;
     min-height: 200px;
     max-height: 300px;
     border-radius: 8px;

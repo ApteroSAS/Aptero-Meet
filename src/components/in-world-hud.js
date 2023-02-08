@@ -42,7 +42,7 @@ AFRAME.registerComponent("in-world-hud", {
     };
 
     this.onMicClick = () => {
-      APP.dialog.toggleMicrophone();
+      APP.mediaDevicesManager.toggleMic();
     };
 
     this.onSpawnClick = () => {

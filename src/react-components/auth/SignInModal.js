@@ -155,7 +155,7 @@ SubmitEmail.defaultProps = {
 };
 
 SubmitEmail.propTypes = {
-  message: PropTypes.string,
+  message: PropTypes.object,
   termsUrl: PropTypes.string,
   privacyUrl: PropTypes.string,
   initialEmail: PropTypes.string,

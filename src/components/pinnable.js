@@ -1,42 +1,55 @@
+import { addComponent, removeComponent } from "bitecs";
+import { Pinnable, Pinned } from "../bit-components";
+
 AFRAME.registerComponent("pinnable", {
   schema: {
     pinned: { default: false }
   },
 
   init() {
-    this._fireEventsAndAnimate = this._fireEventsAndAnimate.bind(this);
+    this._persist = this._persist.bind(this);
+    this._persistAndAnimate = this._persistAndAnimate.bind(this);
 
     // Fire pinned events when media is refreshed since the version will be bumped.
-    this.el.addEventListener("media_refreshed", this._fireEventsAndAnimate);
+    this.el.addEventListener("media_refreshed", this._persistAndAnimate);
 
+    this.el.addEventListener("owned-pager-page-changed", this._persist);
     // Fire pinned events when page changes so we can persist the page.
-    this.el.addEventListener("owned-pager-page-changed", this._fireEventsAndAnimate);
+    this.el.addEventListener("owned-video-state-changed", this._persistAndAnimate);
 
+    addComponent(APP.world, Pinnable, this.el.object3D.eid);
+  },
     // Fire pinned events when video state changes so we can persist the page.
-    this.el.addEventListener("owned-video-state-changed", this._fireEventsAndAnimate);
-  },
-
-  update(oldData) {
-    this._fireEventsAndAnimate(oldData);
-  },
-
-  _fireEventsAndAnimate(oldData, force) {
-    // We need to guard against _fireEventsAndAnimate being called during entity initialization,
-    // when the networked component isn't initialized yet.
-    if (!this.el.components.networked || !this.el.components.networked.data) return;
-
-    const isMine = NAF.utils.isMine(this.el);
-
-    // Avoid firing events during initialization by checking if the pin state has changed before doing so.
-    const pinStateChanged = !!oldData.pinned !== this.data.pinned;
+  update() {
+    this._animate();
 
     if (this.data.pinned) {
-      // Aptero add a check for user being signed in
-      if ((pinStateChanged && window.APP.hubChannel.signedIn) || force) {
-        this.el.emit("pinned", { el: this.el });
-      }
+      addComponent(APP.world, Pinned, this.el.object3D.eid);
+    } else {
+      removeComponent(APP.world, Pinned, this.el.object3D.eid);
+    }
+  },
 
-      if (isMine) {
+  _persistAndAnimate() {
+    this._persist();
+    this._animate();
+  },
+
+  _persist() {
+    // We need to guard against _fireEventsAndAnimate being called during entity initialization,
+    window.APP.pinningHelper.setPinned(this.el, this.data.pinned);
+  },
+    // when the networked component isn't initialized yet.
+  _isMine() {
+    return this.el.components.networked?.data && NAF.utils.isMine(this.el);
+  },
+
+  _animate() {
+    const isAnimationRunning =
+      this.el.components["animation__pin-start"]?.animationIsPlaying ||
+      this.el.components["animation__pin-end"]?.animationIsPlaying;
+
+    if (this._isMine() && this.data.pinned && !isAnimationRunning) {
         this.el.removeAttribute("animation__pin-start");
         this.el.removeAttribute("animation__pin-end");
         const currentScale = this.el.object3D.scale;
@@ -62,34 +75,24 @@ AFRAME.registerComponent("pinnable", {
           this.el.setAttribute("body-helper", { type: "kinematic" });
         }
       }
-    } else {
-      if (pinStateChanged || force) {
-        this.el.emit("unpinned", { el: this.el });
-      }
-    }
-  },
-
-  isHeld(el) {
-    const { leftHand, rightHand, rightRemote } = el.sceneEl.systems.interaction.state;
-    return leftHand.held === el || rightHand.held === el || rightRemote.held === el;
   },
 
   tick() {
-    const held = this.isHeld(this.el);
-    const isMine = this.el.components.networked && this.el.components.networked.data && NAF.utils.isMine(this.el);
+    const isHeld = this.el.sceneEl.systems.interaction.isHeld(this.el);
+    const isMine = this._isMine();
 
     let didFireThisFrame = false;
-    if (!held && this.wasHeld && isMine) {
+    if (!isHeld && this.wasHeld && isMine) {
       didFireThisFrame = true;
-      this._fireEventsAndAnimate(this.data, true);
+      this._persistAndAnimate();
     }
 
-    this.wasHeld = held;
+    this.wasHeld = isHeld;
 
     this.transformObjectSystem = this.transformObjectSystem || AFRAME.scenes[0].systems["transform-selected-object"];
     const transforming = this.transformObjectSystem.transforming && this.transformObjectSystem.target.el === this.el;
     if (!didFireThisFrame && !transforming && this.wasTransforming && isMine) {
-      this._fireEventsAndAnimate(this.data, true);
+      this._persistAndAnimate();
     }
     this.wasTransforming = transforming;
   }

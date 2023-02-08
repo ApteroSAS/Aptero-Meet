@@ -1,7 +1,9 @@
-/* global APP*/
 import { getReticulumFetchUrl, hubUrl } from "./utils/phoenix-utils";
 import { updateEnvironmentForHub, getSceneUrlForHub, updateUIForHub, remountUI } from "./hub";
-import { propertiesService } from "./aptero/module/properties/propertiesService";
+import { loadStoredRoomData, loadLegacyRoomObjects } from "./utils/load-room-objects";
+import qsTruthy from "./utils/qs_truthy";
+import { localClientID, pendingMessages, pendingParts } from "./bit-systems/networking";
+import { storedUpdates } from "./bit-systems/network-receive-system";
 
 function unloadRoomObjects() {
   document.querySelectorAll("[pinnable]").forEach(el => {
@@ -32,11 +34,23 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
     return;
   }
   // Suppress on-screen join and leave messages until we receive a sync.
+  // Suppress on-screen join and leave messages until we receive a sync.
   APP.hideHubPresenceEvents = true;
   const scene = AFRAME.scenes[0];
 
+  // Generate leave events for everyone in the room.
+  Object.keys(APP.hubChannel.presence.state).forEach(key => {
+    if (key !== localClientID) {
+      pendingParts.push(APP.getSid(key));
+    }
+  });
+  // Reticulum "leaving" causes pinned objects to get cleaned up.
+  pendingParts.push(APP.getSid("reticulum"));
+
   let data;
   try {
+    // TODO Migrating to a new hub in one step makes state cleanup suspicious.
+    //      Would prefer to disconnect, cleanup state, then connect to the new hub.
     data = await APP.hubChannel.migrateToHub(hubId);
   } catch (e) {
     console.warn(`Failed to join hub ${hubId}: ${e.reason}|${e.message}`);
@@ -47,7 +61,14 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
   const hub = data.hubs[0];
 
   if (addToHistory) {
-    window.history.pushState(null, null, hubUrl(hubId, {}, hub.slug, waypoint));
+    const search = new URLSearchParams(location.search);
+    const params = {};
+    for (const [key, value] of search.entries()) {
+      if (key !== "hub_id") {
+        params[key] = value;
+      }
+    }
+    window.history.pushState(null, null, hubUrl(hubId, params, hub.slug, waypoint));
   }
 
   APP.hub = hub;
@@ -64,17 +85,34 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
   NAF.entities.removeRemoteEntities();
   await NAF.connection.adapter.disconnect();
   await APP.dialog.disconnect();
+  if (!qsTruthy("newLoader")) {
   unloadRoomObjects();
+  }
   NAF.connection.connectedClients = {};
   NAF.connection.activeDataChannels = {};
+  if (pendingMessages.length || storedUpdates.size) {
+    console.log(
+      `Deleting ${pendingMessages.length + storedUpdates.size} unapplied network messages from previous hub.`
+    );
+    pendingMessages.length = 0;
+    storedUpdates.clear();
+  }
 
   NAF.room = hub.hub_id;
 
-  const fader = document.getElementById("viewing-camera").components["fader"];
-  fader.fadeOut().then(async () => {
-    scene.emit("reset_scene");
-    await updateEnvironmentForHub(hub, APP.entryManager);
-  });
+  if (
+    // TODO: With newLoader (and new net code), we need to clear any network state
+    // that we applied to scene-owned entities before transitioning to the new room.
+    // For now, just unload scene even if the room we're going to has the same scene.
+    qsTruthy("newLoader") ||
+    document.querySelector("#environment-scene").childNodes[0].components["gltf-model-plus"].data.src !==
+      (await getSceneUrlForHub(hub))
+  ) {
+    const fader = document.getElementById("viewing-camera").components["fader"];
+    fader.fadeOut().then(() => {
+      scene.emit("reset_scene");
+      updateEnvironmentForHub(hub, APP.entryManager);
+    });
 
   APP.retChannel.push("change_hub", { hub_id: hub.hub_id });
 
@@ -82,7 +120,6 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
     APP.dialog.connect({
       serverUrl: `wss://${hub.host}:${hub.port}`,
       roomId: hub.hub_id,
-      joinToken: data.perms_token,
       serverParams: { host: hub.host, port: hub.port, turn: hub.turn },
       scene,
       clientId: APP.dialog._clientId,
@@ -94,7 +131,12 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
     NAF.connection.adapter.connect()
   ]);
 
+  if (qsTruthy("newLoader")) {
+    loadStoredRoomData(hubId);
+    loadLegacyRoomObjects(hubId);
+  } else {
   loadRoomObjects(hubId);
+  }
 
   await APP.hubChannel.sendEnteredEvent();
 

@@ -1,55 +1,12 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useRef, useCallback } from "react";
 
-export function useSound({ webmSrc, mp3Src, oggSrc, wavSrc }) {
-  const soundTimeoutRef = useRef();
-  const audioElRef = useRef();
-  const [soundPlaying, setSoundPlaying] = useState(false);
+export function useSound({ scene, sound }) {
+  const sfxSystem = scene.systems["hubs-systems"].soundEffectsSystem;
+  const analyserRef = useRef(scene.systems["hubs-systems"].audioSystem.mixerAnalyser);
 
-  useEffect(
-    () => {
-      const audioEl = document.createElement("audio");
+  const playSound = useCallback(() => {
+    sfxSystem.playSoundOneShot(sound).connect(analyserRef.current);
+  }, [sound, sfxSystem]);
 
-      if (audioEl.canPlayType("audio/webm")) {
-        audioEl.src = webmSrc;
-      } else if (audioEl.canPlayType("audio/mpeg")) {
-        audioEl.src = mp3Src;
-      } else if (audioEl.canPlayType("audio/ogg")) {
-        audioEl.src = oggSrc;
-      } else {
-        audioEl.src = wavSrc;
-      }
-
-      audioElRef.current = audioEl;
-
-      return () => {
-          if(soundPlaying){
-              audioEl.pause();
-          }
-        audioEl.currentTime = 0;
-        clearTimeout(soundTimeoutRef.current);
-      };
-    },
-    [webmSrc, mp3Src, oggSrc, wavSrc, soundPlaying]
-  );
-
-  const playSound = useCallback(
-    () => {
-        (async ()=>{
-      const audioEl = audioElRef.current;
-
-      if (audioEl) {
-        audioEl.currentTime = 0;
-        clearTimeout(soundTimeoutRef.current);
-        await audioEl.play();
-        setSoundPlaying(true);
-
-        soundTimeoutRef.current = setTimeout(() => {
-          setSoundPlaying(false);
-        }, 1393);
-      }})()
-    },
-    [audioElRef, setSoundPlaying]
-  );
-
-  return [soundPlaying, playSound];
+  return { playSound };
 }

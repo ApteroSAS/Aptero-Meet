@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import { SCHEMA } from "../storage/store";
 import { fetchAvatar } from "../utils/avatar-utils";
 import { replaceHistoryState } from "../utils/history";
 import { AvatarSettingsSidebar } from "./room/AvatarSettingsSidebar";
@@ -256,7 +255,7 @@ export default class ProfileEntryPanel extends Component {
       email: this.state.email,
       phoneNumber: this.state.phoneNumber,
       descriptionUser: this.state.descriptionUser,
-      displayNamePattern: SCHEMA.definitions.profile.properties.displayName.pattern,
+      displayNamePattern: this.props.store.schema.definitions.profile.properties.displayName.pattern,
       onChangeDisplayName: e => this.setState({ displayName: e.target.value }),
       onChangeCompanyName: e => this.setState({ companyName: e.target.value }),
       onChangeJobTitle: e => this.setState({ jobTitle: e.target.value }),
@@ -270,7 +269,7 @@ export default class ProfileEntryPanel extends Component {
         }
       },
       //onChangeUserBio: e => ,
-      avatarPreview: <AvatarPreview avatarGltfUrl={this.state.avatar && this.state.avatar.gltf_url}/>,
+      avatarPreview: <AvatarPreview avatarGltfUrl={this.state.avatar && this.state.avatar.gltf_url} />,
       onChangeAvatar: e => {
         e.preventDefault();
         this.props.mediaSearchStore.sourceNavigateWithNoNav("avatars", "use");
@@ -281,7 +280,7 @@ export default class ProfileEntryPanel extends Component {
       signedIn: this.props.signedIn
     };
     if (this.props.containerType === "sidebar") {
-      return <AvatarSettingsSidebar {...avatarSettingsProps} showBackButton={this.props.showBackButton}/>;
+      return <AvatarSettingsSidebar {...avatarSettingsProps} showBackButton={this.props.showBackButton} />;
     }
 
     return <AvatarSetupModal {...avatarSettingsProps} />;

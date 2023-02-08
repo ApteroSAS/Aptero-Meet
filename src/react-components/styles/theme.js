@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import { changeTheme as changeTheme2 } from "./../../utils/theme";
+import configs from "../../utils/configs";
+import { tryGetTheme, getCurrentTheme, registerDarkModeQuery, changeTheme as changeTheme2 } from "../../utils/theme";
 
 let config = process.env.APP_CONFIG;
-
 // Storybook includes environment variables as a string
 // https://storybook.js.org/docs/react/configure/environment-variables
 if (!config && process.env.STORYBOOK_APP_CONFIG) {
@@ -29,16 +29,20 @@ export const themes = config?.theme?.themes || [];
 function useDarkMode() {
   const [darkMode, setDarkMode] = useState(false);
 
-  useEffect(() => {
-    const darkmodeQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    if (darkmodeQuery && darkmodeQuery.addEventListener) {
-      setDarkMode(darkmodeQuery.matches);
+  const changeListener = useCallback(
+    event => {
+      setDarkMode(event.matches);
+    },
+    [setDarkMode]
+  );
 
-      darkmodeQuery.addEventListener("change", event => {
-        setDarkMode(event.matches);
-      });
-    }
-  }, []);
+  useEffect(() => {
+    const [darkModeQuery, removeListener] = registerDarkModeQuery(changeListener);
+
+    setDarkMode(darkModeQuery.matches);
+
+    return removeListener;
+  }, [changeListener]);
 
   return darkMode;
 }
@@ -46,24 +50,8 @@ function useDarkMode() {
 export function useTheme(themeId) {
   const darkMode = useDarkMode();
 
-  useEffect(
-    () => {
-      // Themes can come from an external source. Ensure it is an array.
-      if (!Array.isArray(themes)) return;
-
-      let theme;
-
-      if (themeId) {
-        theme = themes.find(t => t.id === themeId);
-      }
-
-      if (!theme && darkMode) {
-        theme = themes.find(t => t.darkModeDefault);
-      }
-
-      if (!theme) {
-        theme = themes.find(t => t.default);
-      }
+  useEffect(() => {
+    const theme = tryGetTheme(themeId);
 
       if (!theme) {
         return;
@@ -72,7 +60,7 @@ export function useTheme(themeId) {
       const variables = [];
 
       for (const key in theme.variables) {
-        if (!theme.variables.hasOwnProperty(key)) continue;
+      if (!Object.prototype.hasOwnProperty.call(theme.variables, key)) continue;
         variables.push(`--${key}: ${theme.variables[key]};`);
       }
 
@@ -87,9 +75,18 @@ export function useTheme(themeId) {
       return () => {
         document.head.removeChild(styleTag);
       };
-    },
-    [themeId, darkMode]
-  );
+  }, [themeId, darkMode]);
+}
+
+function getAppLogo(darkMode) {
+  const theme = getCurrentTheme();
+  const shouldUseDarkLogo = theme ? theme.darkModeDefault : darkMode;
+  return (shouldUseDarkLogo && configs.image("logo_dark")) || configs.image("logo");
+}
+
+export function useLogo() {
+  const darkMode = useDarkMode();
+  return getAppLogo(darkMode);
 }
 
 export function changeTheme(newThemeId) {
