@@ -1,5 +1,6 @@
 import { propertiesService } from "../properties/propertiesService";
 import axios from "axios";
+import { PromiseQueue } from "./PromiseQueue";
 
 declare const window:any;
 declare const NAF:any;
@@ -34,8 +35,9 @@ export interface MetaData{
 
 export class RemoteControlServiceV2 {
 
-    remoteScreenSessionIdMap = {};
-    remoteScreenSessionRfbMap = {};
+    remoteScreenSessionIdMap:Record<string, string > = {};
+    remoteScreenSessionRfbMap:Record<string, any > = {};
+    promiseQueue = new PromiseQueue<any>();
     lastMoveTime = 0;
     screenSize:Record<string, { width: number, height: number }>={};
     lastX=0;
@@ -83,30 +85,31 @@ export class RemoteControlServiceV2 {
             width:+data.screenSizeX,
             height:+data.screenSizeY
         };
+        console.log(data.remoteScreenSessionId);
         this.remoteScreenSessionIdMap[data.localSessionID]=data.remoteScreenSessionId;
         const dataCreate:(any|CreateDTO) = {...{
             screenSizeX:+data.screenSizeX,
             screenSizeY:+data.screenSizeY,
         },...data.metaData}
-        return new Promise((resolve, reject) => {
-            axios.post(propertiesService.PROTOCOL + propertiesService.REMOTE_VM_SERVICE.url + "/service/remote/orchestrator/create", dataCreate).then(async resp => {
-                let resp2:{
-                    url:string,
-                    ip:string,
-                    port:string,
-                    vmsid:string
-                } = resp.data as any;
-                //resp2.url = "wss://" + propertiesService.REMOTE_VM_SERVICE.url+"/reverse/"+resp2.ip+"/"+resp2.port+"/websockify";
-                const rfb = await this.createRBF(screenElement.children[0],resp2.url,{ credentials: { password: password } });
-                this.remoteScreenSessionRfbMap[data.remoteScreenSessionId] = rfb;
-                resolve(rfb);
-            }).catch(reason => {
-                reject(reason);
-            });
-        })
+        return this.promiseQueue.add(async() => {
+            if(this.remoteScreenSessionRfbMap[data.remoteScreenSessionId]){
+                return this.remoteScreenSessionRfbMap[data.remoteScreenSessionId];
+            }
+            const resp = await axios.post(propertiesService.PROTOCOL + propertiesService.REMOTE_VM_SERVICE.url + "/service/remote/orchestrator/create", dataCreate)
+            let resp2:{
+                url:string,
+                ip:string,
+                port:string,
+                vmsid:string
+            } = resp.data as any;
+            //resp2.url = "wss://" + propertiesService.REMOTE_VM_SERVICE.url+"/reverse/"+resp2.ip+"/"+resp2.port+"/websockify";
+            const rfb = await this.createRBF(screenElement.children[0],resp2.url,{ credentials: { password: password } });
+            this.remoteScreenSessionRfbMap[data.remoteScreenSessionId] = rfb;
+            return rfb;
+        }).promise;
     }
 
-    async createRBF(el,url,options){
+    async createRBF(el,url,options):Promise<any>{
         let RFB = (await import('@novnc/novnc/core/rfb')).default;
         let rfb = new RFB(el, url,options);
         await new Promise((resolve, reject) => {
@@ -165,6 +168,7 @@ export class RemoteControlServiceV2 {
                     .getNetworkedEntity(intersection.object.el)
                     .then(networkedEl => {
                         let screenId = networkedEl.components.networked.data.networkId; // id screen
+                        console.log(screenId);
                         if (this.remoteScreenSessionIdMap[screenId]) {
                             if (new Date().getTime() - this.lastMoveTime < 50) {
                                 return;

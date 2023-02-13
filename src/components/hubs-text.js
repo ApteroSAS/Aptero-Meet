@@ -86,8 +86,8 @@ function loadTexture(src) {
 
 const FONTS = {
   roboto: {
-    json: loadFont("assets/static/third_party/Roboto-msdf.json"),
-    texture: loadTexture("assets/static/third_party/Roboto-msdf.png")
+    json: loadFont("/assets/static/third_party/Roboto-msdf.json"),
+    texture: loadTexture("/assets/static/third_party/Roboto-msdf.png")
   }
 };
 
