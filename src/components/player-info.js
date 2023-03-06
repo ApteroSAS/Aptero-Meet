@@ -33,22 +33,6 @@ function ensureAvatarNodes(json) {
  * @namespace avatar
  * @component player-info
  */
-AFRAME.registerComponent("identity-name-click", {
-  init() {
-    this.onClick = async () => {
-      if(this.el.children[0].childNodes[0].components["personal-space-invader"] && this.el.children[0].childNodes[0].components["personal-space-invader"].invading) return;
-      this.el.sceneEl.emit("avatarClick", this.el.components['networked-audio-analyser'].playerSessionId);
-    }
-  },
-  play() {
-    this.el.object3D.addEventListener("interact", this.onClick);
-  },
-
-  pause() {
-    this.el.object3D.removeEventListener("interact", this.onClick);
-  },
-});
-
 AFRAME.registerComponent("player-info", {
   schema: {
     avatarSrc: { type: "string" },

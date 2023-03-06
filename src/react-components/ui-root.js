@@ -350,9 +350,9 @@ export class UIRoot extends Component {
         }
       });
     });
-    this.props.scene.addEventListener("avatarClick", e => {
+    /*this.props.scene.addEventListener("avatarClick", e => {
       this.setSidebar("display_user_panel", { selectedUserId: e.detail });
-    });
+    });*/
 
     this.props.scene.addEventListener("avatarChanged", () => {
       console.log("has changed avatar");
