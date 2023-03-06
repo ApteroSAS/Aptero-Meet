@@ -1,6 +1,7 @@
 /* global APP*/
 import { getReticulumFetchUrl, hubUrl } from "./utils/phoenix-utils";
-import { updateEnvironmentForHub, updateUIForHub, remountUI } from "./hub";
+import { updateEnvironmentForHub, getSceneUrlForHub, updateUIForHub, remountUI } from "./hub";
+import { propertiesService } from "./aptero/module/properties/propertiesService";
 
 function unloadRoomObjects() {
   document.querySelectorAll("[pinnable]").forEach(el => {
@@ -25,7 +26,7 @@ function loadRoomObjects(hubId) {
   objectsScene.appendChild(objectsEl);
 }
 
-export async function changeHub(hubId, addToHistory = true, waypoint = null) {
+export async function changeHub(hubId, addToHistory = true) {
   if (hubId === APP.hub.hub_id) {
     console.log("Change hub called with the current hub id. This is a noop.");
     return;
@@ -46,20 +47,11 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
   const hub = data.hubs[0];
 
   if (addToHistory) {
-    //Aptero
-    const extraParams = {};
-    const searchParams = new URL(window.location).searchParams;
-    for (const key of searchParams.keys()) {
-      if(["hub_id","vr_entry_type"].indexOf(key)!==-1){
-        continue;//skip specific params
-      }
-      extraParams[key] = searchParams.get(key);
-    }
-    window.history.pushState(null, null, hubUrl(hubId, extraParams, hub.slug, waypoint));
+    window.history.pushState(null, null, hubUrl(hubId, {}, hub.slug));
   }
 
   APP.hub = hub;
-  await updateUIForHub(hub, APP.hubChannel);
+  updateUIForHub(hub, APP.hubChannel);
   scene.emit("hub_updated", { hub });
 
   APP.subscriptions.setSubscribed(data.subscriptions.web_push);
@@ -69,31 +61,26 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
     initialIsFavorited: data.subscriptions.favorites
   });
 
+  NAF.entities.removeRemoteEntities();
+  await NAF.connection.adapter.disconnect();
   await APP.dialog.disconnect();
-
-  //Naf Disconnect see NAF.connection.disconnect();
-  //We do not disconnect at connection level to keep the adapter
-  NAF.connection.entities.removeRemoteEntities();
-  NAF.connection.adapter.disconnect();
+  unloadRoomObjects();
   NAF.connection.connectedClients = {};
   NAF.connection.activeDataChannels = {};
-  NAF.connection.setupDefaultDataSubscriptions();
-  document.body.removeEventListener('connected', NAF.connection.onConnectCallback);
-
-  unloadRoomObjects();//unload object after NAF is fully disconnected
-
-  const fader = document.getElementById("viewing-camera").components["fader"];
-  await fader.fadeOut();
-
-  scene.emit("reset_scene");
-  //update environment before connecting the network adapter to prevent visible invisible elements issue
-  await updateEnvironmentForHub(hub, APP.entryManager);//Note a priori c'est ce truc qui pose problem
-
-  APP.retChannel.push("change_hub", { hub_id: hub.hub_id });
 
   NAF.room = hub.hub_id;
 
-  loadRoomObjects(hubId); // load object before NAF reconnection
+  if (
+    document.querySelector("#environment-scene").childNodes[0].components["gltf-model-plus"].data.src !==
+    (await getSceneUrlForHub(hub))
+  ) {
+    const fader = document.getElementById("viewing-camera").components["fader"];
+    fader.fadeOut().then(() => {
+      updateEnvironmentForHub(hub, APP.entryManager);
+    });
+  }
+
+  APP.retChannel.push("change_hub", { hub_id: hub.hub_id });
 
   await Promise.all([
     APP.dialog.connect({
@@ -107,11 +94,13 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
       forceTurn: APP.dialog._forceTurn,
       iceTransportPolicy: APP.dialog._iceTransportPolicy
     }),
+
     NAF.connection.adapter.connect()
   ]);
 
+  loadRoomObjects(hubId);
 
-  await APP.hubChannel.sendEnteredEvent();
+  APP.hubChannel.sendEnteredEvent();
 
   APP.messageDispatch.receive({
     type: "hub_changed",
@@ -122,12 +111,7 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
 window.changeHub = changeHub;
 
 // TODO see if there is a better way to do this with react router
-//https://developer.mozilla.org/en-US/docs/Web/API/Window/popstate_event
 window.addEventListener("popstate", function() {
-  if(!APP.hub){
-    console.warn("No APP.hub");
-    return;
-  }
   const qs = new URLSearchParams(location.search);
   const newHubId = qs.get("hub_id") || document.location.pathname.substring(1).split("/")[0];
   if (newHubId !== APP.hub.hub_id) {
