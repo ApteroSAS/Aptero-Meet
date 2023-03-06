@@ -21,7 +21,10 @@ let instances: Instances = { roomSID: "NO_DATA", clones: {} };
 
 const EVENT = "room-updated";
 
-export async function redirectIfNeeded() {
+export async function redirectIfNeeded(){
+ /* feature disabled*/
+}
+/*export async function redirectIfNeeded() {
   try {
     //initial fetch load balancer meta data in a non blocking way
     if (window.location.host !== "localhost") {
@@ -48,7 +51,7 @@ export async function redirectIfNeeded() {
   } catch (e) {
     console.error(e);
   }
-}
+}*/
 
 export async function redirectIfNeededV1() {
   try {

@@ -13,7 +13,7 @@ AFRAME.registerComponent("in-world-hud", {
     this.spawn = this.el.querySelector(".spawn");
     this.pen = this.el.querySelector(".penhud");
     //this.cameraBtn = this.el.querySelector(".camera-btn");
-    this.inviteBtn = this.el.querySelector(".invite-btn");
+    //this.inviteBtn = this.el.querySelector(".invite-btn");
     this.background = this.el.querySelector(".bg");
 
     this.onMicStateChanged = () => {
@@ -68,10 +68,10 @@ AFRAME.registerComponent("in-world-hud", {
     this.onQuitClick = () => {
       window.location = window.location.origin;
     };
-    this.onHubUpdated = e => {
+    /*this.onHubUpdated = e => {
       this.inviteBtn.object3D.visible = e.detail.hub.entry_mode !== "invite";
       this.inviteBtn.setAttribute("visible", false);//Aptero Disable visibility
-    };
+    };*/
   },
 
   play() {
@@ -87,7 +87,7 @@ AFRAME.registerComponent("in-world-hud", {
     this.spawn.object3D.addEventListener("interact", this.onSpawnClick);
     this.pen.object3D.addEventListener("interact", this.onPenClick);
     //this.cameraBtn.object3D.addEventListener("interact", this.onCameraClick);
-    this.inviteBtn.object3D.addEventListener("interact", this.onInviteClick);
+    //this.inviteBtn.object3D.addEventListener("interact", this.onInviteClick);
   },
 
   pause() {
@@ -102,6 +102,6 @@ AFRAME.registerComponent("in-world-hud", {
     this.spawn.object3D.removeEventListener("interact", this.onSpawnClick);
     this.pen.object3D.removeEventListener("interact", this.onPenClick);
     //this.cameraBtn.object3D.removeEventListener("interact", this.onCameraClick);
-    this.inviteBtn.object3D.removeEventListener("interact", this.onInviteClick);
+    //this.inviteBtn.object3D.removeEventListener("interact", this.onInviteClick);
   }
 });
