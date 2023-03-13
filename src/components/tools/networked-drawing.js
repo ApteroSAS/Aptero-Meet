@@ -762,6 +762,7 @@ AFRAME.registerComponent("deserialize-drawing-button", {
     this.networkedDrawingBuffer = null;
 
     this.onClick = () => {
+      console.log("pen on");
       if (!NAF.utils.isMine(this.targetEl) && !NAF.utils.takeOwnership(this.targetEl)) return;
 
       const finishDrawing = () => {

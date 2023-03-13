@@ -64,6 +64,9 @@ export class OculusTouchControllerDevice {
 
     this.buttonMap.forEach(b => {
       const path = this.path.button(b.name);
+      if(path === "/actions/cursor/right/StartDrawing" || path === "/actions/cursor/left/StartDrawing"){
+        console.log("CCC")
+      }
       const button = this.gamepad.buttons[b.buttonId];
       frame.setValueType(path.pressed, !!button.pressed);
       frame.setValueType(path.touched, !!button.touched);

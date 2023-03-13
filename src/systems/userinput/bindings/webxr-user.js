@@ -576,7 +576,7 @@ export const webXRUserBindings = addSetsToBindings({
       priority: 2
     },
     {
-      src: [rightGripRisingGrab, rightTriggerPressed2],
+      src: [rightGripRisingGrab],
       dest: { value: paths.actions.cursor.right.grab },
       xform: xforms.any,
       priority: 2

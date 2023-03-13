@@ -221,7 +221,10 @@ AFRAME.registerSystem("interaction", {
     if (state.held) {
       const networked = state.held.components["networked"];
       const lostOwnership = networked && networked.data && networked.data.owner !== NAF.clientId;
-      if (userinput.get(options.dropPath) || lostOwnership) {
+      if (
+        (options.dropPath !== paths.actions.cursor.right.drop && userinput.get(options.dropPath)) ||
+        (options.dropPath === paths.actions.cursor.right.drop && !userinput.get("/webxr/var/rightGripPressed2")) ||
+        lostOwnership) {
         state.held = null;
       }
     } else {

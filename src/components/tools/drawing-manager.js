@@ -20,6 +20,7 @@ AFRAME.registerComponent("drawing-manager", {
   },
 
   createDrawing() {
+    console.log("createDrawing")
     if (!this.createDrawingPromise) {
       this.createDrawingPromise = new Promise(resolve => {
         this.drawingEl = document.createElement("a-entity");

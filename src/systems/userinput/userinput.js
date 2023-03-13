@@ -193,7 +193,12 @@ function computeExecutionStrategy(sortedBindings, masks, activeSets) {
 
 AFRAME.registerSystem("userinput", {
   get(path) {
-    if (!this.frame) return;
+    if (!this.frame){
+      /*if(path==="/actions/cursor/right/StartDrawing" || path==="/actions/cursor/left/StartDrawing"){
+        console.log("AAA")
+      }*/
+      return;
+    }
     return this.frame.get(path);
   },
 
@@ -208,10 +213,23 @@ AFRAME.registerSystem("userinput", {
       values: {},
       generations: {},
       get: function(path) {
-        if (this.generations[path] !== this.generation) return undefined;
+        if (this.generations[path] !== this.generation) {
+          /*if(path==="/actions/cursor/right/StartDrawing" || path==="/actions/cursor/left/StartDrawing"){
+            console.log("BBB")
+          }*/
+          return undefined;
+        }
         return this.values[path];
       },
       setValueType: function(path, value) {
+        if(
+          path==="/actions/cursor/right/StartDrawing"
+          //|| path==="/actions/cursor/left/StartDrawing"
+          //|| path==="/webxr/var/rightTriggerPressed1"
+          || path==="/webxr/var/rightTriggerPressed2"
+        ){
+          console.log(path + " - "+value);
+        }
         this.values[path] = value;
         this.generations[path] = this.generation;
       },
@@ -358,6 +376,8 @@ AFRAME.registerSystem("userinput", {
           return; // multiple connect events without a disconnect event
         }
       }
+      console.log(e.gamepad.id)
+      console.log(e.gamepad.isWebXRGamepad)
       if (e.gamepad.isWebXRGamepad) {
         gamepadDevice = new WebXRControllerDevice(e.gamepad);
       } else if (

@@ -260,11 +260,17 @@ AFRAME.registerComponent("pen", {
     if (this.grabberId && pathsMap[this.grabberId]) {
       const sfx = this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem;
       const paths = pathsMap[this.grabberId];
-      if (userinput.get(paths.startDrawing)) {
+
+      console.log(this.grabberId+" # "+paths.startDrawing+" # "+userinput.get(paths.startDrawing));
+      if (userinput.get(paths.startDrawing)
+        || (!this.currentDrawing && this.grabberId==="right-cursor" && userinput.get("/webxr/var/rightTriggerPressed2"))
+      ) {
         this._startDraw();
         sfx.playSoundOneShot(SOUND_PEN_START_DRAW);
       }
-      if (userinput.get(paths.stopDrawing)) {
+      if (userinput.get(paths.stopDrawing) ||
+        (this.currentDrawing && this.grabberId==="right-cursor" && !userinput.get("/webxr/var/rightTriggerPressed2"))
+      ) {
         this._endDraw();
         sfx.playSoundOneShot(SOUND_PEN_STOP_DRAW);
       }
