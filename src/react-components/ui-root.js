@@ -1952,7 +1952,7 @@ export class UIRoot extends Component {
                             {this.props.hubChannel.can("spawn_emoji") && <ReactionPopoverContainer/>}
                           </>
                         )}
-                        <ChatToolbarButtonContainer onClick={() => this.toggleSidebar("chat", "everyone")}/>
+                        {/*<ChatToolbarButtonContainer onClick={() => this.toggleSidebar("chat", "everyone")}/>*/}
                         {entered && isMobileVR && (
                           <ToolbarButton
                             className={styleUtils.hideLg}

@@ -210,12 +210,12 @@ export function UserProfileSidebar({
                             <FormattedMessage id="user-profile-sidebar.kick-button" defaultMessage="Kick"/>
                         </Button>
                     )*/}
-          {!microsoftUserId &&
+            {/*{!microsoftUserId &&
             <Button preset="basic" onClick={() => toggleChatSidebar("chat", userId, null)}>
               <FormattedMessage id="user-profile-sidebar.chat-button" defaultMessage="Chat"/>
             </Button>
-          }
-          {microsoftUserId &&
+          }*/}
+          {/*microsoftUserId &&
             <>
               <Button preset="basic" onClick={async () => {
                 await (await msTeamsAPI()).processDeepLink("https://teams.microsoft.com/l/chat/0/0?users=" + microsoftUserEmail);
@@ -230,7 +230,7 @@ export function UserProfileSidebar({
                 <FormattedMessage id="user-profile-sidebar.call-button" defaultMessage="Call"/>
               </Button>
             </>
-          }
+          */}
         </Column>
       </Sidebar>
     );

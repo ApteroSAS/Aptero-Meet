@@ -221,10 +221,15 @@ AFRAME.registerSystem("interaction", {
     if (state.held) {
       const networked = state.held.components["networked"];
       const lostOwnership = networked && networked.data && networked.data.owner !== NAF.clientId;
-      if (
-        (options.dropPath !== paths.actions.cursor.right.drop && userinput.get(options.dropPath)) ||
-        (options.dropPath === paths.actions.cursor.right.drop && !userinput.get("/webxr/var/rightGripPressed2")) ||
-        lostOwnership) {
+      const isUnheld = ()=>{
+        if(this.el.sceneEl.is("vr-mode")){
+          return (options.dropPath !== paths.actions.cursor.right.drop && userinput.get(options.dropPath)) || (options.dropPath === paths.actions.cursor.right.drop && !userinput.get("/webxr/var/rightGripPressed2"))
+        }else{
+          return userinput.get(options.dropPath);
+        }
+      }
+      if ( isUnheld()
+        || lostOwnership) {
         state.held = null;
       }
     } else {

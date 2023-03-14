@@ -263,13 +263,13 @@ AFRAME.registerComponent("pen", {
 
       console.log(this.grabberId+" # "+paths.startDrawing+" # "+userinput.get(paths.startDrawing));
       if (userinput.get(paths.startDrawing)
-        || (!this.currentDrawing && this.grabberId==="right-cursor" && userinput.get("/webxr/var/rightTriggerPressed2"))
+        || (this.el.sceneEl.is("vr-mode") && !this.currentDrawing && this.grabberId==="right-cursor" && userinput.get("/webxr/var/rightTriggerPressed2"))
       ) {
         this._startDraw();
         sfx.playSoundOneShot(SOUND_PEN_START_DRAW);
       }
       if (userinput.get(paths.stopDrawing) ||
-        (this.currentDrawing && this.grabberId==="right-cursor" && !userinput.get("/webxr/var/rightTriggerPressed2"))
+        (this.el.sceneEl.is("vr-mode") && this.currentDrawing && this.grabberId==="right-cursor" && !userinput.get("/webxr/var/rightTriggerPressed2"))
       ) {
         this._endDraw();
         sfx.playSoundOneShot(SOUND_PEN_STOP_DRAW);
