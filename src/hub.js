@@ -541,8 +541,8 @@ async function runBotMode(scene, entryManager) {
 
 const init = async () => {
   //APTERO
-  let iceServer = await fetchICEservers();
-  await minimumQualityService.checkTurnServerAndSwitchToTCP(iceServer);
+  //let iceServer = await fetchICEservers();
+  //await minimumQualityService.checkTurnServerAndSwitchToTCP(iceServer);
   console.log("lazy loading start");
   await wait(() => {
     return APP.dialog.lasyLoadingFinished;

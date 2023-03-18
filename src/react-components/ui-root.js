@@ -688,14 +688,15 @@ export class UIRoot extends Component {
   onRequestMicPermission = async () => {
     // TODO: Show an error state if getting the microphone permissions fails
     await adapterReady();//APTERO
-    if (getAdapterParams().adapter !== "none" && !msTeamsAPILight().msTeams()) {
+    /*if (getAdapterParams().adapter !== "none" && !msTeamsAPILight().msTeams()) {
       await this.mediaDevicesManager.startLastUsedMicShare();
-    }
+    }*/
     this.beginOrSkipAudioSetup();
   };
 
   beginOrSkipAudioSetup = () => {
-    const skipAudioSetup = this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now");
+    //const skipAudioSetup = this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now");
+    const skipAudioSetup = true;
 
     AFRAME.scenes[0].audioListener.gain.gain.setTargetAtTime(
       1,
@@ -727,9 +728,7 @@ export class UIRoot extends Component {
     // Push the new history state before going into VR, otherwise menu button will take us back
     clearHistoryState(this.props.history);
 
-    const muteOnEntry = msTeamsAPILight().msTeams() ||
-      getAdapterParams().adapter === "none" ||
-      this.props.store.state.preferences["muteMicOnEntry"];
+    const muteOnEntry = true;
 
     await this.props.enterScene(this.state.enterInVR, muteOnEntry);
 
@@ -1927,7 +1926,7 @@ export class UIRoot extends Component {
                             {enableSpectateVRButton && (
                               <ToolbarButton
                                 icon={<VRIcon/>}
-                                preset="accent5"
+                                preset="accent4"
                                 label={
                                   <FormattedMessage id="toolbar.spectate-in-vr-button" defaultMessage="Spectate in VR"/>
                                 }
@@ -1938,11 +1937,11 @@ export class UIRoot extends Component {
                         )}
                         {entered && (
                           <>
-                            <VoiceButtonContainer
+                            {/*<VoiceButtonContainer
                               scene={this.props.scene}
                               microphoneEnabled={this.mediaDevicesManager.isMicShared}
                             />
-                            <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel}/>
+                            <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel}/>*/}
                             <PlacePopoverContainer
                               scene={this.props.scene}
                               hubChannel={this.props.hubChannel}

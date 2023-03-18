@@ -113,11 +113,11 @@ export function SubmitEmail({ onSubmitEmail, onSubmitEmailMicrosoftLogin, initia
     [setEmail]
   );
 
-  if(msTeamsAPILight().msTeams()){
+  /*if(msTeamsAPILight().msTeams()){
     return <Button preset="basic" style={{margin:"auto"}} onClick={onSubmitEmailMicrosoft}>
       <FormattedMessage id="sign-in-with-teams" defaultMessage="Sign in with teams"/>
     </Button>
-  } else {
+  } else {*/
     return (
       <Column center padding as="form" onSubmit={onSubmitForm}>
         <p>
@@ -141,13 +141,13 @@ export function SubmitEmail({ onSubmitEmail, onSubmitEmailMicrosoftLogin, initia
           </small>
         </p>
         <NextButton type="submit"/>
-        <Button preset="basic" onClick={onSubmitEmailMicrosoft}>
+        {/*<Button preset="basic" onClick={onSubmitEmailMicrosoft}>
           <FormattedMessage id="sign-in-with-teams" defaultMessage="Sign in with teams"/>
-        </Button>
+        </Button>*/}
         <img src={img}></img>
       </Column>
     );
-  }
+  /*}*/
 }
 
 SubmitEmail.defaultProps = {

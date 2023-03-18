@@ -27,7 +27,7 @@ export default class AudioChangeHelper extends Component {
   }
 
   render() {
-    const muteOnEntry = window.APP.store.state.preferences["muteMicOnEntry"] || false;
+    const muteOnEntry = window.APP.store.state.preferences["muteMicOnEntry"] || true;
     if (!this.state.visible) {
       return <></>;
     }

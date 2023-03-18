@@ -381,7 +381,6 @@ export default class AptStyle extends Component {
             {moreSelector} div, {voiceSelector} {`>`} div, {inviteSelector} div,  .ApteroStyles .{stylesContentMenu.contentMenuButton}
             {`{
             border-color: var(--basic-color);
-            background-color: var(--basic-color);
             border: solid 1px grey;
           }`}
             {moreSelector}:hover div, {voiceSelector}:hover {`>`} div, {inviteSelector}:hover div,  .ApteroStyles .{stylesContentMenu.contentMenuButton}:hover
