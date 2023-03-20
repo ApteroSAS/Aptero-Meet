@@ -258,7 +258,7 @@
                     body-helper="type: static; mass: 1; collisionFilterGroup: 1; collisionFilterMask: 1;"
                     is-remote-hover-target
                     position-at-box-shape-border__freeze="target:.freeze-menu;"
-                    tags="isStatic: true; togglesHoveredActionSet: true; inspectable: true;"
+                    tags="isStatic: true; togglesHoveredActionSet: false; inspectable: false;"
                     listed-media
                 >
                     <a-entity class="freeze-menu" visibility-while-frozen="withinDistance: 100;">
@@ -600,7 +600,6 @@
                 <a-entity body-helper="type: kinematic; collisionFilterGroup: 16; collisionFilterMask: 1; disableCollision: true;" >
                 </a-entity>
             </template>
-
 
             <template id="linked-media">
                 <a-entity
