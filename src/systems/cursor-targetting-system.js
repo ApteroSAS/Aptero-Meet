@@ -47,9 +47,11 @@ export class CursorTargettingSystem {
       this.rightRemote.components["cursor-controller"].tick2(t);
     }
 
+    /*
+    always keeps cursor in right hand prevents many bugs APTERO
     if (this.leftRemote) {
       this.leftRemote.components["cursor-controller"].tick2(t, true);
-    }
+    }*/
   }
 
   onObject3DSet() {

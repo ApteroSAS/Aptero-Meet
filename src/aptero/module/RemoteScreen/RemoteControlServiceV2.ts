@@ -43,7 +43,7 @@ export class RemoteControlServiceV2 {
     lastX=0;
     lastY=0;
     lastSessionID = "";
-
+    lastInteract = performance.now();
     async start(){
         setInterval(()=>{
             try {
@@ -145,9 +145,12 @@ export class RemoteControlServiceV2 {
     }
 
     onInteract = (e) => {
-        //https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/button
-        this.remoteScreenSessionRfbMap[this.lastSessionID]._handleMouseButton(this.lastX, this.lastY, true, 1);
-        this.remoteScreenSessionRfbMap[this.lastSessionID]._handleMouseButton(this.lastX, this.lastY, false, 1);
+        if(performance.now() - this.lastInteract>300) {
+            this.lastInteract = performance.now();
+            //https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/button
+            this.remoteScreenSessionRfbMap[this.lastSessionID]._handleMouseButton(this.lastX, this.lastY, true, 1);
+            this.remoteScreenSessionRfbMap[this.lastSessionID]._handleMouseButton(this.lastX, this.lastY, false, 1);
+        }
     };
 
     updateCursorPosition(remoteScreenSessionId, mouseRatioX, mouseRatioY) {

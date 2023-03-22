@@ -467,15 +467,6 @@ export const webXRUserBindings = addSetsToBindings({
     }
   ],
 
-  [sets.rightCursorHoveringOnNothing]: [
-    {
-      src: { value: rightTriggerPressed2 },
-      dest: { value: paths.actions.rightHand.startTeleport },
-      xform: xforms.rising,
-      priority: 1
-    }
-  ],
-
   [sets.leftCursorHoveringOnNothing]: [
     {
       src: { value: leftTriggerPressed2 },
@@ -725,12 +716,6 @@ export const webXRUserBindings = addSetsToBindings({
       src: [rightGripRisingGrab],
       dest: { value: paths.actions.rightHand.grab },
       xform: xforms.any,
-      priority: 2
-    },
-    {
-      src: { value: rightTriggerPressed2 },
-      dest: { value: paths.actions.rightHand.stopTeleport },
-      xform: xforms.falling,
       priority: 2
     }
   ],
