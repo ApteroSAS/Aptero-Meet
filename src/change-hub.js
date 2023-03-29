@@ -82,6 +82,7 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
 
   await APP.dialog.disconnect();
 
+
   //Naf Disconnect see NAF.connection.disconnect();
   //We do not disconnect at connection level to keep the adapter
   NAF.connection.entities.removeRemoteEntities();
@@ -91,10 +92,12 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
   NAF.connection.setupDefaultDataSubscriptions();
   document.body.removeEventListener('connected', NAF.connection.onConnectCallback);
 
-  unloadRoomObjects();//unload object after NAF is fully disconnected
-
   const fader = document.getElementById("viewing-camera").components["fader"];
   await fader.fadeOut();
+
+  unloadRoomObjects();//unload object after NAF is fully disconnected
+
+
 
   scene.emit("reset_scene");
   //update environment before connecting the network adapter to prevent visible invisible elements issue

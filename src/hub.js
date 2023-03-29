@@ -1202,12 +1202,12 @@ const init = async () => {
       stale_fields.includes("scene_listing") ||
       stale_fields.includes("default_environment_gltf_bundle_url")
     ) {
-      const fader = document.getElementById("viewing-camera").components["fader"];
+      //const fader = document.getElementById("viewing-camera").components["fader"];
 
-      fader.fadeOut().then(() => {
+      /*fader.fadeOut().then(() => {
         scene.emit("reset_scene");
         updateEnvironmentForHub(hub, entryManager);
-      });
+      });*/
 
       messageDispatch.receive({
         type: "scene_changed",

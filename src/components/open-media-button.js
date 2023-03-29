@@ -90,7 +90,10 @@ AFRAME.registerComponent("open-media-button", {
       } else if ((await isLocalHubsSceneUrl(this.src)) && mayChangeScene) {
         this.el.sceneEl.emit("scene_media_selected", this.src);
       } else if ((hubId = await isHubsRoomUrl(this.src))) {
-        const url = new URL(this.src);
+        let url = new URL(this.src);
+        if (window.location.href.startsWith("https://localhost")) {
+          url = "https://localhost:53000/hub.html?hub_id=" + hubId;
+        }
         const wurlSearchParams = new URLSearchParams(wurl.searchParams);
         const urlSearchParams = new URLSearchParams(url.searchParams);
         for (const sp of [wurlSearchParams, urlSearchParams]) {
@@ -105,7 +108,7 @@ AFRAME.registerComponent("open-media-button", {
           window.history.replaceState(null, null, window.location.href.split("#")[0] + url.hash);
         } else if (
           window.APP_PROPS.APP_CONFIG.features.fast_room_switching &&
-          await isLocalHubsUrl(this.src) &&
+          //await isLocalHubsUrl(this.src) &&
           wurlSearchParams.toString() === urlSearchParams.toString() //If we have different option do not FRS
         ) {
           // move to new room without page load or entry flow
