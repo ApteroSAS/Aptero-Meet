@@ -52,7 +52,7 @@ export class EnterVrModal extends Component {
                   <div style={{
                     "padding": "20px",
                   }}>
-                  <FormattedMessage id="vr-modal.startMsg" defaultMessage="To Start Click the button below"/>
+                  <FormattedMessage id="vr-modal.startMsg" defaultMessage="Pour commencer, cliquez sur le bouton ci-dessous"/>
                   </div>
                   <ToolbarButton
                     icon={<DesktopIcon/>}

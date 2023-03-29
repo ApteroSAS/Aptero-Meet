@@ -18,7 +18,7 @@ export async function fetchRandomDefaultAvatarId() {
   if (defaultAvatars.length === 0) {
     // If reticulum doesn't return any default avatars, just default to the duck model. This should only happen
     // when running against a fresh reticulum server, e.g. a local ret instance.
-    return new URL("/data/avatar/default/default.glb", location.href).href;
+    return new URL("https://local.aptero.co/data/avatar/ReadyPlayerMe/femme_jeune_indienne.glb").href;
   }
   const avatarIds = defaultAvatars.map(avatar => avatar.id);
   return chooseRandom(avatarIds);

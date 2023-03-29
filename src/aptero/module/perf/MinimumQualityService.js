@@ -140,16 +140,16 @@ class MinimumQualityService {
   };
 
   constructor() {
-    this.fpsBalancer = new FpsBalancer();
+    //this.fpsBalancer = new FpsBalancer();
     this.notifyMicChanged();//for default mic
   }
 
   tick() {
-    this.fpsBalancer.tick();
+    //this.fpsBalancer.tick();
   }
 
   initialCheckFinished() {
-    this.fpsBalancer.startBalancing();//TODO deactivate
+    //this.fpsBalancer.startBalancing();//TODO deactivate
   }
 
   getCheckStatus() {
@@ -240,15 +240,15 @@ class MinimumQualityService {
 
   startFPSTest() {
     this.globalIssueDetected["fps-issue"] = false;
-    this.fpsBalancer.startFPSTest();
+    //this.fpsBalancer.startFPSTest();
   }
 
   stopFPSTest() {
-    let result = this.fpsBalancer.stopFPSTest();
+    /*let result = this.fpsBalancer.stopFPSTest();
     if (result.average < 25 && result.fpsNumber > 25) {
       //fps number > than 25 at 25 fps means at least one second of measurement
       this.globalIssueDetected["fps-issue"] = true;
-    }
+    }*/
   }
 }
 

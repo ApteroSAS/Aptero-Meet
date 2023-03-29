@@ -171,7 +171,6 @@ export class RemoteControlServiceV2 {
                     .getNetworkedEntity(intersection.object.el)
                     .then(networkedEl => {
                         let screenId = networkedEl.components.networked.data.networkId; // id screen
-                        console.log(screenId);
                         if (this.remoteScreenSessionIdMap[screenId]) {
                             if (new Date().getTime() - this.lastMoveTime < 50) {
                                 return;
