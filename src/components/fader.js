@@ -22,16 +22,16 @@ AFRAME.registerComponent("fader", {
   },
 
   fadeOut() {
-    /*AFRAME.scenes[0].object3D.visible=false;
-    return Promise.resolve();*/
+    AFRAME.scenes[0].object3D.visible=false;
+    return Promise.resolve();
     //return this.beginTransition("out");
   },
 
   fadeIn() {
-     /*setTimeout(()=>{
+     setTimeout(()=>{
        AFRAME.scenes[0].object3D.visible = true;
      },1000);
-     return Promise.resolve();*/
+     return Promise.resolve();
     //return this.beginTransition("in");
   },
 
