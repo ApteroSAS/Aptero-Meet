@@ -10,7 +10,7 @@ AFRAME.registerComponent("fader", {
   },
 
   init() {
-    const mesh = new THREE.Mesh(
+    /*const mesh = new THREE.Mesh(
       new THREE.BoxGeometry(),
       new THREE.MeshBasicMaterial({ color: 0x0, side: THREE.BackSide, opacity: 0, transparent: true, fog: false })
     );
@@ -18,19 +18,25 @@ AFRAME.registerComponent("fader", {
     mesh.scale.z = 0.15;
     mesh.matrixNeedsUpdate = true;
     this.el.object3DMap.camera.add(mesh);
-    this.mesh = mesh;
+    this.mesh = mesh;*/
   },
 
   fadeOut() {
-    return this.beginTransition("out");
+    /*AFRAME.scenes[0].object3D.visible=false;
+    return Promise.resolve();*/
+    //return this.beginTransition("out");
   },
 
   fadeIn() {
-    return this.beginTransition("in");
+     /*setTimeout(()=>{
+       AFRAME.scenes[0].object3D.visible = true;
+     },1000);
+     return Promise.resolve();*/
+    //return this.beginTransition("in");
   },
 
   async beginTransition(direction) {
-    if (this._resolveFinish) {
+    /*if (this._resolveFinish) {
       throw new Error("Cannot fade while a fade is happening.");
     }
 
@@ -42,11 +48,11 @@ AFRAME.registerComponent("fader", {
       } else {
         this._resolveFinish = res;
       }
-    });
+    });*/
   },
 
   tick(t, dt) {
-    const mat = this.mesh.material;
+    /*const mat = this.mesh.material;
     this.mesh.visible = this.data.direction === "out" || mat.opacity !== 0;
     if (!this.mesh.visible) return;
 
@@ -65,6 +71,6 @@ AFRAME.registerComponent("fader", {
       }
 
       this.el.setAttribute("fader", { direction: "none" });
-    }
+    }*/
   }
 });
