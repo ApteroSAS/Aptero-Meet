@@ -326,7 +326,7 @@ export const Avatars = () => (
       searchPlaceholder="Search Avatars..."
       mediaSources={mediaSources}
       selectedSource={"avatars"}
-      activeFilter={"my-avatars"}
+      activeFilter={"featured"}
       facets={FACETS.avatars}
       headerRight={
         <IconButton lg>

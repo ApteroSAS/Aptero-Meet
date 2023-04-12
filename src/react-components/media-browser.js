@@ -327,7 +327,7 @@ class MediaBrowserContainer extends Component {
       () => this.props.hubChannel.signedIn,
       async () => {
         await remixAvatar(entry.id, entry.name);
-        this.handleFacetClicked({ params: { filter: "my-avatars" } });
+        this.handleFacetClicked({ params: { filter: "featured" } });
       },
       SignInMessages.remixAvatar
     );
