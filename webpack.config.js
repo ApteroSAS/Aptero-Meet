@@ -320,18 +320,18 @@ module.exports = async (env, argv) => {
       },
       extensions: [".ts", ".tsx", ".js", ".jsx"]
     },
-    entry: {
+    entry: {/*APTERO Keep .async files */
       "microsoft-settings": path.join(__dirname, "src/aptero/module/microsoft/page", "microsoft-settings.tsx"),
       support: path.join(__dirname, "src", "support.js"),
-      index: path.join(__dirname, "src", "index.js"),
-      hub: path.join(__dirname, "src", "hub.js"),
+      index: path.join(__dirname, "src", "index.async.ts"),
+      hub: path.join(__dirname, "src", "hub.js"),//Aptero removed hub.async.ts
       scene: path.join(__dirname, "src", "scene.js"),
       avatar: path.join(__dirname, "src", "avatar.js"),
       link: path.join(__dirname, "src", "link.js"),
       discord: path.join(__dirname, "src", "discord.js"),
       cloud: path.join(__dirname, "src", "cloud.js"),
-      signin: path.join(__dirname, "src", "signin.js"),
-      verify: path.join(__dirname, "src", "verify.js"),
+      signin: path.join(__dirname, "src", "signin.async.ts"),
+      verify: path.join(__dirname, "src", "verify.async.ts"),
       tokens: path.join(__dirname, "src", "tokens.js"),
       "whats-new": path.join(__dirname, "src", "whats-new.js"),
       "webxr-polyfill": path.join(__dirname, "src", "webxr-polyfill.js")
@@ -362,13 +362,13 @@ module.exports = async (env, argv) => {
       historyApiFallback: {
         rewrites: [
           { from: /^\/link/, to: "/link.html" },
-          { from: /^\/avatars/, to: "/avatar.html" },
+//          { from: /^\/avatars/, to: "/avatar.html" },
           { from: /^\/scenes/, to: "/scene.html" },
           { from: /^\/signin/, to: "/signin.html" },
-          { from: /^\/discord/, to: "/discord.html" },
+//          { from: /^\/discord/, to: "/discord.html" },
           { from: /^\/cloud/, to: "/cloud.html" },
           { from: /^\/verify/, to: "/verify.html" },
-          { from: /^\/tokens/, to: "/tokens.html" },
+//          { from: /^\/tokens/, to: "/tokens.html" },
           { from: /^\/whats-new/, to: "/whats-new.html" }
         ]
       },
@@ -523,7 +523,7 @@ module.exports = async (env, argv) => {
         },
         {
           test: /\.svg$/,
-          include: [path.resolve(__dirname, "src", "react-components")],
+          include: [path.resolve(__dirname, "src", "react-components"),path.resolve(__dirname, "src")],
           use: [
             {
               loader: "@svgr/webpack",
@@ -548,7 +548,8 @@ module.exports = async (env, argv) => {
                   ]
                 }
               }
-            }
+            },
+            "url-loader"
           ]
         },
         {
@@ -593,7 +594,7 @@ module.exports = async (env, argv) => {
     },
     optimization: {
       splitChunks: {
-        maxAsyncRequests: 10,
+        maxAsyncRequests: 30,
         maxInitialRequests: 10,
         cacheGroups: {
           frontend: {
@@ -669,20 +670,20 @@ module.exports = async (env, argv) => {
         chunksSortMode: "manual",
         inject: "head"
       }),
-      htmlPagePlugin({
-        filename: "avatar.html",
-        extraChunks: ["support"],
-        chunksSortMode: "manual",
-        inject: "head"
-      }),
+      // htmlPagePlugin({
+      //   filename: "avatar.html",
+      //   extraChunks: ["support"],
+      //   chunksSortMode: "manual",
+      //   inject: "head"
+      // }),
       htmlPagePlugin({
         filename: "link.html",
         extraChunks: ["support"],
         chunksSortMode: "manual"
       }),
-      htmlPagePlugin({
-        filename: "discord.html"
-      }),
+      // htmlPagePlugin({
+      //   filename: "discord.html"
+      // }),
       htmlPagePlugin({
         filename: "whats-new.html",
         inject: "head"
@@ -697,9 +698,9 @@ module.exports = async (env, argv) => {
       htmlPagePlugin({
         filename: "verify.html"
       }),
-      htmlPagePlugin({
-        filename: "tokens.html"
-      }),
+      // htmlPagePlugin({
+      //   filename: "tokens.html"
+      // }),
       new CopyWebpackPlugin({
         patterns: [
           { from: "src/hub.service.js", to: "hub.service.js" },
@@ -730,10 +731,9 @@ module.exports = async (env, argv) => {
           }]
       }),
       // Extract required css and add a content hash.
-      /*new MiniCssExtractPlugin({
-        filename: "assets/stylesheets/[name]-[contenthash].css",
-        //disable: argv.mode !== "production"
-      }),*/
+      new MiniCssExtractPlugin({
+        filename: "assets/stylesheets/[name]-[contenthash].css"
+      }),
       // Define process.env variables in the browser context.
       new webpack.DefinePlugin({
         "process.env": JSON.stringify({

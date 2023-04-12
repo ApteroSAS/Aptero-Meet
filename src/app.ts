@@ -23,18 +23,18 @@ import {
 } from "three";
 import { AudioSettings, SourceType } from "./components/audio-params";
 import { createEffectsComposer } from "./effects";
-import { DialogAdapter } from "./naf-dialog-adapter";
+import DialogAdapter from "./aptero/module/webRTCadapter/naf-dialog-io-adapter";
 import { mainTick } from "./systems/hubs-systems";
 import { waitForPreloads } from "./utils/preload";
 import SceneEntryManager from "./scene-entry-manager";
 import { store } from "./utils/store-instance";
 
 declare global {
+  let APP: App;
   interface Window {
     $O: (eid: number) => Object3D | undefined;
     APP: App;
   }
-  const APP: App;
 }
 
 export interface HubsWorld extends IWorld {

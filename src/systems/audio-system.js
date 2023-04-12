@@ -2,6 +2,11 @@ import { LogMessageType } from "../react-components/room/ChatSidebar";
 import { getAdapterParams } from "../aptero/module/webRTCadapter/adapter-config";
 import { GAIN_TIME_CONST, SourceType } from "../components/audio-params";
 
+export const MixerType = Object.freeze({
+  AVATAR: 0,
+  MEDIA: 1
+});
+
 let delayedReconnectTimeout = null;
 function performDelayedReconnect(gainNode) {
   if (delayedReconnectTimeout) {

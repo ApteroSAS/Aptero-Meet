@@ -37,7 +37,8 @@ function spawnFromUrl(text: string) {
 }
 
 async function spawnFromFileList(files: FileList) {
-  for (const file of files) {
+  //fixed double typing
+  for (const file of files as unknown as IterableIterator<File>) {
     const desiredContentType = file.type || guessContentType(file.name);
     const params = await upload(file, desiredContentType)
       .then(function (response: UploadResponse) {

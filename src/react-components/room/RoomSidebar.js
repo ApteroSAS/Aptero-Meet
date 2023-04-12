@@ -1,13 +1,13 @@
 import React from "react";
 import PropTypes from "prop-types";
-import styles from "./RoomSidebar.scss";
-import { Sidebar } from "../sidebar/Sidebar";
-import { CloseButton } from "../input/CloseButton";
-import { InputField } from "../input/InputField";
-import { IconButton } from "../input/IconButton";
-import { Button } from "../input/Button";
-import { Column } from "../layout/Column";
 import { FormattedMessage, useIntl } from "react-intl";
+import styles from "./RoomSidebar.scss";
+import { Button } from "../input/Button";
+import { CloseButton } from "../input/CloseButton";
+import { Column } from "../layout/Column";
+import { IconButton } from "../input/IconButton";
+import { InputField } from "../input/InputField";
+import { Sidebar } from "../sidebar/Sidebar";
 import configs from "../../utils/configs"
 import ApteroRoomEditPlugin from "../../aptero/module/HubsBridge/react-components/ApteroRoomEditPlugin";
 

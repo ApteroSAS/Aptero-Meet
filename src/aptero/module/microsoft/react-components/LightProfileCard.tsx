@@ -2,9 +2,10 @@ import * as React from "react";
 import { Avatar, Flex, Segment, Text } from "@fluentui/react-northstar";
 import { useEffect, useState } from "react";
 import {msTeamsAPI} from "@aptero/axolotis-module-teams";
+import teamsfx from "@microsoft/teamsfx";
 
 export function LightProfileCard() {
-  const [userProfile, setUserProfile] = useState(null);
+  const [userProfile, setUserProfile] = useState<teamsfx.UserInfo|null>(null);
   useEffect(() => {
     // Similar to componentDidMount and componentDidUpdate:
     if(!userProfile) {

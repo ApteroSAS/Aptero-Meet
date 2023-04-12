@@ -175,7 +175,6 @@ export default class NafTwilioAdapter extends EventEmitter {
     urlWithParams.searchParams.append("peerId", this._clientId);
 
     this._closed = false;
-
     return new Promise(async (resolve, reject) => {
       try {
         await this._joinRoom();
@@ -183,6 +182,7 @@ export default class NafTwilioAdapter extends EventEmitter {
           this.createTrack(this.lastTrack);
         }
         resolve(true);
+        this.emit("dialog-connection-connected");
       } catch (err) {
         this.emitRTCEvent("warn", "Adapter", () => `Error during connect: ${error}`);
         reject(err);

@@ -11,6 +11,7 @@ import "./assets/stylesheets/globals.scss";
 import { Center } from "./react-components/layout/Center";
 import { ThemeProvider } from "./react-components/styles/theme";
 import { store } from "./utils/store-instance";
+import AptHomeRoot from "./aptero/module/HubsBridge/AptHomeRoot";
 
 registerTelemetry("/signin", "Hubs Sign In Page");
 
@@ -24,6 +25,7 @@ function Root() {
           <PageContainer>
             <Center>
               <SignInModalContainer />
+              <AptHomeRoot />
             </Center>
           </PageContainer>
         </AuthContextProvider>

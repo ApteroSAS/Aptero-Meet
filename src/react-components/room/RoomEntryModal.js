@@ -28,9 +28,9 @@ export function RoomEntryModal({
   ...rest
 }) {
   const breakpoint = useCssBreakpoints();
-  setTimeout(()=>{
-    onJoinRoom()//Aptero
-  },0);
+  setTimeout(() => {
+    onJoinRoom(); //Aptero
+  }, 0);
   return (
     <Modal className={classNames(styles.roomEntryModal, className)} disableFullscreen {...rest}>
       <Column center className={styles.content}>

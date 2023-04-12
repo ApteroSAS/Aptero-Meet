@@ -9,7 +9,7 @@ import "./react-components/styles/global.scss";
 import { ThemeProvider } from "./react-components/styles/theme";
 import { store } from "./utils/store-instance";
 import { setupVersionComp } from "./aptero/module/HubsBridge/utils/Version";
-
+import AptHomeRoot from "./aptero/module/HubsBridge/AptHomeRoot";
 registerTelemetry("/home", "Hubs Home Page");
 
 window.APP = { store };
@@ -20,6 +20,7 @@ function Root() {
       <ThemeProvider store={store}>
         <AuthContextProvider store={store}>
           <HomePage />
+          <AptHomeRoot />
         </AuthContextProvider>
       </ThemeProvider>
     </WrappedIntlProvider>

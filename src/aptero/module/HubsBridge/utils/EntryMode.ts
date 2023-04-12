@@ -1,3 +1,5 @@
+import { AScene } from "aframe";
+
 const qs = new URLSearchParams(location.search);
 
 export function isMsTeams(){
@@ -9,7 +11,7 @@ export function isMsTeams(){
   return !!qs.get("msteams")
 }
 
-export function addEntryModeIfNotExist(entryMode){
+export function addEntryModeIfNotExist(entryMode: string){
   if(isMsTeams()){
     return;
   }
@@ -29,7 +31,7 @@ export function getEntryMode(){
   return qsVREntryType;
 }
 
-export function duplicateEntryModeOnSrc(src,sceneEl){
+export function duplicateEntryModeOnSrc(src:string,sceneEl:AScene){
   const windowUrl = new URL(location.href);
   const urlToConstruct = new URL(src);
   const isSameRoom = urlToConstruct.origin === windowUrl.origin && urlToConstruct.pathname === windowUrl.pathname;

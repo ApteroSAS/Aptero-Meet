@@ -269,10 +269,11 @@ export default class MediaDevicesManager extends EventEmitter {
 
     await APP.dialog.setLocalMediaStream(this._mediaStream);
 
-(??)    return result;
-  }
+    if (unmute) {
+      APP.dialog.enableMicrophone(true);
+    }
 
-    if (result) {
+    if (this.lastResult) {
       this._permissionsStatus[MediaDevices.MICROPHONE] = PermissionStatus.GRANTED;
       this._scene.emit(MediaDevicesEvents.MIC_SHARE_STARTED);
       this.emit(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, {
@@ -288,7 +289,7 @@ export default class MediaDevicesManager extends EventEmitter {
       });
     }
 
-    return result;
+    return this.lastResult;
   }
 
   async _startMicShare(constraints = { audio: {} }) {
@@ -416,7 +417,7 @@ export default class MediaDevicesManager extends EventEmitter {
       return;
     }
 
-    success(isDisplayMedia, videoTrackAdded, target, data);
+    success(isDisplayMedia, videoTrackAdded, target);
   }
 
   async stopVideoShare() {

@@ -42,9 +42,6 @@ for (let i = 0; i <= 20; i++) {
   VOLUME_LABELS[i] = s;
 }
 
-const textureCache = new TextureCache();
-const inflightTextures = new Map();
-
 //aptero microsoft feature
 const microsoftErrorImage = new Image();
 microsoftErrorImage.src = microsoftErrorImageSrc;
@@ -52,13 +49,6 @@ const microsoftErrorTexture = new THREE.Texture(microsoftErrorImage);
 microsoftErrorTexture.magFilter = THREE.NearestFilter;
 microsoftErrorImage.onload = () => {
   microsoftErrorTexture.needsUpdate = true;
-};
-
-const errorImage = new Image();
-errorImage.src = errorImageSrc;
-const errorTexture = new THREE.Texture(errorImage);
-errorImage.onload = () => {
-  errorTexture.needsUpdate = true;
 };
 
 //aptero microsoft feature

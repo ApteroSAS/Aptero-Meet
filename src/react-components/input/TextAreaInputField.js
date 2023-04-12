@@ -1,8 +1,8 @@
 import React, { forwardRef, memo } from "react";
 import PropTypes from "prop-types";
 import { InputField } from "./InputField";
-import { useId } from "./useId";
 import { TextAreaInput } from "./TextAreaInput";
+import { useId } from "./useId";
 
 /* eslint-disable-next-line react/display-name */
 export const TextAreaInputField = memo(

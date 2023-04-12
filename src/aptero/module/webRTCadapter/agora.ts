@@ -1,9 +1,9 @@
-import AgoraRTC from "agora-rtc-sdk-ng";
+import AgoraRTC, { IAgoraRTCClient } from "agora-rtc-sdk-ng";
 import { getAdapterParams } from "./adapter-config";
 
 export class AgoraAdapter {
 
-  currentRoom = null;
+  currentRoom:IAgoraRTCClient|null = null;
   private adapterUserListener: any;
   private _micProducer: any;
   private _videoProducer: any;
@@ -55,7 +55,7 @@ export class AgoraAdapter {
       } else {
         //https://docs.agora.io/en/Voice/API%20Reference/web_ng/interfaces/iagorartc.html#createscreenvideotrack
         //https://docs.agora.io/en/Voice/API%20Reference/web_ng/interfaces/screenvideotrackinitconfig.html
-        track = await AgoraRTC.createScreenVideoTrack(undefined);
+        track = await AgoraRTC.createScreenVideoTrack({});
       }
       this._videoProducer = track;
     } else if (constraints.audio) {
@@ -64,7 +64,7 @@ export class AgoraAdapter {
       track = await AgoraRTC.createMicrophoneAudioTrack({ microphoneId: constraints.audio.deviceId?.exact[0] });
       this._micProducer = track;
     }
-    this.currentRoom.publish(track);
+    this.currentRoom?.publish(track);
     return new MediaStream([track.getMediaStreamTrack()]);
   }
 
@@ -91,7 +91,7 @@ export class AgoraAdapter {
     let onParticipant = async (participant, mediaType) => {
       if (mediaType) {
         let peerId = this.convertId(participant.uid);
-        await this.currentRoom.subscribe(participant, mediaType);
+        await this.currentRoom?.subscribe(participant, mediaType);
         if (participant.hasAudio && participant.audioTrack) {
           let track = participant.audioTrack;
           track.track = track.getMediaStreamTrack();
@@ -121,6 +121,7 @@ export class AgoraAdapter {
       this.onTrackRemoved(peerId + "-" + mediaType);
     });
     this.currentRoom.on("user-left", participant => {
+      // @ts-ignore
       console.log(`Participant disconnected: ${participant.identity}`);
       let peerId = this.convertId(participant.uid);
       this.adapterUserListener(peerId);
@@ -148,14 +149,14 @@ export class AgoraAdapter {
 
   async unpublishAudioTrack() {
     if (this._micProducer) {
-      await this.currentRoom.unpublish(this._micProducer);
+      await this.currentRoom?.unpublish(this._micProducer);
       this._micProducer = null;
     }
   }
 
   async unpublishVideoTrack() {
     if (this._videoProducer) {
-      await this.currentRoom.unpublish(this._videoProducer);
+      await this.currentRoom?.unpublish(this._videoProducer);
       this._videoProducer = null;
     }
   }

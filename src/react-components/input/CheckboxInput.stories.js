@@ -1,7 +1,7 @@
 /* eslint-disable @calm/react-intl/missing-formatted-message */
 import React from "react";
-import { Column } from "../layout/Column";
 import { CheckboxInput } from "./CheckboxInput";
+import { Column } from "../layout/Column";
 
 export default {
   title: "Input/CheckboxInput",

@@ -127,7 +127,7 @@ export function createElementEntity(
   } else if (tag === "entity") {
     const outputAttrs: Attrs = {};
     const components: JSXComponentData & Attrs = {};
-    let ref = undefined;
+    let ref:any = undefined;
 
     for (const attr in attrs) {
       if (isReservedAttr(attr)) {

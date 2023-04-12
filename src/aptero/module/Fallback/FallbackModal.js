@@ -1,12 +1,12 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Modal } from "../../../react-components/modal/Modal";
-import { Button } from "../../../react-components/input/Button";
 import { BackButton } from "../../../react-components/input/BackButton";
-import { FormattedMessage } from "react-intl";
+import { Button } from "../../../react-components/input/Button";
 import { Column } from "../../../react-components/layout/Column";
-import { remoteControlServiceV2 } from "../RemoteScreen/RemoteControlServiceV2";
+import { FormattedMessage } from "react-intl";
 import { minimumQualityService } from "../perf/MinimumQualityService";
+import { Modal } from "../../../react-components/modal/Modal";
+import { remoteControlServiceV2 } from "../RemoteScreen/RemoteControlServiceV2";
 
 export function fallbackVMButton(){
   return <>

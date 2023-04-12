@@ -1,33 +1,24 @@
 import "@babel/polyfill";
 
 import "aframe";
+import "./utils/aframe-overrides";
 // A-Frame hardcodes THREE.Cache.enabled = true
 // But we don't want to use THREE.Cache because
 // web browser cache should work well.
 // So we disable it here.
+import * as THREE from "three";
 THREE.Cache.enabled = false;
+THREE.Object3D.DefaultMatrixAutoUpdate = false;
 
 import "./utils/logging";
 import {patchWebGLRenderingContext} from "./utils/webgl";
-
 patchWebGLRenderingContext();
 
-// It seems we need to use require to import modules
-// under the three/examples/js to avoid tree shaking
-// in webpack production mode.
-require("three/examples/js/loaders/GLTFLoader");
-
 import "networked-aframe/src/index";
-import "aframe-rounded";
 import "webrtc-adapter";
-import "aframe-slice9-component";
-import "./utils/threejs-positional-audio-updatematrixworld";
-import "./utils/threejs-world-update";
-import "./utils/threejs-raycast-patches";
-import "./phoenix-adapter";
+import "./phoenix-adapter";/*Aptero dependance pour components*/
 
 import "./components/scene-components";
-import "./components/scale-in-screen-space";
 import "./components/mute-mic";
 import "./components/bone-mute-state-indicator";
 import "./components/bone-visibility";
@@ -42,6 +33,7 @@ import "./components/hoverable-visuals";
 import "./components/hover-visuals";
 import "./components/offset-relative-to";
 import "./components/player-info";
+import "./components/name-tag";
 import "./components/debug";
 import "./components/hand-poses";
 import "./components/hud-controller";
@@ -59,7 +51,9 @@ import "./components/hide-when-pinned-and-forbidden";
 import "./components/visibility-while-frozen";
 import "./components/stats-plus";
 import "./components/networked-avatar";
-import "./components/media-views";
+import "./components/media-video";
+import "./components/media-pdf";
+import "./components/media-image";
 import "./components/avatar-volume-controls";
 import "./components/pinch-to-move";
 import "./components/pitch-yaw-rotator";
@@ -69,18 +63,14 @@ import "./components/pin-networked-object-button";
 import "./components/mirror-media-button";
 import "./components/close-mirrored-media-button";
 import "./components/drop-object-button";
-import "./components/remove-networked-object-button";
 import "./components/camera-focus-button";
 import "./components/unmute-video-button";
-import "./components/destroy-at-extreme-distances";
 import "./components/visible-to-owner";
-import "./components/camera-tool";
 import "./components/emit-state-change";
 import "./components/action-to-event";
 import "./components/action-to-remove";
 import "./components/emit-scene-event-on-remove";
 import "./components/follow-in-fov";
-import "./components/matrix-auto-update";
 import "./components/clone-media-button";
 import "./components/open-media-button";
 import "./components/refresh-media-button";
@@ -91,12 +81,10 @@ import "./components/scale-button";
 import "./components/hover-menu";
 import "./components/disable-frustum-culling";
 import "./components/teleporter";
-import "./components/set-active-camera";
 import "./components/track-pose";
 import "./components/replay";
 import "./components/visibility-by-path";
 import "./components/tags";
-import "./components/billboard";
 import "./components/periodic-full-syncs";
 import "./components/inspect-button";
 import "./components/inspect-pivot-child-selector";
@@ -105,7 +93,7 @@ import "./components/optional-alternative-to-not-hide";
 import "./components/avatar-audio-source";
 import "./components/avatar-inspect-collider";
 import "./components/video-texture-target";
-import "./components/audio-params";
+import "./components/mirror";
 
 import "./systems/nav";
 import "./systems/frame-scheduler";
@@ -115,7 +103,6 @@ import "./systems/permissions";
 import "./systems/exit-on-blur";
 import "./systems/auto-pixel-ratio";
 import "./systems/idle-detector";
-import "./systems/camera-tools";
 import "./systems/pen-tools";
 import "./systems/userinput/userinput";
 import "./systems/userinput/userinput-debug";
@@ -131,19 +118,33 @@ import "./systems/audio-gain-system";
 
 import "./gltf-component-mappings";
 
-import {App} from "./App";
-import {AdapterWarpper} from "./aptero/module/webRTCadapter/AdapterWrapper";
+//Aptero support for multiple Adapters
+import {AdapterWrapper} from "./aptero/module/webRTCadapter/AdapterWrapper";
+import { App, getScene } from "./app";
+import MediaDevicesManager from "./utils/media-devices-manager";
+import PinningHelper from "./utils/pinning-helper";
+import { sleep } from "./utils/async-utils";
+import { platformUnsupported } from "./support";
+import { renderAsEntity } from "./utils/jsx-entity";
+import { VideoMenuPrefab } from "./prefabs/video-menu";
+import { ObjectMenuPrefab } from "./prefabs/object-menu";
+import { loadWaypointPreviewModel, WaypointPreview } from "./prefabs/waypoint-preview";
+import { preload } from "./utils/preload";
 
 window.APP = new App();
-window.APP.dialog = new AdapterWarpper();
-window.APP.RENDER_ORDER = {
-  HUD_BACKGROUND: 1,
-  HUD_ICONS: 2,
-  CURSOR: 3
+window.APP.dialog = new AdapterWrapper() as unknown as DialogAdapter; // Aptero
+renderAsEntity(APP.world, VideoMenuPrefab());
+renderAsEntity(APP.world, VideoMenuPrefab());
+function addToScene(entityDef, visible) {
+  return getScene().then(scene => {
+    const eid = renderAsEntity(APP.world, entityDef);
+    const obj = APP.world.eid2obj.get(eid);
+    if (!obj) return;
+    scene.add(obj);
+    obj.visible = !!visible;
+  });
 }
 
-declare const THREE;
-THREE.Object3D.DefaultMatrixAutoUpdate = false;
 import "./components/owned-object-limiter";
 import "./components/owned-object-cleanup-timeout";
 import "./components/set-unowned-body-kinematic";
@@ -168,9 +169,9 @@ import "./components/shape-helper";
 import {getService} from "@aptero/axolotis-player"
 import {MICROSOFT_STATIC_SERVICE, PROPERTIES_SERVICE} from "@aptero/axolotis-module-teams";
 import {redirectIfNeeded} from "./aptero/module/load-balancer/LoadBalancer";
+import { Object3D } from "three";
+import DialogAdapter from "./aptero/module/webRTCadapter/naf-dialog-io-adapter";
 
-
-declare const window;
 
 async function domReady() {
   return new Promise((resolve, reject) => {
@@ -190,7 +191,7 @@ async function domReady() {
 async function aframeReady() {
   return new Promise((resolve, reject) => {
     try {
-      document.querySelector('a-scene').addEventListener('loaded', resolve)
+      document.querySelector('a-scene')!.addEventListener('loaded', resolve)
     } catch (e) {
       reject(e);
     }

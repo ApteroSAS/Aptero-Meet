@@ -1,16 +1,16 @@
 import React, { useState, useCallback } from "react";
 import PropTypes from "prop-types";
-import { RadioInputField } from "../input/RadioInputField";
-import { RadioInputOption } from "../input/RadioInput";
-import { Button } from "../input/Button";
-import { CloseButton } from "../input/CloseButton";
 import { useForm } from "react-hook-form";
 import styles from "./Banner.scss";
-import { ReactComponent as ArrowIcon } from "../icons/Arrow.svg";
-import critical from "../../assets/images/critical.png";
-import { TextInputField } from "../input/TextInputField";
+import { Button } from "../input/Button";
+import { CloseButton } from "../input/CloseButton";
 import { CheckboxInput } from "../input/CheckboxInput";
 import { FormattedMessage } from "react-intl";
+import { RadioInputOption } from "../input/RadioInput";
+import { RadioInputField } from "../input/RadioInputField";
+import { TextInputField } from "../input/TextInputField";
+import { ReactComponent as ArrowIcon } from "../icons/Arrow.svg";
+import critical from "../../assets/images/critical.png";
 import cone from "../../assets/images/cone.png";
 
 const Banner = () => {

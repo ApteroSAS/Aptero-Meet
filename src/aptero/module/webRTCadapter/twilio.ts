@@ -3,7 +3,7 @@ import { propertiesService } from "../properties/propertiesService";
 import { getAdapterParams } from "./adapter-config";
 
 export class TwilioAdapter {
-  currentRoom = null;
+  currentRoom:Video.Room|null = null;
   videoTrack = null;
   twilioMicEnable = false;
   onTrack:(a:any,b:any,c:any)=>void = () => {console.error("invalid")};
@@ -24,7 +24,7 @@ export class TwilioAdapter {
       try {
         track.stop();
         track.detach();
-        this.currentRoom.localParticipant.unpublishTrack(track);
+        this.currentRoom?.localParticipant.unpublishTrack(track);
       } catch (e) {/* happens in case of remote track*/
       }
       if (video) {
@@ -39,8 +39,9 @@ export class TwilioAdapter {
   }
 
   async unpublishVideoTrack() {
-    for (let publication of this.currentRoom.localParticipant.videoTracks) {
-      publication = publication[1];
+    if(!this.currentRoom?.localParticipant.videoTracks)return;
+    for (let track of this.currentRoom.localParticipant.videoTracks) {
+      let publication = track[1];
       //if(publication.track === videoTrack){
       await this.unpublishGivenVideoTrack(publication.track);
       publication.unpublish();
@@ -136,8 +137,8 @@ export class TwilioAdapter {
     // Extract the AccessToken from the Response.
     const token = await response.text();
     this.currentRoom = await connect(token, { audio: false, video: false });
-
-
+    //TODO better fallback if the promise is cancelled
+    if(!this.currentRoom) throw new Error("Failed to connect"); //the promise may be cancelled
     const onTwilioParticipant = participant => {
       //console.log(`Participant connected: ${participant.identity}`);
       let peerId = this.convertId(participant.identity);
@@ -205,8 +206,9 @@ export class TwilioAdapter {
   }
 
   async unpublishAudioTrack() {
-    for (let publication of this.currentRoom.localParticipant.tracks) {
-      publication = publication[1];
+    if(!this.currentRoom?.localParticipant.tracks)return;
+    for (let track of this.currentRoom.localParticipant.tracks) {
+      let publication = track[1];
       if(publication.track.kind === "audio"){
         publication.track.stop()
         publication.unpublish();

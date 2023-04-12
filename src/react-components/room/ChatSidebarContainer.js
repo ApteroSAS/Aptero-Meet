@@ -351,7 +351,7 @@ export function ChatSidebarContainer({
   canSpawnMessages,
   presences,
   occupantCount,
-  onClose,,
+  onClose,
   initialValue,
   autoFocus,
   toggleChatSidebar

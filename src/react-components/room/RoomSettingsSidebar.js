@@ -1,21 +1,21 @@
 import React, { useEffect } from "react";
 import PropTypes from "prop-types";
 import { useForm } from "react-hook-form";
-import styles from "./RoomSettingsSidebar.scss";
-import { Sidebar } from "../sidebar/Sidebar";
-import { CloseButton } from "../input/CloseButton";
-import { InputField } from "../input/InputField";
 import { FormattedMessage, useIntl } from "react-intl";
-import { ApplyButton } from "../input/Button";
-import { TextInputField } from "../input/TextInputField";
-import { TextAreaInputField } from "../input/TextAreaInputField";
-import { ToggleInput } from "../input/ToggleInput";
-import { RadioInputField, RadioInputOption } from "../input/RadioInputField";
-import { NumericInputField } from "../input/NumericInputField";
+import styles from "./RoomSettingsSidebar.scss";
 import { BackButton } from "../input/BackButton";
-import { SceneInfo } from "./RoomSidebar";
+import { ApplyButton } from "../input/Button";
+import { CloseButton } from "../input/CloseButton";
 import { Column } from "../layout/Column";
+import { InputField } from "../input/InputField";
 import { InviteLinkInputField } from "./InviteLinkInputField";
+import { NumericInputField } from "../input/NumericInputField";
+import { RadioInputField, RadioInputOption } from "../input/RadioInputField";
+import { Sidebar } from "../sidebar/Sidebar";
+import { TextAreaInputField } from "../input/TextAreaInputField";
+import { TextInputField } from "../input/TextInputField";
+import { ToggleInput } from "../input/ToggleInput";
+import { SceneInfo } from "./RoomSidebar";
 
 export function RoomSettingsSidebar({
   showBackButton,

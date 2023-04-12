@@ -104,6 +104,8 @@ declare module "aframe" {
     emit(string, any): void;
     addState(string): void;
     is(string): boolean;
+
+    enterVR(): void;
   }
 
   declare global {

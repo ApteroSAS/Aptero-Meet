@@ -30,6 +30,7 @@ export function getAdapterParams(): {
   transport: string,
   url?: string
 } {
+  // @ts-ignore
   return profile || {};
 }
 
@@ -79,11 +80,11 @@ export async function choseAdapterAuto() {
 export async function adapterFactory() {
   const adapter = await choseAdapterAuto();
   const module = await lazyLoad(adapter);
-  return new module.default();
+  if(module) return new module.default();
 }
 
 export async function unpublishVideoTrack() {
-  const adapterParams = getAdapterParams();
+  const adapterParams = getAdapterParams() as {adapter: string, transport: string, url?: string | undefined};
   if (adapterParams.adapter === "twilio" || adapterParams.adapter === "agora") {
     await window.APP.dialog.subAdapter.unpublishVideoTrack();
   }
@@ -97,7 +98,7 @@ export async function setlistenerEndShareVideo() {
 
 export async function createTrack(constraints, isDisplayDevice) {
   console.log("createTrack :", constraints, isDisplayDevice);
-  const adapterParams = getAdapterParams();
+  const adapterParams = getAdapterParams() as {adapter: string, transport: string, url?: string | undefined};
   if (adapterParams.adapter === "twilio" || adapterParams.adapter === "agora") {
     return (window.APP.dialog as NafTwilioAdapter).createTrack(constraints);
   } else {

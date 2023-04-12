@@ -1,5 +1,5 @@
 export async function wait(validator, poolingIntervalMs = 200) {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     if (validator()) {
       resolve();
     } else {

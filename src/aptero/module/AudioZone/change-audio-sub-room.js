@@ -1,6 +1,6 @@
 import { SOUND_PIN } from "../../../systems/sound-effects-system";
 import { choseAdapter, getAdapterParams } from "../webRTCadapter/adapter-config";
-import { AdapterWarpper } from "../webRTCadapter/AdapterWrapper";
+import { AdapterWrapper } from "../webRTCadapter/AdapterWrapper";
 import { wait } from "../../util/AsyncWaiter";
 
 const history = [];
@@ -17,7 +17,7 @@ export async function switchAdapter(adapter){
     currentSubAdapter = adapter;
     await APP.dialog.disconnect();
     await choseAdapter(adapter);
-    APP.dialog = new AdapterWarpper();
+    APP.dialog = new AdapterWrapper();
     await wait(()=>{return APP.dialog.lasyLoadingFinished});
   }
 }

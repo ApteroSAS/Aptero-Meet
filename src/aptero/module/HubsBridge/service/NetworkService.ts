@@ -1,11 +1,12 @@
 const EventEmitter = require("eventemitter3");
+import { AElement } from "aframe";
+import {Channel} from "phoenix";
 
-declare const NAF;
+declare const NAF:any;
 
 export class NetworkService {
   eventEmitter = new EventEmitter();
-  private hubPhxChannel: any;
-
+  private hubPhxChannel: Channel;
   constructor() {
   }
 
@@ -13,7 +14,7 @@ export class NetworkService {
     /* empty start to ensure the import is made*/
   }
 
-  setPhoenixChannel(hubPhxChannel) {
+  setPhoenixChannel(hubPhxChannel: any) {
     this.hubPhxChannel = hubPhxChannel;
     this.hubPhxChannel.on("message", ({ session_id, type, body, from }) => {
       this.eventEmitter.emit("msg_recv", { session_id, type, body, from });
@@ -25,7 +26,7 @@ export class NetworkService {
     this.hubPhxChannel.push("message", { type: type, body: data });
   }
 
-  onMessage(type, callback: (data: { session_id: string, type: string, body: any, from: string }) => void) {
+  onMessage(type: string, callback: (data: { session_id: string, type: string, body: any, from: string }) => void) {
     this.eventEmitter.on(type, callback);
     return () => {
       this.eventEmitter.off(type, callback);
@@ -41,12 +42,12 @@ export class NetworkService {
     return NAF.clientId;
   }
 
-  async getElementNetworkId(element) {
+  async getElementNetworkId(element:AElement) {
     return new Promise((resolve) => {
       NAF.utils
         .getNetworkedEntity(element)
-        .then(networkedEl => {
-          resolve(networkedEl.components.networked.data.networkId);
+        .then((networkedEl:AElement) => {
+          resolve((networkedEl.components['networked']as any).data.networkId);
         }).catch(() => {
         resolve(null);
       });

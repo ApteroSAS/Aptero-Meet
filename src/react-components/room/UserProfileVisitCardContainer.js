@@ -6,7 +6,7 @@ import {usePeopleList} from "./PeopleSidebarContainer";
 // get the profile of the selected user
 let profileList = [];
 let email = "";
-let jobTitle = "";
+let jobTitleName = "";
 let companyName = "";
 let phoneNumber = "";
 let profilePicture = "";
@@ -29,7 +29,7 @@ export function UserProfileVisitCardContainer({
     });
     if (selectedPersonProfile != null) {
         email = selectedPersonProfile.email;
-        jobTitle = selectedPersonProfile.jobTitle;
+        jobTitleName = selectedPersonProfile.jobTitle;
         companyName = selectedPersonProfile.companyName;
         phoneNumber = selectedPersonProfile.phoneNumber;
         if (selectedPersonProfile.microsoftUserprofilePicture) {
@@ -42,7 +42,7 @@ export function UserProfileVisitCardContainer({
 
     if (selectedPerson) {
         email = selectedPerson.profile.email;
-        jobTitle = selectedPerson.profile.jobTitle;
+        jobTitleName = selectedPerson.profile.jobTitle;
         companyName = selectedPerson.profile.companyName;
         phoneNumber = selectedPerson.profile.phoneNumber;
         if (selectedPerson.profile.microsoftUserprofilePicture) {
@@ -62,7 +62,7 @@ export function UserProfileVisitCardContainer({
             displayName={displayName}
             email={email}
             phoneNumber={phoneNumber}
-            jobTitle={jobTitle}
+            jobTitleName={jobTitleName}
             companyName={companyName}
             profilePicture={profilePicture}
         />

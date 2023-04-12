@@ -7,7 +7,7 @@ import {MicrosoftLoginService, msTeamsAPI} from "@aptero/axolotis-module-teams";
 
 export function LoginButton(props) {
   const [loading, setLoading] = useState(true);
-  const [service, setService] = useState<MicrosoftLoginService>(null);
+  const [service, setService] = useState<MicrosoftLoginService|undefined>(undefined);
   const [error, setError] = useState(null);
   useEffect( () => {
     // Similar to componentDidMount and componentDidUpdate:
@@ -22,7 +22,7 @@ export function LoginButton(props) {
       console.log("1");
       setLoading(true);
       setError(null);
-      await service.login(false);
+      await service!.login(false);
       setLoading(false);
       console.log("2");
     } catch (e) {
@@ -36,13 +36,16 @@ export function LoginButton(props) {
       {!loading && (
         <div style={{ margin: "8px" }}>
           {service && service.isSignedIn() && <LightProfileCard />}
-          {error && (
+          {(error as Error|null) && (
             <p>
               <FormattedMessage
                 id="microsoft.settings.account-auth.authorize1"
                 defaultMessage="Failed to authorize. Please contact the support at admin@aptero.co and past the following error detail:"
               />
-              <br /> {error.toString()}
+              <br /> {
+                // @ts-ignore
+                error.toString()
+              }
             </p>
           )}
           {/*!error && <><p><FormattedMessage id="microsoft.settings.account-auth.authorize2"

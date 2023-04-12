@@ -65,14 +65,15 @@ export const SCHEMA = {
       properties: {
         displayName: { type: "string", pattern: "^[A-Za-z0-9_~ -]{3,32}$" },
         avatarId: { type: "string" },
-        // personalAvatarId is obsolete, but we need it here for backwards compatibility.
+        //aptero
         companyName: { type: "string" },
         jobTitleName: { type: "string" },
         phoneNumber: { type: "string" },
         description: { type: "string" },
-        profilePicture:{type:"string"},
-        microsoftUserprofilePicture:{type:"string"},
-        microsoftUser:{type:"string"},
+        email: { type: "string" },
+        profilePicture: { type: "string" },
+        microsoftUserprofilePicture: { type: "string" },
+        microsoftUser: { type: "string" },
         // personalAvatarId is obsolete, but we need it here for backwards compatibility.
         personalAvatarId: { type: "string" }
       }
@@ -94,8 +95,8 @@ export const SCHEMA = {
         hasFoundFreeze: { type: "boolean" },
         hasChangedName: { type: "boolean" },
         hasAcceptedProfile: { type: "boolean" },
-        hasChangedPicture:{type:"boolean"},
-        hasChangedAvatar:{type:"boolean"},
+        hasChangedPicture: { type: "boolean" },
+        hasChangedAvatar: { type: "boolean" },
         lastEnteredAt: { type: "string" },
         hasPinned: { type: "boolean" },
         hasRotated: { type: "boolean" },
@@ -332,7 +333,7 @@ export default class Store extends EventTarget {
     if (!this.state.activity.hasChangedName) {
       //const authenticationModule= new MicrosoftLoginService();
       this.update({
-        profile: {  displayName:generateRandomName() }
+        profile: { displayName: generateRandomName() }
       });
     }
   };
@@ -425,7 +426,7 @@ export default class Store extends EventTarget {
         delete error.instance[error.argument];
       });
     }
-      // Intentionally not including details about the state or validation result here, since we don't want to leak
+    // Intentionally not including details about the state or validation result here, since we don't want to leak
     if (newState.preferences) {
       // sensitive data in the error message.
       // new defaults will apply without user action
@@ -459,7 +460,7 @@ export default class Store extends EventTarget {
     } else {
       return null;
     }
-    }
+  }
 
   get schema() {
     return SCHEMA;

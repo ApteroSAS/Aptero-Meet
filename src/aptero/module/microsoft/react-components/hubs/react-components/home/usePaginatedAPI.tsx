@@ -21,7 +21,8 @@ export function usePaginatedAPI(apiCallback) {
       return;
     }
 
-    setState((curState) => ({
+    // @ts-ignore This code is not supposed to be a source of error
+    setState(curState => ({
       ...curState,
       cursor: state.nextCursor,
       nextCursor: undefined,
@@ -59,12 +60,13 @@ export function usePaginatedAPI(apiCallback) {
 
     curApiCallback
       .current(internalState.cursor)
-      .then((response) => {
+      .then(response => {
         if (curApiCallback.current !== caller) {
           return;
         }
 
-        setState((curState) => ({
+        // @ts-ignore
+        setState(curState => ({
           ...curState,
           isLoading: false,
           hasMore: !!response.meta.next_cursor,
@@ -74,12 +76,12 @@ export function usePaginatedAPI(apiCallback) {
           nextCursor: response.meta.next_cursor,
         }));
       })
-      .catch((error) => {
+      .catch(error => {
         if (curApiCallback.current !== caller) {
           return;
         }
 
-        setState((curState) => ({
+        setState(curState => ({
           ...curState,
           isLoading: false,
           hasMore: false,

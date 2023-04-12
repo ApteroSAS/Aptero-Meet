@@ -1,15 +1,14 @@
 import * as React from "react";
 import { useCallback, useContext, useState } from "react";
 import { FormattedMessage } from "react-intl";
-
-import { Button, Input } from "@fluentui/react-northstar";
-import { MediaGrid } from "./hubs/react-components/room/MediaGrid";
-import { usePaginatedAPI } from "./hubs/react-components/home/usePaginatedAPI";
-import { Container } from "./hubs/react-components/layout/Container";
-import { Column } from "./hubs/react-components/layout/Column";
 import { AuthContext } from "../../../../react-components/auth/AuthContext";
+import { Column } from "./hubs/react-components/layout/Column";
+import { Container } from "./hubs/react-components/layout/Container";
+import { MediaGrid } from "./hubs/react-components/room/MediaGrid";
 import { MediaTile } from "../../../../react-components/room/MediaTiles";
 import { PadNumber } from "./PadNumber";
+import { usePaginatedAPI } from "./hubs/react-components/home/usePaginatedAPI";
+import { Button, Input } from "@fluentui/react-northstar";
 import { getServiceSync } from "@aptero/axolotis-player";
 import {ROOM_SERVICE, roomService, RoomService} from "../../axolotis/modules/basic";
 import {msTeamsAPI} from "@aptero/axolotis-module-teams";
@@ -89,8 +88,8 @@ export function RoomSection(props: {
     },
 
   ];
-  const sortedFavoriteRooms = Array.from(favoriteRooms).sort((a, b) => b.member_count - a.member_count);
-  const sortedSpokeProject = Array.from(spokeProject).sort((a, b) => b.member_count - a.member_count);
+  const sortedFavoriteRooms = Array.from(favoriteRooms).sort((a:any, b:any) => b.member_count - a.member_count);
+  const sortedSpokeProject = Array.from(spokeProject).sort((a:any, b:any) => b.member_count - a.member_count);
 
   const mySceneDisplay = sortedSpokeProject.length > 0;
   const myRoomDisplay = sortedFavoriteRooms.length > 0;
@@ -206,7 +205,7 @@ export function RoomSection(props: {
             <Container as={undefined} className={undefined}>
               <Column2 grow padding>
                 <MediaGrid center className={undefined} isVariableWidth={undefined} sm={undefined}>
-                  {sortedSpokeProject.map((room) => {
+                  {sortedSpokeProject.map((room:any) => {
                     return (
                       <MediaTile
                         onClick={async (event) => {
@@ -236,7 +235,7 @@ export function RoomSection(props: {
             <Container className={undefined} as={undefined}>
               <Column2 grow padding>
                 <MediaGrid center className={undefined} isVariableWidth={undefined} sm={undefined}>
-                  {sortedFavoriteRooms.map((room) => {
+                  {sortedFavoriteRooms.map((room:any) => {
                     return (
                       <MediaTile
                         onClick={async (event) => {

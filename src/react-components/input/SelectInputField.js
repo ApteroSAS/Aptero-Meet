@@ -1,11 +1,11 @@
 import React from "react";
+import { FormattedMessage } from "react-intl";
 import PropTypes from "prop-types";
-import { InputField } from "./InputField";
 import classNames from "classnames";
+import { useSelect } from "downshift";
+import { InputField } from "./InputField";
 import styles from "./SelectInputField.scss";
 import { ReactComponent as CaretDownIcon } from "../icons/CaretDown.svg";
-import { useSelect } from "downshift";
-import { FormattedMessage } from "react-intl";
 
 function getItemValue(item) {
   return typeof item === "object" ? item.value : item;

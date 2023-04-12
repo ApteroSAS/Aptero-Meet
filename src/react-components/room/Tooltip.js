@@ -23,12 +23,13 @@ if (window.navigator.keyboard !== undefined && window.navigator.keyboard.getLayo
   window.navigator.keyboard
     .getLayoutMap()
     .then(function (map) {
-      moveKeyFront = `${map.get("KeyW")}`.toUpperCase();
-      moveKeyLeft = `${map.get("KeyA")}`.toUpperCase();
-      moveKeyBack = `${map.get("KeyS")}`.toUpperCase();
-      moveKeyRight = `${map.get("KeyD")}`.toUpperCase();
-      turnLeftKey = map.get("KeyQ")?.toUpperCase();
-      turnRightKey = map.get("KeyE")?.toUpperCase();
+      // Aptero add fallback when layout exist yet no key is found
+      moveKeyFront = `${map.get("KeyW") || moveKeyFront}`.toUpperCase();
+      moveKeyLeft = `${map.get("KeyA") || moveKeyLeft}`.toUpperCase();
+      moveKeyBack = `${map.get("KeyS") || moveKeyBack}`.toUpperCase();
+      moveKeyRight = `${map.get("KeyD") || moveKeyRight}`.toUpperCase();
+      turnLeftKey = map.get("KeyQ")?.toUpperCase() || turnLeftKey;
+      turnRightKey = map.get("KeyE")?.toUpperCase() || turnRightKey;
     })
     .catch(function (e) {
       // This occurs on Chrome 93 when the Hubs page is in an iframe
@@ -236,6 +237,7 @@ function onboardingSteps({ intl, step }) {
         }
       };
     case "tips.desktop.locomotion":
+      console.log(`moveKeyFront = ${moveKeyFront}`);
       return {
         control: {
           type: Step,

@@ -33,10 +33,10 @@ export default class ProfileEntryPanel extends Component {
     avatarId: null,
     displayName: null,
     companyName: null,
-    jobTitle: null,
+    jobTitleName: null,
     email: null,
     phoneNumber: null,
-    descriptionUser: null,
+    description: null,
     avatar: null
   };
 
@@ -54,8 +54,8 @@ export default class ProfileEntryPanel extends Component {
   }
 
   getStateFromProfile = () => {
-    const { displayName, avatarId, companyName, jobTitle, email, phoneNumber, descriptionUser } = this.props.store.state.profile;
-    return { displayName, avatarId, companyName, jobTitle, email, phoneNumber, descriptionUser };
+    const { displayName, avatarId, companyName, jobTitleName, email, phoneNumber, description } = this.props.store.state.profile;
+    return { displayName, avatarId, companyName, jobTitleName, email, phoneNumber, description };
   };
 
   storeUpdated = () => this.setState(this.getStateFromProfile());
@@ -76,10 +76,10 @@ export default class ProfileEntryPanel extends Component {
         displayName: this.state.displayName,
         avatarId: this.state.avatarId,
         companyName: this.state.companyName,
-        jobTitle: this.state.jobTitle,
+        jobTitleName: this.state.jobTitleName,
         email: this.props.store.state.credentials.email,
         phoneNumber: this.state.phoneNumber,
-        descriptionUser: this.state.descriptionUser
+        description: this.state.description
       }
     });
     this.props.finished();
@@ -95,8 +95,8 @@ export default class ProfileEntryPanel extends Component {
       displayName: displayName,
       phoneNumber: this.state.phoneNumber,
       companyName: this.state.companyName,
-      jobTitle: this.state.jobTitle,
-      bio: this.state.descriptionUser
+      jobTitleName: this.state.jobTitleName,
+      bio: this.state.description
     };
     const json = JSON.stringify({ mail: this.state.email, profile: profile });
 
@@ -108,15 +108,15 @@ export default class ProfileEntryPanel extends Component {
     });
   }
 
-  async updateUserJobTitle(jobTitle) {
+  async updateUserJobTitle(jobTitleName) {
     const profile = {
       displayName: this.state.displayName,
       phoneNumber: this.state.phoneNumber,
       companyName: this.state.companyName,
-      jobTitle: jobTitle,
-      bio: this.state.descriptionUser
+      jobTitleName: jobTitleName,
+      bio: this.state.description
     };
-    this.setState({ jobTitle: jobTitle });
+    this.setState({ jobTitleName: jobTitleName });
     const json = JSON.stringify({ mail: this.state.email, profile: profile });
 
     await axios.post(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/user/update/user", json, {
@@ -133,7 +133,7 @@ export default class ProfileEntryPanel extends Component {
       phoneNumber: this.state.phoneNumber,
       companyName: companyName,
       jobTitle: this.state.jobTitle,
-      bio: this.state.descriptionUser
+      bio: this.state.description
     };
     this.setState({ companyName: companyName });
     const json = JSON.stringify({ mail: this.state.email, profile: profile });
@@ -152,7 +152,7 @@ export default class ProfileEntryPanel extends Component {
       phoneNumber: phoneNumber,
       companyName: this.state.companyName,
       jobTitle: this.state.jobTitle,
-      bio: this.state.descriptionUser
+      bio: this.state.description
     };
     this.setState({ phoneNumber: phoneNumber });
     const json = JSON.stringify({ mail: this.state.email, profile: profile });
@@ -171,7 +171,7 @@ export default class ProfileEntryPanel extends Component {
       let data = resp.data;
       if(data) {
         this.setState({ displayName: data.displayName });
-        this.setState({ jobTitle: data.jobTitle });
+        this.setState({ jobTitleName: data.jobTitleName });
         this.setState({ companyName: data.companyName });
         this.setState({ phoneNumber: data.phoneNumber });
         this.props.store.update({
@@ -254,7 +254,7 @@ export default class ProfileEntryPanel extends Component {
       jobTitle: this.state.jobTitle,
       email: this.state.email,
       phoneNumber: this.state.phoneNumber,
-      descriptionUser: this.state.descriptionUser,
+      description: this.state.description,
       displayNamePattern: this.props.store.schema.definitions.profile.properties.displayName.pattern,
       onChangeDisplayName: e => this.setState({ displayName: e.target.value }),
       onChangeCompanyName: e => this.setState({ companyName: e.target.value }),

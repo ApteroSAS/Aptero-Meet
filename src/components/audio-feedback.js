@@ -26,6 +26,16 @@ const calculateVolume = (analyser, levels) => {
   return currVolume;
 };
 
+const tempScaleFromPosition = new THREE.Vector3();
+const tempScaleToPosition = new THREE.Vector3();
+
+export function getAudioFeedbackScale(fromObject, toObject, minScale, maxScale, volume) {
+  tempScaleToPosition.setFromMatrixPosition(toObject.matrixWorld);
+  tempScaleFromPosition.setFromMatrixPosition(fromObject.matrixWorld);
+  const distance = tempScaleFromPosition.distanceTo(tempScaleToPosition) / 10;
+  return Math.min(maxScale, minScale + (maxScale - minScale) * volume * 8 * distance);
+}
+
 function updateVolume(component) {
   const newRawVolume = calculateVolume(component.analyser, component.levels);
   minimumQualityService.notifyMicLevel(newRawVolume);

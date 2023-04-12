@@ -12,6 +12,7 @@ import "./module/AudioZone/component/trigger";
 import { gltfExtensionProcessorService } from "./module/ButtonAPI/api/GLTFExtensionProcessorService";
 //import DistributedSoundSystem from "./service/DistributedSoundSystem";
 import SoundSystem from "./module/DistributedSound/SoundSystem";
+import { AudioSettingsSystem } from "./../systems/audio-settings-system";
 
 //adapter
 import "./module/webRTCadapter/adapter-config";
@@ -31,7 +32,7 @@ declare let AFRAME:any;
 
 export const ENTERED_EVENT = 'apt:room:entered';
 
-function sendIframeMessage(type, data) {
+function sendIframeMessage(type:string, data:any) {
   if (window.parent && window.parent.postMessage) {
     window.parent.postMessage(JSON.stringify({type, data}), "*");
   }
@@ -41,7 +42,7 @@ function sendIframeMessage(type, data) {
 window.focus();
 window.addEventListener(
   "keydown",
-  function(e) {
+  function(e:KeyboardEvent) {
     if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(e.code) > -1) {
       e.preventDefault();
     }
@@ -50,7 +51,7 @@ window.addEventListener(
 );
 window.addEventListener(
   "keydown",
-  function(e) {
+  function(e:KeyboardEvent) {
     if (["space"].indexOf(e.code) > -1) {
       e.stopPropagation();
     }
@@ -61,7 +62,7 @@ if (new URL(window.location.href).searchParams.get("hideui")) {
   //no space button if hide ui mode
   window.addEventListener(
     "keydown",
-    function(e) {
+    function(e:KeyboardEvent) {
       if (["Space"].indexOf(e.code) > -1) {
         e.preventDefault();
         e.stopPropagation();
@@ -84,7 +85,7 @@ export class ApteroServices {
     aptLogger.setAdditionalData("version", process.env.BUILD_VERSION);
   }
 
-  start(audioSettingsSystem) {
+  start(audioSettingsSystem: AudioSettingsSystem) {
     this.audioSettingsSystem = audioSettingsSystem;
     waitForDOMContentLoaded().then(async () => {
       await networkService.start();
@@ -143,9 +144,9 @@ export class ApteroServices {
     window.dispatchEvent(new CustomEvent("apt_scene_entered", {}));
   }
 
-  notifyLoadingState(state, action) {
+  notifyLoadingState(state:any, action:any) {
     sendIframeMessage("loading", { state, action });
   }
 }
 
-export const apteroService = new ApteroServices();
+export let apteroService = new ApteroServices();

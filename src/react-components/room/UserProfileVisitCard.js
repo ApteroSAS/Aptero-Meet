@@ -11,7 +11,7 @@ export function UserProfileVisitCard({
                                        displayName,
                                        email,
                                        phoneNumber,
-                                       jobTitle,
+                                       jobTitleName,
                                        profilePicture
                                      }) {
   if ((typeof profilePicture === "string") && !profilePicture.startsWith("http") && !profilePicture.startsWith("data:")) {
@@ -58,7 +58,7 @@ UserProfileVisitCard.propTypes = {
   displayName: PropTypes.string,
   email: PropTypes.string,
   phoneNumber: PropTypes.string,
-  jobTitle: PropTypes.string,
+  jobTitleName: PropTypes.string,
   companyName: PropTypes.string,
   profilePicture: PropTypes.string,
   avatarPreview: PropTypes.string

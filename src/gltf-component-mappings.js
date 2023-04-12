@@ -8,6 +8,8 @@ import { updateAudioSettings } from "./update-audio-settings";
 import { renderAsEntity } from "./utils/jsx-entity";
 import { Networked } from "./bit-components";
 import { addComponent } from "bitecs";
+import { register, registerCustomGLTFModelPlusComponents } from "./aptero/module/ButtonAPI/component/GLTFModelPlusRegistrer";
+
 
 AFRAME.GLTFModelPlus.registerComponent("sound", "sound");
 AFRAME.GLTFModelPlus.registerComponent("css-class", "css-class");

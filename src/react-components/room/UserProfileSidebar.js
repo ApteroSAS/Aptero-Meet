@@ -25,7 +25,6 @@ export function UserProfileSidebar({
   avatarPreview,
   // eslint-disable-next-line no-unused-vars
   avatarId,
-  userId,
   hasMicPresence,
   isSignedIn,
   canPromote,
@@ -265,7 +264,6 @@ UserProfileSidebar.propTypes = {
   identityName: PropTypes.string,
   avatarPreview: PropTypes.node,
   avatarId: PropTypes.string,
-  userId: PropTypes.string,
   hasMicPresence: PropTypes.bool,
   isSignedIn: PropTypes.bool,
   canPromote: PropTypes.bool,

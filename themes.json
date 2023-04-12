@@ -5,17 +5,11 @@
     "name": "Hubs Default",
     "variables": {}
   },
-<<<<<<< HEAD
   {
+    "name": "Hubs Dark Mode",
     "id": "default-dark-mode",
     "darkModeDefault": true,
-    "name": "Default Dark Mode",
-=======
-  {   
     "name": "Hubs Dark Mode",
-    "id": "hubs-dark-mode",
-    "darkModeDefault": true,
->>>>>>> e5f646bc5fc564c47ad577f85ce15ac5d3668369
     "variables": {
       "loading-screen-background": "radial-gradient(50% 50% at 50% 50%, #15171B 0%, #282C31 100%)",
       "accept-color-pressed": "#21242C",

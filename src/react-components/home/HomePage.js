@@ -2,24 +2,24 @@ import React, { useContext, useEffect } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import classNames from "classnames";
 import configs from "../../utils/configs";
-import { CreateRoomButton } from "./CreateRoomButton";
-import { PWAButton } from "./PWAButton";
-import { useFavoriteRooms } from "./useFavoriteRooms";
-import { usePublicRooms } from "./usePublicRooms";
-import styles from "./HomePage.scss";
+import { AppLogo } from "../misc/AppLogo";
 import { AuthContext } from "../auth/AuthContext";
-import { createAndRedirectToNewHub } from "../../utils/phoenix-utils";
-import { MediaGrid } from "../room/MediaGrid";
-import { MediaTile } from "../room/MediaTiles";
-import { PageContainer } from "../layout/PageContainer";
-import { scaledThumbnailUrlFor } from "../../utils/media-url-utils";
 import { Column } from "../layout/Column";
 import { Container } from "../layout/Container";
-import { SocialBar } from "../home/SocialBar";
-import { SignInButton } from "./SignInButton";
-import { AppLogo } from "../misc/AppLogo";
+import { CreateRoomButton } from "./CreateRoomButton";
+import styles from "./HomePage.scss";
 import { isHmc } from "../../utils/isHmc";
 import maskEmail from "../../utils/mask-email";
+import { MediaGrid } from "../room/MediaGrid";
+import { MediaTile } from "../room/MediaTiles";
+import { scaledThumbnailUrlFor } from "../../utils/media-url-utils";
+import { PageContainer } from "../layout/PageContainer";
+import { createAndRedirectToNewHub } from "../../utils/phoenix-utils";
+import { PWAButton } from "./PWAButton";
+import { SignInButton } from "./SignInButton";
+import { SocialBar } from "../home/SocialBar";
+import { useFavoriteRooms } from "./useFavoriteRooms";
+import { usePublicRooms } from "./usePublicRooms";
 import { HaveRoomCodeButton } from "../../aptero/module/HubsBridge/react-components/HaveRoomCodeButton";
 
 export function HomePage() {
@@ -78,13 +78,13 @@ export function HomePage() {
           </div>
           <div className={styles.appInfo}>
             <div className={styles.appDescription}>{configs.translation("app-description")}</div>
-            <HaveRoomCodeButton/>
+            <HaveRoomCodeButton />
             {canCreateRooms && <CreateRoomButton />}
             <PWAButton />
           </div>
           <div className={styles.heroImageContainer}>
             <img
-              style={{margin:"20px"}}
+              style={{ margin: "20px" }}
               alt={intl.formatMessage(
                 {
                   id: "home-page.hero-image-alt",

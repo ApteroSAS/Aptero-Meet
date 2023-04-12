@@ -1,6 +1,5 @@
 import { tryMSMatchTheme } from "./aptero/module/microsoft/react-components/MSThemeMatcher";
 
-
 console.log(`App version: ${process.env.BUILD_VERSION || "?"}`);
 
 import {
@@ -37,11 +36,13 @@ import "./utils/aframe-overrides";
 // web browser cache should work well.
 // So we disable it here.
 import * as THREE from "three";
+
 THREE.Cache.enabled = false;
 THREE.Object3D.DefaultMatrixAutoUpdate = false;
 
 import "./utils/logging";
 import { patchWebGLRenderingContext } from "./utils/webgl";
+
 patchWebGLRenderingContext();
 
 import "networked-aframe/src/index";
@@ -62,7 +63,10 @@ import { emitter } from "./emitter";
 import nextTick from "./utils/next-tick";
 import { addAnimationComponents } from "./utils/animation";
 import Cookies from "js-cookie";
-import { DIALOG_CONNECTION_ERROR_FATAL, DIALOG_CONNECTION_CONNECTED } from "./naf-dialog-adapter";
+import {
+  DIALOG_CONNECTION_ERROR_FATAL,
+  DIALOG_CONNECTION_CONNECTED
+} from "./aptero/module/webRTCadapter/naf-dialog-io-adapter";
 import "./change-hub";
 
 import "./components/scene-components";
@@ -184,7 +188,8 @@ import "./systems/audio-debug-system";
 import "./systems/audio-gain-system";
 
 import "./gltf-component-mappings";
-
+//Aptero support for multiple Adapters
+import {AdapterWrapper} from "./aptero/module/webRTCadapter/AdapterWrapper";
 import { App, getScene } from "./app";
 import MediaDevicesManager from "./utils/media-devices-manager";
 import PinningHelper from "./utils/pinning-helper";
@@ -193,20 +198,28 @@ import { platformUnsupported } from "./support";
 import { renderAsEntity } from "./utils/jsx-entity";
 import { VideoMenuPrefab } from "./prefabs/video-menu";
 import { ObjectMenuPrefab } from "./prefabs/object-menu";
+
 import { loadWaypointPreviewModel, WaypointPreview } from "./prefabs/waypoint-preview";
 import { preload } from "./utils/preload";
 
-//aptero service
+//aptero service//ax
+import {getService} from "@aptero/axolotis-player"
+import {MICROSOFT_STATIC_SERVICE, PROPERTIES_SERVICE} from "@aptero/axolotis-module-teams";
+import {redirectIfNeeded} from "./aptero/module/load-balancer/LoadBalancer";
+import { Object3D } from "three";
+import DialogAdapter from "./aptero/module/webRTCadapter/naf-dialog-io-adapter";
 import { apteroService } from "./aptero/ApteroServices";
 import { roomController } from "./aptero/module/ButtonAPI/api/RoomController";
 import { fetchICEservers } from "./aptero/module/webRTCadapter/adapter-config";
 
-import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
-msTeamsAPILight().redirectToTeamsSidePanel();
+import { msTeamsAPILight } from "@aptero/axolotis-module-teams";
+
 //aptero service end
 window.APP = new App();
+window.APP.dialog = new AdapterWrapper(); // Aptero
 renderAsEntity(APP.world, VideoMenuPrefab());
 renderAsEntity(APP.world, VideoMenuPrefab());
+
 function addToScene(entityDef, visible) {
   return getScene().then(scene => {
     const eid = renderAsEntity(APP.world, entityDef);
@@ -215,6 +228,7 @@ function addToScene(entityDef, visible) {
     obj.visible = !!visible;
   });
 }
+
 preload(addToScene(ObjectMenuPrefab(), false));
 preload(addToScene(ObjectMenuPrefab(), false));
 preload(loadWaypointPreviewModel().then(() => addToScene(WaypointPreview(), false)));
@@ -316,7 +330,7 @@ if (qsTruthy("ecsDebug")) {
 }
 
 function setupLobbyCamera() {
-  console.log("Setting up lobby camera");
+  console.log("[preview] Setting up lobby camera");
   const camera = document.getElementById("scene-preview-node");
   const previewCamera = document.getElementById("environment-scene").object3D.getObjectByName("scene-preview-camera");
 
@@ -355,7 +369,6 @@ function mountUI(props = {}) {
   const disableAutoExitOnIdle =
     qsTruthy("allow_idle") || (process.env.NODE_ENV === "development" && !qs.get("idle_timeout"));
   const forcedVREntryType = qsVREntryType;
-
   ReactDOM.render(
     <WrappedIntlProvider>
       <ThemeProvider store={store}>
@@ -422,11 +435,10 @@ export async function getSceneUrlForHub(hub) {
     // Deprecated
     const res = await fetch(sceneUrl);
     try {//Aptero TryCatch (c'est ok de supprimer ce if)
-    const data = await res.json();
-    const baseURL = new URL(THREE.LoaderUtils.extractUrlBase(sceneUrl), window.location.href);
-    sceneUrl = new URL(data.assets[0].src, baseURL).href;
-    }
-    catch(e){
+      const data = await res.json();
+      const baseURL = new URL(THREE.LoaderUtils.extractUrlBase(sceneUrl), window.location.href);
+      sceneUrl = new URL(data.assets[0].src, baseURL).href;
+    } catch (e) {
       //The 360toScene api is misinterpreted as legacy while being a working glb. We can filter by looking for errors
       sceneUrl = proxiedUrlFor(sceneUrl);
     }
@@ -442,7 +454,7 @@ export async function updateEnvironmentForHub(hub, entryManager) {
   let sameSceneAsBefore;
   try {
     sameSceneAsBefore = document.querySelector("#environment-scene").childNodes[0].components["gltf-model-plus"].data.src === sceneUrl;
-  }catch (e) {
+  } catch (e) {
     sameSceneAsBefore = false;
   }
 
@@ -517,11 +529,11 @@ export async function updateEnvironmentForHub(hub, entryManager) {
 
             traverseMeshesAndAddShapes(environmentEl);
 
-            if(!sameSceneAsBefore) {
-            // We've already entered, so move to new spawn point once new environment is loaded
-            if (sceneEl.is("entered")) {
-              waypointSystem.moveToSpawnPoint();
-            }
+            if (!sameSceneAsBefore) {
+              // We've already entered, so move to new spawn point once new environment is loaded
+              if (sceneEl.is("entered")) {
+                waypointSystem.moveToSpawnPoint();
+              }
             }
 
             const fader = document.getElementById("viewing-camera").components["fader"];
@@ -570,6 +582,7 @@ function onConnectionError(entryManager, connectError) {
 // TODO: Find a home for this
 // TODO: Naming. Is this an "event bus"?
 const events = emitter();
+
 function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data) {
   const scene = document.querySelector("a-scene");
   const isRejoin = NAF.connection.isConnected();
@@ -642,15 +655,15 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
         loadStoredRoomData(hub.hub_id);
         loadLegacyRoomObjects(hub.hub_id);
       } else {
-      // Append objects once we are in the NAF room since ownership may be taken.
-      const objectsScene = document.querySelector("#objects-scene");
-      const objectsUrl = getReticulumFetchUrl(`/${hub.hub_id}/objects.gltf`);
-      const objectsEl = document.createElement("a-entity");
-      objectsEl.setAttribute("gltf-model-plus", { src: objectsUrl, useCache: false, inflate: true });
+        // Append objects once we are in the NAF room since ownership may be taken.
+        const objectsScene = document.querySelector("#objects-scene");
+        const objectsUrl = getReticulumFetchUrl(`/${hub.hub_id}/objects.gltf`);
+        const objectsEl = document.createElement("a-entity");
+        objectsEl.setAttribute("gltf-model-plus", { src: objectsUrl, useCache: false, inflate: true });
 
-      if (!isBotMode) {
-        objectsScene.appendChild(objectsEl);
-      }
+        if (!isBotMode) {
+          objectsScene.appendChild(objectsEl);
+        }
       }
     },
     { once: true }
@@ -731,7 +744,8 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
 
 async function runBotMode(scene, entryManager) {
   console.log("Running in bot mode...");
-  const noop = () => {};
+  const noop = () => {
+  };
   const alwaysFalse = () => false;
   scene.renderer = {
     setAnimationLoop: noop,
@@ -747,6 +761,12 @@ async function runBotMode(scene, entryManager) {
 
 const init = async () => {
   //APTERO
+  await redirectIfNeeded();
+  const { initAxolotisPlayer } = await import("./aptero/module/axolotis/AxInit");
+  await initAxolotisPlayer();
+  await getService(PROPERTIES_SERVICE);
+  await getService(MICROSOFT_STATIC_SERVICE);
+  msTeamsAPILight().redirectToTeamsSidePanel();
   let iceServer = await fetchICEservers();
   await minimumQualityService.checkTurnServerAndSwitchToTCP(iceServer);
   console.log("lazy loading start");
@@ -769,22 +789,22 @@ const init = async () => {
     return;
   }
 
-  if(!msTeamsAPILight().msTeams()) {
-  const detectedOS = detectOS(navigator.userAgent);
-  const browser = detect();
-  // HACK - it seems if we don't initialize the mic track up-front, voices can drop out on iOS
-  // safari when initializing it later.
-  if (["iOS", "Mac OS"].includes(detectedOS) && ["safari", "ios"].includes(browser.name)) {
-    try {
+  if (!msTeamsAPILight().msTeams()) {
+    const detectedOS = detectOS(navigator.userAgent);
+    const browser = detect();
+    // HACK - it seems if we don't initialize the mic track up-front, voices can drop out on iOS
+    // safari when initializing it later.
+    if (["iOS", "Mac OS"].includes(detectedOS) && ["safari", "ios"].includes(browser.name)) {
+      try {
         //await createTrack({ audio: true });//Type MediaStream
         //note aptero we do not need to use create track here since this is just a hack to trigger safari audio authorization popup
-      await navigator.mediaDevices.getUserMedia({ audio: true });
-    } catch (e) {
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+      } catch (e) {
         console.error(e);
-      remountUI({ showSafariMicDialog: true });
-      return;
+        remountUI({ showSafariMicDialog: true });
+        return;
+      }
     }
-  }
   }
 
   const hubId = getCurrentHubId();
@@ -1483,5 +1503,5 @@ const init = async () => {
 
   authChannel.setSocket(socket);
   linkChannel.setSocket(socket);
-}
+};
 init();

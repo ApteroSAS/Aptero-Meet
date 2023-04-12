@@ -16,9 +16,7 @@ if (!config) {
 
 if (config?.theme?.error) {
   console.error(
-    `Custom themes failed to load.\n${
-      config.theme.error
-    }\nIf you are an admin, reconfigure your themes in the admin panel.`
+    `Custom themes failed to load.\n${config.theme.error}\nIf you are an admin, reconfigure your themes in the admin panel.`
   );
 }
 

@@ -24,6 +24,7 @@ import { MenuAnimationSystem } from "./menu-animation-system";
 import { AudioSettingsSystem } from "./audio-settings-system";
 import { AudioSystem } from "./audio-system";
 import { ShadowSystem } from "./shadow-system";
+import { apteroService } from "../aptero/ApteroServices";
 import { InspectYourselfSystem } from "./inspect-yourself-system";
 import { EmojiSystem } from "./emoji-system";
 import { AudioZonesSystem } from "./audio-zones-system";
@@ -112,6 +113,10 @@ AFRAME.registerSystem("hubs-systems", {
     this.shadowSystem = new ShadowSystem(this.el);
     this.inspectYourselfSystem = new InspectYourselfSystem();
     this.emojiSystem = new EmojiSystem(this.el);
+    //APTERO SERVICE DEFINITION
+    this.apteroService = apteroService;
+    this.apteroService.start(this.audioSettingsSystem);
+    //END APTERO SERVICE
     this.audioZonesSystem = new AudioZonesSystem();
     this.gainSystem = new GainSystem();
     this.environmentSystem = new EnvironmentSystem(this.el);
@@ -122,6 +127,7 @@ AFRAME.registerSystem("hubs-systems", {
 
   remove() {
     this.cursorTargettingSystem.remove();
+    this.apteroService.remove();
   }
 });
 
@@ -129,11 +135,11 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   const world = APP.world;
   const sceneEl = AFRAME.scenes[0];
   const aframeSystems = sceneEl.systems;
-  const hubsSystems = aframeSystems["hubs-systems"];
+  const hubsSystems: any = aframeSystems["hubs-systems"];
 
   // TODO does anything actually ever pause the scene?
   if (!sceneEl.isPlaying && !hubsSystems.DOMContentDidLoad) return;
-
+  
   timeSystem(world);
   const t = world.time.elapsed;
   const dt = world.time.delta;
@@ -254,6 +260,8 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   } else {
     renderer.render(scene, camera);
   }
+
+  hubsSystems.apteroService.tick();
 
   // tock()s on components and system will fire here. (As well as any other time render() is called without unbinding onAfterRender)
   // TODO inline invoking tocks instead of using onAfterRender registered in a-scene

@@ -9,15 +9,16 @@ import { EnterVrModal } from "./react-components/EnterVrModal";
 
 export default class AptRoot extends Component {
   render() {
-    return (<>
-        <TestPanelLazy/>
+    return (
+      <>
+        <TestPanelLazy />
         <ShareScreenModal onBack={() => {
-        }}/>
-        <AudioChangeHelper/>
-        <GaugeModal/>
-        <UnderPage/>
+        }} />
+        <AudioChangeHelper />
+        <GaugeModal />
+        <UnderPage />
         <EnterVrModal />
-        <AptStyles/>
+        <AptStyles />
       </>
     );
   }

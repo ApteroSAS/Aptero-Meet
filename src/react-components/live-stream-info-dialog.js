@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import { injectIntl} from "react-intl";
+import { injectIntl } from "react-intl";
 
 import DialogContainer from "./dialog-container.js";
 import axios from "axios";

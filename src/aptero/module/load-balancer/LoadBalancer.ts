@@ -1,6 +1,13 @@
 import { networkService } from "../HubsBridge/service/NetworkService";
+import { Object3D } from "three";
+import { App } from "../../../app";
 
-declare const window;
+declare global {
+  interface Window {
+    APP_PROPS: any;
+  }
+}
+
 const roomUrl = window.location.href;//initial room url
 
 export interface Instances {
@@ -24,12 +31,13 @@ const EVENT = "room-updated";
 export async function redirectIfNeeded() {
   try {
     //initial fetch load balancer meta data in a non blocking way
-    if (window.location.host!=="localhost") {
+    if (!window.location.host.includes("localhost")) {
       //at this point the body corespond to the right room we just need to update the url to be coherent with the body
       let roomUrl = new URL((document.querySelector('[property~="og:url"][content]') as any).content);
-      let windowUrl = new URL(window.location);
+      let windowUrl = new URL(window.location.href);
       if (roomUrl.pathname !== windowUrl.pathname) {
         roomUrl.search = windowUrl.search;//the search param does not apear in the og:url
+        // @ts-ignore
         window.history.pushState(null, null, roomUrl);
       }
     }

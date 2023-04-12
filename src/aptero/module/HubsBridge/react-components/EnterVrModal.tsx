@@ -6,8 +6,6 @@ import { Column } from "../../../../react-components/layout/Column";
 import { ToolbarButton } from "../../../../react-components/input/ToolbarButton";
 import { ReactComponent as DesktopIcon } from "../../../../react-components/icons/VR.svg";
 
-declare const AFRAME;
-
 export class EnterVrModal extends Component {
   state = {
     visible: false
@@ -25,6 +23,8 @@ export class EnterVrModal extends Component {
   }
 
   render() {
+    const Column2: any = Column;
+    const ToolbarButton2: any = ToolbarButton;
     if (!this.state.visible) {
       return <></>;
     } else {
@@ -37,24 +37,25 @@ export class EnterVrModal extends Component {
         }}>
           <div style={{ "margin": "auto", "zIndex": 1 }}>
             <Modal
+              // @ts-ignore
               style={{ "minHeight": "100px" }}
               title={<FormattedMessage id="vr-modal.title" defaultMessage="VR Entry"/>}
               beforeTitle={<BackButton onClick={() => {
                 this.setState({ visible: false });
-              }}/>}
+              }} className={undefined}/>}
             >
               <div style={{
                 "display": "flex",
                 "justifyContent": "center",
                 "alignItems": "center"
               }}>
-                <Column padding center>
+                <Column2 padding center>
                   <div style={{
                     "padding": "20px",
                   }}>
                   <FormattedMessage id="vr-modal.startMsg" defaultMessage="To Start Click the button below"/>
                   </div>
-                  <ToolbarButton
+                  <ToolbarButton2
                     icon={<DesktopIcon/>}
                     onClick={() => {
                       AFRAME.scenes[0].enterVR();
@@ -62,9 +63,8 @@ export class EnterVrModal extends Component {
                     }}
                     label={<FormattedMessage id="vr-modal.title2" defaultMessage="VR Entry"/>}
                     preset="accent5"
-                    statusColor={"accent5"}
                   />
-                </Column>
+                </Column2>
               </div>
             </Modal>
           </div>

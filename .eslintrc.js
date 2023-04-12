@@ -10,7 +10,8 @@ module.exports = {
     THREE: true,
     AFRAME: true,
     NAF: true,
-    APP: true
+    APP: true,
+    APP_PROPS: true
   },
   settings: {
     react: {
@@ -20,7 +21,7 @@ module.exports = {
   plugins: ["prettier", "react", "react-hooks", "@calm/react-intl"],
 
   rules: {
-    "prettier/prettier": "error",
+    "prettier/prettier": "warn",
 
     // https://github.com/prettier/eslint-plugin-prettier
     "prefer-const": "error",

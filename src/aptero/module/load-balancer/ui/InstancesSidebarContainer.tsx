@@ -24,7 +24,7 @@ export function InstancesSidebarContainer({ onClose }) {
   return (
     <Sidebar
       title={`Instances (${totalPeople}/${totalMaxPeople})`}
-      beforeTitle={<CloseButton onClick={onClose}/>}
+      beforeTitle={<CloseButton onClick={onClose} lg={undefined} className={undefined}/>}
     >
       <List>{Object.keys(instances).map(value => {
         let instance = instances[value];

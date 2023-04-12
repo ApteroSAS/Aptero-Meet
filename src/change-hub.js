@@ -113,6 +113,7 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
       scene.emit("reset_scene");
       updateEnvironmentForHub(hub, APP.entryManager);
     });
+  }
 
   APP.retChannel.push("change_hub", { hub_id: hub.hub_id });
 

@@ -1,3 +1,4 @@
+
 window.APP_PROPS = {
   // To override these variables, create a .env file containing the overrides.
 
@@ -76,7 +77,7 @@ window.APP_PROPS = {
       privacy_notice:"https://aptero.co/privacy.html",
       terms_of_use:"https://aptero.co/terms.html",
     },
-   
+
     theme:
       {
       "dark-theme": false,

@@ -168,7 +168,6 @@ AFRAME.registerComponent("player-info", {
     this.identityName = presenceMeta.profile.identityName;
     this.isRecording = !!(presenceMeta.streaming || presenceMeta.recording);
     this.isOwner = !!(presenceMeta.roles && presenceMeta.roles.owner);
-    this.applyDisplayName();
   },
 
   update(oldData) {
@@ -182,7 +181,6 @@ AFRAME.registerComponent("player-info", {
     return !!this.permissions && this.permissions[perm];
   },
   applyProperties(e) {
-    this.applyDisplayName();
     const modelEl = this.el.querySelector(".model");
     if (this.data.avatarSrc && modelEl) {
       modelEl.components["gltf-model-plus"].jsonPreprocessor = ensureAvatarNodes;

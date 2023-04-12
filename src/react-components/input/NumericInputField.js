@@ -1,8 +1,8 @@
 import React, { forwardRef, memo } from "react";
 import PropTypes from "prop-types";
+import { NumericInput } from "./NumericInput";
 import { InputField } from "./InputField";
 import { useId } from "./useId";
-import { NumericInput } from "./NumericInput";
 
 /* eslint-disable-next-line react/display-name */
 export const NumericInputField = memo(

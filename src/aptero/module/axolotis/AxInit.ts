@@ -17,9 +17,11 @@ export async function initAxolotisPlayer() {
     registerTeams(
         //asynchron import should be done it the parent project to avoid issue with webpack packing the async files
         async () => {
+            // @ts-ignore
             let module = await import("@aptero/axolotis-module-teams/dist-index-ms");
             return {module, classname: "MsTeamsAPIFactory" /*module.MsTeamsAPIFactory.name*/};
         }, async () => {
+            // @ts-ignore
             let module = await import("@aptero/axolotis-module-teams/dist-index-ms-light");
             return {module, classname: "MsTeamsAPILight" /*module.MsTeamsAPILight.name*/};
         }

@@ -3,26 +3,27 @@ import PropTypes from "prop-types";
 import { PromoteClientModal } from "./PromoteClientModal";
 import { UserProfileSidebar } from "./UserProfileSidebar.js";
 import { SignInMessages } from "../auth/SignInModal";
-import {usePeopleList} from "./PeopleSidebarContainer";
+import { usePeopleList } from "./PeopleSidebarContainer";
 import { getAvatarThumbnailUrl } from "../../utils/avatar-utils";
+
 export function UserProfileSidebarContainer({
-  mySessionId,
-  user,
-  hubChannel,
-  presences,
-  performConditionalSignIn,
-  showBackButton,
-  onBack,
-  onClose,
-  onCloseDialog,
-  showNonHistoriedDialog,
-  toggleChatSidebar,
-  onSelectPerson,
-  store,
-  mediaSearchStore,
-  signedIn
-  
-}) {
+                                              mySessionId,
+                                              user,
+                                              hubChannel,
+                                              presences,
+                                              performConditionalSignIn,
+                                              showBackButton,
+                                              onBack,
+                                              onClose,
+                                              onCloseDialog,
+                                              showNonHistoriedDialog,
+                                              toggleChatSidebar,
+                                              onSelectPerson,
+                                              store,
+                                              mediaSearchStore,
+                                              signedIn
+
+                                            }) {
   const micUpdateFrequency = 500;
   const [avatarThumbnailUrl, setAvatarThumbnailUrl] = useState();
   const people = usePeopleList(presences, mySessionId, micUpdateFrequency);
@@ -36,7 +37,7 @@ export function UserProfileSidebarContainer({
       getAvatarThumbnailUrl(avatarId).then(avatarThumbnailUrl => setAvatarThumbnailUrl(avatarThumbnailUrl));
     }
   }, []);
-  let avatarPreview=avatarThumbnailUrl;//default url
+  let avatarPreview = avatarThumbnailUrl;//default url
   const mayKick = hubChannel.canOrWillIfCreator("kick_users");
   const hasMicPresence = !!user.micPresence;
   const isNetworkMuted = user.micPresence?.muted;
@@ -55,74 +56,79 @@ export function UserProfileSidebarContainer({
   }, [avatarId, setAvatarThumbnailUrl, user]);
 
   const addOwner = useCallback(() => {
-      performConditionalSignIn(
-        () => hubChannel.can("update_roles"),
-        async () => {
-          showNonHistoriedDialog(PromoteClientModal, {
-            displayName,
-            onConfirm: async () => {
-              setIsOwner(true);
-              await hubChannel.addOwner(userId);
-              onCloseDialog();
-            }
-          });
-        },
-        SignInMessages.addOwner
-      );
+    performConditionalSignIn(
+      () => hubChannel.can("update_roles"),
+      async () => {
+        showNonHistoriedDialog(PromoteClientModal, {
+          displayName,
+          onConfirm: async () => {
+            setIsOwner(true);
+            await hubChannel.addOwner(userId);
+            onCloseDialog();
+          }
+        });
+      },
+      SignInMessages.addOwner
+    );
   }, [performConditionalSignIn, hubChannel, showNonHistoriedDialog, userId, onCloseDialog, displayName]);
 
   const removeOwner = useCallback(() => {
-      performConditionalSignIn(
-        () => hubChannel.can("update_roles"),
-        async () => {
-          setIsOwner(false);
-          await hubChannel.removeOwner(userId);
-        },
-        SignInMessages.removeOwner
-      );
+    performConditionalSignIn(
+      () => hubChannel.can("update_roles"),
+      async () => {
+        setIsOwner(false);
+        await hubChannel.removeOwner(userId);
+      },
+      SignInMessages.removeOwner
+    );
   }, [performConditionalSignIn, hubChannel, userId]);
 
   const toggleHidden = useCallback(() => {
-      if (isHidden) {
-        hubChannel.unhide(userId);
-      } else {
-        hubChannel.hide(userId);
-      }
+    if (isHidden) {
+      hubChannel.unhide(userId);
+    } else {
+      hubChannel.hide(userId);
+    }
 
-      setIsHidden(!isHidden);
+    setIsHidden(!isHidden);
   }, [isHidden, userId, hubChannel]);
 
   const mute = useCallback(() => {
-      performConditionalSignIn(
-        () => hubChannel.can("mute_users"),
-        async () => await hubChannel.mute(userId),
-        SignInMessages.muteUser
-      );
+    performConditionalSignIn(
+      () => hubChannel.can("mute_users"),
+      async () => await hubChannel.mute(userId),
+      SignInMessages.muteUser
+    );
   }, [performConditionalSignIn, hubChannel, userId]);
 
   const kick = useCallback(() => {
-      performConditionalSignIn(
-        () => hubChannel.can("kick_users"),
-        async () => await hubChannel.kick(userId),
-        SignInMessages.kickUser
-      );
+    performConditionalSignIn(
+      () => hubChannel.can("kick_users"),
+      async () => await hubChannel.kick(userId),
+      SignInMessages.kickUser
+    );
 
-      if (onClose) {
-        onClose();
-      } else if (onBack) {
-        onBack();
-      }
-(??)    },
-(??)    [performConditionalSignIn, hubChannel, userId, onClose, onBack]
-(??)  );
-
+    if (onClose) {
+      onClose();
+    } else if (onBack) {
+      onBack();
+    }
+  }, [performConditionalSignIn, hubChannel, userId, onClose, onBack]);
+  people.map(person => {
+    if (person.id === userId) {
+      avatarPreview = person.profile.profilePicture;
+    }
+  });
+  return (
     <UserProfileSidebar
-(??)
+      mySessionId={mySessionId}
+      hubChannel={hubChannel}
+      presences={presences}
+      userId={user.id}
       displayName={displayName}
       identityName={identityName}
       avatarId={avatarId}
       avatarPreview={avatarPreview}
-      userId={userId}
       isSignedIn={isSignedIn}
       canPromote={mayAddOwner}
       onPromote={addOwner}
@@ -138,16 +144,24 @@ export function UserProfileSidebarContainer({
       showBackButton={showBackButton}
       onClose={onClose}
       onBack={onBack}
-(??)
+      hasMicPresence={hasMicPresence}
+      toggleChatSidebar={toggleChatSidebar}
+      performConditionalSignIn={performConditionalSignIn}
+      onCloseDialog={onCloseDialog}
+      showNonHistoriedDialog={showNonHistoriedDialog}
+      onSelectPerson={onSelectPerson}
+      store={store}
+      mediaSearchStore={mediaSearchStore}
+      signedIn={signedIn}
     />
   );
 }
 
 UserProfileSidebarContainer.propTypes = {
-  mySessionId:PropTypes.string,
+  mySessionId: PropTypes.string,
   user: PropTypes.object.required,
   hubChannel: PropTypes.object,
-  presences:PropTypes.object,
+  presences: PropTypes.object,
   performConditionalSignIn: PropTypes.func,
   showBackButton: PropTypes.bool,
   onBack: PropTypes.func,
@@ -158,5 +172,5 @@ UserProfileSidebarContainer.propTypes = {
   onSelectPerson: PropTypes.func,
   store: PropTypes.object,
   mediaSearchStore: PropTypes.object,
-  signedIn:PropTypes.func
+  signedIn: PropTypes.func
 };

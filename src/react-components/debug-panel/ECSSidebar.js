@@ -1,9 +1,9 @@
 /* eslint-disable react/prop-types */
 import React, { useState } from "react";
 import { CloseButton } from "../input/CloseButton";
+import { IconButton } from "../input/IconButton";
 import { Sidebar } from "../sidebar/Sidebar";
 import styles from "./ECSSidebar.scss";
-import { IconButton } from "../input/IconButton";
 import { FormattedMessage } from "react-intl";
 
 import * as bitComponents from "../../bit-components";
