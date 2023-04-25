@@ -505,7 +505,7 @@ module.exports = async (env, argv) => {
           test: /\.(scss|css)$/,
           use: [
             {
-              loader: MiniCssExtractPlugin.loader
+              loader: MiniCssExtractPlugin.loader,
             },
             {
               loader: "css-loader",
@@ -732,7 +732,8 @@ module.exports = async (env, argv) => {
       }),
       // Extract required css and add a content hash.
       new MiniCssExtractPlugin({
-        filename: "assets/stylesheets/[name]-[contenthash].css"
+        filename: "assets/stylesheets/[name]-[contenthash].css",
+        ignoreOrder: true,
       }),
       // Define process.env variables in the browser context.
       new webpack.DefinePlugin({
