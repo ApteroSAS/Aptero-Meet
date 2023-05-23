@@ -7,6 +7,7 @@ const HTMLWebpackPlugin = require("html-webpack-plugin");
 //const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const versionJson = require("./version.json");
+let moduleTeamsPackagePath = path.dirname(require.resolve("@aptero/axolotis-module-teams/package.json"));
 
 const PORT = 53000;//Teams needs port 53000
 
@@ -327,21 +328,12 @@ module.exports = async (env, argv) => {
           { from: "src/schema.toml", to: "schema.toml" },
           { from: "src/aptero/module/properties/properties.js", to: "properties.js" },
           { from: "src/assets/images/favicon.ico", to: "favicon.ico" },
-          //3rd party axolotis modules
-          /*{
-            from: "node_modules/@aptero/axolotis-module-teams/build/library/",
-            to: "assets/js/library"
-          },
           {
-            from: "node_modules/@aptero/axolotis-module-basic/build/library/",
-            to: "assets/js/library"
-          },*/
-          {
-            from: "node_modules/@aptero/axolotis-module-teams/lib/library/@aptero/axolotis-module-teams/assets/auth-start.html",
+            from: moduleTeamsPackagePath+"/assets/auth-start.html",
             to: "auth-start.html"
           },
           {
-            from: "node_modules/@aptero/axolotis-module-teams/lib/library/@aptero/axolotis-module-teams/assets/auth-end.html",
+            from: moduleTeamsPackagePath+"/assets/auth-end.html",
             to: "auth-end.html"
           },
           { from: "src/assets/manifest.webmanifest", to: "manifest.webmanifest" },

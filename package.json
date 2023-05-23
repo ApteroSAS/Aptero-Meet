@@ -5,13 +5,10 @@
   "main": "src/index.js",
   "scripts": {
     "info": "npm-scripts-info",
-    "sub": "git submodule update --init --recursive --remote",
     "start": "webpack-dev-server --mode=development",
-    "setup": "rimraf ./dist && yarn --cwd ./modules/basic-modules run setup && yarn --cwd ./modules/teams-module run setup",
     "start-prod": "webpack-dev-server --mode=production",
     "dev": "webpack-dev-server --mode=development",
-    "build": "rimraf ./dist && yarn build:dep && tsc && webpack --mode=production",
-    "build:dep": "rimraf ./dist && yarn --cwd ./modules/basic-modules run build && yarn --cwd ./modules/teams-module run build",
+    "build": "rimraf ./dist && tsc && webpack --mode=production",
     "prettier": "prettier --write 'src/**/*.js'",
     "lint:js": "eslint 'src/**/*.js'",
     "lint:html": "htmlhint 'src/**/*.html' && node scripts/indent-linter.js 'src/**/*.html'",
@@ -23,17 +20,7 @@
     "spritesheet:system-action": "spritesheet-js -f json -p src/assets/images/spritesheets/ --padding 8 --divisibleByTwo -n sprite-system-action-spritesheet --powerOfTwo src/assets/images/sprites/action/*",
     "spritesheet:system-notice": "spritesheet-js -f json -p src/assets/images/spritesheets/ --padding 8 --divisibleByTwo -n sprite-system-notice-spritesheet --powerOfTwo src/assets/images/sprites/notice/*",
     "intl-extract": "node ./src/assets/locales/intl-extract.js",
-    "intl-extract-en-locale": "node ./src/assets/locales/intl-extract.js en",
-    "pw:debug:run": "cross-env CI=1 PW_PORT=53000 PWDEBUG=1 npx playwright test --config ./test/playwright-teams.config.js StaticTab.test.ts",
-    "pw:debug:serve": "cross-env NODE_ENV=development PW_PORT=53000 yarn run dev",
-    "ci:test": "cross-env NODE_ENV=development npx playwright test --config ./test/playwright.config.js",
-    "ci:load:run": "cross-env npx playwright test --config ./test/playwright-load.config.js",
-    "ci:coverage:serve": "cross-env NODE_ENV=development USE_BABEL_PLUGIN_ISTANBUL=1 webpack --stats-error-details --config webpack.config.js && npx http-server dist --silent -p 53000 --ssl --cert ./certs/cert.pem --key ./certs/key.pem",
-    "ci:coverage:playwright:run": "cross-env NODE_ENV=development PLAYWRIGHT_JUNIT_OUTPUT_NAME=./coverage/junit/junit.xml npx playwright test --config ./test/playwright.config.js --workers=1 --reporter=junit",
-    "ci:coverage:teams:run": "cross-env NODE_ENV=development PLAYWRIGHT_JUNIT_OUTPUT_NAME=./coverage/junit/junit-teams.xml npx playwright test --config ./test/playwright-teams.config.js --workers=1 --reporter=junit",
-    "ci:coverage:serve:run": "cross-env CI=true START_SERVER_AND_TEST_INSECURE=1 start-server-and-test ci:coverage:serve https://127.0.0.1:53000 ci:coverage:playwright:run",
-    "ci": "cross-env yarn run clean && yarn run ci:coverage:serve:run && nyc --no-clean yarn --version",
-    "clean": "rimraf .nyc_output coverage junit.xml dist build"
+    "intl-extract-en-locale": "node ./src/assets/locales/intl-extract.js en"
   },
   "scripts-info": {
     "start": "Run the client against your Hubs Cloud instance, or Mozilla's developer infrastructure,\n  using application configs pulled from the server",
@@ -62,8 +49,8 @@
     ]
   },
   "dependencies": {
-    "@aptero/axolotis-module-basic": "file:./modules/basic-modules",
-    "@aptero/axolotis-module-teams": "file:./modules/teams-module",
+    "@aptero/axolotis-module-basic": "*",
+    "@aptero/axolotis-module-teams": "*",
     "@aptero/axolotis-player": "github:ApteroSAS/axolotis-player.git#semver:^2.1.6",
     "@braintree/sanitize-url": "^5.0.0",
     "@fluentui/react-northstar": "^0.61.0",
