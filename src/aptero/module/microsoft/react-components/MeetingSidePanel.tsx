@@ -3,12 +3,9 @@ import * as React from "react";
 import styles from "./MeetingSidePanel.scss";
 import classNames from "classnames";
 import {useEffect, useState} from "react";
-import {Button, Loader} from "@fluentui/react-northstar";
-import {FormattedMessage} from "react-intl";
-import {msTeamsAPI, msTeamsAPILight} from "@aptero/axolotis-module-teams";
-import {changeTheme} from "../../../../react-components/styles/theme.js";
+import {Loader} from "@fluentui/react-northstar";
 import {tryMSMatchTheme} from "./MSThemeMatcher";
-import {isTeamsLimitedOK} from "../TeamsLimit";
+import {msTeamsAPI, msTeamsAPILight} from "../../axolotis/modules/basic/ImportHelper";
 
 //https://fluentsite.z22.web.core.windows.net/0.60.1
 

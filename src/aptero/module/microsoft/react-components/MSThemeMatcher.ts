@@ -1,5 +1,5 @@
 import { changeTheme } from "../../../../react-components/styles/theme";
-import {msTeamsAPI, msTeamsAPILight} from "@aptero/axolotis-module-teams";
+import {msTeamsAPI, msTeamsAPILight} from "../../axolotis/modules/basic/ImportHelper";
 
 export async function tryMSMatchTheme(){
   if (msTeamsAPILight().msTeams()) {

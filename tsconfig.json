@@ -3,7 +3,7 @@
     "noImplicitAny": false,
     "outDir": "build/types",
     "module": "esnext",
-    "target": "ES5",
+    "target": "ES6",
     "allowJs": false,
     "skipLibCheck": true,
     "resolveJsonModule": true,
@@ -11,7 +11,6 @@
     "sourceMap": true,
     "declaration": true,
     "emitDeclarationOnly": true,
-    "suppressImplicitAnyIndexErrors": true,
     "lib": [ //https://www.typescriptlang.org/tsconfig#lib
       "ESNext",
       "DOM"

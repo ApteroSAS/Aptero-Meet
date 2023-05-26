@@ -3,10 +3,9 @@ import { Loader } from "@fluentui/react-northstar"; //https://fluentsite.z22.web
 import { FormattedMessage } from "react-intl";
 import { LoginButton } from "./LoginButton";
 import { RoomSection } from "./RoomSection";
-import { roomService } from "../../axolotis/modules/basic";
-import { CHANGE_SETTINGS_URL, MSTEAMS_QUERY_PARAM, msTeamsAPI } from "@aptero/axolotis-module-teams";
-import { changeTheme } from "../../../../react-components/styles/theme.js";
+import { CHANGE_SETTINGS_URL, MSTEAMS_QUERY_PARAM } from "@aptero/axolotis-module-teams";
 import { tryMSMatchTheme } from "./MSThemeMatcher";
+import {msTeamsAPI, roomService} from "../../axolotis/modules/basic/ImportHelper";
 
 /**
  * The 'Config' component is used to display your group tabs

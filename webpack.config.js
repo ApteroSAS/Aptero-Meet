@@ -7,7 +7,7 @@ const HTMLWebpackPlugin = require("html-webpack-plugin");
 //const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const versionJson = require("./version.json");
-let moduleTeamsPackagePath = path.dirname(require.resolve("@aptero/axolotis-module-teams/package.json"));
+let moduleTeamsPackagePath = path.dirname(require.resolve("@aptero/axolotis-module-teams"));
 
 const PORT = 53000;//Teams needs port 53000
 
@@ -138,12 +138,12 @@ module.exports = async (env, argv) => {
         "stream": require.resolve('stream-browserify'), // for react-dom dep
         'fs': false, // for ammo.js dep
         'path': require.resolve('path-browserify'), // for ammo.js dep
-        'process': require.resolve("process/browser"),
+        'process/browser': require.resolve("process/browser"),
         'zlib': require.resolve('browserify-zlib'),
         'util': require.resolve('util/'),
         'events': require.resolve('events/')
       },
-      extensions: ["*", ".js", ".jsx", ".tsx", ".ts", ".json"]
+      extensions: [".*", ".js", ".jsx", ".tsx", ".ts", ".json"]
     },
     module: {
       rules: [
@@ -329,11 +329,11 @@ module.exports = async (env, argv) => {
           { from: "src/aptero/module/properties/properties.js", to: "properties.js" },
           { from: "src/assets/images/favicon.ico", to: "favicon.ico" },
           {
-            from: moduleTeamsPackagePath+"/assets/auth-start.html",
+            from: moduleTeamsPackagePath+"/../assets/auth-start.html",
             to: "auth-start.html"
           },
           {
-            from: moduleTeamsPackagePath+"/assets/auth-end.html",
+            from: moduleTeamsPackagePath+"/../assets/auth-end.html",
             to: "auth-end.html"
           },
           { from: "src/assets/manifest.webmanifest", to: "manifest.webmanifest" },

@@ -1,24 +1,18 @@
 import * as React from "react";
-import { useCallback, useContext, useState } from "react";
-import { FormattedMessage } from "react-intl";
+import {useCallback, useContext, useState} from "react";
+import {FormattedMessage} from "react-intl";
 
-import { Button, Input } from "@fluentui/react-northstar";
-import { MediaGrid } from "./hubs/react-components/room/MediaGrid";
-import { usePaginatedAPI } from "./hubs/react-components/home/usePaginatedAPI";
-import { Container } from "./hubs/react-components/layout/Container";
-import { Column } from "./hubs/react-components/layout/Column";
-import { AuthContext } from "../../../../react-components/auth/AuthContext";
-import { MediaTile } from "../../../../react-components/room/MediaTiles";
-import { PadNumber } from "./PadNumber";
-import { getServiceSync } from "@aptero/axolotis-player";
-import {ROOM_SERVICE, roomService, RoomService} from "../../axolotis/modules/basic";
-import {msTeamsAPI} from "@aptero/axolotis-module-teams";
+import {Button, Input} from "@fluentui/react-northstar";
+import {MediaGrid} from "./hubs/react-components/room/MediaGrid";
+import {usePaginatedAPI} from "./hubs/react-components/home/usePaginatedAPI";
+import {Container} from "./hubs/react-components/layout/Container";
+import {Column} from "./hubs/react-components/layout/Column";
+import {AuthContext} from "../../../../react-components/auth/AuthContext";
+import {MediaTile} from "../../../../react-components/room/MediaTiles";
+import {PadNumber} from "./PadNumber";
+import {msTeamsAPI, roomService, roomServiceSync} from "../../axolotis/modules/basic/ImportHelper";
 
 //https://fluentsite.z22.web.core.windows.net/0.60.1
-
-export function roomServiceSync(): RoomService {
-  return getServiceSync<RoomService>(ROOM_SERVICE);
-}
 
 declare const window;
 

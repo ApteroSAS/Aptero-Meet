@@ -2,9 +2,9 @@ import * as React from "react";
 import {Provider, Loader, teamsTheme} from "@fluentui/react-northstar";//https://fluentsite.z22.web.core.windows.net/0.60.1
 import {MeetingSidePanel} from "./MeetingSidePanel";
 import {TabConfig} from "./TabConfig";
-import {msTeamsAPI, msTeamsAPILight} from "@aptero/axolotis-module-teams";
 import classNames from "classnames";
 import styles from "./MSettingsMain.scss";
+import {msTeamsAPI, msTeamsAPILight} from "../../axolotis/modules/basic/ImportHelper";
 
 
 
