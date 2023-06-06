@@ -28,6 +28,7 @@ import { mainTick } from "./systems/hubs-systems";
 import { waitForPreloads } from "./utils/preload";
 import SceneEntryManager from "./scene-entry-manager";
 import { store } from "./utils/store-instance";
+import { Channel } from "phoenix";
 
 declare global {
   let APP: App;
@@ -87,6 +88,7 @@ export class App {
   audioDebugPanelOverrides = new Map<SourceType, AudioSettings>();
   sceneAudioDefaults = new Map<SourceType, AudioSettings>();
   moderatorAudioSource = new Set<AElement | number>();
+  retChannel: Channel|undefined = undefined;
 
   world: HubsWorld = createWorld();
 
