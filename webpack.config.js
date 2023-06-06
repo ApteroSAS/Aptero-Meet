@@ -14,18 +14,16 @@ const request = require("request");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 const versionJson = require("./version.json");
 
-
 const moduleTeamsPackagePath = path.dirname(require.resolve("@aptero/axolotis-module-teams"));
-const moduleThreePackagePath = path.join(path.dirname(require.resolve("three")),"three.module.js");
-const moduleBitecsPackagePath = path.join(path.dirname(require.resolve("bitecs")),"/index.mjs");
+const moduleThreePackagePath = path.join(path.dirname(require.resolve("three")), "three.module.js");
+const moduleBitecsPackagePath = path.join(path.dirname(require.resolve("bitecs")), "index.mjs");
 
-const threeExamplesDir = path.join(path.dirname(require.resolve("three")),'..', 'examples');
+const threeExamplesDir = path.join(path.dirname(require.resolve("three")), "..", "examples");
 
 const basisTranscoderPath = path.resolve(threeExamplesDir, "js", "libs", "basis", "basis_transcoder.js");
 const dracoWasmWrapperPath = path.resolve(threeExamplesDir, "js", "libs", "draco", "gltf", "draco_wasm_wrapper.js");
 const basisWasmPath = path.resolve(threeExamplesDir, "js", "libs", "basis", "basis_transcoder.wasm");
 const dracoWasmPath = path.resolve(threeExamplesDir, "js", "libs", "draco", "gltf", "draco_decoder.wasm");
-
 
 console.log("Current directory : " + __dirname);
 console.log("three : " + moduleThreePackagePath);
@@ -37,7 +35,7 @@ console.log("dracoWasmWrapperPath : " + dracoWasmWrapperPath);
 console.log("basisWasmPath : " + basisWasmPath);
 console.log("dracoWasmPath : " + dracoWasmPath);
 
-const PORT = 53000;//Teams needs port 53000
+const PORT = 53000; //Teams needs port 53000
 
 function createHTTPSConfig() {
   // Generate certs for the local webpack-dev-server.
@@ -267,7 +265,7 @@ module.exports = async (env, argv) => {
   const internalHostname = process.env.INTERNAL_HOSTNAME || "hubs.local";
   return {
     cache: {
-      type: 'memory',
+      type: "memory"
     },
     resolve: {
       alias: {
@@ -275,7 +273,7 @@ module.exports = async (env, argv) => {
         // but they are "smart" and have builds for both ESM and CJS depending on if import or require is used.
         // This forces the ESM version to be used otherwise we end up with multiple instances of the libraries,
         // and for example AFRAME.THREE.Object3D !== THREE.Object3D in Hubs code, which breaks many things.
-        three$: "/build/three.module.js",
+        three$: moduleThreePackagePath,
         bitecs$: moduleBitecsPackagePath,
 
         // TODO these aliases are reequired because `three` only "exports" stuff in examples/jsm
@@ -296,11 +294,12 @@ module.exports = async (env, argv) => {
       },
       extensions: [".ts", ".tsx", ".js", ".jsx"]
     },
-    entry: {/*APTERO Keep .async files */
+    entry: {
+      /*APTERO Keep .async files */
       "microsoft-settings": path.join(__dirname, "src/aptero/module/microsoft/page", "microsoft-settings.tsx"),
       support: path.join(__dirname, "src", "support.js"),
       index: path.join(__dirname, "src", "index.async.ts"),
-      hub: path.join(__dirname, "src", "hub.js"),//Aptero removed hub.async.ts
+      hub: path.join(__dirname, "src", "hub.js"), //Aptero removed hub.async.ts
       scene: path.join(__dirname, "src", "scene.js"),
       avatar: path.join(__dirname, "src", "avatar.js"),
       link: path.join(__dirname, "src", "link.js"),
@@ -338,13 +337,13 @@ module.exports = async (env, argv) => {
       historyApiFallback: {
         rewrites: [
           { from: /^\/link/, to: "/link.html" },
-//          { from: /^\/avatars/, to: "/avatar.html" },
+          //          { from: /^\/avatars/, to: "/avatar.html" },
           { from: /^\/scenes/, to: "/scene.html" },
           { from: /^\/signin/, to: "/signin.html" },
-//          { from: /^\/discord/, to: "/discord.html" },
+          //          { from: /^\/discord/, to: "/discord.html" },
           { from: /^\/cloud/, to: "/cloud.html" },
           { from: /^\/verify/, to: "/verify.html" },
-//          { from: /^\/tokens/, to: "/tokens.html" },
+          //          { from: /^\/tokens/, to: "/tokens.html" },
           { from: /^\/whats-new/, to: "/whats-new.html" }
         ]
       },
@@ -397,7 +396,7 @@ module.exports = async (env, argv) => {
     },
     performance: {
       //maxEntrypointSize: 500 * 1000,//500kb
-      maxAssetSize: 2 * 1000 * 1000,//2mb
+      maxAssetSize: 2 * 1000 * 1000, //2mb
       // Ignore media and sourcemaps when warning about file size.
       assetFilter(assetFilename) {
         return !/\.(map|png|jpg|gif|glb|webm)$/.test(assetFilename);
@@ -481,7 +480,7 @@ module.exports = async (env, argv) => {
           test: /\.(scss|css)$/,
           use: [
             {
-              loader: MiniCssExtractPlugin.loader,
+              loader: MiniCssExtractPlugin.loader
             },
             {
               loader: "css-loader",
@@ -499,7 +498,7 @@ module.exports = async (env, argv) => {
         },
         {
           test: /\.svg$/,
-          include: [path.resolve(__dirname, "src", "react-components"),path.resolve(__dirname, "src")],
+          include: [path.resolve(__dirname, "src", "react-components"), path.resolve(__dirname, "src")],
           use: [
             {
               loader: "@svgr/webpack",
@@ -571,7 +570,7 @@ module.exports = async (env, argv) => {
     optimization: {
       splitChunks: {
         maxAsyncRequests: 30,
-        maxInitialRequests: 10,
+        maxInitialRequests: 10
       }
     },
     plugins: [
@@ -648,11 +647,11 @@ module.exports = async (env, argv) => {
           { from: "src/assets/images/favicon.ico", to: "favicon.ico" },
           //3rd party axolotis modules
           {
-            from: moduleTeamsPackagePath+"/assets/auth-start.html",
+            from: moduleTeamsPackagePath + "/assets/auth-start.html",
             to: "auth-start.html"
           },
           {
-            from: moduleTeamsPackagePath+"/assets/auth-end.html",
+            from: moduleTeamsPackagePath + "/assets/auth-end.html",
             to: "auth-end.html"
           },
           { from: "src/assets/manifest.webmanifest", to: "manifest.webmanifest" },
@@ -660,12 +659,13 @@ module.exports = async (env, argv) => {
           {
             from: "src/workers/pdfjs-dist@2.1.266/build/pdf.worker.js",
             to: "workers/pdfjs-dist@2.1.266/build/pdf.worker.js"
-          }]
+          }
+        ]
       }),
       // Extract required css and add a content hash.
       new MiniCssExtractPlugin({
         filename: "assets/stylesheets/[name]-[contenthash].css",
-        ignoreOrder: true,
+        ignoreOrder: true
       }),
       // Define process.env variables in the browser context.
       new webpack.DefinePlugin({
