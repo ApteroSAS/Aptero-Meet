@@ -6,7 +6,7 @@
   "scripts": {
     "info": "npm-scripts-info",
     "sub": "git submodule update --init --recursive --remote",
-    "pull": "cross-env git pull && git submodule update --recursive --remote --merge && git submodule foreach --recursive \"git fetch origin main && git checkout main && git merge origin/main || true\"",
+    "pull": "cross-env git pull && git submodule update --recursive --remote --merge && git submodule foreach --recursive \"git fetch origin feature/merge && git checkout feature/merge && git merge origin/feature/merge || true\"",
     "start": "webpack serve --mode=development --env loadAppConfig=1",
     "setup": "rimraf ./dist && yarn --cwd ./modules/basic-modules run setup && yarn --cwd ./modules/teams-module run setup",
     "start-prod": "webpack-dev-server --mode=production",
