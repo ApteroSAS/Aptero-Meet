@@ -10,10 +10,32 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 const TOML = require("@iarna/toml");
 const fetch = require("node-fetch");
-const packageLock = require("./package-lock.json");
 const request = require("request");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 const versionJson = require("./version.json");
+
+
+const moduleTeamsPackagePath = path.dirname(require.resolve("@aptero/axolotis-module-teams"));
+const moduleThreePackagePath = path.join(path.dirname(require.resolve("three")),"three.module.js");
+const moduleBitecsPackagePath = path.join(path.dirname(require.resolve("bitecs")),"/index.mjs");
+
+const threeExamplesDir = path.join(path.dirname(require.resolve("three")),'..', 'examples');
+
+const basisTranscoderPath = path.resolve(threeExamplesDir, "js", "libs", "basis", "basis_transcoder.js");
+const dracoWasmWrapperPath = path.resolve(threeExamplesDir, "js", "libs", "draco", "gltf", "draco_wasm_wrapper.js");
+const basisWasmPath = path.resolve(threeExamplesDir, "js", "libs", "basis", "basis_transcoder.wasm");
+const dracoWasmPath = path.resolve(threeExamplesDir, "js", "libs", "draco", "gltf", "draco_decoder.wasm");
+
+
+console.log("Current directory : " + __dirname);
+console.log("three : " + moduleThreePackagePath);
+console.log("bitecs : " + moduleBitecsPackagePath);
+console.log("moduleTeamsPackagePath : " + moduleTeamsPackagePath);
+console.log("threeExamplesDir : " + threeExamplesDir);
+console.log("basisTranscoderPath : " + basisTranscoderPath);
+console.log("dracoWasmWrapperPath : " + dracoWasmWrapperPath);
+console.log("basisWasmPath : " + basisWasmPath);
+console.log("dracoWasmPath : " + dracoWasmPath);
 
 const PORT = 53000;//Teams needs port 53000
 
@@ -63,46 +85,6 @@ function createHTTPSConfig() {
       cert: pems.cert
     };
   }
-}
-
-function getModuleDependencies(moduleName) {
-  const deps = packageLock.dependencies;
-  const arr = [];
-
-  const gatherDeps = name => {
-    arr.push(path.join(__dirname, "node_modules", name) + path.sep);
-
-    const moduleDef = deps[name];
-
-    if (moduleDef && moduleDef.requires) {
-      for (const requiredModuleName in moduleDef.requires) {
-        gatherDeps(requiredModuleName);
-      }
-    }
-  };
-
-  gatherDeps(moduleName);
-
-  return arr;
-}
-
-function deepModuleDependencyTest(modulesArr) {
-  const deps = [];
-
-  for (const moduleName of modulesArr) {
-    const moduleDependencies = getModuleDependencies(moduleName);
-    deps.push(...moduleDependencies);
-  }
-
-  return module => {
-    if (!module.nameForCondition) {
-      return false;
-    }
-
-    const name = module.nameForCondition();
-
-    return deps.some(depName => name?.startsWith(depName));
-  };
 }
 
 function createDefaultAppConfig() {
@@ -217,12 +199,6 @@ function htmlPagePlugin({ filename, extraChunks = [], chunksSortMode, inject }) 
   return new HTMLWebpackPlugin(options);
 }
 
-const threeExamplesDir = path.resolve(__dirname, "node_modules", "three", "examples");
-const basisTranscoderPath = path.resolve(threeExamplesDir, "js", "libs", "basis", "basis_transcoder.js");
-const dracoWasmWrapperPath = path.resolve(threeExamplesDir, "js", "libs", "draco", "gltf", "draco_wasm_wrapper.js");
-const basisWasmPath = path.resolve(threeExamplesDir, "js", "libs", "basis", "basis_transcoder.wasm");
-const dracoWasmPath = path.resolve(threeExamplesDir, "js", "libs", "draco", "gltf", "draco_decoder.wasm");
-
 module.exports = async (env, argv) => {
   env = env || {};
 
@@ -299,8 +275,8 @@ module.exports = async (env, argv) => {
         // but they are "smart" and have builds for both ESM and CJS depending on if import or require is used.
         // This forces the ESM version to be used otherwise we end up with multiple instances of the libraries,
         // and for example AFRAME.THREE.Object3D !== THREE.Object3D in Hubs code, which breaks many things.
-        three$: path.resolve(__dirname, "./node_modules/three/build/three.module.js"),
-        bitecs$: path.resolve(__dirname, "./node_modules/bitecs/dist/index.mjs"),
+        three$: "/build/three.module.js",
+        bitecs$: moduleBitecsPackagePath,
 
         // TODO these aliases are reequired because `three` only "exports" stuff in examples/jsm
         "three/examples/js/libs/basis/basis_transcoder.js": basisTranscoderPath,
@@ -596,43 +572,6 @@ module.exports = async (env, argv) => {
       splitChunks: {
         maxAsyncRequests: 30,
         maxInitialRequests: 10,
-        cacheGroups: {
-          frontend: {
-            test: deepModuleDependencyTest([
-              "react",
-              "react-dom",
-              "prop-types",
-              "raven-js",
-              "react-intl",
-              "classnames",
-              "react-router",
-              "@fortawesome/fontawesome-svg-core",
-              "@fortawesome/free-solid-svg-icons",
-              "@fortawesome/react-fontawesome"
-            ]),
-            name: "frontend",
-            chunks: "initial",
-            priority: 40
-          },
-          engine: {
-            test: deepModuleDependencyTest(["aframe", "three"]),
-            name: "engine",
-            chunks: "initial",
-            priority: 30
-          },
-          store: {
-            test: deepModuleDependencyTest(["phoenix", "jsonschema", "event-target-shim", "jwt-decode", "js-cookie"]),
-            name: "store",
-            chunks: "initial",
-            priority: 20
-          },
-          hubVendors: {
-            test: /[\\/]node_modules[\\/]/,
-            name: "hub-vendors",
-            chunks: chunk => chunk.name === "hub",
-            priority: 10
-          }
-        }
       }
     },
     plugins: [
@@ -708,19 +647,12 @@ module.exports = async (env, argv) => {
           { from: "src/aptero/module/properties/properties.js", to: "properties.js" },
           { from: "src/assets/images/favicon.ico", to: "favicon.ico" },
           //3rd party axolotis modules
-          /*{
-            from: "node_modules/@aptero/axolotis-module-teams/build/library/",
-            to: "assets/js/library"
-          },
-          {  from: "node_modules/@aptero/axolotis-module-basic/build/library/",
-            to: "assets/js/library"
-          },*/
           {
-            from: "node_modules/@aptero/axolotis-module-teams/lib/library/@aptero/axolotis-module-teams/assets/auth-start.html",
+            from: moduleTeamsPackagePath+"/assets/auth-start.html",
             to: "auth-start.html"
           },
           {
-            from: "node_modules/@aptero/axolotis-module-teams/lib/library/@aptero/axolotis-module-teams/assets/auth-end.html",
+            from: moduleTeamsPackagePath+"/assets/auth-end.html",
             to: "auth-end.html"
           },
           { from: "src/assets/manifest.webmanifest", to: "manifest.webmanifest" },
