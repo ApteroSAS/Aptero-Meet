@@ -291,7 +291,7 @@ module.exports = async (env, argv) => {
   const internalHostname = process.env.INTERNAL_HOSTNAME || "hubs.local";
   return {
     cache: {
-      type: "filesystem"
+      type: 'memory',
     },
     resolve: {
       alias: {
