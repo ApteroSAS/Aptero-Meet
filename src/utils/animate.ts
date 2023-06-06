@@ -1,3 +1,4 @@
+// @ts-ignore
 import { MathUtils, Vector3 } from "three";
 
 type Value = Vector3 | number;
