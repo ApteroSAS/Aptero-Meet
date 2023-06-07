@@ -3,27 +3,23 @@ import { HubsWorld } from "../app";
 import { Networked, Owned } from "../bit-components";
 import { getServerTime } from "../phoenix-adapter";
 import { messageFor } from "../utils/message-for";
-import type { Message } from "../utils/networking-types";
 import {
   createMessageDatas,
   isCreatedByMe,
   isNetworkInstantiated,
   localClientID,
+  millisecondsBetweenTicks,
   networkedQuery,
   pendingJoins,
   softRemovedEntities
 } from "./networking";
 
-const ticksPerSecond = 12;
-const millisecondsBetweenTicks = 1000 / ticksPerSecond;
 let nextTick = 0;
 
 const ownedNetworkedQuery = defineQuery([Owned, Networked]);
 const enteredNetworkedQuery = enterQuery(networkedQuery);
 const enteredOwnedNetworkedQuery = enterQuery(ownedNetworkedQuery);
 const exitedNetworkedQuery = exitQuery(networkedQuery);
-
-export const unpinMessages: Message[] = [];
 
 export function networkSendSystem(world: HubsWorld) {
   if (!localClientID) return; // Not connected yet
@@ -48,7 +44,7 @@ export function networkSendSystem(world: HubsWorld) {
     });
   }
 
-  // Tell joining users about entities I network instantiated, and full updates for entities I own
+  // Send newly joined clients creates for entities where I am the creator, and full updates for entities I own
   {
     if (pendingJoins.length) {
       const ownedNetworkedEntities = ownedNetworkedQuery(world);
@@ -60,21 +56,13 @@ export function networkSendSystem(world: HubsWorld) {
         [],
         false
       );
-      if (message) {
-        pendingJoins.forEach(clientId => NAF.connection.sendDataGuaranteed(APP.getString(clientId)!, "nn", message));
-      }
+      pendingJoins.forEach(clientId => {
+        if (message) {
+          NAF.connection.sendDataGuaranteed(APP.getString(clientId)!, "nn", message);
+        }
+      });
       pendingJoins.length = 0;
     }
-  }
-
-  // Tell everyone about entities I unpin
-  // TODO: Make reticulum broadcast the actual unpin message, like it does for pin messages.
-  {
-    for (let i = 0; i < unpinMessages.length; i++) {
-      const message = unpinMessages[i];
-      NAF.connection.broadcastDataGuaranteed("nn", message);
-    }
-    unpinMessages.length = 0;
   }
 
   // Tell everyone about entities I created, entities I own, and entities that I deleted

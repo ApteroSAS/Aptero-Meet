@@ -2,7 +2,8 @@ import {
   getCurrentHubId,
   updateVRHudPresenceCount,
   updateSceneCopresentState,
-  createHubChannelParams
+  createHubChannelParams,
+  isLockedDownDemoRoom
 } from "./utils/hub-utils";
 import "./utils/debug-log";
 import configs from "./utils/configs";
@@ -116,6 +117,7 @@ import "./components/emit-scene-event-on-remove";
 import "./components/follow-in-fov";
 import "./components/clone-media-button";
 import "./components/open-media-button";
+import "./components/change-hub-when-near";
 import "./components/refresh-media-button";
 import "./components/tweet-media-button";
 import "./components/remix-avatar-button";
@@ -157,6 +159,7 @@ import MessageDispatch from "./message-dispatch";
 import SceneEntryManager from "./scene-entry-manager";
 import Subscriptions from "./subscriptions";
 import { createInWorldLogMessage } from "./react-components/chat-message";
+import { fetchRandomDefaultAvatarId } from "./utils/identity.js";
 
 import "./systems/nav";
 import "./systems/frame-scheduler";
@@ -178,7 +181,6 @@ import "./systems/listed-media";
 import "./systems/linked-media";
 import "./systems/audio-debug-system";
 import "./systems/audio-gain-system";
-
 import "./gltf-component-mappings";
 
 import { App, getScene } from "./app";
@@ -189,6 +191,8 @@ import { platformUnsupported } from "./support";
 import { renderAsEntity } from "./utils/jsx-entity";
 import { VideoMenuPrefab } from "./prefabs/video-menu";
 import { ObjectMenuPrefab } from "./prefabs/object-menu";
+import { LinkHoverMenuPrefab } from "./prefabs/link-hover-menu";
+import { PDFMenuPrefab } from "./prefabs/pdf-menu";
 import { loadWaypointPreviewModel, WaypointPreview } from "./prefabs/waypoint-preview";
 import { preload } from "./utils/preload";
 
@@ -203,8 +207,10 @@ function addToScene(entityDef, visible) {
     obj.visible = !!visible;
   });
 }
+preload(addToScene(PDFMenuPrefab(), false));
 preload(addToScene(ObjectMenuPrefab(), false));
 preload(addToScene(ObjectMenuPrefab(), false));
+preload(addToScene(LinkHoverMenuPrefab(), false));
 preload(loadWaypointPreviewModel().then(() => addToScene(WaypointPreview(), false)));
 
 const store = window.APP.store;
@@ -255,10 +261,11 @@ import { ThemeProvider } from "./react-components/styles/theme";
 import { LogMessageType } from "./react-components/room/ChatSidebar";
 import "./load-media-on-paste-or-drop";
 import { swapActiveScene } from "./bit-systems/scene-loading";
-import { setLocalClientID } from "./bit-systems/networking";
+import { localClientID, setLocalClientID } from "./bit-systems/networking";
 import { listenForNetworkMessages } from "./utils/listen-for-network-messages";
 import { exposeBitECSDebugHelpers } from "./bitecs-debug-helpers";
-import { loadStoredRoomData, loadLegacyRoomObjects } from "./utils/load-room-objects";
+import { loadLegacyRoomObjects } from "./utils/load-legacy-room-objects";
+import { loadSavedEntityStates } from "./utils/entity-state-utils";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -496,6 +503,11 @@ export async function updateEnvironmentForHub(hub, entryManager) {
           { once: true }
         );
 
+        // If we had a loop-animation component on the environment, we need to remove it
+        // before loading a new model with gltf-model-plus, or else the component won't
+        // find and play animations in the new scene.
+        environmentEl.removeAttribute("loop-animation");
+
         sceneEl.emit("leaving_loading_environment");
         if (environmentEl.components["gltf-model-plus"].data.src === sceneUrl) {
           console.warn("Updating environment to the same url.");
@@ -562,10 +574,17 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
 
   console.log(`Dialog host: ${hub.host}:${hub.port}`);
 
+  // Mute media until the scene has been fully loaded.
+  // We intentionally want voice to be unmuted.
+  const audioSystem = scene.systems["hubs-systems"].audioSystem;
+  audioSystem.setMediaGainOverride(0);
   remountUI({
     messageDispatch: messageDispatch,
     onSendMessage: messageDispatch.dispatch,
-    onLoaded: () => store.executeOnLoadActions(scene),
+    onLoaded: () => {
+      audioSystem.setMediaGainOverride(1);
+      store.executeOnLoadActions(scene);
+    },
     onMediaSearchResultEntrySelected: (entry, selectAction) =>
       scene.emit("action_selected_media_result_entry", { entry, selectAction }),
     onMediaSearchCancelled: entry => scene.emit("action_media_search_cancelled", entry),
@@ -595,7 +614,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
     "didConnectToNetworkedScene",
     () => {
       if (qsTruthy("newLoader")) {
-        loadStoredRoomData(hub.hub_id);
+        loadSavedEntityStates(APP.hubChannel);
         loadLegacyRoomObjects(hub.hub_id);
       } else {
         // Append objects once we are in the NAF room since ownership may be taken.
@@ -713,7 +732,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const browser = detect();
   // HACK - it seems if we don't initialize the mic track up-front, voices can drop out on iOS
   // safari when initializing it later.
-  if (["iOS", "Mac OS"].includes(detectedOS) && ["safari", "ios"].includes(browser.name)) {
+  // Seems to be working for Safari >= 16.4. We should revisit this in the future and remove it completely.
+  if (["iOS", "Mac OS"].includes(detectedOS) && ["safari", "ios"].includes(browser.name) && browser.version < "16.4") {
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
     } catch (e) {
@@ -823,6 +843,18 @@ document.addEventListener("DOMContentLoaded", async () => {
       () => hubChannel.updateScene(sceneInfo),
       SignInMessages.changeScene
     );
+  });
+
+  scene.addEventListener("hub_updated", async () => {
+    if (isLockedDownDemoRoom()) {
+      const avatarRig = document.querySelector("#avatar-rig");
+      const avatarId = await fetchRandomDefaultAvatarId();
+      avatarRig.setAttribute("player-info", { avatarSrc: await getAvatarSrc(avatarId) });
+    } else {
+      if (scene.is("entered")) {
+        entryManager._setPlayerInfoFromProfile(true);
+      }
+    }
   });
 
   remountUI({
@@ -1263,7 +1295,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   hubPhxChannel
     .join()
     .receive("ok", async data => {
-      setLocalClientID(data.session_id);
+      setLocalClientID(APP.getSid(data.session_id));
       APP.hideHubPresenceEvents = true;
       presenceSync.promise = new Promise(resolve => {
         presenceSync.resolve = resolve;
@@ -1352,10 +1384,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         updateEnvironmentForHub(hub, entryManager);
       });
 
+      const sceneName = hub.scene ? hub.scene.name : "a custom URL";
+
+      console.log(`Entering new scene: ${sceneName}`);
+
       messageDispatch.receive({
         type: "scene_changed",
         name: displayName,
-        sceneName: hub.scene ? hub.scene.name : "a custom URL"
+        sceneName
       });
     }
 
@@ -1388,6 +1424,27 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     scene.emit("hub_updated", { hub });
+  });
+
+  hubPhxChannel.on("host_changed", ({ host, port, turn }) => {
+    console.log("Dialog host changed. Disconnecting from current host and connecting to the new one.", {
+      hub_id: APP.hub.hub_id,
+      host,
+      port,
+      turn
+    });
+
+    APP.dialog.disconnect();
+    APP.dialog.connect({
+      serverUrl: `wss://${host}:${port}`,
+      roomId: APP.hub.hub_id,
+      serverParams: { host, port, turn },
+      scene,
+      clientId: APP.getString(localClientID),
+      forceTcp: qs.get("force_tcp"),
+      forceTurn: qs.get("force_turn"),
+      iceTransportPolicy: qs.get("force_tcp") || qs.get("force_turn") ? "relay" : "all"
+    });
   });
 
   hubPhxChannel.on("permissions_updated", () => hubChannel.fetchPermissions());
