@@ -7,6 +7,8 @@ import {AuthContextProvider} from "../../../../react-components/auth/AuthContext
 import {ThemeProvider} from "../../../../react-components/styles/theme";
 import {WrappedIntlProvider} from "../../../../react-components/wrapped-intl-provider";
 import {MSettingsMain} from "../react-components/MSettingsMain";
+import {container} from "../../axolotis/IOCConfig";
+import { Provider } from 'inversify-react';
 
 
 registerTelemetry("/microsoft-settings", "microsoft-settings");
@@ -23,6 +25,8 @@ export class MicrosoftSettings extends React.Component<any, { page: string }> {
     return <WrappedIntlProviderAny>
         <AuthContextProvider store={store}>
           <ThemeProvider store={store}>
+
+            <Provider container={container}>
             <MSettingsMain />
             <span onClick={() => {
               window.location.reload();
@@ -35,6 +39,7 @@ export class MicrosoftSettings extends React.Component<any, { page: string }> {
               "fontSize": "0.7em",
               "position": "fixed"
             }}>{process.env.BUILD_VERSION}</span>
+            </Provider>
           </ThemeProvider>
         </AuthContextProvider>
       </WrappedIntlProviderAny>;

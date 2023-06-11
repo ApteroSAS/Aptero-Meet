@@ -9,7 +9,7 @@ export function LightProfileCard() {
     // Similar to componentDidMount and componentDidUpdate:
     if(!userProfile) {
       (async () => {
-        let value = await (await msTeamsAPI()).getLoginService().getTeamsLoginService().getCredential().getUserInfo();
+        let value = await (await msTeamsAPI()).getLoginService().getTeamsLoginService().getUserInfo();
         setUserProfile(value);
       })()
     }

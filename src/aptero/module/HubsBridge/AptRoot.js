@@ -6,18 +6,22 @@ import AudioChangeHelper from "../AudioZone/AudioChangeHelper";
 import GaugeModal from "../perf/Gauge/react-component/GaugeModal";
 import UnderPage from "./react-components/UnderPage";
 import { EnterVrModal } from "./react-components/EnterVrModal";
+import { Provider } from 'inversify-react';
+import {container} from "../axolotis/IOCConfig";
 
 export default class AptRoot extends Component {
   render() {
     return (<>
-        <TestPanelLazy/>
-        <ShareScreenModal onBack={() => {
-        }}/>
-        <AudioChangeHelper/>
-        <GaugeModal/>
-        <UnderPage/>
-        <EnterVrModal />
-        <AptStyles/>
+        <Provider container={container}>
+          <TestPanelLazy/>
+          <ShareScreenModal onBack={() => {
+          }}/>
+          <AudioChangeHelper/>
+          <GaugeModal/>
+          <UnderPage/>
+          <EnterVrModal />
+          <AptStyles/>
+        </Provider>
       </>
     );
   }

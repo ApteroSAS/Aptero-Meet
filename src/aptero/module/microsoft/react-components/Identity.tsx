@@ -3,29 +3,28 @@ import { Button, Loader } from "@fluentui/react-northstar";
 import { LightProfileCard } from "./LightProfileCard";
 import { FormattedMessage } from "react-intl";
 import {useEffect, useState} from "react";
-import {MicrosoftLoginService} from "@aptero/axolotis-module-teams";
+import {MsTeamsAPI} from "@aptero/axolotis-module-teams";
 import {msTeamsAPI} from "../../axolotis/modules/basic/ImportHelper";
+import {License} from "./License";
 
-export function LoginButton(props) {
+export function Identity(props) {
   const [loading, setLoading] = useState(true);
-  const [service, setService] = useState<MicrosoftLoginService>(null);
+  const [service, setService] = useState<MsTeamsAPI>(null);
   const [error, setError] = useState(null);
   useEffect( () => {
     // Similar to componentDidMount and componentDidUpdate:
     (async ()=>{
-      setService(await (await msTeamsAPI()).getLoginService());
+      setService(await msTeamsAPI());
       setLoading(false);
     })();
   },[]);
 
   const requestAuth = async () => {
     try {
-      console.log("1");
       setLoading(true);
       setError(null);
-      await service.login(false);
+      await service.getLoginService().login(false);
       setLoading(false);
-      console.log("2");
     } catch (e) {
       setError(e);
       setLoading(false);
@@ -35,17 +34,10 @@ export function LoginButton(props) {
   return (
     <>
       {!loading && (
+
         <div style={{ margin: "8px" }}>
-          {service && service.isSignedIn() && <LightProfileCard />}
-          {error && (
-            <p>
-              <FormattedMessage
-                id="microsoft.settings.account-auth.authorize1"
-                defaultMessage="Failed to authorize. Please contact the support at admin@aptero.co and past the following error detail:"
-              />
-              <br /> {error.toString()}
-            </p>
-          )}
+          <div style={{ margin: "8px", display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "flex-start", gap: "8px" }}>
+          {service && service.getLoginService().isSignedIn() && <LightProfileCard />}
           {/*!error && <><p><FormattedMessage id="microsoft.settings.account-auth.authorize2"
                                           defaultMessage="(Optional) Authorize this app to access advanced features."/>
           </p>
@@ -53,7 +45,7 @@ export function LoginButton(props) {
             style={{height: "auto"}}/></>
           */}
           <br />
-          {service && !service.isSignedIn() && (
+          {service && !service.getLoginService().isSignedIn() && (
             <Button
               primary
               content="Sign In"
@@ -65,7 +57,7 @@ export function LoginButton(props) {
             />
           )}
 
-          {service && service.isSignedIn() && (
+          {service && service.getLoginService().isSignedIn() && (
             <Button
               primary
               content="Sign Out"
@@ -74,7 +66,7 @@ export function LoginButton(props) {
                 try {
                   setLoading(true);
                   setError(null);
-                  await service.logout();
+                  await service.getLoginService().logout();
                   setLoading(false);
                 } catch (e) {
                   setError(e);
@@ -83,6 +75,16 @@ export function LoginButton(props) {
               }}
               style={{ height: "auto" }}
             />
+          )}</div>
+          <License/>
+          {error && (
+              <p>
+                <FormattedMessage
+                    id="microsoft.settings.account-auth.authorize1"
+                    defaultMessage="Failed to authorize. Please contact the support at admin@aptero.co and past the following error detail:"
+                />
+                <br /> {error.toString()}
+              </p>
           )}
         </div>
       )}

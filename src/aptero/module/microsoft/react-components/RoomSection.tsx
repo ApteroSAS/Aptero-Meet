@@ -1,5 +1,5 @@
 import * as React from "react";
-import {useCallback, useContext, useState} from "react";
+import {useCallback, useContext, useEffect, useState} from "react";
 import {FormattedMessage} from "react-intl";
 
 import {Button, Input} from "@fluentui/react-northstar";
@@ -11,6 +11,8 @@ import {AuthContext} from "../../../../react-components/auth/AuthContext";
 import {MediaTile} from "../../../../react-components/room/MediaTiles";
 import {PadNumber} from "./PadNumber";
 import {msTeamsAPI, roomService, roomServiceSync} from "../../axolotis/modules/basic/ImportHelper";
+import {useInjection} from "inversify-react";
+import {MICROSOFT_LOGIN_SERVICE, MicrosoftLoginService} from "@aptero/axolotis-module-teams";
 
 //https://fluentsite.z22.web.core.windows.net/0.60.1
 
@@ -45,6 +47,8 @@ export function RoomSection(props: {
   const [currentTab, setTab] = useState("featured");
   const { results: favoriteRooms } = useFavoriteRooms();
   const { results: spokeProject } = useSpokeProject();
+  const loginService = useInjection<MicrosoftLoginService>(MICROSOFT_LOGIN_SERVICE);
+  const [signIn,setSignIn] = useState(loginService.isSignedIn())
 
   const sortedFeaturedScene = [
     {
@@ -89,6 +93,15 @@ export function RoomSection(props: {
   const mySceneDisplay = sortedSpokeProject.length > 0;
   const myRoomDisplay = sortedFavoriteRooms.length > 0;
   const Column2: any = Column;
+
+  useEffect(() => {
+    loginService.onChange(async ()=>{
+      setSignIn(loginService.isSignedIn());
+    });
+  },[]);
+  if(!signIn){
+    return <div></div>;
+  }
   return (<>
       <h2>
         <FormattedMessage id="microsoft.settings.room" defaultMessage="Room"/>

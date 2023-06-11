@@ -328,14 +328,7 @@ module.exports = async (env, argv) => {
           { from: "src/schema.toml", to: "schema.toml" },
           { from: "src/aptero/module/properties/properties.js", to: "properties.js" },
           { from: "src/assets/images/favicon.ico", to: "favicon.ico" },
-          {
-            from: moduleTeamsPackagePath+"/../assets/auth-start.html",
-            to: "auth-start.html"
-          },
-          {
-            from: moduleTeamsPackagePath+"/../assets/auth-end.html",
-            to: "auth-end.html"
-          },
+          { from: path.join(moduleTeamsPackagePath,"..","assets"), to: "" },// Aptero module assets
           { from: "src/assets/manifest.webmanifest", to: "manifest.webmanifest" },
           { from: "src/assets/static/", to: "assets/static/" },
           {

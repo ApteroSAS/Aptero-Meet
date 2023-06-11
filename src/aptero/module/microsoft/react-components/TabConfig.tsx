@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Loader } from "@fluentui/react-northstar"; //https://fluentsite.z22.web.core.windows.net/0.60.1
 import { FormattedMessage } from "react-intl";
-import { LoginButton } from "./LoginButton";
+import { Identity } from "./Identity";
 import { RoomSection } from "./RoomSection";
 import { CHANGE_SETTINGS_URL, MSTEAMS_QUERY_PARAM } from "@aptero/axolotis-module-teams";
 import { tryMSMatchTheme } from "./MSThemeMatcher";
@@ -57,7 +57,7 @@ export class TabConfig extends React.Component {
             console.log("croquet url detected");
             this.fullUrl = url;
           } else {
-            const teamsParams = btoa(encodeURIComponent(JSON.stringify(await loginService.getTeamsLoginService().getCredential().getUserInfo())));
+            const teamsParams = btoa(encodeURIComponent(JSON.stringify(await loginService.getTeamsLoginService().getUserInfo())));
             roomurl.searchParams.append(MSTEAMS_QUERY_PARAM, teamsParams);
             let data = (await roomService()).parseUrl(roomurl.toString());
             let token = await (await roomService()).getEmbedToken(data.roomSID, data.origin);
@@ -130,10 +130,7 @@ export class TabConfig extends React.Component {
         {!this.state.initialized && <Loader/>}
         {this.state.initialized && (
           <>
-            <h2>
-              <FormattedMessage id="microsoft.settings.identity" defaultMessage="Identity"/>
-            </h2>
-            <LoginButton/>
+            <Identity/>
             <RoomSection
               roomUrl={roomUrl}
               suggestedDisplayName={this.state.suggestedDisplayName}
