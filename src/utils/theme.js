@@ -1,11 +1,9 @@
 import { waitForDOMContentLoaded } from "./async-utils";
-import configs from "./configs";
 import { store } from "./store-instance";
 
 // Node these should be synchronized with the top of shared.scss
 const DEFAULT_ACTION_COLOR = "#FF3464";
 const DEFAULT_ACTION_COLOR_LIGHT = "#FF74A4";
-let transientTheme = null;
 
 const DEFAULT_COLORS = {
   "action-color": DEFAULT_ACTION_COLOR,
@@ -148,16 +146,9 @@ function updateTextButtonColors() {
   }
 }
 
-export function changeTheme(newThemeId){
-  transientTheme = newThemeId;
-  const theme = transientTheme && configs.APP_CONFIG?.theme?.themes?.find(theme => theme.id === transientTheme);
-  if (theme["dark-theme"]) {
-    document.body.classList.add("dark-theme");
-  } else {
-    document.body.classList.add("light-theme");
-  }
-  activateTheme();
-  console.log("change theme :"+transientTheme)
+function applyThemeToBody() {
+  const theme = getCurrentTheme();
+  document.body.setAttribute("data-theme", theme.name.toLowerCase().includes("dark") ? "dark" : "light");
 }
 
 function onThemeChanged(listener) {
@@ -177,13 +168,19 @@ waitForDOMContentLoaded().then(() => {
     return;
   }
 
-  if (configs.APP_CONFIG && configs.APP_CONFIG.theme && configs.APP_CONFIG.theme["dark-theme"]) {
-    document.body.classList.add("dark-theme");
+  // Set initial theme
+  const theme = getCurrentTheme();
+  if (theme && theme.name.toLowerCase().includes("dark")) {
+    document.body.setAttribute("data-theme", "dark");
   } else {
-    document.body.classList.add("light-theme");
+    document.body.setAttribute("data-theme", "light");
   }
+
   updateTextButtonColors();
-  onThemeChanged(updateTextButtonColors);
+  onThemeChanged(() => {
+    updateTextButtonColors();
+    applyThemeToBody();
+  });
 });
 
 function applyThemeToTextButton(el, highlighted) {
@@ -205,6 +202,7 @@ export {
   getDefaultTheme,
   getThemeColor,
   onThemeChanged,
+  applyThemeToBody,
   registerDarkModeQuery,
   themes,
   tryGetTheme

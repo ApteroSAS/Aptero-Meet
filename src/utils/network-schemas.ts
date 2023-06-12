@@ -4,12 +4,14 @@ import {
   $isStringType,
   NetworkedFloatyObject,
   NetworkedMediaFrame,
+  NetworkedPDF,
   NetworkedTransform,
   NetworkedVideo,
   NetworkedWaypoint
 } from "../bit-components";
 import { defineNetworkSchema } from "./define-network-schema";
 import { NetworkedMediaFrameSchema } from "./networked-media-frame-schema";
+import { NetworkedPDFSchema } from "./networked-pdf-schema";
 import { NetworkedTransformSchema } from "./networked-transform-schema";
 import { NetworkedVideoSchema } from "./networked-video-schema";
 import { NetworkedWaypointSchema } from "./networked-waypoint-schema";
@@ -43,6 +45,7 @@ schemas.set(NetworkedFloatyObject, {
   componentName: "networked-floaty-object",
   ...defineNetworkSchema(NetworkedFloatyObject)
 });
+schemas.set(NetworkedPDF, NetworkedPDFSchema);
 
 export const networkableComponents = Array.from(schemas.keys());
 
@@ -58,7 +61,7 @@ export function write(prop: any, eid: EntityID, value: any) {
   if (ArrayBuffer.isView(prop[eid])) {
     prop[eid].set(value);
   } else {
-    prop[$isStringType] ? APP.getString(value) : value;
+    prop[eid] = prop[$isStringType] ? APP.getString(value) : value;
   }
 }
 

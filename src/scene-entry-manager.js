@@ -26,10 +26,14 @@ import { addComponent, removeEntity } from "bitecs";
 import { MyCameraTool } from "./bit-components";
 import { anyEntityWith } from "./utils/bit-utils";
 import { moveToSpawnPoint } from "./bit-systems/waypoint";
+import { spawnFromFileList, spawnFromUrl } from "./load-media-on-paste-or-drop";
+import { isLockedDownDemoRoom } from "./utils/hub-utils";
 //aptero
 import { mediaViewEventEmitter, lastVideoShareData } from "./aptero/module/ButtonAPI/service/ChangeVideoService";
 import { searchService } from "./aptero/module/ButtonAPI/service/SearchService";
 import { networkService } from "./aptero/module/HubsBridge/service/NetworkService";
+
+const useNewLoader = qsTruthy("newLoader");
 
 export default class SceneEntryManager {
   constructor(hubChannel, authChannel, history) {
@@ -80,7 +84,7 @@ export default class SceneEntryManager {
       await exit2DInterstitialAndEnterVR(true);
     }
 
-    if (qsTruthy("newLoader")) {
+    if (useNewLoader) {
       moveToSpawnPoint(APP.world, this.scene.systems["hubs-systems"].characterController);
     } else {
     const waypointSystem = this.scene.systems["hubs-systems"].waypointSystem;
@@ -166,13 +170,14 @@ export default class SceneEntryManager {
   };
 
   _setupPlayerRig = () => {
-    this._setPlayerInfoFromProfile();
-
     // Explict user action changed avatar or updated existing avatar.
     this.scene.addEventListener("avatar_updated", () => this._setPlayerInfoFromProfile(true));
 
     // Store updates can occur to avatar id in cases like error, auth reset, etc.
-    this.store.addEventListener("statechanged", () => this._setPlayerInfoFromProfile());
+    if (!isLockedDownDemoRoom()) {
+      this._setPlayerInfoFromProfile();
+      this.store.addEventListener("statechanged", () => this._setPlayerInfoFromProfile());
+    }
 
     const avatarScale = parseInt(qs.get("avatar_scale"), 10);
     if (avatarScale) {
@@ -221,10 +226,10 @@ export default class SceneEntryManager {
   };
 
   _setupMedia = () => {
-    const offset = { x: 0, y: 0, z: -1.5 };
-    //aptero
-    const spawnMediaInfrontOfPlayer = (src, contentOrigin,data) => {
+    // HACK we only care about the return value in 1 spot, don't want to deal with that in the newLoader path
+    const spawnMediaInfrontOfPlayerAndReturn = (src, contentOrigin,data) => {
       if (!this.hubChannel.can("spawn_and_move_media")) return;
+      const offset = { x: 0, y: 0, z: -1.5 };
       const { entity, orientation } = addMedia(
         src,
         "#interactable-media",
@@ -244,6 +249,23 @@ export default class SceneEntryManager {
       });
 
       return entity;
+    };
+
+    const spawnMediaInfrontOfPlayer = (src, contentOrigin) => {
+      if (useNewLoader) {
+        console.warn(
+          "Spawning newLoader object using `spawnMediaInFrontOfPlayer`. This codepath should likely be made more direct.",
+          src,
+          contentOrigin
+        );
+        if (typeof src === "string") {
+          spawnFromUrl(src);
+        } else {
+          spawnFromFileList([src]);
+        }
+      } else {
+        spawnMediaInfrontOfPlayerAndReturn(src, contentOrigin).eid;
+      }
     };
 
     this.scene.addEventListener("add_media", e => {
@@ -285,13 +307,13 @@ export default class SceneEntryManager {
 
     this.scene.addEventListener("action_vr_notice_closed", () => forceExitFrom2DInterstitial());
 
-    if (!qsTruthy("newLoader")) {
-    document.addEventListener("paste", e => {
-      if (
-        (e.target.matches("input, textarea") || e.target.contentEditable === "true") &&
-        document.activeElement === e.target
-      )
-        return;
+    if (!useNewLoader) {
+      document.addEventListener("paste", e => {
+        if (
+          (e.target.matches("input, textarea") || e.target.contentEditable === "true") &&
+          document.activeElement === e.target
+        )
+          return;
 
       // Never paste into scene if dialog is open
       const uiRoot = document.querySelector(".ui-root");
@@ -361,7 +383,7 @@ export default class SceneEntryManager {
         } else if (target === "avatar") {
           this.avatarRig.setAttribute("player-info", { isSharingAvatarCamera: true });
         } else {
-          currentVideoShareEntity = spawnMediaInfrontOfPlayer(this.mediaDevicesManager.mediaStream, undefined);
+          currentVideoShareEntity = spawnMediaInfrontOfPlayerAndReturn(this.mediaDevicesManager.mediaStream, undefined);
           // Wire up custom removal event which will stop the stream.
           currentVideoShareEntity.setAttribute(
             "emit-scene-event-on-remove",

@@ -1,6 +1,7 @@
 import { getReticulumFetchUrl, hubUrl } from "./utils/phoenix-utils";
 import { updateEnvironmentForHub, getSceneUrlForHub, updateUIForHub, remountUI } from "./hub";
-import { loadStoredRoomData, loadLegacyRoomObjects } from "./utils/load-room-objects";
+import { loadLegacyRoomObjects } from "./utils/load-legacy-room-objects";
+import { loadSavedEntityStates } from "./utils/entity-state-utils";
 import qsTruthy from "./utils/qs_truthy";
 import { localClientID, pendingMessages, pendingParts } from "./bit-systems/networking";
 import { storedUpdates } from "./bit-systems/network-receive-system";
@@ -33,15 +34,16 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
     console.log("Change hub called with the current hub id. This is a noop.");
     return;
   }
-  // Suppress on-screen join and leave messages until we receive a sync.
+
   // Suppress on-screen join and leave messages until we receive a sync.
   APP.hideHubPresenceEvents = true;
   const scene = AFRAME.scenes[0];
 
   // Generate leave events for everyone in the room.
   Object.keys(APP.hubChannel.presence.state).forEach(key => {
-    if (key !== localClientID) {
-      pendingParts.push(APP.getSid(key));
+    const clientId = APP.getSid(key);
+    if (clientId !== localClientID) {
+      pendingParts.push(clientId);
     }
   });
   // Reticulum "leaving" causes pinned objects to get cleaned up.
@@ -86,7 +88,7 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
   await NAF.connection.adapter.disconnect();
   await APP.dialog.disconnect();
   if (!qsTruthy("newLoader")) {
-  unloadRoomObjects();
+    unloadRoomObjects();
   }
   NAF.connection.connectedClients = {};
   NAF.connection.activeDataChannels = {};
@@ -133,10 +135,10 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
   ]);
 
   if (qsTruthy("newLoader")) {
-    loadStoredRoomData(hubId);
+    loadSavedEntityStates(APP.hubChannel);
     loadLegacyRoomObjects(hubId);
   } else {
-  loadRoomObjects(hubId);
+    loadRoomObjects(hubId);
   }
 
   await APP.hubChannel.sendEnteredEvent();
@@ -150,16 +152,11 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
 window.changeHub = changeHub;
 
 // TODO see if there is a better way to do this with react router
-//https://developer.mozilla.org/en-US/docs/Web/API/Window/popstate_event
-window.addEventListener("popstate", function() {
-  if(!APP.hub){
-    console.warn("No APP.hub");
-    return;
-  }
+// https://developer.mozilla.org/en-US/docs/Web/API/Window/popstate_event
+window.addEventListener("popstate", function () {
   const qs = new URLSearchParams(location.search);
   const newHubId = qs.get("hub_id") || document.location.pathname.substring(1).split("/")[0];
   if (newHubId !== APP.hub.hub_id) {
-    if (!window.APP_PROPS.APP_CONFIG.features.fast_room_switching) return;
     changeHub(newHubId, false);
   }
 });

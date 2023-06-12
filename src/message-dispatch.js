@@ -8,6 +8,9 @@ import { ExitReason } from "./react-components/room/ExitedRoomScreen";
 import { LogMessageType } from "./react-components/room/ChatSidebar";
 import { createNetworkedEntity } from "./utils/create-networked-entity";
 import qsTruthy from "./utils/qs_truthy";
+import { add, testAsset, respawn } from "./utils/chat-commands";
+import { isLockedDownDemoRoom } from "./utils/hub-utils";
+import { loadState, clearState } from "./utils/entity-state-utils";
 
 let uiRoot;
 // Handles user-entered messages
@@ -51,8 +54,8 @@ export default class MessageDispatch extends EventTarget {
         this.remountUI({ presenceLogEntries: this.presenceLogEntries });
       }, 1000);
     }, 20000);
-    
   }
+
   addToPresenceLogPrivate(entry) {
     entry.key = Date.now().toString();
     this.presenceLogEntriesPrivate.push(entry);
@@ -60,25 +63,13 @@ export default class MessageDispatch extends EventTarget {
     if (entry.type === "chat" && this.scene.is("loaded")) {
       this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_CHAT_MESSAGE);
     }
-
-    // Fade out and then remove
-    /*
-    setTimeout(() => {
-      entry.expired = true;
-      this.remountUI({ presenceLogEntries: this.presenceLogEntries });
-
-      setTimeout(() => {
-        this.presenceLogEntries.splice(this.presenceLogEntries.indexOf(entry), 1);
-        this.remountUI({ presenceLogEntries: this.presenceLogEntries });
-      }, 5000);
-    }, 20000);
-    */
   }
 
   receive(message) {
+    if (isLockedDownDemoRoom()) return;
     if (message.receiverClientId == null) {
-    this.addToPresenceLog(message);
-    this.dispatchEvent(new CustomEvent("message", { detail: message }));
+      this.addToPresenceLog(message);
+      this.dispatchEvent(new CustomEvent("message", { detail: message }));
     } else {
       if (message.receiverClientId == NAF.clientId || message.sessionId == NAF.clientId) {
         this.addToPresenceLogPrivate(message);
@@ -169,7 +160,7 @@ export default class MessageDispatch extends EventTarget {
               this.log(LogMessageType.unauthorizedSceneChange);
             }
           } else {
-            this.log(LogMessageType.inalidSceneUrl);
+            this.log(LogMessageType.invalidSceneUrl);
           }
         } else if (this.hubChannel.canOrWillIfCreator("update_hub")) {
           this.mediaSearchStore.sourceNavigateWithNoNav("scenes", "use");
@@ -233,6 +224,39 @@ export default class MessageDispatch extends EventTarget {
             }
           } else {
             this.log(LogMessageType.invalidAudioNormalizationRange);
+          }
+        }
+        break;
+      case "add":
+        {
+          const avatarPov = document.querySelector("#avatar-pov-node").object3D;
+          add(APP.world, avatarPov, args);
+        }
+        break;
+      case "respawn":
+        {
+          const sceneEl = AFRAME.scenes[0];
+          const characterController = this.scene.systems["hubs-systems"].characterController;
+          respawn(APP.world, sceneEl, characterController);
+        }
+        break;
+      case "test":
+        {
+          const avatarPov = document.querySelector("#avatar-pov-node").object3D;
+          testAsset(APP.world, avatarPov, args);
+        }
+        break;
+      case "load":
+        {
+          if (this.hubChannel.can("pin_objects") && this.hubChannel.signIn) {
+            loadState(this.hubChannel, APP.world, args);
+          }
+        }
+        break;
+      case "clear":
+        {
+          if (this.hubChannel.can("pin_objects") && this.hubChannel.signIn) {
+            clearState(this.hubChannel, APP.world);
           }
         }
         break;

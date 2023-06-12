@@ -3,13 +3,13 @@ import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCog } from "@fortawesome/free-solid-svg-icons/faCog";
-import { AppLogo } from "../misc/AppLogo";
-import { Container } from "./Container";
-import styles from "./Header.scss";
 import maskEmail from "../../utils/mask-email";
-import { SignInButton } from "../home/SignInButton";
+import styles from "./Header.scss";
+import { Container } from "./Container";
 import { SocialBar } from "../home/SocialBar";
+import { SignInButton } from "../home/SignInButton";
 import { msTeamsAPILight } from "@aptero/axolotis-module-teams";
+import { AppLogo } from "../misc/AppLogo";
 
 export function Header({
   showCloud,
@@ -33,15 +33,10 @@ export function Header({
           <nav>
             <ul>
               <li>
-                <a href="/" className={styles.homeLink}>
-                  {/*
-                This forceConfigurableLogo prop is a bit of a hack, since we want the home page on HMC to use our 
-                configured logo, which is left-aligned, as opposed to the logo that we typically used for HMC, 
-                which is center-aligned.
-                */}
-                  <AppLogo forceConfigurableLogo />
-                </a>
-              </li>
+              <a href="/" className={styles.homeLink}>
+                <AppLogo />
+              </a>
+            </li>
               {enableSpoke && (
                 <li>
                   <a href="/spoke">
@@ -99,21 +94,21 @@ export function Header({
           </nav>
           <div className={styles.signIn}>
             {isSignedIn ? (
-              <div>
-                <span>
-                  <FormattedMessage
-                    id="header.signed-in-as"
-                    defaultMessage="Signed in as {email}"
-                    values={{ email: maskEmail(email) }}
-                  />
-                </span>
-                <a href="#" onClick={onSignOut}>
-                  <FormattedMessage id="header.sign-out" defaultMessage="Sign Out" />
-                </a>
-              </div>
-            ) : (
-              <SignInButton />
-            )}
+            <div>
+              <span>
+                <FormattedMessage
+                  id="header.signed-in-as"
+                  defaultMessage="Signed in as {email}"
+                  values={{ email: maskEmail(email) }}
+                />
+              </span>
+              <a href="#" onClick={onSignOut}>
+                <FormattedMessage id="header.sign-out" defaultMessage="Sign Out" />
+              </a>
+            </div>
+          ) : (
+            <SignInButton />
+          )}
           </div>
           {isHmc ? <SocialBar mobile /> : null}
         </Container>
