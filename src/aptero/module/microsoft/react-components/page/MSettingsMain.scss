@@ -1,4 +1,4 @@
-@use "./hubs/react-components/styles/theme.scss";
+@use "../hubs/react-components/styles/theme";
 
 .themed-background{
   background-color: theme.$background1-color;

@@ -1,11 +1,11 @@
 import * as React from "react";
 import { Loader } from "@fluentui/react-northstar"; //https://fluentsite.z22.web.core.windows.net/0.60.1
 import { FormattedMessage } from "react-intl";
-import { Identity } from "./Identity";
-import { RoomSection } from "./RoomSection";
+import { Identity } from "../components/Identity";
+import { RoomSection } from "../components/RoomSection";
 import { CHANGE_SETTINGS_URL, MSTEAMS_QUERY_PARAM } from "@aptero/axolotis-module-teams";
-import { tryMSMatchTheme } from "./MSThemeMatcher";
-import {msTeamsAPI, roomService} from "../../axolotis/modules/basic/ImportHelper";
+import { tryMSMatchTheme } from "../components/MSThemeMatcher";
+import {msTeamsAPI, roomService} from "../../../axolotis/modules/basic/ImportHelper";
 
 /**
  * The 'Config' component is used to display your group tabs

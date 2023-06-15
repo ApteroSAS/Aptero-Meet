@@ -3,14 +3,14 @@ import {useCallback, useContext, useEffect, useState} from "react";
 import {FormattedMessage} from "react-intl";
 
 import {Button, Input} from "@fluentui/react-northstar";
-import {MediaGrid} from "./hubs/react-components/room/MediaGrid";
-import {usePaginatedAPI} from "./hubs/react-components/home/usePaginatedAPI";
-import {Container} from "./hubs/react-components/layout/Container";
-import {Column} from "./hubs/react-components/layout/Column";
-import {AuthContext} from "../../../../react-components/auth/AuthContext";
-import {MediaTile} from "../../../../react-components/room/MediaTiles";
+import {MediaGrid} from "../hubs/react-components/room/MediaGrid";
+import {usePaginatedAPI} from "../hubs/react-components/home/usePaginatedAPI";
+import {Container} from "../hubs/react-components/layout/Container";
+import {Column} from "../hubs/react-components/layout/Column";
+import {AuthContext} from "../../../../../react-components/auth/AuthContext";
+import {MediaTile} from "../../../../../react-components/room/MediaTiles";
 import {PadNumber} from "./PadNumber";
-import {msTeamsAPI, roomService, roomServiceSync} from "../../axolotis/modules/basic/ImportHelper";
+import {msTeamsAPI, roomService, roomServiceSync} from "../../../axolotis/modules/basic/ImportHelper";
 import {useInjection} from "inversify-react";
 import {MICROSOFT_LOGIN_SERVICE, MicrosoftLoginService} from "@aptero/axolotis-module-teams";
 

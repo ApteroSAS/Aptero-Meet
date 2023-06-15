@@ -24,7 +24,7 @@ import { remoteControlServiceV2 } from "./module/RemoteScreen/RemoteControlServi
 import { wait } from "./util/AsyncWaiter";
 import { networkService } from "./module/HubsBridge/service/NetworkService";
 import { roomParameters } from "./module/HubsBridge/service/RoomParameters";
-import { tryMSMatchTheme } from "./module/microsoft/react-components/MSThemeMatcher";
+import { tryMSMatchTheme } from "./module/microsoft/react-components/components/MSThemeMatcher";
 
 declare let window:any;
 declare let AFRAME:any;

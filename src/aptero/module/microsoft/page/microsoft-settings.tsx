@@ -6,7 +6,7 @@ import "../../../../utils/theme";
 import {AuthContextProvider} from "../../../../react-components/auth/AuthContext";
 import {ThemeProvider} from "../../../../react-components/styles/theme";
 import {WrappedIntlProvider} from "../../../../react-components/wrapped-intl-provider";
-import {MSettingsMain} from "../react-components/MSettingsMain";
+import {MSettingsMain} from "../react-components/page/MSettingsMain";
 import {container} from "../../axolotis/IOCConfig";
 import { Provider } from 'inversify-react';
 

@@ -1,5 +1,5 @@
-@use "./theme.scss";
-@import 'shared';
+@use "theme";
+@import './shared';
 
 .loader-wrap {
   pointer-events: none;

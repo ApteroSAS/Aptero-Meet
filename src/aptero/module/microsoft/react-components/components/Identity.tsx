@@ -4,8 +4,9 @@ import { LightProfileCard } from "./LightProfileCard";
 import { FormattedMessage } from "react-intl";
 import {useEffect, useState} from "react";
 import {MsTeamsAPI} from "@aptero/axolotis-module-teams";
-import {msTeamsAPI} from "../../axolotis/modules/basic/ImportHelper";
+import {msTeamsAPI} from "../../../axolotis/modules/basic/ImportHelper";
 import {License} from "./License";
+import {Authorize} from "./Authorize";
 
 export function Identity(props) {
   const [loading, setLoading] = useState(true);
@@ -75,8 +76,7 @@ export function Identity(props) {
               }}
               style={{ height: "auto" }}
             />
-          )}</div>
-          <License/>
+          )}<License/><Authorize/></div>
           {error && (
               <p>
                 <FormattedMessage

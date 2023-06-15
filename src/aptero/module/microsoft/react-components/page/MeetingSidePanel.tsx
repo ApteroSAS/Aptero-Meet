@@ -4,8 +4,8 @@ import styles from "./MeetingSidePanel.scss";
 import classNames from "classnames";
 import {useEffect, useState} from "react";
 import {Loader} from "@fluentui/react-northstar";
-import {tryMSMatchTheme} from "./MSThemeMatcher";
-import {msTeamsAPI, msTeamsAPILight} from "../../axolotis/modules/basic/ImportHelper";
+import {tryMSMatchTheme} from "../components/MSThemeMatcher";
+import {msTeamsAPI, msTeamsAPILight} from "../../../axolotis/modules/basic/ImportHelper";
 
 //https://fluentsite.z22.web.core.windows.net/0.60.1
 
@@ -46,17 +46,17 @@ export function MeetingSidePanel() {
             {!loading && (
                 <div className={classNames(styles.sidePanelBody)}>
                     {context !== "mobile" &&
-                        <img className={classNames(styles.fleche)} src="../../../../assets/aptero/microsoft/fleche.svg"
+                        <img className={classNames(styles.fleche)} src="../../../../../assets/aptero/microsoft/fleche.svg"
                              alt="fleche"/>}
                     {context !== "mobile" && <div style={{height: "100px"}}></div>}
                     <div style={{height: "20px"}}></div>
                     <main className={classNames(styles.main)}>
                         <div className={classNames(styles.cubes)}>
-                            <img className={classNames(styles.B)} src="../../../../assets/aptero/microsoft/cubeB.svg"
+                            <img className={classNames(styles.B)} src="../../../../../assets/aptero/microsoft/cubeB.svg"
                                  alt="B"/>
-                            <img className={classNames(styles.R)} src="../../../../assets/aptero/microsoft/cubeR.svg"
+                            <img className={classNames(styles.R)} src="../../../../../assets/aptero/microsoft/cubeR.svg"
                                  alt="R"/>
-                            <img className={classNames(styles.J)} src="../../../../assets/aptero/microsoft/cubeJ.svg"
+                            <img className={classNames(styles.J)} src="../../../../../assets/aptero/microsoft/cubeJ.svg"
                                  alt="J"/>
                         </div>
                         {context !== "mobile" &&

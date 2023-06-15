@@ -1,6 +1,6 @@
-@use "./theme.scss";
-@import 'shared';
-@import 'loader';
+@use "theme";
+@import './shared';
+@import './loader';
 
 * {
   box-sizing: border-box;

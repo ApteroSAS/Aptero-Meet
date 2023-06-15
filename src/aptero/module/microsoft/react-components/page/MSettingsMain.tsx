@@ -4,7 +4,8 @@ import {MeetingSidePanel} from "./MeetingSidePanel";
 import {TabConfig} from "./TabConfig";
 import classNames from "classnames";
 import styles from "./MSettingsMain.scss";
-import {msTeamsAPI, msTeamsAPILight} from "../../axolotis/modules/basic/ImportHelper";
+import {msTeamsAPI, msTeamsAPILight} from "../../../axolotis/modules/basic/ImportHelper";
+import {AdminPanel} from "./AdminPanel";
 
 
 
@@ -26,11 +27,16 @@ export class MSettingsMain extends React.Component {
         if (this.state.page === "loading") {
           if (msTeamsAPILight().msTeams()) {
             await (await msTeamsAPI()).getContext((context) => {
+              console.log(context);
               //https://docs.microsoft.com/en-us/microsoftteams/platform/tabs/how-to/access-teams-context
               if (context.page.frameContext === "sidePanel") {
                 this.setState({ page: "sidePanel" });
-              } else {
+              } else if (context.page.frameContext === "settings") {
                 this.setState({ page: "settings" });
+              }else if (context.page.frameContext === "content") {
+                this.setState({ page: "content" });
+              } else  {
+                this.setState({ page: "content" });
               }
             });
           }else{
@@ -48,6 +54,7 @@ export class MSettingsMain extends React.Component {
         {this.state.page === "no-msteams" && <div>Please Open in MS Teams</div>}
         {this.state.page === "sidePanel" && <MeetingSidePanel/>}
         {this.state.page === "settings" && <TabConfig/>}
+        {this.state.page === "content" && <AdminPanel/>}
       </div>
     </Provider>
   }

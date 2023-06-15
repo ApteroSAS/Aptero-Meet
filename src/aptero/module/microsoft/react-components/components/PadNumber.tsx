@@ -1,6 +1,6 @@
 import * as React from "react";
 import classNames from "classnames";
-import styles from "./link.scss";
+import styles from "../styles/link.scss";
 import { FormattedMessage } from "react-intl";
 
 const MAX_DIGITS = 6;
