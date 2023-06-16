@@ -36,8 +36,8 @@ export function Identity(props) {
     <>
       {!loading && (
 
-        <div style={{ margin: "8px" }}>
-          <div style={{ margin: "8px", display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "flex-start", gap: "8px" }}>
+        <span style={{ margin: "8px" }}>
+          <span style={{ margin: "8px", display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "flex-start", gap: "8px" }}>
           {service && service.getLoginService().isSignedIn() && <LightProfileCard />}
           {/*!error && <><p><FormattedMessage id="microsoft.settings.account-auth.authorize2"
                                           defaultMessage="(Optional) Authorize this app to access advanced features."/>
@@ -45,7 +45,6 @@ export function Identity(props) {
             <Button primary content="Authorize" disabled={loading} onClick={requestAuth}
             style={{height: "auto"}}/></>
           */}
-          <br />
           {service && !service.getLoginService().isSignedIn() && (
             <Button
               primary
@@ -76,7 +75,7 @@ export function Identity(props) {
               }}
               style={{ height: "auto" }}
             />
-          )}<License/><Authorize/></div>
+          )}<License/><Authorize/></span>
           {error && (
               <p>
                 <FormattedMessage
@@ -86,7 +85,7 @@ export function Identity(props) {
                 <br /> {error.toString()}
               </p>
           )}
-        </div>
+        </span>
       )}
       {loading && <Loader />}
     </>
