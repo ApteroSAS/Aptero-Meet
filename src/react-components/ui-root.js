@@ -4,7 +4,7 @@ import classNames from "classnames";
 import copy from "copy-to-clipboard";
 import { FormattedMessage } from "react-intl";
 import screenfull from "screenfull";
-
+import { ReactComponent as ObjectsIcon } from "./icons/Objects.svg";
 import configs from "../utils/configs";
 import { isLockedDownDemoRoom } from "../utils/hub-utils";
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
@@ -956,11 +956,17 @@ export class UIRoot extends Component {
           roomName={this.props.hub.name}
           showJoinRoom={!this.state.waitingOnAudio && !this.props.entryDisallowed}
           onJoinRoom={() => {
-              //aptero
-              if (!(this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now"))) {
+            if (isLockedDownDemo) {
+              if (this.props.forcedVREntryType?.startsWith("vr")) {
+                this.setState({ enterInVR: true }, this.onAudioReadyButton);
+                return;
+              }
+              return this.onAudioReadyButton();
+            }
+            //aptero
+            if (!(this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now"))) {
               this.setState({ entering: true });
               this.props.hubChannel.sendEnteringEvent();
-
               if (promptForNameAndAvatarBeforeEntry) {
                 this.pushHistoryState("entry_step", "profile");
               } else {
@@ -989,10 +995,9 @@ export class UIRoot extends Component {
             hubChannel={this.props.hubChannel}
             entering={this.state.entering}
             onEnteringCanceled={this.onEnteringCanceled}
-            />
-          )}
-        </>
-      )
+          />
+        )}
+      </>
     );
   };
   renderDevicePanel = () => {
@@ -1353,12 +1358,6 @@ export class UIRoot extends Component {
             icon: HomeIcon,
             onClick: () => this.setSidebar("room-info")
           },
-          {
-            id: "objects",
-            label: <FormattedMessage id="more-menu.objects" defaultMessage="Objects" />,
-            icon: ObjectsIcon,
-            onClick: () => this.setSidebar("objects")
-          },
           (this.props.breakpoint === "sm" || this.props.breakpoint === "md" || true) && //Aptero for the '|| to force render of invite'
             this.props.hub &&
             (this.props.hub.entry_mode !== "invite" || this.props.hubChannel.can("update_hub")) && {
@@ -1651,7 +1650,7 @@ export class UIRoot extends Component {
     if (!this.getSelectedUser() && (this.state.sidebarId === "display_user_panel" || this.state.sidebarId === "user")) {
       this.setState({ sidebarId: null });
     }
-    console.log("this.props.store",this.props.store)
+    console.log("this.props.store", this.props.store);
     return (
       <MoreMenuContextProvider>
         <ReactAudioContext.Provider value={this.state.audioContext}>
@@ -1746,8 +1745,8 @@ export class UIRoot extends Component {
                             )}
                           <PeopleMenuButton
                             active={this.state.sidebarId === "people"}
-                          disabled={isLockedDownDemo}
-                          onClick={!isLockedDownDemo ? () => this.toggleSidebar("people") : null}
+                            disabled={isLockedDownDemo}
+                            onClick={!isLockedDownDemo ? () => this.toggleSidebar("people") : null}
                             presencecount={this.state.presenceCount}
                           />
                           {showECSObjectsMenuButton && (
@@ -1993,50 +1992,59 @@ export class UIRoot extends Component {
                                   icon={<VRIcon />}
                                   preset="accent5"
                                   label={
-                              <FormattedMessage id="toolbar.spectate-in-vr-button" defaultMessage="Spectate in VR" />
-                            }
-                            onClick={() => this.props.scene.enterVR()}
-                          />
-                        )}
-                      </>
-                    )}
-                    {entered && (
-                      <>
-                        {!isLockedDownDemo && (
-                          <>
-                            <AudioPopoverButtonContainer scene={this.props.scene} />
-                            <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel} />
-                            <PlacePopoverContainer
-                              scene={this.props.scene}
-                              hubChannel={this.props.hubChannel}
-                              mediaSearchStore={this.props.mediaSearchStore}
-                              showNonHistoriedDialog={this.showNonHistoriedDialog}
+                                    <FormattedMessage
+                                      id="toolbar.spectate-in-vr-button"
+                                      defaultMessage="Spectate in VR"
+                                    />
+                                  }
+                                  onClick={() => this.props.scene.enterVR()}
+                                />
+                              )}
+                            </>
+                          )}
+                          {entered && (
+                            <>
+                              {!isLockedDownDemo && (
+                                <>
+                                  <AudioPopoverButtonContainer scene={this.props.scene} />
+                                  <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel} />
+                                  <PlacePopoverContainer
+                                    scene={this.props.scene}
+                                    hubChannel={this.props.hubChannel}
+                                    mediaSearchStore={this.props.mediaSearchStore}
+                                    showNonHistoriedDialog={this.showNonHistoriedDialog}
+                                  />
+                                </>
+                              )}
+                              {this.props.hubChannel.can("spawn_emoji") && (
+                                <ReactionPopoverContainer
+                                  scene={this.props.scene}
+                                  initialPresence={getPresenceProfileForSession(
+                                    this.props.presences,
+                                    this.props.sessionId
+                                  )}
+                                />
+                              )}
+                            </>
+                          )}
+                          {!isLockedDownDemo && (
+                            <ChatToolbarButton
+                              onClick={() => this.toggleSidebar("chat", { chatPrefix: "", chatAutofocus: false })}
                             />
-                          </>
-                        )}
-                        {this.props.hubChannel.can("spawn_emoji") && (
-                          <ReactionPopoverContainer
-                            scene={this.props.scene}
-                            initialPresence={getPresenceProfileForSession(this.props.presences, this.props.sessionId)}
-                          />
-                        )}
-                      </>
-                    )}
-                    {!isLockedDownDemo && (
-                      <ChatToolbarButton
-                        onClick={() => this.toggleSidebar("chat", { chatPrefix: "", chatAutofocus: false })}
-                      />
-                    )}
-                    {entered && isMobileVR && (
-                      <ToolbarButton
-                        className={styleUtils.hideLg}
-                        icon={<VRIcon />}
-                        preset="accept"
-                        label={<FormattedMessage id="toolbar.enter-vr-button" defaultMessage="Enter VR" />}
-                        onClick={() => exit2DInterstitialAndEnterVR(true)}
-                      />
-                    )}
-                  </>
+                          )}
+                          {entered && isMobileVR && (
+                            <ToolbarButton
+                              className={styleUtils.hideLg}
+                              icon={<VRIcon />}
+                              preset="accept"
+                              label={<FormattedMessage id="toolbar.enter-vr-button" defaultMessage="Enter VR" />}
+                              onClick={() => exit2DInterstitialAndEnterVR(true)}
+                            />
+                          )}
+                        </>
+                      )}
+                    </>
+                  )
                 }
                 toolbarRight={
                   <>
@@ -2045,10 +2053,10 @@ export class UIRoot extends Component {
                         icon={<VRIcon />}
                         preset="accept"
                         label={<FormattedMessage id="toolbar.enter-vr-button" defaultMessage="Enter VR" />}
-                          onClick={
-                            () => this.props.scene.enterVR() //APTERO
-                            //() => exit2DInterstitialAndEnterVR(true)
-                          }
+                        onClick={
+                          () => this.props.scene.enterVR() //APTERO
+                          //() => exit2DInterstitialAndEnterVR(true)
+                        }
                       />
                     )}
                     {entered && (
@@ -2065,16 +2073,16 @@ export class UIRoot extends Component {
                       />
                     )}
                     <MoreMenuPopoverButton menu={moreMenu} />
-			{/*Aptero*/}
-                      {!aptGuiVisible ? null : (
-                        <InvitePopoverContainer
-                          className={styles.inviteButtonContainer}
-                          hub={this.props.hub}
-                          hubChannel={this.props.hubChannel}
-                          scene={this.props.scene}
-                          store={this.props.store}
-                        />
-                      )}
+                    {/*Aptero*/}
+                    {!aptGuiVisible ? null : (
+                      <InvitePopoverContainer
+                        className={styles.inviteButtonContainer}
+                        hub={this.props.hub}
+                        hubChannel={this.props.hubChannel}
+                        scene={this.props.scene}
+                        store={this.props.store}
+                      />
+                    )}
                   </>
                 }
               />

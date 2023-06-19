@@ -87,8 +87,8 @@ export default class SceneEntryManager {
     if (useNewLoader) {
       moveToSpawnPoint(APP.world, this.scene.systems["hubs-systems"].characterController);
     } else {
-    const waypointSystem = this.scene.systems["hubs-systems"].waypointSystem;
-    waypointSystem.moveToSpawnPoint();
+      const waypointSystem = this.scene.systems["hubs-systems"].waypointSystem;
+      waypointSystem.moveToSpawnPoint();
     }
 
     if (isMobile || forceEnableTouchscreen || qsTruthy("force_enable_touchscreen")) {
@@ -227,18 +227,18 @@ export default class SceneEntryManager {
 
   _setupMedia = () => {
     // HACK we only care about the return value in 1 spot, don't want to deal with that in the newLoader path
-    const spawnMediaInfrontOfPlayerAndReturn = (src, contentOrigin,data) => {
+    const spawnMediaInfrontOfPlayerAndReturn = (src, contentOrigin, data) => {
       if (!this.hubChannel.can("spawn_and_move_media")) return;
       const offset = { x: 0, y: 0, z: -1.5 };
       const { entity, orientation } = addMedia(
         src,
         "#interactable-media",
         contentOrigin,
-        data && data.type && data.type.includes("360")?"360-equirectangular":null,
+        data && data.type && data.type.includes("360") ? "360-equirectangular" : null,
         !(src instanceof MediaStream),
         true,
         true,
-        data?data:{}
+        data ? data : {}
       );
       orientation.then(or => {
         entity.setAttribute("offset-relative-to", {
@@ -271,9 +271,9 @@ export default class SceneEntryManager {
     this.scene.addEventListener("add_media", e => {
       const contentOrigin = e.detail instanceof File ? ObjectContentOrigins.FILE : ObjectContentOrigins.URL;
 
-      if(searchService.resultAwaited) {
-        let entry = { url: e.detail, contentOrigin};
-        let selectAction = "result";
+      if (searchService.resultAwaited) {
+        const entry = { url: e.detail, contentOrigin };
+        const selectAction = "result";
         this.scene.emit("action_selected_media_result_entry", { entry, selectAction });
         return;
       }
@@ -315,24 +315,24 @@ export default class SceneEntryManager {
         )
           return;
 
-      // Never paste into scene if dialog is open
-      const uiRoot = document.querySelector(".ui-root");
-      if (uiRoot && uiRoot.classList.contains("in-modal-or-overlay")) return;
+        // Never paste into scene if dialog is open
+        const uiRoot = document.querySelector(".ui-root");
+        if (uiRoot && uiRoot.classList.contains("in-modal-or-overlay")) return;
 
-      const url = e.clipboardData.getData("text");
-      const files = e.clipboardData.files && e.clipboardData.files;
-      if (url) {
-        spawnMediaInfrontOfPlayer(url, ObjectContentOrigins.URL);
-      } else {
-        for (const file of files) {
-          spawnMediaInfrontOfPlayer(file, ObjectContentOrigins.CLIPBOARD);
+        const url = e.clipboardData.getData("text");
+        const files = e.clipboardData.files && e.clipboardData.files;
+        if (url) {
+          spawnMediaInfrontOfPlayer(url, ObjectContentOrigins.URL);
+        } else {
+          for (const file of files) {
+            spawnMediaInfrontOfPlayer(file, ObjectContentOrigins.CLIPBOARD);
+          }
         }
-      }
-    });
+      });
 
       let lastDebugScene;
-    document.addEventListener("drop", e => {
-      e.preventDefault();
+      document.addEventListener("drop", e => {
+        e.preventDefault();
 
         if (qsTruthy("debugLocalScene")) {
           URL.revokeObjectURL(lastDebugScene);
@@ -342,27 +342,27 @@ export default class SceneEntryManager {
           return;
         }
 
-      let url = e.dataTransfer.getData("url");
+        let url = e.dataTransfer.getData("url");
 
-      if (!url) {
-        // Sometimes dataTransfer text contains a valid URL, so try for that.
-        try {
-          url = new URL(e.dataTransfer.getData("text")).href;
-        } catch (e) {
-          // Nope, not this time.
+        if (!url) {
+          // Sometimes dataTransfer text contains a valid URL, so try for that.
+          try {
+            url = new URL(e.dataTransfer.getData("text")).href;
+          } catch (e) {
+            // Nope, not this time.
+          }
         }
-      }
 
-      const files = e.dataTransfer.files;
+        const files = e.dataTransfer.files;
 
-      if (url) {
-        spawnMediaInfrontOfPlayer(url, ObjectContentOrigins.URL);
-      } else {
-        for (const file of files) {
-          spawnMediaInfrontOfPlayer(file, ObjectContentOrigins.FILE);
+        if (url) {
+          spawnMediaInfrontOfPlayer(url, ObjectContentOrigins.URL);
+        } else {
+          for (const file of files) {
+            spawnMediaInfrontOfPlayer(file, ObjectContentOrigins.FILE);
+          }
         }
-      }
-    });
+      });
     }
 
     document.addEventListener("dragover", e => e.preventDefault());
@@ -374,11 +374,10 @@ export default class SceneEntryManager {
       isHandlingVideoShare = false;
 
       if (isVideoTrackAdded) {
-
-        if(lastVideoShareData.data && lastVideoShareData.data.selectAction==="result"){
+        if (lastVideoShareData.data && lastVideoShareData.data.selectAction === "result") {
           //Aptero integration
           lastVideoShareData.data.src = `hubs://clients/${NAF.clientId}/video`;
-          mediaViewEventEmitter.emit("share_video_media_stream_created", {...lastVideoShareData.data});
+          mediaViewEventEmitter.emit("share_video_media_stream_created", { ...lastVideoShareData.data });
           lastVideoShareData.data = null;
         } else if (target === "avatar") {
           this.avatarRig.setAttribute("player-info", { isSharingAvatarCamera: true });
@@ -457,12 +456,12 @@ export default class SceneEntryManager {
       // If user has HMD lifted up or gone through interstitial, delay spawning for now. eventually show a modal
       if (delaySpawn) {
         setTimeout(() => {
-        //aptero
-          spawnMediaInfrontOfPlayer(entry.url, ObjectContentOrigins.URL,entry);
+          //aptero
+          spawnMediaInfrontOfPlayer(entry.url, ObjectContentOrigins.URL, entry);
         }, 3000);
       } else {
-      //aptero
-        spawnMediaInfrontOfPlayer(entry.url, ObjectContentOrigins.URL,entry);
+        //aptero
+        spawnMediaInfrontOfPlayer(entry.url, ObjectContentOrigins.URL, entry);
       }
     });
 
@@ -558,8 +557,8 @@ export default class SceneEntryManager {
     const audioStream = audioEl.captureStream
       ? audioEl.captureStream()
       : audioEl.mozCaptureStream
-        ? audioEl.mozCaptureStream()
-        : null;
+      ? audioEl.mozCaptureStream()
+      : null;
 
     if (audioStream) {
       let audioVolume = Number(qs.get("audio_volume") || "1.0");
@@ -579,8 +578,8 @@ export default class SceneEntryManager {
     }
 
     const connect = async () => {
-    await APP.dialog.setLocalMediaStream(this.mediaDevicesManager.mediaStream);
-    audioEl.play();
+      await APP.dialog.setLocalMediaStream(this.mediaDevicesManager.mediaStream);
+      audioEl.play();
     };
     if (APP.dialog._sendTransport) {
       connect();

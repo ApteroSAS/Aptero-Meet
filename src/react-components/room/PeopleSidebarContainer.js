@@ -7,6 +7,8 @@ import { UserProfileSidebarContainer } from "./UserProfileSidebarContainer";
 import { useCan } from "./hooks/useCan";
 import { useRoomPermissions } from "./hooks/useRoomPermissions";
 import { useRole } from "./hooks/useRole";
+let selectedId;
+let selectedName;
 
 export function userFromPresence(sessionId, presence, micPresences, mySessionId, voiceEnabled) {
   const meta = presence.metas[presence.metas.length - 1];
@@ -18,29 +20,30 @@ export function userFromPresence(sessionId, presence, micPresences, mySessionId,
 }
 
 export function usePeopleList(presences, mySessionId, micUpdateFrequency = 500) {
+  // eslint-disable-next-line prefer-const
   let [people, setPeople] = useState([]);
   const { voice_chat: voiceChatEnabled } = useRoomPermissions();
 
   useEffect(() => {
-      let timeout;
+    let timeout;
 
-      function updateMicrophoneState() {
-        const micPresences = getMicrophonePresences();
+    function updateMicrophoneState() {
+      const micPresences = getMicrophonePresences();
 
-        setPeople(
-          Object.entries(presences).map(([id, presence]) => {
+      setPeople(
+        Object.entries(presences).map(([id, presence]) => {
           return userFromPresence(id, presence, micPresences, mySessionId, voiceChatEnabled);
-          })
-        );
+        })
+      );
 
-        timeout = setTimeout(updateMicrophoneState, micUpdateFrequency);
-      }
+      timeout = setTimeout(updateMicrophoneState, micUpdateFrequency);
+    }
 
-      updateMicrophoneState();
+    updateMicrophoneState();
 
-      return () => {
-        clearTimeout(timeout);
-      };
+    return () => {
+      clearTimeout(timeout);
+    };
   }, [presences, micUpdateFrequency, setPeople, mySessionId, voiceChatEnabled]);
 
   //aptero state cleanup
@@ -52,11 +55,11 @@ export function usePeopleList(presences, mySessionId, micUpdateFrequency = 500) 
 
 function PeopleListContainer({ hubChannel, people, onSelectPerson, onClose }) {
   const onMuteAll = useCallback(() => {
-      for (const person of people) {
-        if (person.presence === "room" && person.permissions && !person.permissions.mute_users) {
-          hubChannel.mute(person.id);
-        }
+    for (const person of people) {
+      if (person.presence === "room" && person.permissions && !person.permissions.mute_users) {
+        hubChannel.mute(person.id);
       }
+    }
   }, [people, hubChannel]);
   const canVoiceChat = useCan("voice_chat");
   const { voice_chat: voiceChatEnabled } = useRoomPermissions();
@@ -100,10 +103,9 @@ export function PeopleSidebarContainer({
   const people = usePeopleList(presences, mySessionId);
   const [selectedPersonId, setSelectedPersonId] = useState(null);
   const selectedPerson = people.find(person => person.id === selectedPersonId);
-  var iSignedIn=true;
-  if(selectedPerson)
-  {
-    iSignedIn=selectedPerson.roles.signed_in;
+  let iSignedIn = true;
+  if (selectedPerson) {
+    iSignedIn = selectedPerson.roles.signed_in;
   }
 
   const setSelectedPerson = useCallback(
@@ -130,7 +132,6 @@ export function PeopleSidebarContainer({
         />
       );
     } else {
-    
       return (
         <UserProfileSidebarContainer
           mySessionId={mySessionId}
@@ -157,7 +158,12 @@ export function PeopleSidebarContainer({
     <PeopleListContainer onSelectPerson={setSelectedPerson} onClose={onClose} hubChannel={hubChannel} people={people} />
   );
 }
-
+export function getSelectedPersonId() {
+  return selectedId;
+}
+export function getSelectedPersonName() {
+  return selectedName;
+}
 PeopleSidebarContainer.propTypes = {
   displayNameOverride: PropTypes.string,
   store: PropTypes.object.isRequired,
@@ -171,5 +177,5 @@ PeopleSidebarContainer.propTypes = {
   onCloseDialog: PropTypes.func.isRequired,
   showNonHistoriedDialog: PropTypes.func.isRequired,
   toggleChatSidebar: PropTypes.func,
-  signedIn:PropTypes.func
+  signedIn: PropTypes.func
 };

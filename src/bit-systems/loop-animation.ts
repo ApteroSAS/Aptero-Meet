@@ -26,7 +26,7 @@ const getActiveClips = (
   clip: string
 ): AnimationClip[] => {
   if (clip !== "") {
-    const activeClips = [];
+    const activeClips:AnimationClip[] = [];
     const clipNames = clip.split(",");
     for (let i = 0; i < clipNames.length; i++) {
       const clipName = clipNames[i];
@@ -53,7 +53,7 @@ export function loopAnimationSystem(world: HubsWorld): void {
     addComponent(world, LoopAnimation, eid);
 
     const params = LoopAnimationInitializeData.get(eid)!;
-    const activeAnimations = [];
+    const activeAnimations:AnimationAction[] = [];
 
     for (let i = 0; i < params.length; i++) {
       const p = params[i];
@@ -71,7 +71,7 @@ export function loopAnimationSystem(world: HubsWorld): void {
           continue;
         }
 
-        const action = mixer.clipAction(activeClips[j], object);
+        const action:AnimationAction = mixer.clipAction(activeClips[j], object);
         action.enabled = true;
         action.paused = p.paused;
         action.time = p.startOffset;

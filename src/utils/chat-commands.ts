@@ -16,7 +16,7 @@ function usage(
   options: Map<string, string[]> | null,
   rest: string[] | null
 ) {
-  let str = [];
+  let str:string[] = [];
   str.push(`/${commandName}`);
   if (flags) {
     flags.forEach(flag => {

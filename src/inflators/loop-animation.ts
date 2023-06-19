@@ -40,9 +40,9 @@ export function inflateLoopAnimationInitialize(
     params = DEFAULTS;
   }
 
-  const componentParams = [];
+  const componentParams:any[] = [];
   for (let i = 0; i < params.length; i++) {
-    const requiredParams = Object.assign({}, ELEMENT_DEFAULTS, params[i]) as Required<ElementParams>;
+    const requiredParams:Required<ElementParams> = Object.assign({}, ELEMENT_DEFAULTS, params[i]) as Required<ElementParams>;
     const activeClipIndices =
       requiredParams.activeClipIndices.length > 0 ? requiredParams.activeClipIndices : [requiredParams.activeClipIndex];
     componentParams.push({

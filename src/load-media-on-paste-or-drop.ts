@@ -36,7 +36,7 @@ export function spawnFromUrl(text: string) {
   obj.lookAt(avatarPov.getWorldPosition(new Vector3()));
 }
 
-async function spawnFromFileList(files: FileList) {
+export async function spawnFromFileList(files: FileList) {
   //fixed double typing
   for (const file of files as unknown as IterableIterator<File>) {
     const desiredContentType = file.type || guessContentType(file.name);

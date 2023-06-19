@@ -1,11 +1,11 @@
 import React, { useEffect, Component } from "react";
 import styles from "./UnderPage.scss";
-import { useRoomLoadingState } from "../../../../react-components/room/useRoomLoadingState";
+import { useRoomLoadingState } from "../../../../react-components/room/hooks/useRoomLoadingState";
 import IframeResizer from "iframe-resizer-react";
 import { roomParameters } from "../service/RoomParameters";
 
 function scrollbot() {
-  var hash = "underPage";
+  const hash = "underPage";
   document.getElementById(hash).scrollIntoView({
     behavior: "smooth"
   });
@@ -52,7 +52,7 @@ class UnderPage extends Component {
     } catch (err) {//no params to expect in some scenarios
     }
 
-    let vh = window.innerHeight * 0.01;
+    const vh = window.innerHeight * 0.01;
     document.documentElement.style.setProperty("--vh", `${vh}px`);
   }
 
@@ -101,7 +101,7 @@ class UnderPage extends Component {
 }
 
 function UnderPageHooksWrapper() {
-  let scene = document.querySelector("a-scene");
+  const scene = document.querySelector("a-scene");
   const { loading } = useRoomLoadingState(scene);
 
   useEffect(() => {

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import configs from "../../utils/configs";
-import { tryGetTheme, getCurrentTheme, registerDarkModeQuery, changeTheme as changeTheme2 } from "../../utils/theme";
+import { tryGetTheme, getCurrentTheme, registerDarkModeQuery } from "../../utils/theme";
 
 let config = process.env.APP_CONFIG;
 // Storybook includes environment variables as a string
@@ -51,28 +51,28 @@ export function useTheme(themeId) {
   useEffect(() => {
     const theme = tryGetTheme(themeId);
 
-      if (!theme) {
-        return;
-      }
+    if (!theme) {
+      return;
+    }
 
-      const variables = [];
+    const variables = [];
 
-      for (const key in theme.variables) {
+    for (const key in theme.variables) {
       if (!Object.prototype.hasOwnProperty.call(theme.variables, key)) continue;
-        variables.push(`--${key}: ${theme.variables[key]};`);
-      }
+      variables.push(`--${key}: ${theme.variables[key]};`);
+    }
 
-      const styleTag = document.createElement("style");
+    const styleTag = document.createElement("style");
 
-      styleTag.innerHTML = `:root {
+    styleTag.innerHTML = `:root {
         ${variables.join("\n")}
       }`;
 
-      document.head.appendChild(styleTag);
+    document.head.appendChild(styleTag);
 
-      return () => {
-        document.head.removeChild(styleTag);
-      };
+    return () => {
+      document.head.removeChild(styleTag);
+    };
   }, [themeId, darkMode]);
 }
 
@@ -89,17 +89,15 @@ export function useLogo() {
 
 export function changeTheme(newThemeId) {
   currentTheme = newThemeId;
-  changeTheme2(newThemeId);
   window.theme.requestChangeTheme(newThemeId);
 }
-
 
 export function useThemeFromStore(store) {
   const [themeId, setThemeId] = useState(currentTheme || store?.state?.preferences?.theme);
 
   useEffect(() => {
     window.theme = {
-      requestChangeTheme: (newThemeId) => {
+      requestChangeTheme: newThemeId => {
         setThemeId(newThemeId);
       }
     };

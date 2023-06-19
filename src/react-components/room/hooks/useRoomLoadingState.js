@@ -2,7 +2,7 @@ import { useEffect, useReducer, useRef, useCallback } from "react";
 import { useIntl, defineMessages } from "react-intl";
 import { waitForPreloads } from "../../../utils/preload";
 import qsTruthy from "../../../utils/qs_truthy";
-import { apteroService } from "../../aptero/ApteroServices";
+import { apteroService } from "../../../aptero/ApteroServices";
 
 function reducer(state, action) {
   apteroService.notifyLoadingState(state, action);

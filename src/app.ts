@@ -33,7 +33,6 @@ import { ElOrEid } from "./utils/bit-utils";
 import { Channel } from "phoenix";
 
 declare global {
-  let APP: App;
   interface Window {
     $O: (eid: number) => Object3D | undefined;
     APP: App;

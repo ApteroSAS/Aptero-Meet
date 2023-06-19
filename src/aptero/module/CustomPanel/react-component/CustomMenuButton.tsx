@@ -6,7 +6,7 @@ export function CustomMenuButton(props: JSX.IntrinsicAttributes & { [x: string]:
     if(customMenuService.isActivated()){
         const title = customMenuService.getButtonTitle();
         return (
-            <ContentMenuButton {...props}>
+            <ContentMenuButton disabled={undefined} {...props}>
                 <ObjectsIcon />
                 <span>
           {title}
