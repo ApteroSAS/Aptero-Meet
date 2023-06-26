@@ -30,7 +30,8 @@ export const RoomEditor: React.FC<any> = (props) => {
     if(window.location.href.indexOf("localhost") > -1) {
         license = useLicense("offer-saas-aptero.free", null);
     }else {
-        license = useLicense("offer-saas-aptero.tier-1",null);
+        license = useLicense("offer-saas-aptero.free",null);
+        //license = useLicense("offer-saas-aptero.tier-1",null);//For later in the BM
     }
     return (<div style={{flexGrow:1,backgroundColor:"aliceblue",border:"none",overflow:"hidden"}}>
         {license ? <EditorFrame/> : <NoLicenseMessage/>}

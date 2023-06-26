@@ -7,6 +7,6 @@ function getLastPart(input: string, delimiter: string = '.'): string {
 }
 
 export function License() {
-    const license = useLicense("offer-saas-aptero","Free");
+    const license = useLicense("offer-saas-aptero","No License");
     return (<>{license && <div> License : {getLastPart(license)}</div>}</>);
 }

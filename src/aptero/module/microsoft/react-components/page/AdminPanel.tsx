@@ -10,10 +10,7 @@ export const AdminPanel: React.FC<any> = (props) => {
             display: "flex", /* Enables flexbox layout */
             flexDirection: "column", /* Stacks child elements vertically */
         }}>
-            <div>
             <Identity/>
-                Once your scene project is created you can add the 3D room where you want in teams (Meeting extension, Tab, Chat). Click on the contextual "Add App" menu.
-            </div>
             <RoomEditor/>
         </div>
     );

@@ -43,8 +43,8 @@ window.APP_PROPS = {
     ROOM_TOKEN_SERVICE: "https://alphahub.aptero.co"
   },
   "@aptero/axolotis-module-teams":{
-    //MICROSOFT_APP_ID: "c89c5d54-37ec-49d6-952a-befc9b770079", //alpha
-    //MICROSOFT_APP_AUTHORITY:"https://login.microsoftonline.com/common",//alpha
+    //MICROSOFT_APP_ID: "c89c5d54-37ec-49d6-952a-befc9b770079", //alpha (does not work for debug localhost)
+    //MICROSOFT_APP_AUTHORITY:"https://login.microsoftonline.com/common",//alpha (does not work for debug localhost)
     MICROSOFT_APP_ID: "12ee7a90-4b99-4717-becc-9384ab5d09c3", //local
     MICROSOFT_APP_AUTHORITY: "https://login.microsoftonline.com/apteroco.onmicrosoft.com",//local
   },
