@@ -17,6 +17,12 @@ export class MSettingsMain extends React.Component {
   };
 
   constructor(props) {
+
+    //if this page is used outside its context redirect to help page - This page should always be an iframe
+    if(window.self === window.top) {
+      window.location.href = "https://www.aptero.co/help.html";
+    }
+
     super(props);
     (async () => {
       try {
