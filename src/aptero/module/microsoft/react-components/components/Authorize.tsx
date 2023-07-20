@@ -8,7 +8,7 @@ import {
     MicrosoftLoginService
 } from "@aptero/axolotis-module-teams";
 
-export const Authorize: React.FC<any> = (props) => {
+export const Authorize: React.FC<{ label:string }> = ({label} = {label:"Authorize"}) => {
 
     let microsoftGraphService = useInjection<MicrosoftGraphService>(MICROSOFT_GRAPH_SERVICE);
     let microsoftLoginService = useInjection<MicrosoftLoginService>(MICROSOFT_LOGIN_SERVICE);
@@ -37,5 +37,5 @@ export const Authorize: React.FC<any> = (props) => {
         });
     }, []);
 
-    return (<>{!authorized && <Button onClick={() => microsoftLoginService.login()}>Authorize</Button>}</>);
+    return (<>{!authorized && <Button onClick={() => microsoftLoginService.login()} style={{height: "auto"}}>{label}</Button>}</>);
 }

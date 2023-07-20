@@ -13,6 +13,7 @@ import {PadNumber} from "./PadNumber";
 import {msTeamsAPI, roomService, roomServiceSync} from "../../../axolotis/modules/basic/ImportHelper";
 import {useInjection} from "inversify-react";
 import {MICROSOFT_LOGIN_SERVICE, MicrosoftLoginService} from "@aptero/axolotis-module-teams";
+import {IdentitySmall} from "./IdentitySmall";
 
 //https://fluentsite.z22.web.core.windows.net/0.60.1
 
@@ -103,9 +104,6 @@ export function RoomSection(props: {
     return <div></div>;
   }
   return (<>
-      <h2>
-        <FormattedMessage id="microsoft.settings.room" defaultMessage="Room"/>
-      </h2>
       {props.roomUrl && (
         <>
           <Input
@@ -137,6 +135,7 @@ export function RoomSection(props: {
       {!props.roomUrl && (
         <>
           <div style={{ padding: 10, display: "flex", justifyContent: "space-evenly" }}>
+            <IdentitySmall />
             <Button
               style={{ margin: 10 }}
               primary={currentTab === "featured"}

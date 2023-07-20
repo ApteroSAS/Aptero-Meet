@@ -1,207 +1,148 @@
 import * as React from "react";
-import classNames from "classnames";
-import styles from "../styles/link.scss";
-import { FormattedMessage } from "react-intl";
+import {CSSProperties} from "react";
 
 const MAX_DIGITS = 6;
-const MAX_LETTERS = 4;
-const hasTouchEvents = "ontouchstart" in document.documentElement;
 
-interface State {entered:string,isAlphaMode:boolean,failedAtLeastOnce:boolean}
+const styles: Record<string, CSSProperties> = {
+    container: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: '#fafafa',
+        padding: '10px',
+        fontFamily: 'Arial, sans-serif',
+        color: '#333',
+        maxWidth: '400px',
+        margin: '0 auto',
+        borderRadius: '5px',
+        boxShadow: '0px 1px 5px rgba(0, 0, 0, 0.1)',
+    },
+    input: {
+        height: '50px',
+        fontSize: '20px',
+        borderRadius: '5px',
+        border: '1px solid #ddd',
+        textAlign: 'center',
+        marginBottom: '20px',
+        width: '50%',
+        boxSizing: 'border-box',
+        marginRight: '20px',
+    },
+    keypad: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3, 1fr)',
+        gap: '10px',
+        width: '50%',
+    },
+    button: {
+        height: '50px',
+        borderRadius: '5px',
+        border: '1px solid #ddd',
+        fontSize: '20px',
+        color: '#333',
+        backgroundColor: '#f5f5f5',
+        transition: 'all 0.2s ease-in-out',
+    },
+    buttonDisabled: {
+        opacity: '0.5',
+    },
+    error: {
+        color: '#ff0000',
+        marginBottom: '10px',
+    },
+};
 
-function ToggleModeButton(props) {
-  return (
-    <span>
-      <a href="#" {...props}>
-        <FormattedMessage id="link-page.toggle-mode-button" defaultMessage="Have a letter code?" />
-      </a>
-    </span>
-  );
-}
+export const PadNumber = ({execute}) => {
+    const [entered, setEntered] = React.useState("");
+    const [failedAtLeastOnce, setFailedAtLeastOnce] = React.useState(false);
 
-export class PadNumber extends React.Component<{execute:(code:string)=>void},State> {
-  state:State = {
-    entered: "",
-    isAlphaMode: false,
-    failedAtLeastOnce: false
-  };
 
-  buttonRefs = {};
-
-  componentDidMount = () => {
-    document.addEventListener("keydown", this.handleKeyDown);
-    this.attachTouchEvents();
-  };
-
-  attachTouchEvents = () => {
-    // https://github.com/facebook/react/issues/9809#issuecomment-413978405
-    if (hasTouchEvents) {
-      for (const [name, ref] of Object.entries(this.buttonRefs)) {
-        if (!ref) continue;
-        if (name === "remove") {
-          (ref as any).ontouchstart = () => this.removeChar();
-        } else if (name === "toggle") {
-          (ref as any).ontouchstart = () => this.toggleMode();
-        } else {
-          (ref as any).ontouchstart = () => this.addToEntry(name);
+    const handleKeyDown = e => {
+        if (e.keyCode < 48 || e.keyCode > 57) {
+            return;
         }
-      }
-    }
-  };
 
-  componentDidUpdate = () => {
-    this.attachTouchEvents();
-  };
+        e.preventDefault();
+        e.stopPropagation();
+        addToEntry(e.keyCode - 48);
+    };
 
-  componentWillUnmount = () => {
-    document.removeEventListener("keydown", this.handleKeyDown);
-  };
+    const addToEntry = async (ch) => {
+        if (entered.length >= MAX_DIGITS) return;
+        const newChars = `${entered}${ch}`;
 
-  handleKeyDown = e => {
-    // Number keys 0-9
-    if ((e.keyCode < 48 || e.keyCode > 57) && !this.state.isAlphaMode) {
-      return;
-    }
-
-    // Alpha keys A-I
-    if ((e.keyCode < 65 || e.keyCode > 73) && this.state.isAlphaMode) {
-      return;
-    }
-
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (this.state.isAlphaMode) {
-      this.addToEntry("IHGFEDCBA"[73 - e.keyCode]);
-    } else {
-      this.addToEntry(e.keyCode - 48);
-    }
-  };
-
-  toggleMode = () => {
-    this.setState({ isAlphaMode: !this.state.isAlphaMode, entered: "", failedAtLeastOnce: false });
-  };
-
-  addToEntry = ch => {
-    if (this.state.entered.length >= this.maxAllowedChars()) return;
-    const newChars = `${this.state.entered}${ch}`;
-
-    this.setState({ entered: newChars }, () => {
-      if (this.state.entered.length === this.maxAllowedChars()) {
-        try {
-          this.props.execute(this.state.entered);
-        }catch (e) {
-          console.error(e);
-          this.setState({ failedAtLeastOnce: true, entered: "" });
-        }
-      }
-    });
-  };
-
-  removeChar = () => {
-    const entered = this.state.entered;
-    if (entered.length === 0) return;
-    this.setState({ entered: entered.substring(0, entered.length - 1) });
-  };
-
-  render() {
-    return <div className={styles.link}>
-      <div className={styles.linkContents}>
-    <div className={styles.enteredContents}>
-      <div className={styles.header}>
-        {this.state.failedAtLeastOnce ? (
-          <FormattedMessage
-            id="link-page.try-again"
-            defaultMessage="We couldn't find that code.{linebreak}Please try again."
-            values={{ linebreak: <br /> }}
-          />
-        ) : (
-          <FormattedMessage id="link-page.enter-code" defaultMessage="Enter code:" />
-        )}
-      </div>
-
-      <div className={styles.entered}>
-        <input
-          className={styles.charInput}
-          type={this.state.isAlphaMode ? "text" : "tel"}
-          pattern="[0-9A-I]*"
-          value={this.state.entered}
-          onChange={ev => {
-            if (!this.state.isAlphaMode && ev.target.value.match(/[a-z]/i)) {
-              this.setState({ isAlphaMode: true });
+        setEntered(newChars);
+        if (newChars.length === MAX_DIGITS) {
+            try {
+                await execute(newChars);
+            } catch (e) {
+                console.error(e);
+                setFailedAtLeastOnce(true);
+                setEntered("");
             }
+        }
+    };
 
-            this.setState({ entered: ev.target.value.toUpperCase() }, () => {
-              if (this.state.entered.length === this.maxAllowedChars()) {
-                try {
-                  this.props.execute(this.state.entered);
-                }catch (e) {
-                  console.error(e);
-                  this.setState({ failedAtLeastOnce: true, entered: "" });
-                }
-              }
-            });
-          }}
-        />
-      </div>
+    const removeChar = () => {
+        if (entered.length === 0) return;
+        setEntered(entered.substring(0, entered.length - 1));
+    };
 
-      <div className={styles.enteredFooter}>
-        {!this.state.isAlphaMode && <ToggleModeButton onClick={() => this.toggleMode()} />}
-      </div>
-    </div>
-    <div className={styles.keypad}>
-      {(this.state.isAlphaMode
-          ? ["A", "B", "C", "D", "E", "F", "G", "H", "I"]
-          : [1, 2, 3, 4, 5, 6, 7, 8, 9]
-      ).map((d, i) => (
-        <button
-          disabled={this.state.entered.length === this.maxAllowedChars()}
-          className={styles.keypadButton}
-          key={`char_${i}`}
-          onClick={() => {
-            if (!hasTouchEvents) this.addToEntry(d);
-          }}
-          ref={r => (this.buttonRefs[d.toString()] = r)}
-        >
-          {d}
-        </button>
-      ))}
-      <button
-        className={classNames(styles.keypadButton, styles.keypadToggleMode)}
-        ref={r => (this.buttonRefs["toggle"] = r)}
-        onClick={() => {
-          if (!hasTouchEvents) this.toggleMode();
-        }}
-      >
-        {this.state.isAlphaMode ? "123" : "ABC"}
-      </button>
-      {!this.state.isAlphaMode && (
-        <button
-          disabled={this.state.entered.length === this.maxAllowedChars()}
-          className={classNames(styles.keypadButton, styles.keypadZeroButton)}
-          ref={r => (this.buttonRefs["0"] = r)}
-          onClick={() => {
-            if (!hasTouchEvents) this.addToEntry(0);
-          }}
-        >
-          0
-        </button>
-      )}
-      <button
-        disabled={this.state.entered.length === 0 || this.state.entered.length === this.maxAllowedChars()}
-        className={classNames(styles.keypadButton, styles.keypadBackspace)}
-        ref={r => (this.buttonRefs["remove"] = r)}
-        onClick={() => {
-          if (!hasTouchEvents) this.removeChar();
-        }}
-      >
-      </button>
-    </div>
-      </div>
-    </div>;
-  }
+    React.useEffect(() => {
+        document.addEventListener("keydown", handleKeyDown);
+        return () => {
+            document.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [entered]);
 
-  private maxAllowedChars() {
-    return this.state.isAlphaMode ? MAX_LETTERS : MAX_DIGITS;
-  }
-}
+    return (<>
+        {failedAtLeastOnce &&
+          <div style={styles.error}>
+            We couldn't find that code. Please try again.
+          </div>
+        }
+        <div style={styles.container}>
+            <input
+                style={styles.input}
+                type="tel"
+                pattern="[0-9]*"
+                value={entered}
+                placeholder="Enter code"
+                onChange={ev => {
+                    const val = ev.target.value;
+                    setEntered(val);
+                    if (val.length === MAX_DIGITS) {
+                        try {
+                            execute(val);
+                        } catch (e) {
+                            console.error(e);
+                            setFailedAtLeastOnce(true);
+                            setEntered("");
+                        }
+                    }
+                }}
+            />
+
+            <div style={styles.keypad}>
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((d, i) => (
+                    <button
+                        disabled={entered.length === MAX_DIGITS}
+                        style={{...styles.button, ...(entered.length === MAX_DIGITS && styles.buttonDisabled)}}
+                        key={`char_${i}`}
+                        onClick={() => addToEntry(d)}
+                    >
+                        {d}
+                    </button>
+                ))}
+                <button
+                    disabled={entered.length === 0}
+                    style={{...styles.button, ...((entered.length === 0) && styles.buttonDisabled)}}
+                    onClick={removeChar}
+                >
+                    {"<"}
+                </button>
+            </div>
+        </div>
+    </>);
+};
