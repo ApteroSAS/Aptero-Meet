@@ -40,7 +40,6 @@ export class MSettingsMain extends React.Component {
                 //if this page is used outside its context redirect to help page - This page should always be an iframe
                 window.location.href = "https://www.aptero.co/help.html";
               }
-              (await msTeamsAPI()).getTeamsApp().app.notifySuccess();
             });
           }else{
             //if this page is used outside its context redirect to help page - This page should always be an iframe

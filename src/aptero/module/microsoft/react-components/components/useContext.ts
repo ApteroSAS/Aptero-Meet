@@ -22,7 +22,7 @@ export function useDeviceType(): "mobile" | "desktop" | "loading" {
             if (msTeamsAPILight().msTeams()) {
                 await (await msTeamsAPI()).getContext(async (context) => {
                     const clientType = context.app.host.clientType;
-                    if (context.page.frameContext === "sidePanel" && (clientType === "android" || clientType === "ios")) {
+                    if (clientType === "android" || clientType === "ios") {
                         setDeviceType("mobile");
                     } else {
                         setDeviceType("desktop");

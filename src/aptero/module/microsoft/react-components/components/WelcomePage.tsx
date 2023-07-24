@@ -3,7 +3,9 @@ import React from "react";
 import {OpenAppMenu} from "./OpenAppMenu";
 import {Button, Flex} from "@fluentui/react-northstar";
 import ResponsiveYouTube from "./ResponsiveYoutube";
+import {useDeviceType} from "./useContext";
 export function WelcomePage({startEditor}: { startEditor: () => void }) {
+    const deviceType = useDeviceType();
     return (
         <Grid container style={{padding: "20px"}}>
             <Grid item xs={12}>
@@ -22,7 +24,8 @@ export function WelcomePage({startEditor}: { startEditor: () => void }) {
                     alignItems: 'center',
                     gap:"20px",
                 }} >
-                    <Button primary onClick={startEditor}>Open Editor</Button>
+                    {deviceType === "desktop" && <Button primary onClick={startEditor}>Open Editor</Button>}
+                    {deviceType !== "desktop" && <div> The editor is only available on larger screen (Laptop or Desktop)</div>}
                     <OpenAppMenu/>
                 </div>
             </Grid>

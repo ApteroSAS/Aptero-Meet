@@ -9,6 +9,7 @@ import {FAQ} from "../components/FAQ";
 
 export const AdminPanel: React.FC<any> = (props) => {
     const [tab, setTab] = React.useState("welcome");
+    const deviceType = useDeviceType();
 
     return (
         <>
@@ -26,7 +27,7 @@ export const AdminPanel: React.FC<any> = (props) => {
                     }}
                     style={{height: "auto", flex: '1 1 auto'}}
                 />
-                <Button
+                {deviceType !== "mobile" && <Button
                     primary
                     content="Editor"
                     disabled={tab === "editor"}
@@ -34,7 +35,7 @@ export const AdminPanel: React.FC<any> = (props) => {
                         setTab("editor");
                     }}
                     style={{height: "auto", flex: '1 1 auto'}}
-                />
+                />}
                 <OpenAppMenu style={{height: "auto", flex: '1 1 auto'}}/>
                 <Button
                     primary

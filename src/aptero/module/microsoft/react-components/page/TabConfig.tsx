@@ -64,6 +64,7 @@ export class TabConfig extends React.Component {
             roomurl.searchParams.append("embed_token", token);
             this.fullUrl = roomurl.toString();
             console.log(this.fullUrl);
+            this.setState({ url: this.fullUrl });
           }
         } catch (ex) {
           console.error(ex);
@@ -118,13 +119,6 @@ export class TabConfig extends React.Component {
       }
     }
 
-    let roomUrl = this.state.url;
-    try {
-      roomUrl = new URL(this.state.url).origin + new URL(this.state.url).pathname;
-    } catch (e) {
-      //ignore error
-    }
-
     return (
       <div style={{ margin: "8px" }}>
         {!this.state.initialized && <Loader/>}
@@ -132,7 +126,7 @@ export class TabConfig extends React.Component {
           <>
             <SignIn />
             <RoomSection
-              roomUrl={roomUrl}
+              roomUrl={this.state.url}
               suggestedDisplayName={this.state.suggestedDisplayName}
               onChangeRoomUrl={async (url) => {
                 if (!url) {
