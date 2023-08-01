@@ -105,7 +105,7 @@ export function Identity(props) {
                           />
                       )}
                       <License />
-                        <Authorize label={"Authorize"}/>
+                        <Authorize label={"Check License"}/>
                     </span>
               {error && (
                   <p>

@@ -4,7 +4,6 @@ import { RoomSection } from "../components/RoomSection";
 import { CHANGE_SETTINGS_URL, MSTEAMS_QUERY_PARAM } from "@aptero/axolotis-module-teams";
 import { tryMSMatchTheme } from "../components/MSThemeMatcher";
 import {msTeamsAPI, roomService} from "../../../axolotis/modules/basic/ImportHelper";
-import {Identity} from "../components/Identity";
 import {SignIn} from "../components/SignIn";
 
 /**

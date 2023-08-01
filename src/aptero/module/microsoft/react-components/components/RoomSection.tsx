@@ -112,7 +112,7 @@ export function RoomSection(props: {
                                           onChangeSuggestedDisplayName={props.onChangeSuggestedDisplayName}/>)}
             {!props.roomUrl && (
                 <>
-                    <div style={{padding: 10, display: "flex", justifyContent: "space-evenly"}}>
+                    <div style={{padding: 10, display: "flex", justifyContent: "space-evenly",flexWrap: 'wrap',}}>
                         <IdentitySmall/>
                         <Button
                             style={{margin: 5, padding: 0}}
