@@ -8,8 +8,9 @@ import {
 } from "@aptero/axolotis-module-teams";
 import {Button, Segment} from "@fluentui/react-northstar";
 import {useLicense} from "./useLicense";
-import {OpenAppSourceService} from "./OpenAppSourceService";
+import {OpenAppSourceService, OpenMicrosoftLicensePanel} from "./OpenAppSourceService";
 import {Authorize} from "./Authorize";
+import {License} from "./License";
 
 export const NoLicenseMessage: React.FC<any> = (props) => {
     return (<div style={{
@@ -19,10 +20,11 @@ export const NoLicenseMessage: React.FC<any> = (props) => {
         alignItems: "center",
         height: "100%"
     }}>
-        <div style={{fontSize: "2em", fontWeight: "bold"}}>You don't have a license</div>
-        <div style={{fontSize: "1.5em", fontWeight: "bold"}}>Please go to microsoft AppSource to get licenses</div>
-        <OpenAppSourceService/>
-        <Authorize label={"Check License"}/>
+        <License />
+        <div style={{fontWeight: "bold"}}>You don't have a license</div>
+        <div style={{fontWeight: "bold"}}> 1 - Please go to microsoft AppSource to get licenses <OpenAppSourceService/></div>
+        <div style={{fontWeight: "bold"}}> 2 - One you have a License please assign it to yourself <OpenMicrosoftLicensePanel/></div>
+        <div>If you encounter any difficulties please contact us at support@aptero.co</div>
     </div>);
 }
 

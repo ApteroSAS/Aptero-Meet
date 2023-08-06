@@ -74,7 +74,7 @@ export function SignIn(props) {
                         <p>
                             <FormattedMessage
                                 id="microsoft.settings.account-auth.authorize1"
-                                defaultMessage="Failed to authorize. Please contact the support at admin@aptero.co and past the following error detail:"
+                                defaultMessage="Failed to authorize. Please contact the support at support@aptero.co and past the following error detail:"
                             />
                             <br/> {error.toString()}
                         </p>
