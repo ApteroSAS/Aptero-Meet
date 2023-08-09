@@ -47,7 +47,16 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
   const hub = data.hubs[0];
 
   if (addToHistory) {
-    window.history.pushState(null, null, hubUrl(hubId, {}, hub.slug, waypoint));
+    //Aptero
+    const extraParams = {};
+    const searchParams = new URL(window.location).searchParams;
+    for (const key of searchParams.keys()) {
+      if(["hub_id","vr_entry_type"].indexOf(key)!==-1){
+        continue;//skip specific params
+      }
+      extraParams[key] = searchParams.get(key);
+    }
+    window.history.pushState(null, null, hubUrl(hubId, extraParams, hub.slug, waypoint));
   }
 
   APP.hub = hub;
