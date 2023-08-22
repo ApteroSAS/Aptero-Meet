@@ -9,7 +9,8 @@ function getLastPart(input: string, delimiter: string = '.'): string {
 }
 
 export function License() {
-    const license = useLicense("offer-saas-aptero","No License");
+    return <></>;
+    /*const license = useLicense("offer-saas-aptero","No License");
     return (
         <>
             {license &&
@@ -24,5 +25,5 @@ export function License() {
               </div>
             }
         </>
-    );
+    );*/
 }

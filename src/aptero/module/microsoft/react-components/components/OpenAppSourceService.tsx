@@ -10,6 +10,16 @@ export function OpenAppSourceService() {
     return <Button primary style={{margin:"5px"}} size={"small"} onClick={()=>{window.open(msLink)}}> Open Appsource</Button>
 }
 
+export function OpenAppSourceTeamsApp() {
+    const properties = useInjection<Properties>(PROPERTIES_SERVICE);
+    const msLink = properties.get<PropertiesFormat>(PROPERTY_KEY).APP_SOURCE_TEAMS_APP_LINK;
+    return <Button primary style={{margin:"5px"}} size={"small"} onClick={()=>{window.open(msLink)}}> Open Appsource Teams App</Button>
+}
+
+export function OpenTeams() {
+    return <Button primary style={{margin:"5px"}} size={"small"} onClick={()=>{window.open("https://teams.microsoft.com")}}> Open Microsoft Teams</Button>
+}
+
 export function OpenMicrosoftLicensePanel() {
     return <Button primary style={{margin:"5px"}} size={"small"} onClick={()=>{window.open("https://admin.microsoft.com/#/licenses")}}> Microsoft License Panel</Button>
 }

@@ -56,7 +56,8 @@ export const RoomEditor: React.FC<any> = (props) => {
         flexDirection: "column",
     }}>
         <div style={{flexGrow: 1, backgroundColor: "aliceblue", border: "none", overflow: "hidden"}}>
-            {license ? <EditorFrame/> : <NoLicenseMessage/>}
+            {/*license ? <EditorFrame/> : <NoLicenseMessage/> disable the license system since it is not user friendly enough for the moment*/}
+            <EditorFrame/>
         </div>
     </Segment>);
 }

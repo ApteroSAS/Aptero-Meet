@@ -54,7 +54,8 @@ window.APP_PROPS = {
     //MICROSOFT_APP_AUTHORITY:"https://login.microsoftonline.com/common",//alpha (does not work for debug localhost)
     MICROSOFT_APP_ID: "12ee7a90-4b99-4717-becc-9384ab5d09c3", //local
     MICROSOFT_APP_AUTHORITY: "https://login.microsoftonline.com/apteroco.onmicrosoft.com",//local
-    APP_SOURCE_LINK: "https://appsource.microsoft.com/en-us/product/web-apps/aptero1644253171882.offer-saas-aptero?tab=overview",
+    APP_SOURCE_LINK: "https://appsource.microsoft.com/en-us/product/web-apps/aptero1644253171882.offer-saas-aptero",
+    APP_SOURCE_TEAMS_APP_LINK: "https://appsource.microsoft.com/en-us/product/office/WA200004108",
   },
   "@aptero/axolotis-module-phoenix-auth":{
     RETICULUM_SERVER: "alphahub.aptero.co",

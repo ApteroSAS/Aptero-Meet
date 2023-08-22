@@ -98,6 +98,7 @@ export function MeetingSidePanel() {
             {!loading && <>
                 {context === "mobile-default" && <MeetingSidePanelMobileAfterInstall/>}
                 {context === "mobile-dark" && <MeetingSidePanelInviteToShareArrow/>}
+                {context === "desktop" && <MeetingSidePanelInviteToShareArrow/>}
                 </>
             }
         </>
