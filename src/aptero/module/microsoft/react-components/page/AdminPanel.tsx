@@ -2,8 +2,8 @@ import React from "react";
 import {Identity} from "../components/Identity";
 import {RoomEditor} from "../components/RoomEditor";
 import {WelcomePage} from "../components/WelcomePage";
-import {Button, Flex, Segment} from "@fluentui/react-northstar";
-import {useContext, useDeviceType} from "../components/useContext";
+import {Button, Flex} from "@fluentui/react-northstar";
+import { useDeviceType} from "../components/useContext";
 import {OpenAppMenu} from "../components/OpenAppMenu";
 import {FAQ} from "../components/FAQ";
 

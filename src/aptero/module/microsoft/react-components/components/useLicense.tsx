@@ -7,6 +7,22 @@ import {
 } from "@aptero/axolotis-module-teams";
 import {useEffect, useState} from "react";
 
+export function useMSSignIn() {
+    const [isSignIn, setSignIn] = useState<boolean>(false);
+    let microsoftLoginService = useInjection<MicrosoftLoginService>(MICROSOFT_LOGIN_SERVICE);
+
+    useEffect(() => {
+        (async () => {
+            await microsoftLoginService.onReady();
+            setSignIn(microsoftLoginService.isSignedIn());
+        })();
+        return microsoftLoginService.onChange((async () => {
+            setSignIn(microsoftLoginService.isSignedIn());
+        }));
+    }, []);
+    return {isSignIn,signIn:async ()=>{return microsoftLoginService.login()}};
+}
+
 export function useLicense(filter: string,defaultValue: string = "no-license") {
     const [license, setLicense] = useState<string>(null);
     let microsoftGraphService = useInjection<MicrosoftGraphService>(MICROSOFT_GRAPH_SERVICE);

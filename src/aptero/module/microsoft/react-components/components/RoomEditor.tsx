@@ -7,10 +7,12 @@ import {
     MicrosoftLoginService
 } from "@aptero/axolotis-module-teams";
 import {Button, Segment} from "@fluentui/react-northstar";
-import {useLicense} from "./useLicense";
+import {useLicense, useMSSignIn} from "./useLicense";
 import {OpenAppSourceService, OpenMicrosoftLicensePanel} from "./OpenAppSourceService";
 import {Authorize} from "./Authorize";
 import {License} from "./License";
+import {Typography} from "@material-ui/core";
+import {SignIn} from "./SignIn";
 
 export const NoLicenseMessage: React.FC<any> = (props) => {
     return (<div style={{
@@ -40,6 +42,7 @@ export const EditorFrame: React.FC<any> = (props) => {
 
 export const RoomEditor: React.FC<any> = (props) => {
     let license;
+    const {isSignIn,signIn} = useMSSignIn();
     if (window.location.href.indexOf("localhost") > -1) {
         license = useLicense("offer-saas-aptero.free", null);
     } else {
@@ -57,7 +60,14 @@ export const RoomEditor: React.FC<any> = (props) => {
     }}>
         <div style={{flexGrow: 1, backgroundColor: "aliceblue", border: "none", overflow: "hidden"}}>
             {/*license ? <EditorFrame/> : <NoLicenseMessage/> disable the license system since it is not user friendly enough for the moment*/}
-            <EditorFrame/>
+            {isSignIn?<EditorFrame/>:<div style={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                flexDirection: 'column'
+            }}>Please Sign In to use the editor. <SignIn/> </div>}
         </div>
     </Segment>);
 }
