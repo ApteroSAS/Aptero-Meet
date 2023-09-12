@@ -24,7 +24,7 @@ import HubsTextureLoader from "../loaders/HubsTextureLoader";
 import { MixerType } from "../systems/audio-system";
 
 import qsTruthy from "../utils/qs_truthy";
-import { IN_APP_WEB_BROWSER_PROTOCOL, remoteWebBrowser } from "../aptero/module/HubsBridge/react-components/media-utils-lib";
+import { IN_APP_WEB_BROWSER_PROTOCOL, remoteWebBrowser } from "../aptero/module/RemoteScreen/RemoteControlServiceV2";
 
 /**
  * Warning! This require statement is fragile!
@@ -59,6 +59,8 @@ for (let i = 0; i <= 20; i++) {
 import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader";
 import { rewriteBasisTranscoderUrls } from "../utils/media-url-utils";
 import { AudioType, MediaAudioDefaults } from "./audio-params";
+import {HYPERBEAM_PROTOCOL, hyperbeamService, HyperbeamService} from "../aptero/module/RemoteScreen/HyperbeamService";
+import {container} from "../aptero/module/axolotis/IOCConfig";
 const loadingManager = new THREE.LoadingManager();
 loadingManager.setURLModifier(rewriteBasisTranscoderUrls);
 
@@ -807,10 +809,11 @@ AFRAME.registerComponent("media-video", {
 
       // Set src on video to begin loading.
 
-      if (url.startsWith(IN_APP_WEB_BROWSER_PROTOCOL)) {
-        //APTERO
+      if(url.startsWith(HYPERBEAM_PROTOCOL)) {
+        texture = await hyperbeamService.getScreen(this.el,texture,this.data);
+      } else if (url.startsWith(IN_APP_WEB_BROWSER_PROTOCOL)) {
         texture = await remoteWebBrowser(this.el,texture,this.data);
-      }else if (url.startsWith("hubs://")) {
+      } else if (url.startsWith("hubs://")) {
         const streamClientId = url.substring(7).split("/")[1]; // /clients/<client id>/video is only URL for now
         const stream = await APP.dialog.getMediaStream(streamClientId, "video");
         // We subscribe to video stream notifications for this peer to update the video element

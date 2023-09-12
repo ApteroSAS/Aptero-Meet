@@ -1,6 +1,77 @@
 import { propertiesService } from "../properties/propertiesService";
 import axios from "axios";
 
+export const IN_APP_WEB_BROWSER_PROTOCOL = "web-browser:";
+export const IN_APP_WEB_BROWSER_TRAIL = "/web-browser.mp4";
+
+declare const NAF;
+declare const THREE;
+declare const window;
+
+export const processWebBrowserEntity = (entity, mediaOptions) => {
+    let objJsonStr = JSON.stringify({
+        sessionID:mediaOptions.webBrowser.sessionID,
+        startUrl:"https://google.com",
+        width:1024,
+        height:512,
+    });
+    //let metaData = Buffer.from(objJsonStr).toString("base64");
+    let encoded = btoa(objJsonStr);
+    entity.setAttribute("media-loader", { src: IN_APP_WEB_BROWSER_PROTOCOL + encoded + IN_APP_WEB_BROWSER_TRAIL });
+};
+
+/*export const proxyURL = (url) => {
+    if (url.startsWith("hubs:")) return url;
+    if (url.startsWith("https:")) return url;
+    if (url.startsWith(IN_APP_WEB_BROWSER_PROTOCOL)) return url;
+    return null;
+};*/
+
+export const remoteWebBrowser = async (screenElement,texture,mediaData) => {
+    let screenSRC = mediaData.src;
+    screenSRC = screenSRC.replace(IN_APP_WEB_BROWSER_PROTOCOL,"");
+    screenSRC = screenSRC.replace(IN_APP_WEB_BROWSER_TRAIL,"");
+    let metaData = JSON.parse(atob(screenSRC));
+    let remoteScreenSessionId = metaData.sessionID;
+
+
+    let screenId = await new Promise((resolve) => {
+        NAF.utils.getNetworkedEntity(screenElement).then(networkedEl => {
+            //hovered
+            //unhovered
+            delete screenElement.components["hover-menu__video"];
+            let screenId = networkedEl.components.networked.data.networkId;
+            //singleActionButton:true;
+            //remoteControlService.registerEventOnElement(screenElement);
+            screenElement.setAttribute("tags","singleActionButton: true;");
+            resolve(screenId);
+        });
+    });
+    let connexionInfo = {
+        localSessionID: screenId,
+        remoteScreenSessionId: remoteScreenSessionId,
+        screenSizeX:metaData.width,
+        screenSizeY:metaData.height,
+        metaData:metaData
+    };
+    let rfb:any = await remoteControlServiceV2.getScreen(screenElement,connexionInfo);
+    remoteControlServiceV2.registerEventOnElement(screenElement);
+
+    // Setup a POT canvas
+    let canvas = rfb._canvas;
+    canvas.width = metaData.width || 1024;
+    canvas.height = metaData.height || 512;
+    texture = new THREE.Texture(canvas);
+
+    texture.isVideoTexture = true;
+    texture.image.duration = Infinity;
+    texture.image.play = () => { return Promise.resolve(true)};
+    texture.update = ()=>{
+        texture.needsUpdate = true;
+    };
+    return texture;
+};
+
 export class RemoteControlServiceV2 {
 
     remoteScreenSessionIdMap = {};
@@ -55,7 +126,7 @@ export class RemoteControlServiceV2 {
         };
         this.remoteScreenSessionIdMap[data.localSessionID]=data.remoteScreenSessionId;
         return new Promise((resolve, reject) => {
-            axios.post(propertiesService.PROTOCOL + propertiesService.REMOTE_VM_SERVICE.url + "/service/remote/orchestrator/create", data).then(async resp => {
+            axios.post(propertiesService.PROTOCOL + propertiesService.REMOTE_VM_SERVICE.url + "/service/remote/orchestrator/create", data).then(async (resp:any) => {
                 resp=resp.data;
                 resp.url = "wss://" + propertiesService.REMOTE_VM_SERVICE.url+"/reverse/"+resp.ip+"/"+resp.port+"/websockify";
                 const rfb = await this.createRBF(screenElement.children[0],resp.url,{ credentials: { password: password } });
@@ -85,7 +156,7 @@ export class RemoteControlServiceV2 {
                     console.error("Something went wrong, connection is closed",e);
                 }
             });
-            rfb.addEventListener("credentialsrequired", (e) => {
+            rfb.addEventListener("credentialsrequired", () => {
                 const password = prompt("Password Required:");
                 rfb.sendCredentials({ password: password });
             });
@@ -102,7 +173,7 @@ export class RemoteControlServiceV2 {
         el.object3D.addEventListener("unhovered", ()=>{console.log("unhovered")});
     }
 
-    onInteract = (e) => {
+    onInteract = () => {
         //https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/button
         this.remoteScreenSessionRfbMap[this.lastSessionID]._handleMouseButton(this.lastX, this.lastY, true, 1);
         this.remoteScreenSessionRfbMap[this.lastSessionID]._handleMouseButton(this.lastX, this.lastY, false, 1);
