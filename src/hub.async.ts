@@ -166,7 +166,6 @@ import "./components/shape-helper";
 
 //ax
 import {getService} from "@aptero/axolotis-player"
-import {MICROSOFT_STATIC_SERVICE, PROPERTIES_SERVICE} from "@aptero/axolotis-module-teams";
 import {redirectIfNeeded} from "./aptero/module/load-balancer/LoadBalancer";
 
 
@@ -202,8 +201,6 @@ export {};
   await redirectIfNeeded();
   const {initAxolotisPlayer} = await import("./aptero/module/axolotis/AxInit");
   await initAxolotisPlayer();
-  await getService(PROPERTIES_SERVICE);
-  await getService(MICROSOFT_STATIC_SERVICE);
   console.log("Start hub");
   await domReady();
   console.log("dom loaded");

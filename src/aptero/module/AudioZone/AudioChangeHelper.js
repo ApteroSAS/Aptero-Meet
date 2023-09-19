@@ -1,7 +1,6 @@
 import { MicSetupModalContainer } from "../../../react-components/room/MicSetupModalContainer";
 import React, { Component } from "react";
 import { getAdapterParams } from "../webRTCadapter/adapter-config";
-import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
 
 window.audioChangeHelperController = {};
 window.audioChangeHelperController.spawn = () => {
@@ -16,7 +15,7 @@ export default class AudioChangeHelper extends Component {
 
   componentDidMount() {
     //TODO use a listener
-    if(getAdapterParams().adapter === "none" || msTeamsAPILight().msTeams()){
+    if(getAdapterParams().adapter === "none"){
       this.setState({ micShareOk: false });
     }
     window.audioChangeHelperController.spawn = () => {
@@ -41,18 +40,14 @@ export default class AudioChangeHelper extends Component {
           selectedMicrophone={window.APP.store.state.settings.lastUsedMicDeviceId}
           microphoneOptions={window.APP.mediaDevicesManager.micDevices}
           onChangeMicrophone={deviceId => {
-            if (!msTeamsAPILight().msTeams()) {
-              window.APP.mediaDevicesManager.startMicShare(deviceId);
-            }
+            window.APP.mediaDevicesManager.startMicShare(deviceId);
             this.setState({ micShareOk: true });
           }}
           microphoneEnabled={window.APP.mediaDevicesManager.isMicShared}
           microphoneMuted={muteOnEntry}
           onChangeMicrophoneMuted={() => window.APP.store.update({ preferences: { muteMicOnEntry: !muteOnEntry } })}
           onEnterRoom={() => {
-            if (!msTeamsAPILight().msTeams()) {
-              window.APP.mediaDevicesManager.startMicShare(window.APP.store.state.settings.lastUsedMicDeviceId);
-            }
+            window.APP.mediaDevicesManager.startMicShare(window.APP.store.state.settings.lastUsedMicDeviceId);
             this.setState({ micShareOk: true });
             this.setState({ visible: false });
           }

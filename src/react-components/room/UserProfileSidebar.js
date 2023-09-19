@@ -7,8 +7,7 @@ import { Column } from "../layout/Column";
 import { FormattedMessage, useIntl } from "react-intl";
 import { rotateInPlaceAroundWorldUp, affixToWorldUp } from "../../utils/three-utils";
 import { UserProfileVisitCardContainer } from "./UserProfileVisitCardContainer";
-import { PeopleSidebarContainer, usePeopleList } from "./PeopleSidebarContainer";
-import { msTeamsAPILight, msTeamsAPI } from "@aptero/axolotis-module-teams";
+import { PeopleSidebarContainer } from "./PeopleSidebarContainer";
 
 function useGoToSelectedAvatar(entity) {
   const targetMatrix = new THREE.Matrix4();
@@ -72,7 +71,6 @@ export function UserProfileSidebar({
                                    }) {
   const intl = useIntl();
   const [goBack, setgoBack] = useState("goBack");
-  const people = usePeopleList(presences, mySessionId);
   if (goBack == null) {
     //setgoBack("goBack");
     return (
@@ -92,17 +90,6 @@ export function UserProfileSidebar({
       />
     );
   } else {
-    let microsoftUserId = null;
-    let microsoftUserEmail = null;
-    try {
-      const selectedPerson = people.find(person => person.id === userId);
-      microsoftUserId = selectedPerson?.profile?.microsoftUser;
-      microsoftUserEmail = selectedPerson?.profile?.email;
-      //console.log("selected user :" + microsoftUser);
-      //changeSelectedUserByUID(microsoftUserId);
-    } catch (e) {
-      console.error(e);
-    }
     return (
       <Sidebar
         title={identityName ? `${displayName} (${identityName})` : displayName}
@@ -198,7 +185,7 @@ export function UserProfileSidebar({
           >
             <FormattedMessage id="avatar-teleport" defaultMessage="Go to"/>
           </Button>
-          {(canMute && !msTeamsAPILight().msTeams()) && (
+          {(canMute) && (
             <Button preset="cancel" onClick={onMute}>
               <FormattedMessage id="user-profile-sidebar.mute-button" defaultMessage="Mute"/>
             </Button>

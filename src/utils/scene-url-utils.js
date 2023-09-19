@@ -1,8 +1,6 @@
 import { isLocalHubsSceneUrl, proxiedUrlFor } from "../utils/media-url-utils";
-import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
 
 export async function isValidGLB(url) {
-  url = await msTeamsAPILight().preFetchConvertMicrosoftUrl(url);
   return fetch(url).then(async r => {
     const reader = r.body.getReader();
     let header = "";
@@ -31,7 +29,6 @@ export async function isValidSceneUrl(url) {
 
 //Aptero
 export async function isValidRemoteImage(url) {
-  url = await msTeamsAPILight().preFetchConvertMicrosoftUrl(url);
   //try catch fausse url
   try {
     return await fetch(url,{method: 'HEAD'}).then(async r => {

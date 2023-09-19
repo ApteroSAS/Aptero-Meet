@@ -18,7 +18,6 @@ import { proxiedUrlFor, scaledThumbnailUrlFor } from "../utils/media-url-utils";
 import { CreateTile, MediaTile } from "./room/MediaTiles";
 import { SignInMessages } from "./auth/SignInModal";
 import { createAvatarCustomTileV2, MediaTilesLib, mlHandleEntryClicked } from "../aptero/module/HubsBridge/react-components/media-tiles-lib";
-import {isTeamsLimitedOK} from "../aptero/module/microsoft/TeamsLimit";
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
 
@@ -54,7 +53,10 @@ const DEFAULT_FACETS = {
     { text: "Weapons", params: { filter: "weapons-military" } }
   ],
   avatars: [
-    { text: "Featured", params: { filter: "featured",create:false  } }
+    { text: "Featured", params: { filter: "featured",create:false  } },
+    { text: "My Avatars", params: { filter: "my-avatars",create:false  } },
+    { text: "Newest", params: { filter: "",create:false } },
+    { text: "Create new avatar", params: {filter: "create-avatar", create:true} },//aptero
   ],
   favorites: [],
   scenes: [{ text: "Featured", params: { filter: "featured" } }, { text: "My Scenes", params: { filter: "my-scenes" } }],
@@ -327,7 +329,7 @@ class MediaBrowserContainer extends Component {
       () => this.props.hubChannel.signedIn,
       async () => {
         await remixAvatar(entry.id, entry.name);
-        this.handleFacetClicked({ params: { filter: "featured" } });
+        this.handleFacetClicked({ params: { filter: "my-avatars" } });
       },
       SignInMessages.remixAvatar
     );
@@ -447,7 +449,7 @@ class MediaBrowserContainer extends Component {
     return (
       <MediaBrowser
         banner = {()=>{
-          if(urlSource === "avatars" && searchParams.get("create") === "true" && isTeamsLimitedOK()){//Aptero
+          if(urlSource === "avatars" && searchParams.get("create") === "true"){//Aptero
             return createAvatarCustomTileV2((evt,entry)=> {
               //Aptero
               const { scene, store} = this.props;

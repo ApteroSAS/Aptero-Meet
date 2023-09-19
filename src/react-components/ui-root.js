@@ -76,8 +76,6 @@ import { ObjectsSidebarContainer } from "./room/ObjectsSidebarContainer";
 import { ObjectMenuContainer } from "./room/ObjectMenuContainer";
 import { useCssBreakpoints } from "react-use-css-breakpoints";
 import { PlacePopoverContainer } from "./room/PlacePopoverContainer";
-import { SharePopoverContainer } from "./room/SharePopoverContainer";
-import { VoiceButtonContainer } from "./room/VoiceButtonContainer";
 import { ReactionPopoverContainer } from "./room/ReactionPopoverContainer";
 import { SafariMicModal } from "./room/SafariMicModal";
 import { RoomSignInModalContainer } from "./auth/RoomSignInModalContainer";
@@ -104,11 +102,9 @@ import { propertiesService } from "../aptero/module/properties/propertiesService
 import AptRoot from "../aptero/module/HubsBridge/AptRoot";
 import { minimumQualityService } from "../aptero/module/perf/MinimumQualityService";
 import { adapterReady, getAdapterParams } from "../aptero/module/webRTCadapter/adapter-config";
-import {msTeamsAPI, msTeamsAPILight} from "@aptero/axolotis-module-teams";
 import {CustomMenuButton} from "../aptero/module/CustomPanel/react-component/CustomMenuButton";
 import {InstancesMenuButton} from "../aptero/module/load-balancer/ui/InstancesMenuButton";
 import {InstancesSidebarContainer} from "../aptero/module/load-balancer/ui/InstancesSidebarContainer";
-import {isTeamsLimitedOK} from "../aptero/module/microsoft/TeamsLimit";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 const IN_ROOM_MODAL_ROUTER_PATHS = ["/media"];
@@ -230,11 +226,6 @@ export class UIRoot extends Component {
     // An exit handler that discards event arguments and can be cleaned up.
     this.exitEventHandler = () => this.props.exitScene();
     this.mediaDevicesManager = window.APP.mediaDevicesManager;
-    if (msTeamsAPILight().msTeams()) {
-      msTeamsAPI().then(service => {
-        this.setState({ msTeamsAPI: service });
-      });
-    }
   }
 
   componentDidUpdate(prevProps) {
@@ -647,14 +638,10 @@ export class UIRoot extends Component {
   performDirectEntryFlow = async enterInVR => {
     this.setState({ enterInVR, waitingOnAudio: true });
     let hasGrantedMic = false;
-    if (msTeamsAPILight().msTeams()) {
-      hasGrantedMic = true;
-    } else {
-      hasGrantedMic = (await grantedMicLabels()).length > 0;
-    }
+    hasGrantedMic = (await grantedMicLabels()).length > 0;
 
-    if (hasGrantedMic || new URL(window.location.href).searchParams.get("offline2") || msTeamsAPILight().msTeams()) {
-      if (!this.mediaDevicesManager.isMicShared && !msTeamsAPILight().msTeams()) {
+    if (hasGrantedMic || new URL(window.location.href).searchParams.get("offline2")) {
+      if (!this.mediaDevicesManager.isMicShared) {
         await this.mediaDevicesManager.startLastUsedMicShare();
       }
       this.beginOrSkipAudioSetup();
@@ -688,9 +675,6 @@ export class UIRoot extends Component {
   onRequestMicPermission = async () => {
     // TODO: Show an error state if getting the microphone permissions fails
     await adapterReady();//APTERO
-    /*if (getAdapterParams().adapter !== "none" && !msTeamsAPILight().msTeams()) {
-      await this.mediaDevicesManager.startLastUsedMicShare();
-    }*/
     this.beginOrSkipAudioSetup();
   };
 
@@ -703,7 +687,7 @@ export class UIRoot extends Component {
       AFRAME.scenes[0].audioListener.context.currentTime,
       0.2
     );
-    if (skipAudioSetup || getAdapterParams().adapter === "none" || msTeamsAPILight().msTeams()) {
+    if (skipAudioSetup || getAdapterParams().adapter === "none") {
       this.onAudioReadyButton();
     } else {
       this.pushHistoryState("entry_step", "audio");
@@ -1466,7 +1450,7 @@ export class UIRoot extends Component {
       }
     ];
 
-    if (msTeamsAPILight().msTeams() && this.state.msTeamsAPI) {
+    {
       moreMenu = [
         {
           id: "user",
@@ -1519,7 +1503,7 @@ export class UIRoot extends Component {
               icon: HomeIcon,
               onClick: () => this.setSidebar("room-info")
             },
-            (isTeamsLimitedOK()) && {
+            {
               id: "objects",
               label: <FormattedMessage id="more-menu.objects" defaultMessage="Objects"/>,
               icon: ObjectsIcon,
@@ -1538,7 +1522,7 @@ export class UIRoot extends Component {
                 icon: StarOutlineIcon,
                 onClick: () => this.toggleFavorited()
               },
-            (isModerator && entered && isTeamsLimitedOK()) && {
+            (isModerator && entered) && {
               id: "streamer-mode",
               label: streaming ? (
                 <FormattedMessage id="more-menu.exit-streamer-mode" defaultMessage="Exit Streamer Mode"/>
@@ -1552,7 +1536,7 @@ export class UIRoot extends Component {
         },
         {
           id: "support",
-          label: isTeamsLimitedOK() ?<FormattedMessage id="more-menu.support" defaultMessage="Support"/>: <></>,
+          label: <></>,
           items: [
             configs.feature("show_community_link") && {
               id: "community",
@@ -1565,15 +1549,6 @@ export class UIRoot extends Component {
               label: <FormattedMessage id="more-menu.report-issue" defaultMessage="Report Issue"/>,
               icon: WarningCircleIcon,
               href: configs.link("issue_report", "https://www.aptero.co/docs/help.html")
-            },
-            (entered && isTeamsLimitedOK()) && {
-              id: "start-tour",
-              label: <FormattedMessage id="more-menu.start-tour" defaultMessage="Start Tour"/>,
-              icon: SupportIcon,
-              onClick: () => {
-                window.open("https://vimeo.com/524816064");
-                this.props.scene.systems.tips.resetTips();
-              }
             },
             configs.feature("show_docs_link") && {
               id: "help",
@@ -1604,12 +1579,6 @@ export class UIRoot extends Component {
               label: <FormattedMessage id="more-menu.privacy" defaultMessage="Privacy Notice"/>,
               icon: ShieldIcon,
               href: configs.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")
-            },
-            (isTeamsLimitedOK()) && {
-              id: "faq",
-              label: <FormattedMessage id="more-menu.faq" defaultMessage="FAQ"/>,
-              icon: SupportIcon,
-              href: configs.link("docs", "https://www.aptero.co/help.html")
             }
           ].filter(item => item)
         }
@@ -1914,7 +1883,7 @@ export class UIRoot extends Component {
                 toolbarCenter={
                   !aptGuiVisible ? null : (
                     <>
-                      {(!msTeamsAPILight().msTeams()) && <>
+                      {<>
                         {watching && (
                           <>
                             <ToolbarButton

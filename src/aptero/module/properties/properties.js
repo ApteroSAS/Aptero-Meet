@@ -9,7 +9,6 @@ window.APP_PROPS = {
   RETICULUM_SERVER: "local.aptero.co",
 
   // The thumbnailing backend to connect to.
-  // See here for the server code: https://github.com/MozillaReality/farspark or https://github.com/MozillaReality/nearspark
   THUMBNAIL_SERVER: "",
 
   // Comma-separated list of domains which are known to not need CORS proxying
@@ -31,9 +30,6 @@ window.APP_PROPS = {
   AVAILABLE_INTEGRATIONS:{"objects":true, "videos360":true, "videos2d":true, "scenes":true, "avatars":true,"tenor":false,"poly":false, "sketchfab":false,"bing_videos":false},
 
   REMOTE_VM_SERVICE:{ url:"local.aptero.co"},
-
-  //SENTRY_DSN:"https://944afa0719c6473997fa1d6a06515c7e@o407192.ingest.sentry.io/5275835",
-  //SENTRY_ENV:"web-prod",
 
   GA_TRACKING_ID:"",
 

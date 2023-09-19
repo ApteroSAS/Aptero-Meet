@@ -3,11 +3,10 @@ import PropTypes from "prop-types";
 import { CloseButton } from "../input/CloseButton";
 import { Modal } from "../modal/Modal";
 import { FormattedMessage, useIntl, defineMessages } from "react-intl";
-import { CancelButton, NextButton, ContinueButton, Button } from "../input/Button";
+import { CancelButton, NextButton, ContinueButton } from "../input/Button";
 import { TextInputField } from "../input/TextInputField";
 import { Column } from "../layout/Column";
 import { LegalMessage } from "./LegalMessage";
-import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
 
 export const SignInStep = {
   submit: "submit",
@@ -79,7 +78,7 @@ export const SignInMessages = defineMessages({
   }
 });
 
-export function SubmitEmail({ onSubmitEmail, onSubmitEmailMicrosoftLogin, initialEmail, privacyUrl, termsUrl, message }) {
+export function SubmitEmail({ onSubmitEmail, initialEmail, privacyUrl, termsUrl, message }) {
 
   const intl = useIntl();
 
@@ -92,17 +91,6 @@ export function SubmitEmail({ onSubmitEmail, onSubmitEmailMicrosoftLogin, initia
       onSubmitEmail(email);
     },
     [onSubmitEmail, email]
-  );
-  const onSubmitEmailMicrosoft = useCallback(
-    async e => {
-      e.preventDefault();
-      try {
-          onSubmitEmailMicrosoftLogin();
-      } catch (error) {
-        console.error(error);
-      }
-    },
-    [onSubmitEmailMicrosoftLogin]
   );
 
 

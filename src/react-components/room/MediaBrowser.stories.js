@@ -37,7 +37,10 @@ const FACETS = {
     { text: "Weapons", params: { filter: "weapons-military" } }
   ],
   avatars: [
-    { text: "Featured", params: { filter: "featured" , create:"false" } }
+    { text: "Featured", params: { filter: "featured" , create:"false" } },
+    { text: "My Avatars", params: { filter: "my-avatars" , create:"false" } },
+    { text: "Newest", params: { filter: "", create:"false" } },
+    { text: "Create new avatar", params: { filter: "create-avatar", create:"true"} },//Aptero
   ],
   favorites: [],
   scenes: [{ text: "Featured", params: { filter: "featured" } }, { text: "My Scenes", params: { filter: "my-scenes" } }]
@@ -326,7 +329,7 @@ export const Avatars = () => (
       searchPlaceholder="Search Avatars..."
       mediaSources={mediaSources}
       selectedSource={"avatars"}
-      activeFilter={"featured"}
+      activeFilter={"my-avatars"}
       facets={FACETS.avatars}
       headerRight={
         <IconButton lg>

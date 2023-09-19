@@ -24,7 +24,6 @@ import { remoteControlServiceV2 } from "./module/RemoteScreen/RemoteControlServi
 import { wait } from "./util/AsyncWaiter";
 import { networkService } from "./module/HubsBridge/service/NetworkService";
 import { roomParameters } from "./module/HubsBridge/service/RoomParameters";
-import { tryMSMatchTheme } from "./module/microsoft/react-components/MSThemeMatcher";
 
 declare let window:any;
 declare let AFRAME:any;
@@ -119,8 +118,7 @@ export class ApteroServices {
       return this.audioSettingsSystem;
     });
     await roomParameters.applyDefaultAudioSettingsSystem(this.audioSettingsSystem);
-    window.document.dispatchEvent(new Event(ENTERED_EVENT))
-    await tryMSMatchTheme();
+    window.document.dispatchEvent(new Event(ENTERED_EVENT));
     sendIframeMessage(ENTERED_EVENT,{});
   }
 

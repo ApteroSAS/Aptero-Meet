@@ -1,6 +1,4 @@
 import { createTrack } from "../aptero/module/webRTCadapter/adapter-config";
-import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
-
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
 const isFirefoxReality = isMobileVR && navigator.userAgent.match(/Firefox/);
@@ -25,9 +23,7 @@ export default class MediaDevicesManager {
     this._audioTrack = null;
     this.audioSystem = audioSystem;
     this._mediaStream = audioSystem.outboundStream;
-    if(!msTeamsAPILight().msTeams()) {
-      navigator.mediaDevices.addEventListener("devicechange", this.onDeviceChange);
-    }
+    navigator.mediaDevices.addEventListener("devicechange", this.onDeviceChange);
   }
 
   get deviceId() {
@@ -112,9 +108,6 @@ export default class MediaDevicesManager {
   }
 
   async startMicShare(deviceId) {
-    if(msTeamsAPILight().msTeams()){
-      console.error("no audio device in Teams");
-    }
     if(this.lastDeviceId && JSON.stringify(deviceId) === JSON.stringify(this.lastDeviceId)){
       return this.lastResult;
     }

@@ -71,10 +71,7 @@ import { platformUnsupported } from "./support";
 //aptero service
 import { apteroService } from "./aptero/ApteroServices";
 import { roomController } from "./aptero/module/ButtonAPI/api/RoomController";
-import { fetchICEservers } from "./aptero/module/webRTCadapter/adapter-config";
 
-import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
-msTeamsAPILight().redirectToTeamsSidePanel();
 //aptero service end
 
 const store = window.APP.store;
@@ -384,7 +381,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data,
 
   // Turn off NAF for embeds as an optimization, so the user's browser isn't getting slammed
   // with NAF traffic on load.
-  if (isEmbed && !msTeamsAPILight().msTeams()) {
+  if (isEmbed) {
     hubChannel.allowNAFTraffic(false);
   }
 
@@ -504,7 +501,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data,
     updateUIForHub(hub, hubChannel);
     scene.emit("hub_updated", { hub });
     const hideui = new URL(window.location.href).searchParams.get("hideui");
-    if (!isEmbed || hideui || msTeamsAPILight().msTeams()) {
+    if (!isEmbed || hideui) {
       loadEnvironmentAndConnect();
     } else {
       remountUI({
@@ -563,21 +560,19 @@ const init = async () => {
     return;
   }
 
-  if(!msTeamsAPILight().msTeams()) {
-    const detectedOS = detectOS(navigator.userAgent);
-    const browser = detect();
-    // HACK - it seems if we don't initialize the mic track up-front, voices can drop out on iOS
-    // safari when initializing it later.
-    if (["iOS", "Mac OS"].includes(detectedOS) && ["safari", "ios"].includes(browser.name)) {
-      try {
-        //await createTrack({ audio: true });//Type MediaStream
-        //note aptero we do not need to use create track here since this is just a hack to trigger safari audio authorization popup
-        await navigator.mediaDevices.getUserMedia({audio: true});
-      } catch (e) {
-        console.error(e);
-        remountUI({showSafariMicDialog: true});
-        return;
-      }
+  const detectedOS = detectOS(navigator.userAgent);
+  const browser = detect();
+  // HACK - it seems if we don't initialize the mic track up-front, voices can drop out on iOS
+  // safari when initializing it later.
+  if (["iOS", "Mac OS"].includes(detectedOS) && ["safari", "ios"].includes(browser.name)) {
+    try {
+      //await createTrack({ audio: true });//Type MediaStream
+      //note aptero we do not need to use create track here since this is just a hack to trigger safari audio authorization popup
+      await navigator.mediaDevices.getUserMedia({audio: true});
+    } catch (e) {
+      console.error(e);
+      remountUI({showSafariMicDialog: true});
+      return;
     }
   }
 
@@ -691,7 +686,7 @@ const init = async () => {
   remountUI({
     performConditionalSignIn,
     embed: isEmbed,
-    showPreload: isEmbed && !hideui && !msTeamsAPILight().msTeams()
+    showPreload: isEmbed && !hideui
   });
   entryManager.performConditionalSignIn = performConditionalSignIn;
   entryManager.init();
