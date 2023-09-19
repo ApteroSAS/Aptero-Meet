@@ -88,8 +88,9 @@ export class RemoteControlServiceV2 {
         console.log(data.remoteScreenSessionId);
         this.remoteScreenSessionIdMap[data.localSessionID]=data.remoteScreenSessionId;
         const dataCreate:(any|CreateDTO) = {...{
-            screenSizeX:+data.screenSizeX,
-            screenSizeY:+data.screenSizeY,
+                screenSizeX:+data.screenSizeX,
+                screenSizeY:+data.screenSizeY,
+                remoteScreenSessionId:data.remoteScreenSessionId,
         },...data.metaData}
         /*return this.promiseQueue.add(async() => {
             if(this.remoteScreenSessionRfbMap[data.remoteScreenSessionId]){
@@ -100,14 +101,14 @@ export class RemoteControlServiceV2 {
             ip: string,
             port: string,
             vmsid: string
-        } = null;
+        };
         try {
             const resp = await axios.post(propertiesService.PROTOCOL + propertiesService.REMOTE_VM_SERVICE.url + "/service/remote/orchestrator/create", dataCreate)
-            let resp2 = resp.data as any;
+            resp2 = resp.data as any;
         }catch (e) {
             //retry at least once before failing it
             const resp = await axios.post(propertiesService.PROTOCOL + propertiesService.REMOTE_VM_SERVICE.url + "/service/remote/orchestrator/create", dataCreate)
-            let resp2 = resp.data as any;
+            resp2 = resp.data as any;
         }
         //resp2.url = "wss://" + propertiesService.REMOTE_VM_SERVICE.url+"/reverse/"+resp2.ip+"/"+resp2.port+"/websockify";
         const rfb = await this.createRBF(screenElement.children[0],resp2.url,{ credentials: { password: password } });
