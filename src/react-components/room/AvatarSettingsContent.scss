@@ -4,7 +4,12 @@
   //align-items: center;
   padding: 24px;
   text-align: center;
-  flex-direction: column !important ;
+  flex-direction: column !important;
+  @media (max-height: 600px) {
+    /* CSS rules for screens less than 600px */
+    flex-direction: row !important;
+    justify-content: space-evenly !important;
+  }
   margin-bottom: 0px !important;
   align-items: center;
   justify-content: center;

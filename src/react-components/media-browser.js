@@ -53,10 +53,7 @@ const DEFAULT_FACETS = {
     { text: "Weapons", params: { filter: "weapons-military" } }
   ],
   avatars: [
-    { text: "Featured", params: { filter: "featured",create:false  } },
-    { text: "My Avatars", params: { filter: "my-avatars",create:false  } },
-    { text: "Newest", params: { filter: "",create:false } },
-    { text: "Create new avatar", params: {filter: "create-avatar", create:true} },//aptero
+    { text: "Featured", params: { filter: "featured",create:false  } }
   ],
   favorites: [],
   scenes: [{ text: "Featured", params: { filter: "featured" } }, { text: "My Scenes", params: { filter: "my-scenes" } }],
@@ -329,7 +326,7 @@ class MediaBrowserContainer extends Component {
       () => this.props.hubChannel.signedIn,
       async () => {
         await remixAvatar(entry.id, entry.name);
-        this.handleFacetClicked({ params: { filter: "my-avatars" } });
+        this.handleFacetClicked({ params: { filter: "featured" } });
       },
       SignInMessages.remixAvatar
     );
