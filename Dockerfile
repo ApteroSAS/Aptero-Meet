@@ -1,20 +1,16 @@
-FROM node:16-alpine
+FROM node:18-alpine
 RUN apk add git openssh
 RUN npm i -g cross-env
 
 COPY ./modules/basic-modules/package.json ./modules/basic-modules/package.json
 COPY ./modules/basic-modules/yarn.lock ./modules/basic-modules/yarn.lock
 RUN yarn --cwd ./modules/basic-modules
-RUN yarn --cwd ./modules/basic-modules link
+COPY ./modules/basic-modules/ ./modules/basic-modules/
+RUN yarn --cwd ./modules/basic-modules run build
 
 COPY ./package.json .
 COPY ./yarn.lock .
-
 RUN yarn install
-RUN yarn link @aptero/axolotis-module-basic
-
-COPY ./modules/basic-modules/ ./modules/basic-modules/
-RUN yarn --cwd ./modules/basic-modules run build
 
 COPY . .
 RUN yarn run build
