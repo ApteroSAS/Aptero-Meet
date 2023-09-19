@@ -11,7 +11,7 @@
     "start-prod": "webpack-dev-server --mode=production",
     "dev": "webpack-dev-server --mode=development",
     "build": "rimraf ./dist && yarn build:dep && tsc && webpack --mode=production",
-    "build:dep": "rimraf ./dist && yarn --cwd ./modules/basic-modules run build && yarn --cwd ./modules/teams-module run build",
+    "build:dep": "rimraf ./dist && yarn --cwd ./modules/basic-modules run build",
     "prettier": "prettier --write 'src/**/*.js'",
     "lint:js": "eslint 'src/**/*.js'",
     "lint:html": "htmlhint 'src/**/*.html' && node scripts/indent-linter.js 'src/**/*.html'",
@@ -35,20 +35,6 @@
     "ci": "cross-env yarn run clean && yarn run ci:coverage:serve:run && nyc --no-clean yarn --version",
     "clean": "rimraf .nyc_output coverage junit.xml dist build"
   },
-  "scripts-info": {
-    "start": "Run the client against your Hubs Cloud instance, or Mozilla's developer infrastructure,\n  using application configs pulled from the server",
-    "dev": "Run the client against Mozilla's developer infrastructure with all features enabled",
-    "local": "Run the client against you local reticulum server",
-    "login": "Log in to your Hubs Cloud instance",
-    "logout": "Log out of your Hubs Cloud instance",
-    "deploy": "Build and deploy the client to your Hubs Cloud instance",
-    "undeploy": "Undeploy your custom client from your Hubs Cloud instance and revert it to the standard client",
-    "build": "Build production-ready code and assets",
-    "lint": "Check the source code for formatting and errors",
-    "prettier": "Format all source code in-place",
-    "test": "Check code, run tests and build the code",
-    "spritesheet": "Re-build spritesheets from their source images"
-  },
   "ava": {
     "files": [
       "./test/unit"
@@ -63,7 +49,6 @@
   },
   "dependencies": {
     "@aptero/axolotis-module-basic": "file:./modules/basic-modules",
-    "@aptero/axolotis-module-teams": "file:./modules/teams-module",
     "@aptero/axolotis-player": "github:ApteroSAS/axolotis-player.git#semver:^2.1.6",
     "@braintree/sanitize-url": "^5.0.0",
     "@fluentui/react-northstar": "^0.61.0",

@@ -88,7 +88,6 @@ module.exports = async (env, argv) => {
       fs: "empty"
     },*/
     entry: {
-      "microsoft-settings": path.join(__dirname, "src/aptero/module/microsoft/page", "microsoft-settings.tsx"),
       support: path.join(__dirname, "src", "support.js"),
       index: path.join(__dirname, "src", "index.async.ts"),
       hub: path.join(__dirname, "src", "hub.async.ts"),
@@ -280,12 +279,6 @@ module.exports = async (env, argv) => {
       }),
       // Each output page needs a HTMLWebpackPlugin entry
       new HTMLWebpackPlugin({
-        filename: "microsoft-settings.html",
-        template: path.join(__dirname, "src/aptero/module/microsoft/page", "microsoft-settings.html"),
-        chunks: ["microsoft-settings"],
-        minify: { removeComments: false }
-      }),
-      new HTMLWebpackPlugin({
         filename: "index.html",
         template: path.join(__dirname, "src", "index.html"),
         chunks: ["support", "index"],
@@ -327,23 +320,6 @@ module.exports = async (env, argv) => {
           { from: "src/schema.toml", to: "schema.toml" },
           { from: "src/aptero/module/properties/properties.js", to: "properties.js" },
           { from: "src/assets/images/favicon.ico", to: "favicon.ico" },
-          //3rd party axolotis modules
-          /*{
-            from: "node_modules/@aptero/axolotis-module-teams/build/library/",
-            to: "assets/js/library"
-          },
-          {
-            from: "node_modules/@aptero/axolotis-module-basic/build/library/",
-            to: "assets/js/library"
-          },*/
-          {
-            from: "node_modules/@aptero/axolotis-module-teams/lib/library/@aptero/axolotis-module-teams/assets/auth-start.html",
-            to: "auth-start.html"
-          },
-          {
-            from: "node_modules/@aptero/axolotis-module-teams/lib/library/@aptero/axolotis-module-teams/assets/auth-end.html",
-            to: "auth-end.html"
-          },
           { from: "src/assets/manifest.webmanifest", to: "manifest.webmanifest" },
           { from: "src/assets/static/", to: "assets/static/" },
           {

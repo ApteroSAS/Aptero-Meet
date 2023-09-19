@@ -1,69 +1,47 @@
-![CircleCI](https://img.shields.io/circleci/build/github/ApteroSAS/Aptero-Meet/master?token=8805dc1c4f2cce3d06bfbdb53044026c8d0650ab)
-![Codecov](https://img.shields.io/codecov/c/github/ApteroSAS/Aptero-Meet?token=WFBtLwuv97)
+# Node.js Project README
 
-# [Aptero Hubs](https://hubs.Aptero.com/)
+## description
+The frontend of the application.
 
-.\node_modules\.bin\webpack --json | webpack-bundle-size-analyzer
 
-The client-side code for [Aptero Hubs](https://hubs.Aptero.com/), an online 3D collaboration platform that works for desktop, mobile, and VR platforms.
+## Prerequisites
 
-[Learn more about Hubs](https://hubs.Aptero.com/docs/welcome.html)
+Before you can use this project, you must have the following installed:
 
-## Getting Started
+- [Node.js](https://nodejs.org/en/)
+- [Yarn](https://classic.yarnpkg.com/en/docs/install/)
+- [Docker](https://www.docker.com/get-started)
 
-If you would like to run Hubs on your own servers, check out [Hubs Cloud](https://hubs.Aptero.com/docs/hubs-cloud-intro.html).
+## Installation
 
-If you would like to deploy a custom client to your existing Hubs Cloud instance please refer to [this guide](https://hubs.Aptero.com/docs/hubs-cloud-custom-clients.html).
+This is a Node.js project that requires Yarn to be installed and can be run as a Docker container.
 
-If you would like to contribute to the main fork of the Hubs client please see the [contributor guide](./CONTRIBUTING.md).
-
-If you just want to check out how Hubs works and make your own modifications continue on to our Quick Start Guide.
-
-### Quick Start
-
-[Install NodeJS](https://nodejs.org) if you haven't already. We recommend version 12 or above.
-
-Run the following commands:
+To install the necessary dependencies for this project, run the following command:
 
 ```bash
-git clone https://github.com/Aptero/hubs.git
-cd hubs
-npm ci
-npm run dev
+cd modules/basic-modules
+yarn install
+cd ..
+yarn install
 ```
 
-Then visit https://localhost:8080 (note: HTTPS is required, you'll need to accept the warning for the self-signed SSL certificate)
+## Build
 
-> Note: When running the Hubs client locally, you will still connect to the development versions of our [Janus WebRTC](https://github.com/Aptero/janus-plugin-sfu) and [reticulum](https://github.com/Aptero/reticulum) servers. These servers do not allow being accessed outside of localhost. If you want to host your own Hubs servers, please check out [Hubs Cloud](https://hubs.Aptero.com/docs/hubs-cloud-intro.html).
+To build the project, run the following command:
 
-## Documentation
+```bash
+cd modules/basic-modules
+yarn run build
+cd ..
+yarn run build
+```
 
-The Hubs documentation can be found [here](https://hubs.Aptero.com/docs).
+## Docker Container
 
-## Community
+To generate a Docker container, run the following command:
 
-Join us on our [Discord Server](https://discord.gg/CzAbuGu) or [follow us on Twitter](https://twitter.com/ApteroHubs).
+```bash
+docker/build.bat
+```
 
-## Contributing
-
-Read our [contributor guide](./CONTRIBUTING.md) to learn how you can submit bug reports, feature requests, and pull requests.
-
-We're also looking for help with localization. The Hubs redesign has a lot of new text and we need help from people like you to translate it. Follow the [localization docs](./src/assets/locales/README.md) to get started.
-
-Contributors are expected to abide by the project's [Code of Conduct](./CODE_OF_CONDUCT.md) and to be respectful of the project and people working on it. 
-
-## Additional Resources
-
-* [Reticulum](https://github.com/Aptero/reticulum) - Phoenix-based backend for managing state and presence.
-* [NAF Janus Adapter](https://github.com/Aptero/naf-janus-adapter) - A [Networked A-Frame](https://github.com/networked-aframe) adapter for the Janus SFU service.
-* [Janus Gateway](https://github.com/meetecho/janus-gateway) - A WebRTC proxy used for centralizing network traffic in this client.
-* [Janus SFU Plugin](https://github.com/Aptero/janus-plugin-sfu) - Plugins for Janus which enables it to act as a SFU.
-* [Hubs-Ops](https://github.com/Aptero/hubs-ops) - Infrastructure as code + management tools for running necessary backend services on AWS.
-
-## Privacy
-
-Aptero and Hubs believe that privacy is fundamental to a healthy internet. Read our [privacy policy](./PRIVACY.md) for more info.
-
-## License
-
-Hubs is licensed with the [Aptero Public License 2.0](./LICENSE)
+Make sure you have Docker installed on your system before running this command.
