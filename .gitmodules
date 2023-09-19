@@ -1,5 +1,0 @@
-[submodule "modules/basic-modules"]
-	path = modules/basic-modules
-	url = https://github.com/ApteroSAS/basic-modules.git
-	branch = main
-	update = merge
