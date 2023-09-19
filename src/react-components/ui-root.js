@@ -214,8 +214,7 @@ export class UIRoot extends Component {
     objectSrc: "",
     sidebarId: null,
     userId: null,
-    presenceCount: 0,
-    msTeamsAPI: null
+    presenceCount: 0
   };
 
   constructor(props) {
@@ -504,7 +503,6 @@ export class UIRoot extends Component {
           step: SignInStep.WaitForMicrosoftVerification,
           onClose: onContinueAfterSignIn || this.closeDialog
         });
-        await (await msTeamsAPI()).getLoginService().login();
         this.showNonHistoriedDialog(RoomSignInModalContainer, {
           step: SignInStep.complete,
           onClose: onContinueAfterSignIn || this.closeDialog,
@@ -1470,21 +1468,6 @@ export class UIRoot extends Component {
               icon: SettingsIcon,
               onClick: () => this.setState({ showPrefs: true })
             },
-            this.state.msTeamsAPI.getLoginService().isSignedIn() ? {
-              id: "authorize",
-              label: "Sign Out",
-              icon: SettingsIcon,
-              onClick: () => {
-                this.state.msTeamsAPI.getLoginService().logout();
-              }
-            } : {
-              id: "authorize",
-              label: "Sign In",
-              icon: SettingsIcon,
-              onClick: () => {
-                this.state.msTeamsAPI.getLoginService().login();
-              }
-            }
           ].filter(item => item)
         },
         {
