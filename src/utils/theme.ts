@@ -6,6 +6,8 @@ const DEFAULT_ACTION_COLOR = "#FF3464";
 const DEFAULT_ACTION_COLOR_LIGHT = "#FF74A4";
 let transientTheme = null;
 
+declare const window:any;
+
 const DEFAULT_COLORS = {
   "action-color": DEFAULT_ACTION_COLOR,
   "action-label-color": DEFAULT_ACTION_COLOR,
@@ -18,7 +20,7 @@ const DEFAULT_COLORS = {
   "favorited-color": "#FFC000"
 };
 
-function getThemeColor(name) {
+export function getThemeColor(name) {
   const themeId = transientTheme || window.APP?.store?.state?.preferences?.theme || "light-default";
   const theme = themeId && configs.APP_CONFIG?.theme?.themes?.find(theme => theme.id === themeId);
   if (theme?.variables?.[name]) {
@@ -99,7 +101,7 @@ waitForDOMContentLoaded().then(() => {
   window.APP?.store?.addEventListener("statechanged", onStoreChanged);
 });
 
-function applyThemeToTextButton(el, highlighted) {
+export function applyThemeToTextButton(el, highlighted) {
   el.setAttribute(
     "text-button",
     "backgroundColor",
@@ -111,5 +113,3 @@ function applyThemeToTextButton(el, highlighted) {
     highlighted ? "#aaa" : getThemeColor("action-color-highlight")
   );
 }
-
-export { applyThemeToTextButton, getThemeColor };

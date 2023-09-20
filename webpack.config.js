@@ -100,7 +100,7 @@ module.exports = async (env, argv) => {
       filename: "assets/js/[name]-[chunkhash].js",
       publicPath: process.env.BASE_ASSETS_PATH || "/"
     },
-    devtool: argv.mode === "production" ? "source-map" : "eval-source-map",
+    devtool: "source-map",
     devServer: {
       https: createHTTPSConfig(),//Comment for ngrok http <port>
       host: "0.0.0.0",
@@ -262,8 +262,9 @@ module.exports = async (env, argv) => {
 
     optimization: {
       //https://webpack.js.org/plugins/split-chunks-plugin/
-      minimize: argv.mode === "production",
-      splitChunks: {
+      //minimize: argv.mode === "production",
+      minimize: false,
+      /*splitChunks: {
         chunks: 'all',
         minSize: 20000,
         minRemainingSize: 0,
@@ -271,7 +272,7 @@ module.exports = async (env, argv) => {
         maxAsyncRequests: 30,
         maxInitialRequests: 30,
         enforceSizeThreshold: 50000,
-      },
+      },*/
     },
     plugins: [
       new webpack.ProvidePlugin({

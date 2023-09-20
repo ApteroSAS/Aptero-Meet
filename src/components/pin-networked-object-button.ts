@@ -2,6 +2,10 @@ import { getPromotionTokenForFile } from "../utils/media-utils";
 import { SOUND_PIN } from "../systems/sound-effects-system";
 import { applyThemeToTextButton } from "../utils/theme";
 
+declare const NAF: any;
+declare const AFRAME: any;
+declare const window: any;
+
 AFRAME.registerComponent("pin-networked-object-button", {
   schema: {
     // Selector for label informing users about Discord bridging of pins.
