@@ -98,9 +98,11 @@ AFRAME.registerComponent("open-media-button", {
         const urlSearchParams = new URLSearchParams(url.searchParams);
         for (const sp of [wurlSearchParams, urlSearchParams]) {
           sp.sort();
-          //Ignore this list of option
+          //Ignore this list of option those should no prevent FRS since it does not change the content of the room
           sp.delete("hub_id");
           sp.delete("vr_entry_type");
+          sp.delete("msteams");
+          sp.delete("embed_token");
         }
 
         if (url.hash && window.APP.hub.hub_id === hubId) {
