@@ -7,6 +7,40 @@ import { duplicateEntryModeOnSrc } from "../aptero/module/HubsBridge/utils/Entry
 import { propertiesService } from "../aptero/module/properties/propertiesService";
 
 //aptero
+const checkIfFrameable = async (url) => {
+  /*
+    We'll use our own CORS proxy server to get around the CORS issues
+    and use it to check if the url is frameable by checking the headers
+  */
+
+  //const targetURL = encodeURIComponent(url); //Don't encode it, the proxy breaks with encoded urls, I should work on that
+  //const proxyURL = `https://corsproxy.aptero.co/${targetURL}`;
+  //const proxyURL = `https://corsproxy.aptero.co/https://google.com`;
+  const proxyURL = `https://corsproxy.aptero.co/${url}`;
+
+  const response = await fetch(proxyURL, {
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest'
+    }
+  });
+
+  const xFrameOptions = response.headers.get('x-frame-options')?.toLowerCase();
+  const csp = response.headers.get('content-security-policy')?.toLowerCase();
+
+  if (xFrameOptions && !['allow-all', 'allow-from *', '*'].includes(xFrameOptions)) {
+    console.log("IS NOT FRAMEABLE");
+    return false;
+  }
+
+  if (csp && (csp.includes('frame-ancestors') || csp.includes('frame-src'))) {
+    console.log("IS NOT FRAMEABLE");
+    return false;
+  }
+  console.log("IS FRAMEABLE");
+  return true;
+};
+
+//aptero
 function isValidHttpUrl(string) {
   let url;
   try {
@@ -70,7 +104,19 @@ AFRAME.registerComponent("open-media-button", {
           }
         }
         this.label.setAttribute("text", "value", label);
+      }
 
+      //Create secundary URL for Hyperbeam
+      this.clean_src = this.src;
+      // Check if the url is frameable
+      const isFrameable = await checkIfFrameable(this.src);
+      if (!isFrameable)
+      {
+        //Convert into a Hyperbeam link to bypass Embed restrictions
+        const url = new URL(this.src);
+        const hyperbeamURL = "https://hyperbeam.serverless.aptero.co/?url=" + url.toString();
+        console.log("Hyperbeam URL: " + hyperbeamURL);
+        this.src = hyperbeamURL;
       }
     };
 
@@ -122,7 +168,7 @@ AFRAME.registerComponent("open-media-button", {
         }
       } else {
         await exitImmersive();
-        window.open(this.src,"_blank","popup");
+        window.open(this.clean_src,"_blank","popup");
       }
     };
 
