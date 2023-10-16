@@ -5,9 +5,9 @@ import { send } from "process";
 import { func } from "prop-types";
 import Hyperbeam from "@hyperbeam/web";
 import { getCurrentHubId } from "../../../utils/hub-utils";
-import apteroCursor from "./apteroCursor.svg";
+import apteroCursor from "../../../assets/aptero/apteroCursor.svg";
 import { hb_popup_style } from "./hb_popup_style";
-import { Sidebar } from "../../../../src/react-components/sidebar/Sidebar"
+//import { Sidebar } from "../../../../src/react-components/sidebar/Sidebar"
 
 
 export const HYPERBEAM_PROTOCOL = "hyperbeam:";
@@ -32,7 +32,8 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
 
   // Load the cursor SVG image
   let hbCursor = new Image();
-  hbCursor.src = apteroCursor;
+  hbCursor.src = new URL(apteroCursor, window.location.origin).href;
+  
 
   // Getting the networked entity and setting its attributes
   // We also get rid of the Hover menu component
@@ -462,9 +463,12 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
 
           hbCursor.onload = () => {
             finalContext.drawImage(hbCursor, x * width, y * height, 40, 40);
-          }
+          };
 
-          hbCursor.onerror = function() {
+          // Draw the cursor image
+          try {
+            finalContext.drawImage(hbCursor, x * width, y * height, 40, 40);
+          } catch (e) {
             // Draw a red circle if the cursor image is not loaded
             finalContext.fillStyle = 'red';
             finalContext.beginPath();
