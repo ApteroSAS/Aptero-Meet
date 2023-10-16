@@ -9,6 +9,7 @@ import { lastVideoShareData } from "../../ButtonAPI/service/ChangeVideoService";
 
 
 export const WEB_BROWSER_URL_MODE = "web-browser";
+export const HYPERBEAM_MODE = "hyperbeam";
 
 function BaseTile({ as: TileComponent, className, name, description, tall, wide, children, ...rest }) {
   let additionalProps;

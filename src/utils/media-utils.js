@@ -8,7 +8,7 @@ import { validMaterials } from "../components/hoverable-visuals";
 import { proxiedUrlFor, guessContentType } from "../utils/media-url-utils";
 import Linkify from "linkify-it";
 import tlds from "tlds";
-import { WEB_BROWSER_URL_MODE } from "../aptero/module/HubsBridge/react-components/media-tiles-lib";
+import { WEB_BROWSER_URL_MODE, HYPERBEAM_MODE } from "../aptero/module/HubsBridge/react-components/media-tiles-lib";
 import { processWebBrowserEntity } from "../aptero/module/RemoteScreen/RemoteControlServiceV2";
 
 import anime from "animejs";
@@ -257,6 +257,9 @@ export const addMedia = (
   } else if (src === WEB_BROWSER_URL_MODE){
     //aptero
     processWebBrowserEntity(entity,mediaOptions);
+  } else if (src.startsWith(HYPERBEAM_MODE)){
+    //aptero
+    // Hyperbeam properties are requested once we have users in the room
   }
 
   if (contentOrigin) {
@@ -458,6 +461,8 @@ export async function createImageTexture(url, filter) {
   let texture;
   //aptero
     url = url.replace("http://","https://");
+    url = url.replace("hyperbeam://","https://");
+    url = url.replace("https://https://","https://");
   if (filter) {
     const image = new Image();
     image.crossOrigin = "anonymous";

@@ -17,16 +17,8 @@ export async function setupIframeButton(t) {
   //test if url is allowed host
   if (allowedSRC) return;
   
-  // iframeable is dead, not big surprise
-  //doc : https://iframeable.com
-  //const fetchResponse = await fetch("https://iframeable.com/api/v1/?url=" + t.src);
-  /*const fetchResponse = await fetch("https://iframeable.com/api/v1/?url=" + t.src, {
-    mode: 'no-cors' // 'cors' by default
-  });
-  if (!isFrameable) return;
-  */
-  
-
+  // iframeable is dead, not big surprise, we don't use it anymore
+  // The new code is on the open-media-button.js
   
   if (t.el.parentEl.children.length > 1) return; // Prevent adding buttons that already exist
   t.el.object3D.position.set(-0.35, 0.2, 0.001);

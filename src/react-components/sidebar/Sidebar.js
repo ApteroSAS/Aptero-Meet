@@ -3,8 +3,8 @@ import PropTypes from "prop-types";
 import classNames from "classnames";
 import styles from "./Sidebar.scss";
 
-import { FullscreenEnter } from '@styled-icons/open-iconic/FullscreenEnter';
-import { FullscreenExit } from '@styled-icons/open-iconic/FullscreenExit';
+import {Fullscreen, FullscreenExit} from "@material-ui/icons/"
+
 import { startsWith } from "core-js/core/string";
 
 
@@ -22,13 +22,16 @@ export class Sidebar extends React.Component {
   render() {
     const { title, beforeTitle, afterTitle, children, contentClassName, className, disableOverflowScroll, fullmodeButton, fullmode} = this.props;
     const { fullmodeToggle } = this.state;
-    const FullscreenIcon = fullmodeToggle ? FullscreenExit : FullscreenEnter;
+    const FullscreenLogo = fullmodeToggle ? FullscreenExit : Fullscreen;
 
     //Display on the title that we are embedding a Hyperbeam link
-    const url = children.props.src;
     let hyperbeamPrefix = "";
-    if (url && url.toString().startsWith("https://hyperbeam"))
-    {hyperbeamPrefix = "Hyperbeam: ";}
+    if (children.props) //ONLY if we are using a URL as a child
+    {
+      const url = children.props.src;
+      if (url && url.toString().startsWith("https://hyperbeam"))
+      {hyperbeamPrefix = "Hyperbeam: ";}
+    }
 
     return (
       <div className={classNames(styles.sidebar, className, fullmodeToggle ? styles.fullmode : "")}>
@@ -36,9 +39,9 @@ export class Sidebar extends React.Component {
           <div className={styles.header}>
             <div className={styles.beforeTitle}>{beforeTitle}</div>
             <button className={styles.fullmodeButton} onClick={this.handleToggle}>
-              <FullscreenIcon size="24" /> {/*Note: React-icons accept the size prop (in px) for icon size */}
+              <FullscreenLogo size="24" style={{visibility: afterTitle ? "hidden" : "visible"}}/> {/*Note: React-icons accept the size prop (in px) for icon size */}
             </button>
-            <h5>{hyperbeamPrefix+title}</h5>
+            <h5>{hyperbeamPrefix}{title}</h5>
             <div className={styles.afterTitle}>{afterTitle}</div>
           </div>
         )}

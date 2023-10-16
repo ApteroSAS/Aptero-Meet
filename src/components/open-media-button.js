@@ -12,10 +12,9 @@ const checkIfFrameable = async (url) => {
     We'll use our own CORS proxy server to get around the CORS issues
     and use it to check if the url is frameable by checking the headers
   */
-
-  //const targetURL = encodeURIComponent(url); //Don't encode it, the proxy breaks with encoded urls, I should work on that
-  //const proxyURL = `https://corsproxy.aptero.co/${targetURL}`;
-  //const proxyURL = `https://corsproxy.aptero.co/https://google.com`;
+  if (url.startsWith("hyperbeam")){
+    return true;
+  }
   const proxyURL = `https://corsproxy.aptero.co/${url}`;
 
   const response = await fetch(proxyURL, {
@@ -28,15 +27,12 @@ const checkIfFrameable = async (url) => {
   const csp = response.headers.get('content-security-policy')?.toLowerCase();
 
   if (xFrameOptions && !['allow-all', 'allow-from *', '*'].includes(xFrameOptions)) {
-    console.log("IS NOT FRAMEABLE");
     return false;
   }
 
   if (csp && (csp.includes('frame-ancestors') || csp.includes('frame-src'))) {
-    console.log("IS NOT FRAMEABLE");
     return false;
   }
-  console.log("IS FRAMEABLE");
   return true;
 };
 
@@ -144,9 +140,11 @@ AFRAME.registerComponent("open-media-button", {
         const urlSearchParams = new URLSearchParams(url.searchParams);
         for (const sp of [wurlSearchParams, urlSearchParams]) {
           sp.sort();
-          //Ignore this list of option
+          //Ignore this list of option those should not prevent FRS since it does not change the content of the room
           sp.delete("hub_id");
           sp.delete("vr_entry_type");
+          sp.delete("msteams");
+          sp.delete("embed_token");
         }
 
         if (url.hash && window.APP.hub.hub_id === hubId) {

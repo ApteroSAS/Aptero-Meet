@@ -1,6 +1,10 @@
 import { paths } from "../paths";
 import { ArrayBackedSet } from "../array-backed-set";
 
+//aptero
+window.lockMovement = false;
+
+
 // TODO currently hardcoding these keys to be physical location based instead of character based. We likely want to make this part of the bindings themselves.
 const CODE_TO_KEY = {
   KeyW: "w",
@@ -49,10 +53,13 @@ export class KeyboardDevice {
     ["blur"].map(x => window.addEventListener(x, this.events.push.bind(this.events)));
   }
 
+  
   write(frame) {
+    //Also ignore key inputs if we are using Hyperbeam
+
     for (let i = 0; i < this.events.length; i++) {
       const event = this.events[i];
-      if (event.type === "blur") {
+      if (event.type === "blur" || window.lockMovement) {
         this.keys = {};
         this.seenKeys.clear();
       } else {

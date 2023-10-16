@@ -150,7 +150,6 @@
     "semver": "^7.3.2",
     "stream-browserify": "^3.0.0",
     "styled-components": "^5.3.1",
-    "styled-icons": "^10.47.0",
     "three": "^0.128.0",
     "three-ammo": "github:infinitelee/three-ammo",
     "three-bmfont-text": "github:mozillareality/three-bmfont-text#hubs/master",
