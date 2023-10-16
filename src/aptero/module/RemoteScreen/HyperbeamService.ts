@@ -33,10 +33,6 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
   // Load the cursor SVG image
   let hbCursor = new Image();
   hbCursor.src = apteroCursor;
-  let hbCursorHasloaded = false;
-  hbCursor.onload = function() {
-    hbCursorHasloaded = true;
-  }
 
   // Getting the networked entity and setting its attributes
   // We also get rid of the Hover menu component
@@ -462,10 +458,18 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
       localCursorMap.forEach(function(value, key) {
         if (value.x !== -1) {
           const [x, y] = [value.x, value.y];
-          finalContext.fillStyle = 'red';
           // Ensure the cursor image is loaded (.onload), then draw it
-          if (hbCursorHasloaded) {
+
+          hbCursor.onload = () => {
             finalContext.drawImage(hbCursor, x * width, y * height, 40, 40);
+          }
+
+          hbCursor.onerror = function() {
+            // Draw a red circle if the cursor image is not loaded
+            finalContext.fillStyle = 'red';
+            finalContext.beginPath();
+            finalContext.arc(x * width, y * height, 12, 0, 2 * Math.PI);
+            finalContext.fill();
           }
         }
       });
@@ -718,7 +722,7 @@ export const processHyperbeamEntity = async (entity,mediaData,objIdentifier) => 
     url = "https://" + url;
   }
 
-  let fetchfrom = '/objcomputer';
+  let fetchfrom = 'https://hyperbeam.serverless.aptero.co/objcomputer';
   // If we are running from localhost, fetch directly using CORS proxy
   if (window.location.hostname === "localhost") {
     const proxyURL = 'https://corsproxy.aptero.co/';

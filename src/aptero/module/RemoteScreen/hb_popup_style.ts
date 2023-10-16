@@ -20,6 +20,7 @@ export const hb_popup_style = /*css*/`
   align-items: center;
   justify-content: center;
   width: 27.2em;
+  color: white;
 }
 
 .hyperbeam-popup button {
