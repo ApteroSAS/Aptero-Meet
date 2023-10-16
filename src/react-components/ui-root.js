@@ -1027,11 +1027,7 @@ export class UIRoot extends Component {
         microphoneMuted={muteOnEntry}
         onChangeMicrophoneMuted={() => this.props.store.update({ preferences: { muteMicOnEntry: !muteOnEntry } })}
         onEnterRoom={() => {
-          if (minimumQualityService.getErrorDetected()) {
-            this.pushHistoryState("entry_step", "fallback");
-          } else {
-            this.onAudioReadyButton();
-          }
+          this.onAudioReadyButton();
         }}
         onBack={() => this.props.history.goBack()}
       />
@@ -1188,15 +1184,6 @@ export class UIRoot extends Component {
           </StateRoute>
           <StateRoute stateKey="entry_step" stateValue="mic_grant" history={this.props.history}>
             <MicPermissionsModal onBack={() => this.props.history.goBack()}/>
-          </StateRoute>
-          <StateRoute stateKey="entry_step" stateValue="fallback" history={this.props.history}>
-            {/*aptero*/}
-            <FallbackModal
-              onBack={() => this.props.history.goBack()}
-              onEnterRoom={() => {
-                this.onAudioReadyButton();
-              }}
-            />
           </StateRoute>
           <StateRoute stateKey="entry_step" stateValue="audio" history={this.props.history}>
             {this.renderAudioSetupPanel()}
