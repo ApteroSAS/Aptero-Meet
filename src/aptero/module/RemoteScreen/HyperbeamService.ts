@@ -657,6 +657,8 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
     hoverswitch = false;
 
     // Hide popup (Fade out using using opacity)
+    // (Ignore if it was already hidden)
+    if (window.hyperbeam_popup.style.display !== "flex") {return;}
     window.hyperbeam_popup.style.animation = "fadeout 0.3s ease-in-out";
     setTimeout(() => {
       if (window.lockMovement) {return;}
