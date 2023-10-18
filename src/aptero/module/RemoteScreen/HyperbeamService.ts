@@ -7,7 +7,7 @@ import Hyperbeam from "@hyperbeam/web";
 import { getCurrentHubId } from "../../../utils/hub-utils";
 import apteroCursor from "../../../assets/aptero/apteroCursor.svg";
 import { hb_popup_style } from "./hb_popup_style";
-//import { Sidebar } from "../../../../src/react-components/sidebar/Sidebar"
+import { Sidebar } from "../../../../src/react-components/sidebar/Sidebar"
 
 
 export const HYPERBEAM_PROTOCOL = "hyperbeam:";
@@ -100,25 +100,26 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
     let hubId = getCurrentHubId();
     const hb_objid = 'hb_objid_'+hubId+'_'+screenElement.id;
     
-    let apteroTimeout = 5000;
+    let apteroTimeout = 1000;
     // Try get the Hyperbeam session from Aptero
     while(embedURL === "")
     {
-        try {
-            embedURL = await processHyperbeamEntity(screenElement,mediaData,hb_objid);
-        }
-            catch (e) {
-            console.log("Error getting Aptero Hyperbeam",e);
-        }
-        
-        if (embedURL === "") {
-            console.log("Waiting for Aptero Hyperbeam");
-            // Wait an increasing amount of time before trying again
-            await new Promise(r => setTimeout(r, apteroTimeout));
-            apteroTimeout = Math.min(30000, apteroTimeout + 5000);
-        }
+      console.log("----------[While start]----------")
+      try {
+          embedURL = await processHyperbeamEntity(screenElement,mediaData,hb_objid);
+      }
+          catch (e) {
+          console.log("Error getting Aptero Hyperbeam",e);
+      }
+      
+      if (embedURL === "") {
+          console.log("Waiting for Aptero Hyperbeam");
+          // Wait an increasing amount of time before trying again
+          await new Promise(r => setTimeout(r, apteroTimeout));
+          apteroTimeout = Math.min(10000, apteroTimeout + 1000);
+      }
     }
-
+    console.log("----------[While end]----------")
   }
 
   if (embedURL === "") {
@@ -592,6 +593,7 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
     hbPopupButton2.innerHTML = "Fullscreen";
     hbPopup.appendChild(hbPopupButton2);
     hbPopupButton2.addEventListener("click", async () => {
+      // Make sure the source is properly defined
       const hb_source = window.hyperbeam_element;
       if (hb_source && hb_source.getAttribute("media-loader") 
       && hb_source.getAttribute("media-loader").hsrc) {
@@ -600,9 +602,13 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
           type : "sidebar_iframe",
           title: "Hyperbeam Element",
         }
+        // Exit Hyperbeam 3D mode first
+        hyperbeamExit();
+        // Open the sidebar
         hb_source.sceneEl.emit("action_toggle_custom_sidebar");
         setTimeout(()=>{hb_source.sceneEl.emit("action_toggle_custom_sidebar_info",obj)},10);
-        hyperbeamExit();
+        // Make it fullscreen
+        hb_source.sceneEl.emit("action_toggle_custom_sidebar_fullscreen");
       }
     });
 

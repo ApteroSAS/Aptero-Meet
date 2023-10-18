@@ -14,11 +14,27 @@ export class Sidebar extends React.Component {
     fullmodeToggle: false
   };
 
-  // method to toggle the state
+  /*
+    Method to toggle the state: The listener is meant to allow
+    the sidebar to be toggled from external components/scripts
+  */
   handleToggle = () => {
     this.setState(prevState => ({ fullmodeToggle: !prevState.fullmodeToggle }));
   };
+  addEventListener = () => {
+    window.addEventListener("action_toggle_custom_sidebar_fullscreen", this.handleToggle);
+  }
+  removeEventListener = () => {
+    window.removeEventListener("action_toggle_custom_sidebar_fullscreen", this.handleToggle);
+  }
+  componentDidMount() {
+    this.addEventListener();
+  }
+  componentWillUnmount() {
+    this.removeEventListener();
+  }
 
+  // Render component
   render() {
     const { title, beforeTitle, afterTitle, children, contentClassName, className, disableOverflowScroll, fullmodeButton, fullmode} = this.props;
     const { fullmodeToggle } = this.state;
