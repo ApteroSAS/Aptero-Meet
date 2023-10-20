@@ -28,7 +28,7 @@ function cleanurl(url) {
 
 export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
   console.log("Process Hyperbeam Browser")
-  console.log(screenElement, texture, mediaData)
+  //console.log(screenElement, texture, mediaData)
 
   // Load the cursor SVG image
   let hbCursor = new Image();
@@ -86,27 +86,30 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
 
   let embedURL = "";  // Running locally and you have an embed URL? Set it here
 
-  let mediaLoader = await screenElement.getAttribute("media-loader");
-  let testUrl = mediaLoader.hsrc;
+  let mediaLoader = await screenElement.getAttribute("media-video");
+  let testUrl = await mediaLoader.hsrc;
+
+  console.log("mediaLoader",mediaLoader);
 
   let doUpdate = false;
 
   if (testUrl) {
+    console.log("embedURL is Defined: ",testUrl)
     embedURL = testUrl;
   } else {
 
-    console.log("Get element id",screenElement.id);
+    console.log("hsrc NOT defined for element",screenElement.id);
     // If the object doesn't have a defined HB ID, we assign one
     let hubId = getCurrentHubId();
     const hb_objid = 'hb_objid_'+hubId+'_'+screenElement.id;
     
-    let apteroTimeout = 1000;
+    let apteroTimeout = 2000;
     // Try get the Hyperbeam session from Aptero
     while(embedURL === "")
     {
       console.log("----------[While start]----------")
       try {
-          embedURL = await processHyperbeamEntity(screenElement,mediaData,hb_objid);
+          embedURL = await processHyperbeamEntity(screenElement,mediaData,hb_objid,[width,height]);
       }
           catch (e) {
           console.log("Error getting Aptero Hyperbeam",e);
@@ -148,8 +151,6 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
     texture.needsUpdate = true;
     texture.generateMipmaps = false
     return texture;
-  } else {
-    // Successfully got a Hyperbeam session, set to the object using the hsrc from media-loader
   }
 
   
@@ -595,10 +596,10 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
     hbPopupButton2.addEventListener("click", async () => {
       // Make sure the source is properly defined
       const hb_source = window.hyperbeam_element;
-      if (hb_source && hb_source.getAttribute("media-loader") 
-      && hb_source.getAttribute("media-loader").hsrc) {
+      if (hb_source && hb_source.getAttribute("media-video") 
+      && hb_source.getAttribute("media-video").hsrc) {
         const obj = {
-          url : hb_source.getAttribute("media-loader").hsrc,
+          url : hb_source.getAttribute("media-video").hsrc,
           type : "sidebar_iframe",
           title: "Hyperbeam Element",
         }
@@ -723,7 +724,7 @@ function readQueryVariable(name, defaultValue) {
   return defaultValue;
 }
 
-export const processHyperbeamEntity = async (entity,mediaData,objIdentifier) => {
+export const processHyperbeamEntity = async (entity,mediaData,objIdentifier,size) => {
   // Get the VM session from Aptero or from the Hyperbeam demo server
   let url = readQueryVariable('url', mediaData.src);
   url = url.replace(HYPERBEAM_PROTOCOL, "https:");
@@ -750,12 +751,12 @@ export const processHyperbeamEntity = async (entity,mediaData,objIdentifier) => 
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      session: session? session : undefined,
+      session: session? session : null,
       objid: objIdentifier,
       start_url: url,
-      region: getRegionFromLocale(),
-      width: window.innerWidth,
-      height: window.innerHeight,
+      region: 'NA',
+      width: size[0],
+      height: size[1],
       webgl:true,
       kiosk: mediaData.kiosk? mediaData.kiosk : true, // Nav bar
       playoutDelay: mediaData.playoutDelay? mediaData.playoutDelay : false,
@@ -768,13 +769,14 @@ export const processHyperbeamEntity = async (entity,mediaData,objIdentifier) => 
     const data = await response.json();
     if (data.embed_url) {
       console.log("Aptero Hyperbeam is available: ", data.embed_url);
-      // Define hsrc for media-loader
-      entity.setAttribute("media-loader", {hsrc: data.embed_url});
+      
+      // Define hsrc for media-video
+      entity.setAttribute("media-video", {hsrc: data.embed_url});
       return data.embed_url;
     }
   }
 
-  console.log("Aptero Hyperbeam is not available!!!");
+  console.log("Aptero Hyperbeam is not available!!!",response);
   return "";
 }
 

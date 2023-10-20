@@ -60,7 +60,7 @@ for (let i = 0; i <= 20; i++) {
 import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader";
 import { rewriteBasisTranscoderUrls } from "../utils/media-url-utils";
 import { AudioType, MediaAudioDefaults } from "./audio-params";
-import { HYPERBEAM_PROTOCOL, hyperbeamService, hyperbeamTexture } from "../aptero/module/RemoteScreen/HyperbeamService";
+import { HYPERBEAM_PROTOCOL } from "../aptero/module/RemoteScreen/HyperbeamService";
 import {container} from "../aptero/module/axolotis/IOCConfig";
 const loadingManager = new THREE.LoadingManager();
 loadingManager.setURLModifier(rewriteBasisTranscoderUrls);
@@ -290,6 +290,7 @@ function timeFmt(t) {
 AFRAME.registerComponent("media-video", {
   schema: {
     src: { type: "string" },
+    hsrc: { type: "string" }, // Used for storing Hyperbeam EmbedURL
     audioSrc: { type: "string" },
     contentType: { type: "string" },
     loop: { type: "boolean", default: true },
