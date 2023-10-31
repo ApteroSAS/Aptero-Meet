@@ -300,6 +300,7 @@ AFRAME.registerComponent("media-video", {
     time: { type: "number" },
     tickRate: { default: 1000 }, // ms interval to send time interval updates
     syncTolerance: { default: 2 },
+    customOptions: { type: "string" ,  default: ""},
   },
 
   init() {

@@ -205,7 +205,7 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
 
 async function mediaInflator(el, componentName, componentData, components) {
   let isControlled = true;
-
+  console.log("componentName",componentName,"componentData", componentData);
   if (componentName === "link" && (components.video || components.image)) {
     // video/image component will set link url specified in link component.
     return;
@@ -263,6 +263,24 @@ async function mediaInflator(el, componentName, componentData, components) {
 
   const src = componentName === "link" ? componentData.href : componentData.src;
 
+
+  if (componentName === "link" && componentData.HBRes) {
+    //Load Hyperbeam properties into mediaOptions.customOptions
+    mediaOptions.customOptions = JSON.stringify({
+      HBRes: componentData.HBRes,
+      HBFps: componentData.HBFps,
+      HBQlty: componentData.HBQlty,
+      HBWebGL: componentData.HBWebGL,
+      HBRestricted: componentData.HBRestricted,
+      HBRegion: componentData.HBRegion,
+      HBDarkMode: componentData.HBDarkMode,
+      HBuBlock: componentData.HBuBlock,
+      HBBrowserNav: componentData.HBBrowserNav,
+      HBSession: componentData.HBSession,
+    });
+  }
+
+
   el.setAttribute("media-loader", {
     src: sanitizeUrl(src),
     fitToBox: true,
@@ -272,6 +290,8 @@ async function mediaInflator(el, componentName, componentData, components) {
     mediaOptions,
     moveTheParentNotTheMesh: true
   });
+
+  
 }
 
 AFRAME.GLTFModelPlus.registerComponent("model", "model", mediaInflator);

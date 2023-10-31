@@ -3,6 +3,7 @@ export const hb_popup_style = /*css*/`
 .hyperbeam-popup {
   opacity: 0;
   display: flex;
+  flex-direction: column;
   position: absolute;
   z-index: 10;
   top: 1em;
@@ -20,7 +21,12 @@ export const hb_popup_style = /*css*/`
   align-items: center;
   justify-content: center;
   width: 27.2em;
+  max-width: 95%;
   color: white;
+}
+
+.nowrap {
+  white-space: nowrap;
 }
 
 .hyperbeam-popup button {
@@ -31,7 +37,7 @@ export const hb_popup_style = /*css*/`
   font-weight: bold;
   line-height: 1.5em;
   text-align: center;
-  margin-left: 1em;
+  margin: 0.3em 0.5em 0;
   border: none;
   box-shadow: 0 0 0.5em #00000033;
 }

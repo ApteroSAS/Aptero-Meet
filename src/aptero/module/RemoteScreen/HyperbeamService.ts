@@ -26,14 +26,34 @@ function cleanurl(url) {
   return url;
 }
 
+
+
 export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
-  console.log("Process Hyperbeam Browser")
-  //console.log(screenElement, texture, mediaData)
 
   // Load the cursor SVG image
   let hbCursor = new Image();
   hbCursor.src = new URL(apteroCursor, window.location.origin).href;
-  
+
+  let userMadeHB = false;
+
+  var hbProperties;
+  if (mediaData.customOptions)  {
+    hbProperties = JSON.parse(mediaData.customOptions);
+  } else {
+    userMadeHB = true;
+    hbProperties = {
+      HBRes: null,
+      HBRegion: null,
+      HBWebGL: null,
+      HBBrowserNav: null,
+      HBRestricted: null,
+      HBDarkMode: null,
+      HBFps: null,
+      HBQlty: null,
+      HBuBlock: null,
+      HBSession: null,
+    };
+  }
 
   // Getting the networked entity and setting its attributes
   // We also get rid of the Hover menu component
@@ -46,15 +66,9 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
     });
   });
 
-
-  //texture = new THREE.Texture();
-
-  // The default resolution of Hyperbeam is 1280x720
-  // Warning: This doesn't change the resolution of the video stream
-  //   It only changes the resolution of the canvas
-  const aspectRatio = 16 / 9;
-  const width = 1280;
-  const height = 720;
+  //const aspectRatio = 16 / 9;
+  const width = hbProperties.HBRes ? Math.floor(hbProperties.HBRes * 16 / 9) : 1280;
+  const height = hbProperties.HBRes ? hbProperties.HBRes : 720;
 
   const canvas = document.createElement('canvas');
   canvas.width = width;
@@ -89,16 +103,12 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
   let mediaLoader = await screenElement.getAttribute("media-video");
   let testUrl = await mediaLoader.hsrc;
 
-  console.log("mediaLoader",mediaLoader);
 
   let doUpdate = false;
 
   if (testUrl) {
-    console.log("embedURL is Defined: ",testUrl)
     embedURL = testUrl;
   } else {
-
-    console.log("hsrc NOT defined for element",screenElement.id);
     // If the object doesn't have a defined HB ID, we assign one
     let hubId = getCurrentHubId();
     const hb_objid = 'hb_objid_'+hubId+'_'+screenElement.id;
@@ -107,26 +117,23 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
     // Try get the Hyperbeam session from Aptero
     while(embedURL === "")
     {
-      console.log("----------[While start]----------")
       try {
-          embedURL = await processHyperbeamEntity(screenElement,mediaData,hb_objid,[width,height]);
+          embedURL = await processHyperbeamEntity(screenElement,mediaData,hb_objid,hbProperties);
       }
           catch (e) {
           console.log("Error getting Aptero Hyperbeam",e);
       }
       
       if (embedURL === "") {
-          console.log("Waiting for Aptero Hyperbeam");
           // Wait an increasing amount of time before trying again
           await new Promise(r => setTimeout(r, apteroTimeout));
           apteroTimeout = Math.min(10000, apteroTimeout + 1000);
       }
     }
-    console.log("----------[While end]----------")
   }
 
   if (embedURL === "") {
-    // We we can't get a Hyperbeam session, we just display an Error message
+    // We can't get a Hyperbeam session, we just display an Error message
 
     context.fillStyle = '#A788FD';
     context.beginPath();
@@ -236,7 +243,7 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
   function handleCords(senderId, type, data, targetId) {
     if (type === dataChannel) {
       // Ignore our own coordinates
-      if (data.userId === NAF.clientId) {console.log("noo"); return;}
+      if (data.userId === NAF.clientId) {return;}
 
       // Update the HbCords Map
       HbCords.set(data.userId, {x: data.x, y: data.y});
@@ -244,7 +251,6 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
       // If the user is not in the localCursorMap, we add it
       if (!localCursorMap.has(data.userId)) {
         localCursorMap.set(data.userId, {x: data.x, y: data.y});
-        console.log("Add new cursor from user",data.userId);
       }
     }
   }
@@ -287,7 +293,6 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
   
   // Remove the user from the HbCords Map when the user left the room
   document.body.addEventListener("clientDisconnected", function(event:any) {
-    console.log("A user disconnected with the id: ", event.detail.clientId);
     HbCords.delete(event.detail.clientId);
     localCursorMap.delete(event.detail.clientId);
     // Force update without the disconnected user
@@ -347,6 +352,7 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
               window.lockMovement = true;
               window.hyperbeam_hb = hb;
               window.hyperbeam_element = screenElement;
+
               // Show popup
               window.hyperbeam_popup.style.animation = "fadein 0.3s ease-in-out";
               setTimeout(() => {
@@ -392,11 +398,9 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
     // Capture mouse events only if we are locked
     if (window.lockMovement && window.hyperbeam_element === screenElement) {
       // Capture mouse X and Y based on where the cursor is pointing at the screenElement
-      // This is calculated based on the screenElement position and rotation
-      
+      // This is calculated using a Raycaster
       const m3x = window.hyperbeam_3dx;
       const m3y = window.hyperbeam_3dy;
-
       
       //Update Local localCursorMap
       setCursorMap(NAF.clientId, {
@@ -407,7 +411,6 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
       // Send the event to Hyperbeam
       if (e.type !== "mousemove")
       {
-        //console.log("Mouse event",e)
         if (e.type === "wheel") {
           hb.sendEvent({
             type: "mousemove",
@@ -454,9 +457,10 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
       finalContext.stroke();
     }
     
-
+    // Draw the cursors (Unless the screen is not PINNED or it was created from Opal)
     if (screenElement.getAttribute("pinnable")
-    && screenElement.getAttribute("pinnable").pinned) {
+    && screenElement.getAttribute("pinnable").pinned
+    || !screenElement.getAttribute("pinnable") && !userMadeHB) {
       // Draw the cursors based on the cursors Map
       localCursorMap.forEach(function(value, key) {
         if (value.x !== -1) {
@@ -559,10 +563,10 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
   window.addEventListener("keydown", onKeyEvent);
   window.addEventListener("keyup", onKeyEvent);
 
-  // Ping Hyperbeam every second to keep the connection alive
+  // Ping Hyperbeam every 20 seconds to keep the connection alive
   setInterval(() => {
     hb.ping();
-  }, 1000);
+  }, 20 * 1000);
 
   /* 
     We can change the Hyperbeam resolution using resize
@@ -573,8 +577,12 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
 
   // We can also change the URL of the browser using .update
   // !!This is kept here in case we use the default Hyperbeam server!!
-  if (doUpdate)
-  {hb.tabs.update({ url: screenSRC });}
+  /*if (doUpdate)
+  {hb.tabs.update({ url: screenSRC });}*/
+
+
+
+  
 
   // Display on the screen a popup that shows that we are locked to a Hyperbeam screen
   if (!window.hyperbeam_popup) {
@@ -582,17 +590,22 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
     const hbPopup = window.hyperbeam_popup = document.createElement("div");
     document.body.appendChild(hbPopup);
     hbPopup.className = "hyperbeam-popup";
-    hbPopup.innerHTML = "Hyperbeam is active Press [ESC] to exit";
+    hbPopup.innerHTML = '<p>3D-Browser is active <span class="nowrap">Press [ESC] to exit</span></p>';
+
 
     // Apply style from hb_popup_style.ts
     const hbPopupStyle = document.createElement("style");
     hbPopupStyle.innerHTML = hb_popup_style;
     document.head.appendChild(hbPopupStyle);
+
+    const hbButtons = document.createElement("div");
+    hbButtons.className = "hyperbeam-buttons";
+    hbPopup.appendChild(hbButtons);
     
-    // Add a Button to open a Sidebar
+    // Add a Button to open a Sidebar inside a div
     const hbPopupButton2 = document.createElement("button");
     hbPopupButton2.innerHTML = "Fullscreen";
-    hbPopup.appendChild(hbPopupButton2);
+    hbButtons.appendChild(hbPopupButton2);
     hbPopupButton2.addEventListener("click", async () => {
       // Make sure the source is properly defined
       const hb_source = window.hyperbeam_element;
@@ -601,7 +614,7 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
         const obj = {
           url : hb_source.getAttribute("media-video").hsrc,
           type : "sidebar_iframe",
-          title: "Hyperbeam Element",
+          title: "3D Web Browser",
         }
         // Exit Hyperbeam 3D mode first
         hyperbeamExit();
@@ -612,16 +625,37 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
         hb_source.sceneEl.emit("action_toggle_custom_sidebar_fullscreen");
       }
     });
+    // Add a Button to open the keyboard for mobile devices
+    if (AFRAME.utils.device.isMobile()) {
+      const hbPopupButton4 = document.createElement("button");
+      hbPopupButton4.innerHTML = "Keyboard";
+      hbButtons.appendChild(hbPopupButton4);
+      hbPopupButton4.addEventListener("click", () => {
+        // Activate the saveHBSessions listener
+        window.dispatchEvent(new Event("openKeyboard"));
+      });
+    }
 
     // Add a Button to exit Hyperbeam
     const hbPopupButton = document.createElement("button");
     hbPopupButton.innerHTML = "Exit";
-    hbPopup.appendChild(hbPopupButton);
+    hbButtons.appendChild(hbPopupButton);
     hbPopupButton.addEventListener("click", () => {
       hyperbeamExit();
     });
 
-    // Don't judge my methods, judge my results =)
+    // Add a button to Save the current session if we are using Persistent sessions
+    if (hbProperties.HBSession) {
+      const hbPopupButton3 = document.createElement("button");
+      hbPopupButton3.innerHTML = "Save";
+      hbButtons.appendChild(hbPopupButton3);
+      hbPopupButton3.addEventListener("click", () => {
+        // Activate the saveHBSessions listener
+        window.dispatchEvent(new Event("saveHBSessions"));
+      });
+    }
+
+    // This way of adding the popup is questionable, but it works
   }
 
   // Destroy hb when the object is destroyed
@@ -683,36 +717,6 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
   https://hyperbeam.serverless.aptero.co/source.js
   It is used to get a Hyperbeam VM from the Aptero Hyperbeam service
 */
-function getRegionFromLocale() {
-  const locale = navigator.language;
-  let region = 'NA'; // default region
-
-  if (locale) {
-    const localeRegion = locale.split('_')[1];
-
-    if (localeRegion) {
-      switch (localeRegion) {
-        case 'US':
-        case 'CA':
-        case 'MX':
-          region = 'NA';
-          break;
-        case 'GB':
-        case 'FR':
-        case 'DE':
-          region = 'EU';
-          break;
-        case 'CN':
-        case 'JP':
-        case 'KR':
-          region = 'AS';
-          break;
-      }
-    }
-  }
-
-  return region;
-}
 function readQueryVariable(name, defaultValue) {
   const re = new RegExp('.*[?&]' + name + '=([^&#]*)'),
     match = document.location.href.match(re);
@@ -724,59 +728,123 @@ function readQueryVariable(name, defaultValue) {
   return defaultValue;
 }
 
-export const processHyperbeamEntity = async (entity,mediaData,objIdentifier,size) => {
+export const processHyperbeamEntity = async (entity,mediaData,objIdentifier,hbProperties) => {
   // Get the VM session from Aptero or from the Hyperbeam demo server
   let url = readQueryVariable('url', mediaData.src);
   url = url.replace(HYPERBEAM_PROTOCOL, "https:");
-  console.log("READ URL",url)
-  let session = readQueryVariable('session', "");//session_id : for multiplayer frame
-  
-  if (!(url.startsWith("http://") || url.startsWith("https://"))) {
-    url = "https://" + url;
-  }
+  url = url.replace("http://", "https://");
+  url = url.replace("https://https://", "https://");
+
 
   let fetchfrom = 'https://hyperbeam.serverless.aptero.co/objcomputer';
   // If we are running from localhost, fetch directly using CORS proxy
   if (window.location.hostname === "localhost") {
+    /*/
     const proxyURL = 'https://corsproxy.aptero.co/';
     const serverOrigin = 'https://hyperbeam.serverless.aptero.co/';
-    fetchfrom = proxyURL+serverOrigin+'/objcomputer'
-    
-    //fetchfrom = "http://localhost:8286/objcomputer"
+    fetchfrom = proxyURL+serverOrigin+'objcomputer';
+    /*/
+    fetchfrom = "http://localhost:8286/objcomputer"
+    /**/
   }
   
+  /*
+    We have 2 ways of requesting a VM:
+    - Using the session to get an Existing VM (Defined in Opal)
+    - Using a disposable session (No profile defined, So no Load)
+  */
+  /*const profile = hbProperties.HBSession ? {
+    save: hbProperties.HBSession,
+    load: hbProperties.HBSession
+  } : null;*/
+
+  const bodyContent = {
+    //session: hbProperties.HBSession ? hbProperties.HBSession : null,
+    objid: objIdentifier,
+    start_url: url,
+    region: hbProperties.HBRegion ? hbProperties.HBRegion : 'NA',
+    width: hbProperties.HBRes ? Math.floor(hbProperties.HBRes * 16 / 9) : 1280,
+    height: hbProperties.HBRes ? hbProperties.HBRes : 720,
+    webgl: hbProperties.HBWebGL ? hbProperties.HBWebGL : false,
+    kiosk: hbProperties.HBBrowserNav ? hbProperties.HBBrowserNav : false, // Nav bar
+    control_disable_default: hbProperties.HBRestricted ? hbProperties.HBRestricted : false,
+    dark: hbProperties.HBDarkMode ? hbProperties.HBDarkMode : false,
+    fps: hbProperties.HBFps ? hbProperties.HBFps : 24,
+    quality: {
+      mode: hbProperties.HBQlty ? hbProperties.HBQlty : "smooth",
+    },
+    ublock: hbProperties.HBuBlock ? hbProperties.HBuBlock : false,
+    timeout: {
+      "absolute": 18 * 60 * 60, //seconds
+      "inactive": 30, //seconds
+      "offline": 30, //seconds
+    }
+    //profile: profile,
+  }
+
   const response = await fetch(fetchfrom, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      session: session? session : null,
-      objid: objIdentifier,
-      start_url: url,
-      region: 'NA',
-      width: size[0],
-      height: size[1],
-      webgl:true,
-      kiosk: mediaData.kiosk? mediaData.kiosk : true, // Nav bar
-      playoutDelay: mediaData.playoutDelay? mediaData.playoutDelay : false,
-    })
-
+    body: JSON.stringify(bodyContent)
   });
   
+  // Define saveSession
+  var latestSave = Date.now();
+  /*const saveSession = async () => {
+    // Copy bodyContent into bodySaver
+    let bodySaver;
+    bodySaver = {...bodyContent}
+    bodySaver.profile = {
+      save: hbProperties.HBSession
+    }
+
+    const saveInfo = await fetch(fetchfrom, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(bodySaver)
+    });
+
+    if (saveInfo) {
+      const data = await saveInfo.json();
+      if (data.embed_url) {
+        console.log("Save successful");
+        latestSave = Date.now();
+      }
+    }
+  }*/
 
   if (response) {
     const data = await response.json();
     if (data.embed_url) {
-      console.log("Aptero Hyperbeam is available: ", data.embed_url);
-      
       // Define hsrc for media-video
       entity.setAttribute("media-video", {hsrc: data.embed_url});
+
+      // Auto-save every 60 seconds
+      /*if (hbProperties.HBSession) {
+        setInterval(() => {
+          saveSession();
+          
+        }, 60 * 1000);
+      }
+      
+      // Also, add an event listener to save the session when the user leaves or manually
+      if (hbProperties.HBSession) {
+        window.addEventListener("saveHBSessions", async () => {
+          await saveSession();
+        });
+      }*/
+      
+
       return data.embed_url;
     }
   }
-
-  console.log("Aptero Hyperbeam is not available!!!",response);
+  
+  console.log("Aptero Hyperbeam is not available",response);
+  
   return "";
 }
 
