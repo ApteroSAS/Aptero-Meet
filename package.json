@@ -156,7 +156,7 @@
     "three-mesh-bvh": "^0.3.7",
     "three-pathfinding": "^0.14.1",
     "three-to-ammo": "github:infinitelee/three-to-ammo#9e68a3bbe500988f2dc0096f78c12dabbdaf5548",
-    "twilio-video": "^2.12.0",
+    "twilio-video": "^2.28.1",
     "use-clipboard-copy": "^0.1.2",
     "util": "^0.12.4",
     "uuid": "^3.2.1",

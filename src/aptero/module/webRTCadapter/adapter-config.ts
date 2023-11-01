@@ -115,11 +115,13 @@ export async function createTrack(constraints, isDisplayDevice) {
 }
 
 export async function fetchICEservers() {
+  //To test chrome://webrtc-internals/
   window.iceServers = [];
   try {
     const twilioApi = propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER +"/service/twilio/ice";
     const resp = await fetch(twilioApi);
     const servers = await resp.json();
+    console.log("WebRTC ICE", servers);
     window.iceServers = [...servers.iceServers];
   } catch (error) {
     //just log no app break this is optional
@@ -146,12 +148,13 @@ export function filterServer(iceServers, forceTcp) {
     });
   }
   //remove tcp server
-  if (!forceTcp) {
+  /*if (!forceTcp) {
     iceServers = iceServers.filter(server => {
       let isTcp = server.urls.search("turn") !== -1 && server.urls.search("tcp") !== -1;
       return !isTcp;
     });
-  }
+  }*/
+  console.log("WebRTC Filtered : ", iceServers)
   return iceServers;
 }
 
