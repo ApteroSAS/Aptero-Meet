@@ -1,6 +1,5 @@
 import { TwilioAdapter } from "./twilio";
 import EventEmitter from "eventemitter3";
-import { ProtooHelper } from "./protoHelper";
 import AdapterUserListener from "./AdapterUserListener";
 
 // NOTE this adapter does not properly fire the onOccupantsReceived events since those are only needed for
@@ -161,13 +160,13 @@ export default class NafTwilioAdapter extends EventEmitter {
     this.subAdapter.setOnTrackRemoved((trackId)=>{
       this._consumers.delete(trackId);
     });
-    this.subAdapter.setOnParticipantDisconnected((peerId)=>{
+    /*this.subAdapter.setOnParticipantDisconnected((peerId)=>{
       this._consumers.forEach(consumer => {
         if (consumer.appData.peerId === peerId && "video" === consumer.track.kind) {
           this.subAdapter.unpublishGivenVideoTrack(consumer);
         }
       });
-    });
+    });*/
     await this.subAdapter.connectRoom(this._clientId,this._roomId);
 
     const urlWithParams = new URL(this._serverUrl);
