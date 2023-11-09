@@ -1,5 +1,5 @@
 import EventEmitter from "eventemitter3";
-import AdapterUserListener from "./AdapterUserListener";
+import AdapterUserListener from "../../AdapterUserListener";
 
 export default class NoneAdapter extends EventEmitter {
   occupants = {};

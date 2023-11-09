@@ -1,5 +1,5 @@
 import protooClient from "protoo-client";
-import { getAdapterParams } from "./adapter-config";
+import { getAdapterParams } from "../../adapter-config";
 
 export class ProtooHelper {
   private _protoo: protooClient.Peer;

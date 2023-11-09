@@ -1,7 +1,7 @@
 import configs from "../../../utils/configs";
 import { lazyLoad } from "./adapterRegistrer";
 import { propertiesService } from "../properties/propertiesService";
-import type NafTwilioAdapter from "./naf-twilio-adapter";
+import {Adapter, SubAdapter} from "./AdapterI";
 
 let defaultAdapter = configs.APP_CONFIG.adapterParams.adapter;
 
@@ -76,7 +76,7 @@ export async function choseAdapterAuto() {
   return ret;
 }
 
-export async function adapterFactory() {
+export async function adapterFactory():Promise<Adapter> {
   const adapter = await choseAdapterAuto();
   const module = await lazyLoad(adapter);
   return new module.default();
@@ -99,7 +99,7 @@ export async function createTrack(constraints, isDisplayDevice) {
   console.log("createTrack :", constraints, isDisplayDevice);
   const adapterParams = getAdapterParams();
   if (adapterParams.adapter === "twilio" || adapterParams.adapter === "agora") {
-    return (window.APP.dialog as NafTwilioAdapter).createTrack(constraints);
+    return (window.APP.dialog as SubAdapter).createTrack(constraints);
   } else {
     if (isDisplayDevice) {
       return await navigator.mediaDevices.getDisplayMedia(constraints);

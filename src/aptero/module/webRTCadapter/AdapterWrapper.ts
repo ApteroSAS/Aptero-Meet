@@ -2,14 +2,19 @@ import EventEmitter from "eventemitter3";
 import { adapterFactory } from "./adapter-config";
 import { wait } from "../../util/AsyncWaiter";
 import { roomParameters } from "../HubsBridge/service/RoomParameters";
+import {Adapter} from "./AdapterI";
 
 declare const AFRAME;
 
-export class AdapterWarpper {
+/**
+ * Adapter loading will be async so this clas will be used to wrap the adapter waiting for it to load
+ * implements AdapterI interface
+ */
+export class AdapterWarpper{
   lasyLoadingFinished = false;
   tmplisteners = {};
   private tmpEventEmiter: EventEmitter<string | symbol, any>;
-  private on: (event, fn) => void;
+  private on;
   private __proto__: any;
 
    constructor() {
@@ -36,7 +41,7 @@ export class AdapterWarpper {
        const listeners = this.tmplisteners[event];
        if(listeners) {
          listeners.forEach(entry => {
-           adapter.on(event, entry.fn)
+           (adapter as any).on(event, entry.fn)
          })
        }
      });
@@ -47,7 +52,7 @@ export class AdapterWarpper {
      })
 
      //function
-     this.__proto__ = adapter.__proto__;
+     this.__proto__ = (adapter as any).__proto__;
 
      this.lasyLoadingFinished=true;
    }

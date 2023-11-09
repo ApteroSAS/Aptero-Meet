@@ -1,5 +1,5 @@
 import AgoraRTC from "agora-rtc-sdk-ng";
-import { getAdapterParams } from "./adapter-config";
+import { getAdapterParams } from "../../adapter-config";
 
 export class AgoraAdapter {
 

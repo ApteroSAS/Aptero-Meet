@@ -1,8 +1,8 @@
 import * as mediasoupClient from "mediasoup-client";
 import protooClient from "protoo-client";
 import EventEmitter from "eventemitter3";
-import { addIceServers, getAdapterParams } from "./adapter-config";
-import AdapterUserListener from "./AdapterUserListener";
+import { addIceServers, getAdapterParams } from "../../adapter-config";
+import AdapterUserListener from "../../AdapterUserListener";
 
 // Used for VP9 webcam video.
 //const VIDEO_KSVC_ENCODINGS = [{ scalabilityMode: "S3T3_KEY" }];

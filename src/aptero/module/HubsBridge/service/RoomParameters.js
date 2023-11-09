@@ -7,7 +7,7 @@ export class RoomParameters {
   fetch = false;
 
   async getParameters(roomSID) {
-    console.log(propertiesService);
+    //console.log(propertiesService);
     return await new Promise((resolve) => {
       axios
         .get(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/room/room/" + roomSID)
