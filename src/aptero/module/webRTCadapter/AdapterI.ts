@@ -16,6 +16,8 @@ export interface ConnectOptions {
  * This line emits a mic-state-changed event with data about whether the microphone is currently enabled. Listeners to this event would then know the microphone has been toggled and could update the UI accordingly.
  */
 export const MIC_EVENT = "mic-state-changed";
+export const LOCAL_MEDIA_STREAM_CREATED_EVENT = "local-media-stream-created";
+
 
 /**
  * Custom Events Dispatched in the Code:
@@ -44,7 +46,7 @@ export const RTC_EVENT = "rtc_event";
 
 // Extend the EventEmitter to type the possible custom events
 export interface AdapterEvents {
-    [MIC_EVENT]: (data:{ enabled: boolean }) => void;
+    [MIC_EVENT]: (data: { enabled: boolean }) => void;
     [KICKED_EVENT]: (detail: { clientId: string }) => void;
     [BLOCKED_EVENT]: (detail: { clientId: string }) => void;
     [UNBLOCKED_EVENT]: (detail: { clientId: string }) => void;
@@ -58,20 +60,30 @@ export interface MediaStreamTrackWithHint extends MediaStreamTrack {
     _hubs_contentHint?: string; // Assuming the content hint is a string. Adjust the type if necessary.
 }
 
-export interface Adapter extends EventEmitter<AdapterEvents>{
-    connect(options: ConnectOptions) : Promise<void>;
+export interface Adapter extends EventEmitter<AdapterEvents> {
+    connect(options: ConnectOptions): Promise<void>;
+
     getMediaStream(clientId: string, kind?: "audio" | "video"): Promise<MediaStream>
+
     setLocalMediaStream(stream: MediaStream): Promise<void>;
+
     toggleMicrophone(): void;
-    enableMicrophone(enabled:boolean): void;
+
+    enableMicrophone(enabled: boolean): void;
+
     get isMicEnabled(): boolean;
+
     disconnect(): void;
+
     kick(clientId: string): Promise<void>;
+
     block(clientId: string): Promise<void>;
+
     unblock(clientId: string): Promise<void>;
 }
 
 
-export interface SubAdapter{
-    createTrack(constraints:MediaStreamConstraints):Promise<MediaStream>;
+export interface SubAdapter {
+    createTrack(constraints: MediaStreamConstraints): Promise<MediaStream>;
+    unpublishVideoTrack(): Promise<void>;
 }
