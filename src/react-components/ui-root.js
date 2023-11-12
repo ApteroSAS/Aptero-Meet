@@ -479,6 +479,10 @@ export class UIRoot extends Component {
     this.props.scene.removeEventListener("action_toggle_custom_sidebar", () => {
       this.toggleSidebar("custom");
     });
+    if (window.hyperbeam_popup) {
+      console.log("Remove hyperbeam popup DIV");
+      window.hyperbeam_popup.remove();
+    }
   }
 
   storeUpdated = () => {
@@ -871,6 +875,7 @@ export class UIRoot extends Component {
   setSidebar(sidebarId, otherState) {
 
     this.setState({ sidebarId, selectedUserId: null, ...otherState });
+    this.unmuteHBElement();
   }
 
   toggleSidebar(sidebarId, otherState) {
@@ -883,6 +888,10 @@ export class UIRoot extends Component {
 
     this.setState(({ sidebarId: curSidebarId }) => {
       const nextSidebarId = curSidebarId === sidebarId ? null : sidebarId;
+      // Unmute Hyperbeam element if we DO NOT set sidebarId to "custom"
+      if (nextSidebarId !== "custom") {
+        this.unmuteHBElement();
+      }
 
       return {
         sidebarId: nextSidebarId,
@@ -890,6 +899,19 @@ export class UIRoot extends Component {
         ...otherState
       };
     });
+  }
+
+  unmuteHBElement = () => {
+    // Unmumte Hyperbeam element if defined
+    const hb_source = window.mutedHBElement;
+    if (hb_source) {
+      const audio = hb_source.getObject3D(hb_source.attrName);
+      if (audio) {
+        audio.setVolume(1);
+        console.log("Unmuting Hyperbeam element")
+      }
+      window.mutedHBElement = undefined;
+    }    
   }
 
   renderInterstitialPrompt = () => {
