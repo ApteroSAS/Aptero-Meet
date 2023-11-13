@@ -1,11 +1,8 @@
-import {getService} from "@aptero/axolotis-player";
-import {MICROSOFT_STATIC_SERVICE, PROPERTIES_SERVICE} from "@aptero/axolotis-module-teams";
+export {};
 
 (async () => {
-  const {initAxolotisPlayer} = await import("./aptero/module/axolotis/AxInit");
-  await initAxolotisPlayer();
-  await getService(PROPERTIES_SERVICE);
-  await getService(MICROSOFT_STATIC_SERVICE);
+  const {initIOC} = await import("./aptero/module/axolotis/AxInit");
+  await initIOC();
   console.log("Start hub");
   await import("./signin.js");
   console.log("Start hub finished");

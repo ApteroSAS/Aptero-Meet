@@ -1,47 +1,61 @@
-import { getService, getServiceSync } from "@aptero/axolotis-player";
 /**
  * Should only import type to stay lightweight
  */
-import type { Properties } from "@aptero/axolotis-module-basic";
-import type { RoomService } from "@aptero/axolotis-module-basic";
-import type { PhoenixAuthService } from "@aptero/axolotis-module-basic";
-import type { NameGenerationService } from "@aptero/axolotis-module-basic";
-import type { CookieStore } from "@aptero/axolotis-module-basic";
-import type { Store } from "@aptero/axolotis-module-basic";
-
-//NOTE the ids are duplicated from the async src index.js
-export const PROPERTIES_SERVICE = "@aptero/axolotis-module-properties/Properties";
-export const STORE_SERVICE = "@aptero/axolotis-module-storage/Store";
-export const COOKIE_STORE_SERVICE = "@aptero/axolotis-module-storage/CookieStore";
-export const PHX_AUTH_SERVICE = "@aptero/axolotis-module-phx-auth/PhoenixAuthService";
-export const NAME_SERVICE = "@aptero/axolotis-module-name/NameService";
-export const ROOM_SERVICE = "@aptero/axolotis-module-room/RoomService";
+import {
+  COOKIE_STORE_SERVICE,
+  CookieStore, NAME_SERVICE,
+  NameGenerationService,
+  PhoenixAuthService, PHX_AUTH_SERVICE,
+  Properties,
+  PROPERTIES_SERVICE, ROOM_SERVICE,
+  RoomService,
+  Store, STORE_SERVICE
+} from "@aptero/axolotis-module-basic";
+import {container} from "../../IOCConfig";
+import type {MsTeamsAPILight} from "@aptero/axolotis-module-teams";
+import type {MsTeamsAPI} from "@aptero/axolotis-module-teams";
+import {MICROSOFT_SERVICE, MICROSOFT_STATIC_SERVICE} from "@aptero/axolotis-module-teams";
 
 export async function propertyService(): Promise<Properties> {
-  return getService<Properties>(PROPERTIES_SERVICE);
+  return container.getAsync<Properties>(PROPERTIES_SERVICE);
 }
 
 export async function roomService(): Promise<RoomService> {
-  return getService<RoomService>(ROOM_SERVICE);
+  return container.getAsync<RoomService>(ROOM_SERVICE);
 }
 
 /* needs preload before usage */
 export function roomServiceSync(): RoomService {
-  return getServiceSync<RoomService>(ROOM_SERVICE);
+  return container.get<RoomService>(ROOM_SERVICE);
 }
 
 export async function nameGenerationService(): Promise<NameGenerationService> {
-  return getService<NameGenerationService>(NAME_SERVICE);
+  return container.getAsync<NameGenerationService>(NAME_SERVICE);
 }
 
 export async function phoenixAuth(): Promise<PhoenixAuthService> {
-  return getService<PhoenixAuthService>(PHX_AUTH_SERVICE);
+  return container.getAsync<PhoenixAuthService>(PHX_AUTH_SERVICE);
 }
 
 export async function cookiesStore(): Promise<CookieStore> {
-  return getService<CookieStore>(COOKIE_STORE_SERVICE);
+  return container.getAsync<CookieStore>(COOKIE_STORE_SERVICE);
 }
 
 export async function store(): Promise<Store> {
-  return getService<Store>(STORE_SERVICE);
+  return container.getAsync<Store>(STORE_SERVICE);
+}
+
+//msTeamsAPILight
+export function msTeamsAPILight(): MsTeamsAPILight {
+  return container.get<MsTeamsAPILight>(MICROSOFT_STATIC_SERVICE);
+}
+
+//Helps to transition to 100% async
+export function msTeamsAPILightAsync(): Promise<MsTeamsAPILight> {
+  return container.getAsync<MsTeamsAPILight>(MICROSOFT_STATIC_SERVICE);
+}
+
+//msTeamsAPI
+export async function msTeamsAPI(): Promise<MsTeamsAPI> {
+  return container.getAsync<MsTeamsAPI>(MICROSOFT_SERVICE);
 }

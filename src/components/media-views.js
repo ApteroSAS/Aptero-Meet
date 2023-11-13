@@ -24,7 +24,8 @@ import HubsTextureLoader from "../loaders/HubsTextureLoader";
 import { MixerType } from "../systems/audio-system";
 
 import qsTruthy from "../utils/qs_truthy";
-import { IN_APP_WEB_BROWSER_PROTOCOL, remoteWebBrowser } from "../aptero/module/HubsBridge/react-components/media-utils-lib";
+import { IN_APP_WEB_BROWSER_PROTOCOL, remoteWebBrowser } from "../aptero/module/RemoteScreen/RemoteControlServiceV2";
+import { hyperbeamBrowser } from "../aptero/module/RemoteScreen/HyperbeamService";
 
 /**
  * Warning! This require statement is fragile!
@@ -59,6 +60,8 @@ for (let i = 0; i <= 20; i++) {
 import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader";
 import { rewriteBasisTranscoderUrls } from "../utils/media-url-utils";
 import { AudioType, MediaAudioDefaults } from "./audio-params";
+import { HYPERBEAM_PROTOCOL } from "../aptero/module/RemoteScreen/HyperbeamService";
+import {container} from "../aptero/module/axolotis/IOCConfig";
 const loadingManager = new THREE.LoadingManager();
 loadingManager.setURLModifier(rewriteBasisTranscoderUrls);
 
@@ -287,6 +290,7 @@ function timeFmt(t) {
 AFRAME.registerComponent("media-video", {
   schema: {
     src: { type: "string" },
+    hsrc: { type: "string" }, // Used for storing Hyperbeam EmbedURL
     audioSrc: { type: "string" },
     contentType: { type: "string" },
     loop: { type: "boolean", default: true },
@@ -295,7 +299,8 @@ AFRAME.registerComponent("media-video", {
     projection: { type: "string", default: "flat" },
     time: { type: "number" },
     tickRate: { default: 1000 }, // ms interval to send time interval updates
-    syncTolerance: { default: 2 }
+    syncTolerance: { default: 2 },
+    customOptions: { type: "string" ,  default: ""},
   },
 
   init() {
@@ -548,6 +553,9 @@ AFRAME.registerComponent("media-video", {
       this.playPauseButton.setAttribute("icon-button", "active", pause);
     }
 
+    // Ignore if we are using Hyperbeam
+    if (this.data.src.startsWith(HYPERBEAM_PROTOCOL)) return;
+    
     if (pause) {
       this.video.pause();
     } else {
@@ -639,7 +647,7 @@ AFRAME.registerComponent("media-video", {
       }
 
       this.mediaElementAudioSource = null;
-      if (!src.startsWith("hubs://") && !src.startsWith(IN_APP_WEB_BROWSER_PROTOCOL)/** APTERO **/) {
+      if (!src.startsWith("hubs://") && !src.startsWith(HYPERBEAM_PROTOCOL) && !src.startsWith(IN_APP_WEB_BROWSER_PROTOCOL)/** APTERO **/) {
         // iOS video audio is broken on ios safari < 13.1.2, see: https://github.com/mozilla/hubs/issues/1797
         if (!isIOS || semver.satisfies(detect().version, ">=13.1.2")) {
           // TODO FF error here if binding mediastream: The captured HTMLMediaElement is playing a MediaStream. Applying volume or mute status is not currently supported -- not an issue since we have no audio atm in shared video.
@@ -657,7 +665,7 @@ AFRAME.registerComponent("media-video", {
       this.video.addEventListener("play", this.onPauseStateChange);
 
       //aptero livescream bugfix //TODO still necessary?
-      if (src.startsWith("hubs://")  && !src.startsWith(IN_APP_WEB_BROWSER_PROTOCOL) ) {
+      if (src.startsWith("hubs://") && !src.startsWith(HYPERBEAM_PROTOCOL) && !src.startsWith(IN_APP_WEB_BROWSER_PROTOCOL) ) {
         setTimeout(() => {
           this.video.play();
         }, 2000);
@@ -807,10 +815,15 @@ AFRAME.registerComponent("media-video", {
 
       // Set src on video to begin loading.
 
-      if (url.startsWith(IN_APP_WEB_BROWSER_PROTOCOL)) {
-        //APTERO
+      if(url.startsWith(HYPERBEAM_PROTOCOL)) {
+
+        console.log("hyperbeam protocol")
+        console.log(texture)
+        texture = await hyperbeamBrowser(this.el,texture,this.data);
+
+      } else if (url.startsWith(IN_APP_WEB_BROWSER_PROTOCOL)) {
         texture = await remoteWebBrowser(this.el,texture,this.data);
-      }else if (url.startsWith("hubs://")) {
+      } else if (url.startsWith("hubs://")) {
         const streamClientId = url.substring(7).split("/")[1]; // /clients/<client id>/video is only URL for now
         const stream = await APP.dialog.getMediaStream(streamClientId, "video");
         // We subscribe to video stream notifications for this peer to update the video element

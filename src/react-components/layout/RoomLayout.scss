@@ -27,7 +27,8 @@
   overflow: hidden;
   width: 450px;
 
-  @media(max-width: theme.$breakpoint-lg - 1), (max-height: theme.$breakpoint-vr - 1) {
+  //@media(max-width: theme.$breakpoint-lg - 1), (max-height: theme.$breakpoint-vr - 1) {
+  @media(max-width: #{theme.$breakpoint-lg - 1}), (max-height: #{theme.$breakpoint-vr - 1})  {
     position: fixed;
     top: 0;
     left: 0;
@@ -81,7 +82,8 @@
 }
 
 :local(.object-focused) {
-  @media(max-width: theme.$breakpoint-lg - 1), (max-height: theme.$breakpoint-vr - 1) {
+  //@media(max-width: theme.$breakpoint-lg - 1), (max-height: theme.$breakpoint-vr - 1) {
+  @media(max-width: #{theme.$breakpoint-lg - 1}), (max-height: #{theme.$breakpoint-vr - 1}) {
     :local(.toolbar) {
       display: none;
     }

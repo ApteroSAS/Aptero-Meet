@@ -7,6 +7,7 @@ const HTMLWebpackPlugin = require("html-webpack-plugin");
 //const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const versionJson = require("./version.json");
+let moduleTeamsPackagePath = path.dirname(require.resolve("@aptero/axolotis-module-teams"));
 
 const PORT = 53000;//Teams needs port 53000
 
@@ -76,7 +77,8 @@ module.exports = async (env, argv) => {
       "@babel/proposal-class-properties",
       "@babel/proposal-object-rest-spread",
       "@babel/plugin-transform-async-to-generator",
-      "@babel/plugin-proposal-optional-chaining"
+      "@babel/plugin-proposal-optional-chaining",
+      //"@babel/plugin-proposal-decorators"
     ]
   };
   return {
@@ -137,12 +139,12 @@ module.exports = async (env, argv) => {
         "stream": require.resolve('stream-browserify'), // for react-dom dep
         'fs': false, // for ammo.js dep
         'path': require.resolve('path-browserify'), // for ammo.js dep
-        'process': require.resolve("process/browser"),
+        'process/browser': require.resolve("process/browser"),
         'zlib': require.resolve('browserify-zlib'),
         'util': require.resolve('util/'),
         'events': require.resolve('events/')
       },
-      extensions: ["*", ".js", ".jsx", ".tsx", ".ts", ".json"]
+      extensions: [".*", ".js", ".jsx", ".tsx", ".ts", ".json"]
     },
     module: {
       rules: [
@@ -327,23 +329,7 @@ module.exports = async (env, argv) => {
           { from: "src/schema.toml", to: "schema.toml" },
           { from: "src/aptero/module/properties/properties.js", to: "properties.js" },
           { from: "src/assets/images/favicon.ico", to: "favicon.ico" },
-          //3rd party axolotis modules
-          /*{
-            from: "node_modules/@aptero/axolotis-module-teams/build/library/",
-            to: "assets/js/library"
-          },
-          {
-            from: "node_modules/@aptero/axolotis-module-basic/build/library/",
-            to: "assets/js/library"
-          },*/
-          {
-            from: "node_modules/@aptero/axolotis-module-teams/lib/library/@aptero/axolotis-module-teams/assets/auth-start.html",
-            to: "auth-start.html"
-          },
-          {
-            from: "node_modules/@aptero/axolotis-module-teams/lib/library/@aptero/axolotis-module-teams/assets/auth-end.html",
-            to: "auth-end.html"
-          },
+          { from: path.join(moduleTeamsPackagePath,"..","assets"), to: "" },// Aptero module assets
           { from: "src/assets/manifest.webmanifest", to: "manifest.webmanifest" },
           { from: "src/assets/static/", to: "assets/static/" },
           {

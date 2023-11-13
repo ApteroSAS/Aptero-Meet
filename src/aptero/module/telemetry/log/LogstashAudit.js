@@ -16,6 +16,7 @@ export class LogstashAudit {
     sessionStart = +new Date();
 
     _userId = "server";
+    active = false;
 
     constructor(tracking_url, origine_url) {
         this.tracking_url = tracking_url;
@@ -32,6 +33,9 @@ export class LogstashAudit {
      * @param value optional additional information (e.g. the msec it took to start the app)
      */
     track(event, data) {
+        if(!this.active){
+            return
+        }
         return new Promise((resolve, reject) => {
             try {
                 let origin = this.origine_url;

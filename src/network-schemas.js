@@ -110,6 +110,10 @@ function registerNetworkSchemas() {
         property: "videoPaused"
       },
       {
+        component: "media-video",
+        property: "hsrc"
+      },
+      {
         component: "media-pdf",
         property: "index"
       },

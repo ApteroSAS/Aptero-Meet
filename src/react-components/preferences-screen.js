@@ -10,6 +10,7 @@ import styles from "../assets/stylesheets/preferences-screen.scss";
 import { defaultMaterialQualitySetting } from "../storage/store";
 import { AVAILABLE_LOCALES } from "../assets/locales/locale_config";
 import { themes } from "./styles/theme";
+import {isMsTeams} from "../aptero/module/HubsBridge/utils/EntryMode";
 
 export const CLIPPING_THRESHOLD_ENABLED = false;
 export const CLIPPING_THRESHOLD_MIN = 0.0;
@@ -623,7 +624,7 @@ const CATEGORY_CONTROLS = 1;
 const CATEGORY_MISC = 2;
 const CATEGORY_MOVEMENT = 3;
 const CATEGORY_TOUCHSCREEN = 4;
-const TOP_LEVEL_CATEGORIES = [CATEGORY_AUDIO, CATEGORY_CONTROLS, CATEGORY_MISC];
+const TOP_LEVEL_CATEGORIES = isMsTeams()?[CATEGORY_CONTROLS, CATEGORY_MISC]:[CATEGORY_AUDIO,CATEGORY_CONTROLS, CATEGORY_MISC];
 const categoryNames = defineMessages({
   [CATEGORY_AUDIO]: { id: "preferences-screen.category.audio", defaultMessage: "Audio" },
   [CATEGORY_CONTROLS]: { id: "preferences-screen.category.controls", defaultMessage: "Controls" },
@@ -795,7 +796,7 @@ class PreferencesScreen extends Component {
     this.mediaDevicesManager = window.APP.mediaDevicesManager;
 
     this.state = {
-      category: CATEGORY_AUDIO,
+      category: CATEGORY_CONTROLS,
       toastHeight: "150px",
       preferredMic: {
         key: "preferredMic",

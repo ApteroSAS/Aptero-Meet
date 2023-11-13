@@ -17,35 +17,32 @@ export interface Instances {
   },
 }
 
-let instances: Instances = { roomSID: "NO_DATA", clones: {} };
+let instances: Instances;
 
 const EVENT = "room-updated";
 
 export async function redirectIfNeeded() {
   try {
     //initial fetch load balancer meta data in a non blocking way
-    if (window.location.host !== "localhost") {
+    if (!window.location.host.startsWith("localhost")) {
       //at this point the body corespond to the right room we just need to update the url to be coherent with the body
-      let roomUrl = new URL((document.querySelector("[property~=\"og:url\"][content]") as any).content);
+      let roomUrl = new URL((document.querySelector('[property~="og:url"][content]') as any).content);
       let windowUrl = new URL(window.location);
       if (roomUrl.pathname !== windowUrl.pathname) {
         roomUrl.search = windowUrl.search;//the search param does not apear in the og:url
         window.history.pushState(null, null, roomUrl);
       }
     }
-  } catch (e) {
-    console.error(e);
-  }
 
-  try {
     //loadbalancer clones data
     getClones();
-    networkService.onMessage(EVENT, () => {
+    networkService.onMessage(EVENT,() => {
       console.log("room update received");
       //fetch meta data in a non blocking way
       getClones();
-    });
-  } catch (e) {
+    })
+
+  }catch (e) {
     console.error(e);
   }
 }
@@ -60,18 +57,18 @@ export async function redirectIfNeededV1() {
     const host = window.APP_PROPS.RETICULUM_SERVER;
     let response = await fetch(window.location.protocol + "//" + host + "/service/loadbalancer/redirect?url=" + encodeURIComponent(roomUrl));
     let data: { url: string } = await response.json();
-    networkService.onMessage(EVENT, () => {
+    networkService.onMessage(EVENT,() => {
       console.log("room update recived");
       //fetch meta data in a non blocking way
       getClones();
-    });
+    })
     if (!data.url) {
       console.error("invalid return data");
       return;
     }
     if (roomUrl !== data.url) {
       //window.location.replace(data.url);
-      window.location.href = data.url;
+      window.location.href=data.url;
       console.log("redirect to :" + roomUrl);
     }
     //initial fetch meta data in a non blocking way
@@ -106,14 +103,6 @@ export async function getClones(): Promise<{
   clones: ClonesI,
 }> {
   instances = await getData();
-  return instances;
-}
-
-/** returns last data */
-export function getClonesSync(): {
-  roomSID: string,
-  clones: ClonesI,
-} {
   return instances;
 }
 

@@ -7,6 +7,36 @@ import { duplicateEntryModeOnSrc } from "../aptero/module/HubsBridge/utils/Entry
 import { propertiesService } from "../aptero/module/properties/propertiesService";
 
 //aptero
+const checkIfFrameable = async (url) => {
+  /*
+    We'll use our own CORS proxy server to get around the CORS issues
+    and use it to check if the url is frameable by checking the headers
+  */
+  if (url.startsWith("hyperbeam")){
+    return true;
+  }
+  const proxyURL = `https://corsproxy.aptero.co/${url}`;
+
+  const response = await fetch(proxyURL, {
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest'
+    }
+  });
+
+  const xFrameOptions = response.headers.get('x-frame-options')?.toLowerCase();
+  const csp = response.headers.get('content-security-policy')?.toLowerCase();
+
+  if (xFrameOptions && !['allow-all', 'allow-from *', '*'].includes(xFrameOptions)) {
+    return false;
+  }
+
+  if (csp && (csp.includes('frame-ancestors') || csp.includes('frame-src'))) {
+    return false;
+  }
+  return true;
+};
+
+//aptero
 function isValidHttpUrl(string) {
   let url;
   try {
@@ -70,7 +100,19 @@ AFRAME.registerComponent("open-media-button", {
           }
         }
         this.label.setAttribute("text", "value", label);
+      }
 
+      //Create secundary URL for Hyperbeam
+      this.clean_src = this.src;
+      // Check if the url is frameable
+      const isFrameable = await checkIfFrameable(this.src);
+      if (!isFrameable)
+      {
+        //Convert into a Hyperbeam link to bypass Embed restrictions
+        const url = new URL(this.src);
+        const hyperbeamURL = "https://hyperbeam.serverless.aptero.co/?url=" + url.toString();
+        console.log("Hyperbeam URL: " + hyperbeamURL);
+        this.src = hyperbeamURL;
       }
     };
 
@@ -90,23 +132,29 @@ AFRAME.registerComponent("open-media-button", {
       } else if ((await isLocalHubsSceneUrl(this.src)) && mayChangeScene) {
         this.el.sceneEl.emit("scene_media_selected", this.src);
       } else if ((hubId = await isHubsRoomUrl(this.src))) {
-        const url = new URL(this.src);
+        let url = new URL(this.src);
+        if (window.location.href.startsWith("https://localhost")) {
+          url = "https://localhost:53000/hub.html?hub_id=" + hubId;
+        }
         const wurlSearchParams = new URLSearchParams(wurl.searchParams);
         const urlSearchParams = new URLSearchParams(url.searchParams);
         for (const sp of [wurlSearchParams, urlSearchParams]) {
           sp.sort();
-          //Ignore this list of option
+          //Ignore this list of option those should not prevent FRS since it does not change the content of the room
           sp.delete("hub_id");
           sp.delete("vr_entry_type");
+          sp.delete("msteams");
+          sp.delete("embed_token");
         }
 
         if (url.hash && window.APP.hub.hub_id === hubId) {
           // move to waypoint w/o writing to history
           window.history.replaceState(null, null, window.location.href.split("#")[0] + url.hash);
         } else if (
-          window.APP_PROPS.APP_CONFIG.features.fast_room_switching &&
-          await isLocalHubsUrl(this.src) &&
-          wurlSearchParams.toString() === urlSearchParams.toString() //If we have different option do not FRS
+            window.APP_PROPS.APP_CONFIG.features.fast_room_switching &&
+            //await isLocalHubsUrl(this.src) &&
+            wurlSearchParams.toString() === urlSearchParams.toString() && //If we have different option do not FRS
+          !wurl.searchParams.get("offline2")
         ) {
           // move to new room without page load or entry flow
           const { changeHub } = await import("../change-hub");
@@ -119,7 +167,7 @@ AFRAME.registerComponent("open-media-button", {
         }
       } else {
         await exitImmersive();
-        window.open(this.src,"_blank","popup");
+        window.open(this.clean_src,"_blank","popup");
       }
     };
 

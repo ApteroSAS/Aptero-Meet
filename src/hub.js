@@ -1,4 +1,4 @@
-import { tryMSMatchTheme } from "./aptero/module/microsoft/react-components/MSThemeMatcher";
+import {msTeamsAPILight} from "./aptero/module/axolotis/modules/basic/ImportHelper";
 
 
 console.log(`App version: ${process.env.BUILD_VERSION || "?"}`);
@@ -73,7 +73,6 @@ import { apteroService } from "./aptero/ApteroServices";
 import { roomController } from "./aptero/module/ButtonAPI/api/RoomController";
 import { fetchICEservers } from "./aptero/module/webRTCadapter/adapter-config";
 
-import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
 msTeamsAPILight().redirectToTeamsSidePanel();
 //aptero service end
 
