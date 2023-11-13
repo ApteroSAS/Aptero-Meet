@@ -1,6 +1,6 @@
 import protooClient from "protoo-client";
 import EventEmitter from "eventemitter3";
-import { getAdapterParams } from "./adapter-config";
+import { getAdapterParams } from "../../adapter-config";
 
 let debug = console.log;
 let error = console.error;

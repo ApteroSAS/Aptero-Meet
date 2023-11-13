@@ -100,7 +100,8 @@ export class LoggerClass {
     }
 
     activated() {
-        return this.properties.ACTIVATED? (this.properties.ACTIVATED==="true" || this.properties.ACTIVATED===true) : false;
+        return false;//TODO tmp no logger CERT issue with the server
+        //return this.properties.ACTIVATED? (this.properties.ACTIVATED==="true" || this.properties.ACTIVATED===true) : false;
     }
 
     deactivated() {

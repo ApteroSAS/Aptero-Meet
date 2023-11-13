@@ -1,7 +1,7 @@
-import { TwilioAdapter } from "./twilio";
+import { AgoraAdapter } from "./agora";
 import EventEmitter from "eventemitter3";
 import { ProtooHelper } from "./protoHelper";
-import AdapterUserListener from "./AdapterUserListener";
+import AdapterUserListener from "../../AdapterUserListener";
 
 // NOTE this adapter does not properly fire the onOccupantsReceived events since those are only needed for
 // data channels, which are not yet supported. To fire that event, this class would need to keep a list of
@@ -13,34 +13,8 @@ let debug = console.log;
 let error = console.error;
 let info = console.log;
 
-declare const window:any;
-
 export const DIALOG_CONNECTION_ERROR_FATAL = "dialog-connection-error-fatal";
 export default class NafTwilioAdapter extends EventEmitter {
-  private _micProducer: any;
-  private _cameraProducer: any;
-  private _shareProducer: any;
-  private _localMediaStream: any;
-  private _consumers: Map<any, any>;
-  private _pendingMediaRequests: Map<any, any>;
-  private _blockedClients: Map<any, any>;
-  private _forceTcp: boolean;
-  private _forceTurn: boolean;
-  private _iceTransportPolicy: any;
-  private scene: any;
-  private _serverParams: any;
-  private adapterUserListener: any;
-  private _consumerStats:any;
-  private _serverUrl: any;
-  private _clientId: any;
-  private _roomId: any;
-  private _joinToken: any;
-  private subAdapter: TwilioAdapter;
-  private _closed: boolean;
-  private _micEnabled: Boolean;
-  private _micShouldBeEnabled: boolean;
-  private lastTrack = null;
-
   constructor() {
     super();
     this._micProducer = null;
@@ -58,12 +32,12 @@ export default class NafTwilioAdapter extends EventEmitter {
     this._consumerStats = {};
     this.adapterUserListener = new AdapterUserListener();
   }
-  
+
   get consumerStats() {
     return this._consumerStats;
   }
 
-    /**
+  /**
    * Gets transport/consumer/producer stats on the server side.
    */
   async getServerStats() {
@@ -111,35 +85,20 @@ export default class NafTwilioAdapter extends EventEmitter {
   // eslint-disable-next-line no-unused-vars
   checkRecvIceStatus(connectionState) {
   }
-  
-  async reconnect(){
-    await this.disconnect();
 
-    await new Promise(resolve => setTimeout(resolve,4000));
-    await this.connect({
-       serverUrl:this._serverUrl,
-       roomId:this._roomId,
-       joinToken:this._joinToken,
-       serverParams:this._serverParams,
-       clientId:this._clientId,
-       scene:this.scene,
-       forceTcp:this._forceTcp,
-       forceTurn:this._forceTurn,
-       iceTransportPolicy:this._iceTransportPolicy
-    })
-  }
+
 
   async connect({
-    serverUrl,
-    roomId,
-    joinToken,
-    serverParams,
-    scene,
-    clientId,
-    forceTcp,
-    forceTurn,
-    iceTransportPolicy
-  }) {
+                  serverUrl,
+                  roomId,
+                  joinToken,
+                  serverParams,
+                  scene,
+                  clientId,
+                  forceTcp,
+                  forceTurn,
+                  iceTransportPolicy
+                }) {
     this._serverUrl = serverUrl;
     this._roomId = roomId;
     this._joinToken = joinToken;
@@ -150,10 +109,10 @@ export default class NafTwilioAdapter extends EventEmitter {
     this._forceTurn = forceTurn;
     this._iceTransportPolicy = iceTransportPolicy;
 
-    this.subAdapter = new TwilioAdapter(this.adapterUserListener);
+    this.subAdapter = new AgoraAdapter(this.adapterUserListener);
     this.subAdapter.setOnTrack((track, peerId,trackid)=>{
       //RemoteAudioTrack
-      console.log("Add consumer:",track);
+      console.log(" Add consumer:",track);
       track.appData = {peerId};
       this._consumers.set(trackid, track);
       this.resolvePendingMediaRequestForTrack(peerId, track.track);
@@ -174,15 +133,47 @@ export default class NafTwilioAdapter extends EventEmitter {
     urlWithParams.searchParams.append("roomId", this._roomId);
     urlWithParams.searchParams.append("peerId", this._clientId);
 
+    // TODO: Establishing connection could take a very long time.
+    //       Inform the user if we are stuck here.
+    this.protooHelper = new ProtooHelper();
+    await this.protooHelper.init(urlWithParams);
+    this._protoo =this.protooHelper._protoo;
+
     this._closed = false;
 
+    this.protooHelper._protoo.on("notification", notification => {
+      switch (notification.method) {
+        case "newPeer": {
+          const peer = notification.data;
+          this.newPeer(peer);
+          break;
+        }
+
+        case "peerClosed": {
+          const { peerId } = notification.data;
+          this.closePeer(peerId);
+          break;
+        }
+
+        case "peerBlocked": {
+          const { peerId } = notification.data;
+          document.body.dispatchEvent(new CustomEvent("blocked", { detail: { clientId: peerId } }));
+
+          break;
+        }
+
+        case "peerUnblocked": {
+          const { peerId } = notification.data;
+          document.body.dispatchEvent(new CustomEvent("unblocked", { detail: { clientId: peerId } }));
+
+          break;
+        }
+      }
+    });
     return new Promise(async (resolve, reject) => {
       try {
         await this._joinRoom();
-        if(this.lastTrack){
-          this.createTrack(this.lastTrack);
-        }
-        resolve(true);
+        resolve();
       } catch (err) {
         this.emitRTCEvent("warn", "Adapter", () => `Error during connect: ${error}`);
         reject(err);
@@ -192,7 +183,8 @@ export default class NafTwilioAdapter extends EventEmitter {
 
   async _retryConnectWithNewHost() {
     this.cleanUpLocalState();
-    const serverParams = await window.APP.hubChannel.getHost();
+    this._protoo.removeAllListeners();
+    const serverParams = await APP.hubChannel.getHost();
     const { host, port } = serverParams;
     const newServerUrl = `wss://${host}:${port}`;
     if (this._serverUrl === newServerUrl) {
@@ -204,7 +196,7 @@ export default class NafTwilioAdapter extends EventEmitter {
     await this.connect({
       serverUrl: newServerUrl,
       roomId: this._roomId,
-      joinToken: window.APP.hubChannel.token,
+      joinToken: APP.hubChannel.token,
       serverParams,
       scene: this.scene,
       clientId: this._clientId,
@@ -213,7 +205,7 @@ export default class NafTwilioAdapter extends EventEmitter {
       iceTransportPolicy: this._iceTransportPolicy
     });
   }
-  
+
   closePeer(peerId) {
     const pendingMediaRequests = this._pendingMediaRequests.get(peerId);
 
@@ -313,10 +305,11 @@ export default class NafTwilioAdapter extends EventEmitter {
 
   async _joinRoom() {
     debug("_joinRoom()");
+
+    await this.protooHelper.join(this._clientId,this._device,this._joinToken);
     if (this._localMediaStream) {
       // TODO: Refactor to be "Create producers"
       await this.setLocalMediaStream(this._localMediaStream);
-      this.enableMicrophone(this._micShouldBeEnabled);//use last state for mic (useful for fast room switching)
     }
   }
 
@@ -327,24 +320,24 @@ export default class NafTwilioAdapter extends EventEmitter {
 
     await Promise.all(
       stream.getTracks().map(async track => {
-      if (track.kind === "audio") {
-        sawAudio = true;
+        if (track.kind === "audio") {
+          sawAudio = true;
 
-        // TODO multiple audio tracks?
-        if (this._micProducer) {
+          // TODO multiple audio tracks?
+          if (this._micProducer) {
             if (this._micProducer.track !== track) {
               this._micProducer.track.stop();
               //this._micProducer.replaceTrack(track);
+            }
+          } else {
+            if (!this._micEnabled) {
+              track.enabled = false;
+            }
+
+            // stopTracks = false because otherwise the track will end during a temporary disconnect
+            this._micProducer = {track};
           }
         } else {
-          if (!this._micEnabled) {
-            track.enabled = false;
-          }
-
-          // stopTracks = false because otherwise the track will end during a temporary disconnect
-          this._micProducer = {track};
-        }
-      } else {
           sawVideo = true;
 
           if (track._hubs_contentHint === "share") {
@@ -399,7 +392,7 @@ export default class NafTwilioAdapter extends EventEmitter {
     }
   }
 
-  enableMicrophone(enabled:boolean) {
+  enableMicrophone(enabled) {
     this.subAdapter.enableMicrophone(enabled);
     this._micShouldBeEnabled = enabled;
     this.emit("mic-state-changed", { enabled: this.isMicEnabled });
@@ -424,23 +417,37 @@ export default class NafTwilioAdapter extends EventEmitter {
     }
     if (this._closed) return;
 
-    debug("disconnected()");
+    debug("disconnect()");
     this.cleanUpLocalState();
+    if (this._protoo) {
+      this._protoo.removeAllListeners();
+      if (this._protoo.connected) {
+        this._protoo.close();
+        this.emitRTCEvent("info", "Signaling", () => `[close]`);
+      }
+    }
     this.adapterUserListener.disconnect();
   }
 
   kick(clientId, permsToken) {
-    document.body.dispatchEvent(new CustomEvent("kicked", { detail: { clientId: clientId } }));
+    return this.protooHelper.kick(clientId, permsToken,this.room)
+      .then(() => {
+        document.body.dispatchEvent(new CustomEvent("kicked", { detail: { clientId: clientId } }));
+      });
   }
 
   block(clientId) {
-    this._blockedClients.set(clientId, true);
-    document.body.dispatchEvent(new CustomEvent("blocked", { detail: { clientId: clientId } }));
+    return this.protooHelper.block(clientId).then(() => {
+      this._blockedClients.set(clientId, true);
+      document.body.dispatchEvent(new CustomEvent("blocked", { detail: { clientId: clientId } }));
+    });
   }
 
   unblock(clientId) {
-    this._blockedClients.delete(clientId);
-    document.body.dispatchEvent(new CustomEvent("unblocked", { detail: { clientId: clientId } }));
+    return this.protooHelper.unblock(clientId).then(() => {
+      this._blockedClients.delete(clientId);
+      document.body.dispatchEvent(new CustomEvent("unblocked", { detail: { clientId: clientId } }));
+    });
   }
 
   emitRTCEvent(level, tag, msgFunc) {
@@ -452,10 +459,5 @@ export default class NafTwilioAdapter extends EventEmitter {
       second: "numeric"
     });
     this.scene.emit("rtc_event", { level, tag, time, msg: msgFunc() });
-  }
-
-  async createTrack(constraints) {
-    this.lastTrack = constraints;
-    return this.subAdapter.createTrack(constraints);
   }
 }

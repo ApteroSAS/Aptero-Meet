@@ -866,7 +866,7 @@ AFRAME.registerComponent("media-video", {
         texture.dash = dashPlayer;
       } else if (AFRAME.utils.material.isHLS(url, contentType)) {
         if (HLS.isSupported()) {
-          this.el.setAttribute("rtmp-auto-refresh", {});
+          this.el.setAttribute("rtmp-auto-refresh", {});//APTERO
           const corsProxyPrefix = `https://${configs.CORS_PROXY_SERVER}/`;
           const baseUrl = url.startsWith(corsProxyPrefix) ? url.substring(corsProxyPrefix.length) : url;
           const setupHls = () => {
@@ -896,15 +896,17 @@ AFRAME.registerComponent("media-video", {
             });
 
             texture.hls = hls;
-            hls.loadSource(url);
+            hls.loadSource(baseUrl);//Aptero use baseURL/de-proxyfied-url to avoid loading the video via cors proxy
             hls.attachMedia(videoEl);
 
+            /*
+            APTERO Removed
             hls.on(HLS.Events.ERROR, function(event, data) {
               if (data.fatal) {
                 switch (data.type) {
                   case HLS.ErrorTypes.NETWORK_ERROR:
                     // try to recover network error
-                    hls.startLoad();
+                    //hls.startLoad();
                     break;
                   case HLS.ErrorTypes.MEDIA_ERROR:
                     hls.recoverMediaError();
@@ -914,7 +916,7 @@ AFRAME.registerComponent("media-video", {
                     return;
                 }
               }
-            });
+            });*/
           };
 
           setupHls();

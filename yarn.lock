@@ -22,12 +22,20 @@
     uuid "^3.2.1"
 
 "@aptero/axolotis-module-basic@file:./modules/teams-module/modules/basic-modules":
-  version "0.0.0"
+  version "1.0.0"
+  dependencies:
+    deepmerge "^4.2.2"
+    event-target-shim "^6.0.2"
+    eventemitter3 "^4.0.7"
+    jsonschema "^1.4.1"
+    phoenix "github:gfodor/phoenix-js#f4cebf1534dd7c503fe797ef396709c4d3ea8d69"
+    tsutils "^3.21.0"
+    uuid "^3.2.1"
 
 "@aptero/axolotis-module-teams@file:./modules/teams-module":
   version "1.0.0"
   dependencies:
-    "@aptero/axolotis-module-basic" "file:./../../../AppData/Local/Yarn/Cache/v6/npm-@aptero-axolotis-module-teams-1.0.0-c47e9caf-c749-4372-bf44-71099c3f3a00-1666941528967/node_modules/@aptero/axolotis-module-teams/modules/basic-modules"
+    "@aptero/axolotis-module-basic" "file:./../../../../Users/pierr/AppData/Local/Yarn/Cache/v6/npm-@aptero-axolotis-module-teams-1.0.0-a7deed27-fc61-4f59-98f6-78f8acf826e5-1672757257155/node_modules/@aptero/axolotis-module-teams/modules/basic-modules"
     "@azure/msal-browser" "2.30.0"
     "@microsoft/microsoft-graph-client" "^3.0.2"
     "@microsoft/teams-js" "^2.4.1"
@@ -8146,7 +8154,7 @@ event-target-shim@^6.0.2:
   resolved "https://registry.yarnpkg.com/event-target-shim/-/event-target-shim-6.0.2.tgz#ea5348c3618ee8b62ff1d344f01908ee2b8a2b71"
   integrity sha512-8q3LsZjRezbFZ2PN+uP+Q7pnHUMmAOziU2vA2OwoFaKIXxlxl38IylhSSgUorWu/rf4er67w0ikBqjBFk/pomA==
 
-eventemitter3@^4.0.0, eventemitter3@^4.0.3, eventemitter3@^4.0.7:
+eventemitter3@^4.0.0, eventemitter3@^4.0.7:
   version "4.0.7"
   resolved "https://registry.yarnpkg.com/eventemitter3/-/eventemitter3-4.0.7.tgz#2de9b68f6528d5644ef5c59526a1b4a07306169f"
   integrity sha512-8guHBZCwKnFhYdHr2ysuRWErTwhoN2X8XELRlrRwpmfeY2jjuUN4taQMsULKUVo1K4DvZl+0pgfyoysHxvmvEw==
@@ -9581,13 +9589,10 @@ history@^4.7.2, history@^4.9.0:
     tiny-warning "^1.0.0"
     value-equal "^1.0.1"
 
-hls.js@^0.14.6:
-  version "0.14.17"
-  resolved "https://registry.yarnpkg.com/hls.js/-/hls.js-0.14.17.tgz#0127cff2ec2f994a54eb955fe669ef6153a8e317"
-  integrity sha512-25A7+m6qqp6UVkuzUQ//VVh2EEOPYlOBg32ypr34bcPO7liBMOkKFvbjbCBfiPAOTA/7BSx1Dujft3Th57WyFg==
-  dependencies:
-    eventemitter3 "^4.0.3"
-    url-toolkit "^2.1.6"
+hls.js@^1.2.9:
+  version "1.2.9"
+  resolved "https://registry.yarnpkg.com/hls.js/-/hls.js-1.2.9.tgz#2f25e42ec4c2ea8c88ab23c0f854f39062d45ac9"
+  integrity sha512-SPjm8ix0xe6cYzwDvdVGh2QvQPDkCYrGWpZu6bRaKNNVyEGWM9uF0pooh/Lqj/g8QBQgPFEx1vHzW8SyMY9rqg==
 
 hmac-drbg@^1.0.1:
   version "1.0.1"
@@ -17261,7 +17266,7 @@ url-set-query@^1.0.0:
   resolved "https://registry.yarnpkg.com/url-set-query/-/url-set-query-1.0.0.tgz#016e8cfd7c20ee05cafe7795e892bd0702faa339"
   integrity sha512-3AChu4NiXquPfeckE5R5cGdiHCMWJx1dwCWOmWIL4KHAziJNOFIYJlpGFeKDvwLPHovZRCxK3cYlwzqI9Vp+Gg==
 
-url-toolkit@^2.1.6:
+url-toolkit@^2.2.5:
   version "2.2.5"
   resolved "https://registry.yarnpkg.com/url-toolkit/-/url-toolkit-2.2.5.tgz#58406b18e12c58803e14624df5e374f638b0f607"
   integrity sha512-mtN6xk+Nac+oyJ/PrI7tzfmomRVNFIWKUbG8jdYFt52hxbiReFAXIjYskvu64/dvuW71IcB7lV8l0HvZMac6Jg==

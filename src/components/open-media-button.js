@@ -153,7 +153,8 @@ AFRAME.registerComponent("open-media-button", {
         } else if (
             window.APP_PROPS.APP_CONFIG.features.fast_room_switching &&
             //await isLocalHubsUrl(this.src) &&
-            wurlSearchParams.toString() === urlSearchParams.toString() //If we have different option do not FRS
+            wurlSearchParams.toString() === urlSearchParams.toString() && //If we have different option do not FRS
+          !wurl.searchParams.get("offline2")
         ) {
           // move to new room without page load or entry flow
           const { changeHub } = await import("../change-hub");
