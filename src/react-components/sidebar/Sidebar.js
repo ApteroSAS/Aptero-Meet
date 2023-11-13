@@ -59,7 +59,7 @@ export class Sidebar extends React.Component {
               onClick={this.handleToggle}
               //Make blue on hover
               onMouseEnter={e => (e.currentTarget.style.color = "#00a0ff")}
-              onMouseLeave={e => (e.currentTarget.style.color = "#fff")}
+              onMouseLeave={e => (e.currentTarget.style.color = "")} 
             >
               <FullscreenLogo size="24" style={{display: afterTitle ? "none" : "block"}}/>
             </button>

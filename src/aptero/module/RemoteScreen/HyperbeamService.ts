@@ -695,7 +695,7 @@ export const processHyperbeamEntity = async (entity,mediaData,objIdentifier,hbPr
   let fetchfrom = 'https://hyperbeam.serverless.aptero.co/objcomputer';
   // If we are running from localhost, fetch directly using CORS proxy
   if (window.location.hostname === "localhost") {
-    /*/
+    //*/
     const proxyURL = 'https://corsproxy.aptero.co/';
     const serverOrigin = 'https://hyperbeam.serverless.aptero.co/';
     fetchfrom = proxyURL+serverOrigin+'objcomputer';
