@@ -106,6 +106,14 @@ export async function getClones(): Promise<{
   return instances;
 }
 
+/** returns last data */
+export function getClonesSync(): {
+  roomSID: string,
+  clones: ClonesI,
+} {
+  return instances;
+}
+
 export function hasInstances(): boolean {
   if (!instances) return false;
   return Object.keys(instances.clones).length > 1;
