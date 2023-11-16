@@ -21,6 +21,27 @@ function cleanurl(url) {
   return url;
 }
 
+function updatePermission(hbProperties,screenElement) {
+  let allowInput = false;
+    console.log("Manage Permissions",hbProperties.HBPermissions);
+
+    for (const [key, value] of Object.entries(hbProperties.HBPermissions)) {
+      console.log("Check Permission",key,value);
+      if (value && window.APP.hubChannel.can(key)) {
+        console.log("Allow Input",key,value)
+        allowInput = true;
+        break;
+      }
+    }
+
+    window.APP.hubChannel.addEventListener("permissions_updated", () => {
+      const allowInputNew = updatePermission(hbProperties,screenElement);
+      screenElement.acceptsInput = allowInputNew;
+    });
+  
+    return allowInput;
+}
+
 
 export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
 
@@ -40,21 +61,26 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
       HBRegion: null,
       HBWebGL: null,
       HBBrowserNav: null,
-      HBRestricted: null,
       HBDarkMode: null,
       HBFps: null,
       HBQlty: null,
       HBuBlock: null,
       HBSession: null,
       HBNoCursors: null,
+      HBStready: null,
+      HBRestricted: null,
+      HBPermissions: {},
     };
   }
 
-  if (!hbProperties.HBNoCursors) {
-    screenElement.acceptsInput = true;
-  } else {
-    screenElement.acceptsInput = false;
+  // Check if the user has permission to use the screen
+  let allowInput = true;
+  if (hbProperties.HBRestricted) {
+    allowInput = updatePermission(hbProperties,screenElement);
   }
+
+  screenElement.acceptsInput = allowInput;
+  
 
 
   // Getting the networked entity and setting its attributes
@@ -115,7 +141,7 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
     {
       try {
           embedURL = await processHyperbeamEntity(screenElement,mediaData,hb_objid,hbProperties);
-          console.log("Define EmbedURL",screenElement.getAttribute("media-video").hsrc);
+          //console.log("Define EmbedURL",screenElement.getAttribute("media-video").hsrc);
       }
           catch (e) {
           console.log("Error getting Aptero Hyperbeam",e);
@@ -213,6 +239,8 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
   /*----------------------------------------------------
     We can use hb events to manage events from Hyperbeam
    ----------------------------------------------------*/
+
+  hb.playoutDelay = hbProperties.HBStready ? true : false;
 
   // Mouse events setup
 
@@ -624,7 +652,14 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
       window.removeEventListener("mousemove", onMouseEvent);
       window.removeEventListener("mousedown", onMouseEvent);
       window.removeEventListener("mouseup", onMouseEvent);
+      window.removeEventListener("wheel", onMouseEvent);
       screenElement.sceneEl.removeEventListener("clientDisconnected", () => { });
+
+      // Remove all possible listeners
+      NAF.connection.unsubscribeToDataChannel(dataChannel, handleCords);
+      // Remove the cursor map
+      localCursorMap.clear();
+      HbCords.clear();
 
       // Unlock the movement if the object is destroyed
       if (window.lockMovement && window.hyperbeam_element === screenElement) {
@@ -724,7 +759,6 @@ export const processHyperbeamEntity = async (entity,mediaData,objIdentifier,hbPr
     height: hbProperties.HBRes ? hbProperties.HBRes : 720,
     webgl: hbProperties.HBWebGL ? hbProperties.HBWebGL : false,
     kiosk: hbProperties.HBBrowserNav ? hbProperties.HBBrowserNav : false, // Nav bar
-    control_disable_default: hbProperties.HBRestricted ? hbProperties.HBRestricted : false,
     dark: hbProperties.HBDarkMode ? hbProperties.HBDarkMode : false,
     fps: hbProperties.HBFps ? hbProperties.HBFps : 24,
     quality: {

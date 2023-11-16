@@ -13,7 +13,7 @@ export function hyperbeamPopup(hyperbeamExit,hbProperties) {
     const hbPopup = window.hyperbeam_popup = document.createElement("div");
     document.body.appendChild(hbPopup);
     hbPopup.className = "hyperbeam-popup";
-    hbPopup.innerHTML = '<p>3D-Browser is active <span class="nowrap">Press [ESC] to exit</span></p>';
+    hbPopup.innerHTML = '<p>Screen active: You can click <span class="nowrap">inside and use it</span></p>';
 
     // Apply style from hb_popup_style.ts
     const hbPopupStyle = document.createElement("style");
