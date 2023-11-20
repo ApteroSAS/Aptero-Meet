@@ -25,6 +25,9 @@ export class TwilioAdapter {
     }
 
     public async unpublishLocalParticipantAudioTrack(): Promise<void> {
+        if (!this.currentRoom) {
+            return;
+        }
         this.enableMicrophone(false);//mute so that when we republish it is muted
         for (let publication of this.currentRoom.localParticipant.tracks) {
             const publicationTrack = publication[1];
@@ -35,14 +38,14 @@ export class TwilioAdapter {
     }
 
     private async unpublishGivenAudioTrack(track: Video.RemoteAudioTrack) {
-        if (track) {
+        if (track && this.currentRoom) {
             track.detach();
             this.currentRoom.localParticipant.unpublishTrack(track.mediaStreamTrack);
         }
     }
 
     private async unpublishGivenVideoTrack(track: Video.RemoteVideoTrack) {
-        if (track) {
+        if (track && this.currentRoom) {
             track.detach();
             this.currentRoom.localParticipant.unpublishTrack(track.mediaStreamTrack);
         }
@@ -73,6 +76,9 @@ export class TwilioAdapter {
     }
 
     public async unpublishLocalParticipantVideoTrack() {
+        if(!this.currentRoom){
+            return;
+        }
         for (let publication of this.currentRoom.localParticipant.videoTracks) {
             const publicationTrack = publication[1];
             if (publicationTrack.track.kind === "video") {

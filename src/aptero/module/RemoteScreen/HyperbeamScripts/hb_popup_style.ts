@@ -2,7 +2,7 @@
 export const hb_popup_style = /*css*/`
 .hyperbeam-popup {
   opacity: 0;
-  display: flex;
+  display: none;
   flex-direction: column;
   position: absolute;
   z-index: 10;

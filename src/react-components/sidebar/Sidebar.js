@@ -54,8 +54,14 @@ export class Sidebar extends React.Component {
         {(title || beforeTitle || afterTitle || fullmodeButton || fullmode) && (
           <div className={styles.header}>
             <div className={styles.beforeTitle}>{beforeTitle}</div>
-            <button className={styles.fullmodeButton} onClick={this.handleToggle}>
-              <FullscreenLogo size="24" style={{visibility: afterTitle ? "hidden" : "visible"}}/> {/*Note: React-icons accept the size prop (in px) for icon size */}
+            <button 
+              className={styles.fullmodeButton} 
+              onClick={this.handleToggle}
+              //Make blue on hover
+              onMouseEnter={e => (e.currentTarget.style.color = "#00a0ff")}
+              onMouseLeave={e => (e.currentTarget.style.color = "")} 
+            >
+              <FullscreenLogo size="24" style={{display: afterTitle ? "none" : "block"}}/>
             </button>
             <h5>{hyperbeamPrefix}{title}</h5>
             <div className={styles.afterTitle}>{afterTitle}</div>

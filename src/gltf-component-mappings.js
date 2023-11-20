@@ -271,12 +271,14 @@ async function mediaInflator(el, componentName, componentData, components) {
       HBFps: componentData.HBFps,
       HBQlty: componentData.HBQlty,
       HBWebGL: componentData.HBWebGL,
-      HBRestricted: componentData.HBRestricted,
       HBRegion: componentData.HBRegion,
       HBDarkMode: componentData.HBDarkMode,
       HBuBlock: componentData.HBuBlock,
       HBBrowserNav: componentData.HBBrowserNav,
       HBSession: componentData.HBSession,
+      HBNoCursors: componentData.HBNoCursors,
+      HBRestricted: componentData.HBRestricted,
+      HBPermissions: componentData.HBPermissions,
     });
   }
 
