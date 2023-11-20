@@ -30,7 +30,7 @@ export function CustomSidebarContainer({ onClose }) {
       beforeTitle={<CloseButton onClick={onClose} />}
     >
         {/* https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Feature-Policy#directives */}
-        <iframe src={currentUrl} width="100%" height="100%" allow="camera; fullscreen; vr; xr; xr-spatial-tracking;"></iframe>
+        <iframe src={currentUrl} width="100%" height="100%" allow="camera; microphone; display-capture; fullscreen; vr; xr; xr-spatial-tracking;"></iframe>
     </Sidebar>
   );
 }
