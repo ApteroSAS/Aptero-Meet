@@ -9,6 +9,7 @@ import { rotateInPlaceAroundWorldUp, affixToWorldUp } from "../../utils/three-ut
 import { UserProfileVisitCardContainer } from "./UserProfileVisitCardContainer";
 import { PeopleSidebarContainer, usePeopleList } from "./PeopleSidebarContainer";
 import {msTeamsAPI, msTeamsAPILight} from "../../aptero/module/axolotis/modules/basic/ImportHelper";
+import {getAdapterParams} from "../../aptero/module/webRTCadapter/adapter-config";
 
 function useGoToSelectedAvatar(entity) {
   const targetMatrix = new THREE.Matrix4();
@@ -198,7 +199,7 @@ export function UserProfileSidebar({
           >
             <FormattedMessage id="avatar-teleport" defaultMessage="Go to"/>
           </Button>
-          {(canMute && !msTeamsAPILight().msTeams()) && (
+          {(canMute && !(msTeamsAPILight().msTeams() || getAdapterParams().adapter === "none")) && (
             <Button preset="cancel" onClick={onMute}>
               <FormattedMessage id="user-profile-sidebar.mute-button" defaultMessage="Mute"/>
             </Button>

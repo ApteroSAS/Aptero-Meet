@@ -651,13 +651,13 @@ export class UIRoot extends Component {
   performDirectEntryFlow = async enterInVR => {
     this.setState({ enterInVR, waitingOnAudio: true });
     let hasGrantedMic = false;
-    if (msTeamsAPILight().msTeams()) {
+    if (msTeamsAPILight().msTeams() || getAdapterParams().adapter === "none") {
       hasGrantedMic = true;
     } else {
       hasGrantedMic = (await grantedMicLabels()).length > 0;
     }
 
-    if (hasGrantedMic || new URL(window.location.href).searchParams.get("offline2") || msTeamsAPILight().msTeams()) {
+    if (hasGrantedMic || new URL(window.location.href).searchParams.get("offline2") || msTeamsAPILight().msTeams() || getAdapterParams().adapter === "none") {
       if (!this.mediaDevicesManager.isMicShared && !msTeamsAPILight().msTeams()) {
         await this.mediaDevicesManager.startLastUsedMicShare();
       }
