@@ -29,8 +29,10 @@ export function CustomSidebarContainer({ onClose }) {
       title={currentButtonTitle}
       beforeTitle={<CloseButton onClick={onClose} />}
     >
-        {/* https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Feature-Policy#directives */}
+      {/* https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Feature-Policy#directives */}
+      {currentUrl !== "psidebar" && (
         <iframe src={currentUrl} width="100%" height="100%" allow="camera; fullscreen; vr; xr; xr-spatial-tracking;"></iframe>
+      )}
     </Sidebar>
   );
 }

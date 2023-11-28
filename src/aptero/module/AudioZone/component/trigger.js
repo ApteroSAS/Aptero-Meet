@@ -1,14 +1,58 @@
-import { changeAudioSubRoom, popAudioSubRoom, pushAudioSubRoom } from "../change-audio-sub-room";
 
 const sizeVec = new THREE.Vector3();
 const boundingBoxWorldPositionVec = new THREE.Vector3();
 const colliderWorldPositionVec = new THREE.Vector3();
+
+
+function startPFrame(data) {
+  // Create iframe
+  console.log("CREATING A PERSISTENT IFRAME")
+  const iframe = document.createElement("iframe");
+  iframe.src = data.linkSource;
+  iframe.width = "20%";
+  iframe.height = "20%";
+  iframe.allow = "camera; fullscreen; vr; xr; xr-spatial-tracking;";
+  iframe.style.position = "absolute";
+  iframe.style.top = "0";
+  iframe.style.left = "0";
+  iframe.style.border = "0";
+  iframe.style.zIndex = "1";
+  iframe.style.visibility = "hidden";
+  document.body.appendChild(iframe);
+
+  window.PERSISTENTIFRAME = iframe;
+  window.PFrameProps = {
+    name: data.sidebarName,
+    icon: data.buttonIcon,
+  };
+
+  console.log("PFrameProps: ", window.PFrameProps)
+
+  const obj = {
+    url : "psidebar",
+    type : "sidebar_iframe",
+    title: data.sidebarName,
+    icon: data.buttonIcon,
+  }
+
+  const sceneEl = document.querySelector("a-scene");
+  sceneEl.emit("togglePFrameButtonVisibility"); // Toggle Button
+  sceneEl.emit("action_toggle_custom_psidebar"); // Toggle Persistent Sidebar
+  setTimeout(()=>{sceneEl.emit("action_toggle_custom_sidebar_info",obj)},10);
+  
+}
+
+
 
 AFRAME.registerComponent("trigger", {
   schema: {
     colliders: { type: "selectorAll" },
     size: { type: "vec3", default: { x: 1, y: 1, z: 1 } },
     target: { type: "selector" },
+    sidebarName: { type: "string" },
+    linkSource: { type: "string" },
+    buttonIcon: { type: "string" },
+    // legacy properties
     enterComponent: { type: "string" },
     enterProperty: { type: "string" },
     enterValue: {
@@ -48,10 +92,21 @@ AFRAME.registerComponent("trigger", {
       const isColliding = this.boundingBox.containsPoint(colliderWorldPositionVec);
       const collidingLastFrame = this.collidingLastFrame[object3D.id];
 
-      if (isColliding && !collidingLastFrame) {
-        await pushAudioSubRoom(this.data.enterValue);
-      } else if (!isColliding && collidingLastFrame) {
-        await popAudioSubRoom();
+      // We FIRST check if the user has selected their avatar + microphone
+      if (window.fullyInRoom) {
+        if (isColliding && !collidingLastFrame) {
+          console.log("entering zone");
+          if (!window.PERSISTENTIFRAME) {
+            startPFrame(this.data);
+          }
+        } else if (!isColliding && collidingLastFrame && window.PERSISTENTIFRAME) {
+          console.log("leaving zone");
+          window.PERSISTENTIFRAME.remove();
+          window.PERSISTENTIFRAME = null;
+          const sceneEl = document.querySelector("a-scene");
+          sceneEl.emit("togglePFrameButtonVisibility");
+          sceneEl.emit("action_toggle_custom_psidebar");
+        }
       }
 
       this.collidingLastFrame[object3D.id] = isColliding;

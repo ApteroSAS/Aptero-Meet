@@ -51,7 +51,7 @@ import { MicSetupModalContainer } from "./room/MicSetupModalContainer";
 import { InvitePopoverContainer } from "./room/InvitePopoverContainer";
 import { MoreMenuPopoverButton, CompactMoreMenuButton, MoreMenuContextProvider } from "./room/MoreMenuPopover";
 import { ChatSidebarContainer, ChatContextProvider, ChatToolbarButtonContainer } from "./room/ChatSidebarContainer";
-import { ContentMenu, PeopleMenuButton, ObjectsMenuButton } from "./room/ContentMenu";
+import { ContentMenu, PeopleMenuButton, ObjectsMenuButton , PSidebarButton} from "./room/ContentMenu";
 import { ReactComponent as CameraIcon } from "./icons/Camera.svg";
 import { ReactComponent as AvatarIcon } from "./icons/Avatar.svg";
 import { ReactComponent as AddIcon } from "./icons/Add.svg";
@@ -219,7 +219,10 @@ export class UIRoot extends Component {
     sidebarId: null,
     userId: null,
     presenceCount: 0,
-    msTeamsAPI: null
+    msTeamsAPI: null,
+
+    persistentIframe: null,
+    psidebarIcon: null,
   };
 
   constructor(props) {
@@ -236,6 +239,27 @@ export class UIRoot extends Component {
       });
     }
   }
+
+  //aptero
+  syncPersistentIframe = () => {
+    this.setState({ persistentIframe: window.PERSISTENTIFRAME });
+    // console log whenever we set the sidebar to the persistent iframe, which we do by checking the state
+    if (window.PERSISTENTIFRAME && this.state.persistentIframe === window.PERSISTENTIFRAME) {
+      const obj = {
+        url : "psidebar",
+        type : "sidebar_iframe",
+        title: window.PFrameProps.name,
+        icon: window.PFrameProps.icon,
+      }
+      this.setState({ psidebarIcon: obj.icon });
+      setTimeout(()=>{
+        const sceneEl = document.querySelector("a-scene");
+        sceneEl.emit("action_toggle_custom_sidebar_info",obj)
+      },10);
+    }
+
+    this.forceUpdate();
+  };
 
   componentDidUpdate(prevProps) {
     const { hubChannel, showSignInDialog } = this.props;
@@ -403,12 +427,37 @@ export class UIRoot extends Component {
       this.setState({ hide: !this.state.hide, hideUITip: false })
     );
     this.props.scene.addEventListener("devicechange", () => {
-      this.forceUpdate();
+      this.forceUpdate();syncPersistentIframe = () => {
+        this.setState({ persistentIframe: window.PERSISTENTIFRAME });
+      };
     });
     //Aptero
     this.props.scene.addEventListener("action_toggle_custom_sidebar", () => {
       this.toggleSidebar("custom");
     });
+    this.props.scene.addEventListener("action_toggle_custom_psidebar", () => {
+      this.toggleSidebar("psidebar");
+    });
+    window.addEventListener("action_toggle_custom_sidebar_fullscreen", () => {
+      setTimeout(() => {
+        this.adjustIframeSize(";)", this.state.sidebarId);
+      }, 10);
+    });
+
+    //sidebar!!
+
+
+    // Add listener for adjustIframeSize
+    this.props.scene.addEventListener("adjustIframeSize", (e) => {
+      this.adjustIframeSize(e.detail.currentState, e.detail.newState);
+    });
+    // Also for when we resize the window
+    window.addEventListener("resize", () => {
+      this.adjustIframeSize(";)", this.state.sidebarId);
+    });
+
+    this.syncPersistentIframe();
+    window.addEventListener('togglePFrameButtonVisibility', this.syncPersistentIframe);
 
     const scene = this.props.scene;
 
@@ -479,10 +528,14 @@ export class UIRoot extends Component {
     this.props.scene.removeEventListener("action_toggle_custom_sidebar", () => {
       this.toggleSidebar("custom");
     });
+    this.props.scene.removeEventListener("action_toggle_custom_psidebar", () => {
+      this.toggleSidebar("psidebar");
+    });
     if (window.hyperbeam_popup) {
       console.log("Remove hyperbeam popup DIV");
       window.hyperbeam_popup.remove();
     }
+    window.removeEventListener('togglePFrameButtonVisibility', this.syncPersistentIframe);
   }
 
   storeUpdated = () => {
@@ -872,10 +925,50 @@ export class UIRoot extends Component {
 
   pushHistoryState = (k, v) => pushHistoryState(this.props.history, k, v);
 
+  adjustIframeSize(currentState, newState) {
+    if (window.PERSISTENTIFRAME && currentState !== newState) {
+      if (newState === "psidebar") {
+        // Sync persistent iframe with the sidebar bounds
+        const iframe = window.PERSISTENTIFRAME;
+        const sidebar = document.querySelector(".psidebar");
+        if (!sidebar) {
+          iframe.style.visibility = "hidden";
+          return;
+        }
+        const sidebarRect = sidebar.getBoundingClientRect();
+        iframe.style.left = sidebarRect.left + "px";
+        iframe.style.top = sidebarRect.top + "px";
+        iframe.style.width = sidebarRect.width + "px";
+        iframe.style.height = sidebarRect.height + "px";
+        iframe.style.visibility = "visible";
+        // Sync Sidebar with the new name
+        const obj = {
+          url : "psidebar",
+          type : "sidebar_iframe",
+          title: window.PFrameProps.name,
+          icon: window.PFrameProps.icon,
+        }
+        setTimeout(()=>{
+          const sceneEl = document.querySelector("a-scene");
+          sceneEl.emit("action_toggle_custom_sidebar_info",obj)
+        },10);
+
+      } else {
+        // Hide persistent iframe
+        const iframe = window.PERSISTENTIFRAME;
+        iframe.style.visibility = "hidden";
+      }
+    }
+  }
+
   setSidebar(sidebarId, otherState) {
 
     this.setState({ sidebarId, selectedUserId: null, ...otherState });
     this.unmuteHBElement();
+    // Also adjust iframe size if we are in the persistent iframe (or close it)
+    if (sidebarId === "psidebar" || this.state.sidebarId === "psidebar") {
+      this.adjustIframeSize(this.state.sidebarId, sidebarId);
+    }
   }
 
   toggleSidebar(sidebarId, otherState) {
@@ -888,9 +981,36 @@ export class UIRoot extends Component {
 
     this.setState(({ sidebarId: curSidebarId }) => {
       const nextSidebarId = curSidebarId === sidebarId ? null : sidebarId;
+      console.log("Current sidebar: " + curSidebarId + " Next sidebar: " + nextSidebarId);
+
       // Unmute Hyperbeam element if we DO NOT set sidebarId to "custom"
       if (nextSidebarId !== "custom") {
         this.unmuteHBElement();
+      }
+
+      // Handle when we want to CLOSE the persistent iframe
+      if (nextSidebarId === "psidebar" 
+      && window.PERSISTENTIFRAME === null) {
+        // We were indeed in the persistent iframe, so we should close it
+        if (curSidebarId === "psidebar") {
+          console.log("End persistent iframe")
+          this.setState({ sidebarId: null });
+          return {
+            sidebarId: null,
+            selectedUserId: null,
+            ...otherState
+          }
+        } else { // There's something else in the Sidebar (Like the chat for example)
+          return;
+        }
+      }
+
+      if (nextSidebarId === "psidebar" || curSidebarId === "psidebar") {
+        console.log("Adjust iframe size")
+        // Wait 15 ms first
+        setTimeout(() => {
+          this.adjustIframeSize(curSidebarId, nextSidebarId);
+        }, 15);
       }
 
       return {
@@ -1721,6 +1841,14 @@ export class UIRoot extends Component {
                               onClick={() => this.toggleSidebar("objects")}
                             />
                           )}
+                          {//Aptero
+                            this.state.persistentIframe && (
+                            <PSidebarButton
+                              active={this.state.sidebarId === "psidebar"}
+                              onClick={() => this.toggleSidebar("psidebar")}
+                              icon={this.state.psidebarIcon}
+                            />
+                          )}
                           <PeopleMenuButton
                             active={this.state.sidebarId === "people"}
                             onClick={() => this.toggleSidebar("people")}
@@ -1778,7 +1906,8 @@ export class UIRoot extends Component {
                 sidebar={
                   this.state.sidebarId ? (
                     <>
-                      {this.state.sidebarId === "custom" && (
+                      {this.state.sidebarId === "custom" ||
+                       this.state.sidebarId === "psidebar" && (
                         <CustomSidebarContainer onClose={() => this.setSidebar(null)}/>
                       )}
 

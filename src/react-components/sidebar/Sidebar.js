@@ -18,14 +18,19 @@ export class Sidebar extends React.Component {
     Method to toggle the state: The listener is meant to allow
     the sidebar to be toggled from external components/scripts
   */
-  handleToggle = () => {
+  fullmodeClick = () => {
+    // Trigger as an emit to sync other components that may need to update
+    const sceneEl = document.querySelector("a-scene");
+    sceneEl.emit("action_toggle_custom_sidebar_fullscreen");
+  }
+  handleFullmodeToggle = () => {
     this.setState(prevState => ({ fullmodeToggle: !prevState.fullmodeToggle }));
   };
   addEventListener = () => {
-    window.addEventListener("action_toggle_custom_sidebar_fullscreen", this.handleToggle);
+    window.addEventListener("action_toggle_custom_sidebar_fullscreen", this.handleFullmodeToggle);
   }
   removeEventListener = () => {
-    window.removeEventListener("action_toggle_custom_sidebar_fullscreen", this.handleToggle);
+    window.removeEventListener("action_toggle_custom_sidebar_fullscreen", this.handleFullmodeToggle);
   }
   componentDidMount() {
     this.addEventListener();
@@ -42,8 +47,7 @@ export class Sidebar extends React.Component {
 
     //Display on the title that we are embedding a Hyperbeam link
     let hyperbeamPrefix = "";
-    if (children.props) //ONLY if we are using a URL as a child
-    {
+    if (children && children.props) { //ONLY if we are using a URL as a child
       const url = children.props.src;
       if (url && url.toString().startsWith("https://hyperbeam"))
       {hyperbeamPrefix = "Hyperbeam: ";}
@@ -56,7 +60,7 @@ export class Sidebar extends React.Component {
             <div className={styles.beforeTitle}>{beforeTitle}</div>
             <button 
               className={styles.fullmodeButton} 
-              onClick={this.handleToggle}
+              onClick={this.fullmodeClick}
               //Make blue on hover
               onMouseEnter={e => (e.currentTarget.style.color = "#00a0ff")}
               onMouseLeave={e => (e.currentTarget.style.color = "")} 
@@ -67,7 +71,7 @@ export class Sidebar extends React.Component {
             <div className={styles.afterTitle}>{afterTitle}</div>
           </div>
         )}
-        <div className={classNames(styles.content, disableOverflowScroll ? "" : styles.overflowY, contentClassName)}>
+        <div className={classNames("psidebar",styles.content, disableOverflowScroll ? "" : styles.overflowY, contentClassName)}>
           {children}
         </div>
       </div>
