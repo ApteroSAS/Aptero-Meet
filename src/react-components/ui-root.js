@@ -941,6 +941,14 @@ export class UIRoot extends Component {
         iframe.style.width = sidebarRect.width + "px";
         iframe.style.height = sidebarRect.height + "px";
         iframe.style.visibility = "visible";
+
+        // Adjust Z index for fullscreen
+        if (sidebarRect.width > window.innerWidth/2) {
+          iframe.style.zIndex = 11;
+        } else {
+          iframe.style.zIndex = 1;
+        }
+
         // Sync Sidebar with the new name
         const obj = {
           url : "psidebar",
