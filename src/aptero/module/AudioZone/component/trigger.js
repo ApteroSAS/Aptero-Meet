@@ -80,9 +80,21 @@ AFRAME.registerComponent("trigger", {
   },
 
   async tick() {
-    if(this.wip){return;}
+    if (this.wip){return;}
     this.wip = true;
+
+    if (!window.fullyInRoom) {
+      this.wip = false;
+      //console.log("not fully in room");
+      return;
+    }
+
     const colliders = this.data.colliders;
+    if (colliders.length === 0) {
+      this.wip = false;
+      //console.log("no colliders");
+      return;
+    }
 
     for (let i = 0; i < colliders.length; i++) {
       const collider = colliders[i];
@@ -93,24 +105,24 @@ AFRAME.registerComponent("trigger", {
       const collidingLastFrame = this.collidingLastFrame[object3D.id];
 
       // We FIRST check if the user has selected their avatar + microphone
-      if (window.fullyInRoom) {
-        if (isColliding && !collidingLastFrame) {
-          console.log("entering zone");
-          if (!window.PERSISTENTIFRAME) {
-            startPFrame(this.data);
-          }
-        } else if (!isColliding && collidingLastFrame && window.PERSISTENTIFRAME) {
-          console.log("leaving zone");
-          window.PERSISTENTIFRAME.remove();
-          window.PERSISTENTIFRAME = null;
-          const sceneEl = document.querySelector("a-scene");
-          sceneEl.emit("togglePFrameButtonVisibility");
-          sceneEl.emit("action_toggle_custom_psidebar");
+    
+      //console.log("fully in room",isColliding,collidingLastFrame);
+      if (isColliding && !collidingLastFrame) {
+        console.log("entering zone");
+        if (!window.PERSISTENTIFRAME) {
+          startPFrame(this.data);
         }
+      } else if (!isColliding && collidingLastFrame && window.PERSISTENTIFRAME) {
+        console.log("leaving zone");
+        window.PERSISTENTIFRAME.remove();
+        window.PERSISTENTIFRAME = null;
+        const sceneEl = document.querySelector("a-scene");
+        sceneEl.emit("togglePFrameButtonVisibility");
+        sceneEl.emit("action_toggle_custom_psidebar");
       }
-
       this.collidingLastFrame[object3D.id] = isColliding;
     }
+  
 
     this.wip = false;
   }
