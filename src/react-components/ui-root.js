@@ -704,13 +704,13 @@ export class UIRoot extends Component {
   performDirectEntryFlow = async enterInVR => {
     this.setState({ enterInVR, waitingOnAudio: true });
     let hasGrantedMic = false;
-    if (msTeamsAPILight().msTeams()) {
+    if (msTeamsAPILight().msTeams() || getAdapterParams().adapter === "none") {
       hasGrantedMic = true;
     } else {
       hasGrantedMic = (await grantedMicLabels()).length > 0;
     }
 
-    if (hasGrantedMic || new URL(window.location.href).searchParams.get("offline2") || msTeamsAPILight().msTeams()) {
+    if (hasGrantedMic || new URL(window.location.href).searchParams.get("offline2") || msTeamsAPILight().msTeams() || getAdapterParams().adapter === "none") {
       if (!this.mediaDevicesManager.isMicShared && !msTeamsAPILight().msTeams()) {
         await this.mediaDevicesManager.startLastUsedMicShare();
       }
@@ -2184,7 +2184,7 @@ function getUrl(avatarGlb) {
 
 async function getUserProfile(store) {
   const mail = store.state.credentials.email;
-  return axios.get(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/user/get/user/" + mail).then(resp => {
+  return axios.get(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/dbapi/get/user/" + mail).then(resp => {
     let data = resp.data;
     if(data) {
       //this.setState({displayName:data.displayName});

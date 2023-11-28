@@ -36,6 +36,7 @@ export function VoiceButtonContainer({ scene, microphoneEnabled }) {
 
   return (
     <ToolbarButton
+      id = "voice-button-container-toolbar-button"
       ref={buttonRef}
       icon={isMuted || !microphoneEnabled ? <MicrophoneMutedIcon /> : <MicrophoneIcon />}
       label={<FormattedMessage id="voice-button-container.label" defaultMessage="Voice" />}

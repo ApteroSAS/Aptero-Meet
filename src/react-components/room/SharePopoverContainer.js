@@ -6,6 +6,7 @@ import { ReactComponent as AvatarIcon } from "../icons/Avatar.svg";
 import { SharePopoverButton } from "./SharePopover";
 import { FormattedMessage } from "react-intl";
 import useAvatar from "./useAvatar";
+import {getAdapterParams} from "../../aptero/module/webRTCadapter/adapter-config";
 
 function useShare(scene, hubChannel) {
   const [sharingSource, setSharingSource] = useState(null);
@@ -111,6 +112,9 @@ function useShare(scene, hubChannel) {
 }
 
 export function SharePopoverContainer({ scene, hubChannel }) {
+  if(getAdapterParams().adapter === "none"){
+    return <></>
+  }
   const {
     sharingSource,
     canShareCamera,

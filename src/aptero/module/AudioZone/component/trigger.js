@@ -11,7 +11,7 @@ function startPFrame(data) {
   iframe.src = data.linkSource;
   iframe.width = "20%";
   iframe.height = "20%";
-  iframe.allow = "camera; fullscreen; vr; xr; xr-spatial-tracking;";
+  iframe.allow = "camera; microphone; display-capture; fullscreen; vr; xr; xr-spatial-tracking;";
   iframe.style.position = "absolute";
   iframe.style.top = "0";
   iframe.style.left = "0";
