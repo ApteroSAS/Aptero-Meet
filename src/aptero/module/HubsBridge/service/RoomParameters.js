@@ -10,7 +10,7 @@ export class RoomParameters {
     //console.log(propertiesService);
     return await new Promise((resolve) => {
       axios
-        .get(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/room/room/" + roomSID)
+        .get(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/dbapi/room/" + roomSID)
         .then(resp => {
           resolve(resp.data);
         })

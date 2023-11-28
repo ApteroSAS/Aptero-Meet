@@ -178,7 +178,7 @@ export class TwilioAdapter {
         let clientId: string = this.clientId, roomName: string = this.roomId;
         let apiUrl: string;
         if (!getAdapterParams().url) {
-            const url = propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/room/adapter/twilio/profile";
+            const url = propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/dbapi/adapter/twilio/profile";
             const resp = await fetch(url);
             const adapterParams = await resp.json();
             apiUrl = adapterParams.url;

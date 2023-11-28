@@ -101,7 +101,7 @@ export default class ProfileEntryPanel extends Component {
     };
     const json = JSON.stringify({ mail: this.state.email, profile: profile });
 
-    await axios.post(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/user/update/user", json, {
+    await axios.post(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/dbapi/update/user", json, {
       headers: {
         // Overwrite Axios's automatically set Content-Type
         "Content-Type": "application/json"
@@ -120,7 +120,7 @@ export default class ProfileEntryPanel extends Component {
     this.setState({ jobTitle: jobTitle });
     const json = JSON.stringify({ mail: this.state.email, profile: profile });
 
-    await axios.post(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/user/update/user", json, {
+    await axios.post(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/dbapi/update/user", json, {
       headers: {
         // Overwrite Axios's automatically set Content-Type
         "Content-Type": "application/json"
@@ -139,7 +139,7 @@ export default class ProfileEntryPanel extends Component {
     this.setState({ companyName: companyName });
     const json = JSON.stringify({ mail: this.state.email, profile: profile });
 
-    await axios.post(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/user/update/user", json, {
+    await axios.post(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/dbapi/update/user", json, {
       headers: {
         // Overwrite Axios's automatically set Content-Type
         "Content-Type": "application/json"
@@ -158,7 +158,7 @@ export default class ProfileEntryPanel extends Component {
     this.setState({ phoneNumber: phoneNumber });
     const json = JSON.stringify({ mail: this.state.email, profile: profile });
 
-    await axios.post(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/user/update/user", json, {
+    await axios.post(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/dbapi/update/user", json, {
       headers: {
         // Overwrite Axios's automatically set Content-Type
         "Content-Type": "application/json"
@@ -168,7 +168,7 @@ export default class ProfileEntryPanel extends Component {
 
   async getUserProfile() {
     const mail = this.props.store.state.credentials.email;
-    return axios.get(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/user/get/user/" + mail).then(resp => {
+    return axios.get(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/dbapi/get/user/" + mail).then(resp => {
       let data = resp.data;
       if(data) {
         this.setState({ displayName: data.displayName });

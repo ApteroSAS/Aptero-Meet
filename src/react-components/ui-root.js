@@ -2055,7 +2055,7 @@ function getUrl(avatarGlb) {
 
 async function getUserProfile(store) {
   const mail = store.state.credentials.email;
-  return axios.get(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/user/get/user/" + mail).then(resp => {
+  return axios.get(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/dbapi/get/user/" + mail).then(resp => {
     let data = resp.data;
     if(data) {
       //this.setState({displayName:data.displayName});

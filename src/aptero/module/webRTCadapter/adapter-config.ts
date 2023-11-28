@@ -37,7 +37,7 @@ export async function choseAdapter(adapter) {
     configs.APP_CONFIG.adapterParams.adapter = adapter;
     //fetch profile
     try {
-        const url = propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/room/adapter/" + adapter + "/profile";
+        const url = propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/dbapi/adapter/" + adapter + "/profile";
         const resp = await fetch(url);
         const recvProfile = await resp.json();
         profile = {...(configs.APP_CONFIG.adapterParams || {}), ...recvProfile};
