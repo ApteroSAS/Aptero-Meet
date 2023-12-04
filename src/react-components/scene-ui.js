@@ -235,7 +235,7 @@ class SceneUI extends Component {
                 <a
                   target="_blank"
                   rel="noopener noreferrer"
-                  href={getReticulumFetchUrl(`/spoke/projects/${sceneProjectId}`)}
+                  href={getReticulumFetchUrl(`/opal/projects/${sceneProjectId}`)}
                   className={styles.spokeButton}
                 >
                   <FontAwesomeIcon icon={faPencilAlt} />
@@ -250,7 +250,7 @@ class SceneUI extends Component {
                   <a
                     target="_blank"
                     rel="noopener noreferrer"
-                    href={getReticulumFetchUrl(`/spoke/projects/new?sceneId=${sceneId}`)}
+                    href={getReticulumFetchUrl(`/opal/projects/new?sceneId=${sceneId}`)}
                     className={styles.spokeButton}
                   >
                     <FontAwesomeIcon icon={faCodeBranch} />
@@ -283,7 +283,7 @@ class SceneUI extends Component {
                 defaultMessage="made with <a/>"
                 values={{
                   a: () => (
-                    <a href="/spoke">
+                    <a href="/opal">
                       <img src={configs.image("editor_logo")} />
                     </a>
                   )
