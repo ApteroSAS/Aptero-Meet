@@ -43,7 +43,7 @@ export function Header({
             )}
             {enableSpoke && (
               <li>
-                <a href="/spoke">{editorName}</a>
+                <a href="/opal">{editorName}</a>
               </li>
             )}
             {showDocsLink && (

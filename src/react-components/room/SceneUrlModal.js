@@ -67,7 +67,7 @@ export function SceneUrlModal({ enableSpoke, editorName, onValidateUrl, onSubmit
               defaultMessage="Paste a URL to a {editorName} scene or a URL to a <glblink>GLB</glblink>."
               values={{
                 editorName: (
-                  <a href="/spoke" target="_blank" rel="noopener noreferrer">
+                  <a href="/opal" target="_blank" rel="noopener noreferrer">
                     {editorName}
                   </a>
                 ),
@@ -130,7 +130,7 @@ export function SceneUrlModal({ enableSpoke, editorName, onValidateUrl, onSubmit
                 values={{ editorName }}
               />
             </p>
-            <Button as="a" preset="primary" href="/spoke/new" target="_blank" rel="noopener noreferrer">
+            <Button as="a" preset="primary" href="/opal/new" target="_blank" rel="noopener noreferrer">
               <FormattedMessage
                 id="scene-url-modal.new-spoke-project-button"
                 defaultMessage="Launch {editorName}"

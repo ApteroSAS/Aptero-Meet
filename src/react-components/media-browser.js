@@ -426,7 +426,7 @@ class MediaBrowserContainer extends Component {
             <>
               {intl.formatMessage(poweredByMessages.scenes, {
                 editorName: (
-                  <a href="/spoke" target="_blank" rel="noreferrer noopener">
+                  <a href="/opal" target="_blank" rel="noreferrer noopener">
                     {configs.translation("editor-name")}
                   </a>
                 )
@@ -531,7 +531,7 @@ class MediaBrowserContainer extends Component {
               configs.feature("enable_spoke") && (
                 <CreateTile
                   as="a"
-                  href="/spoke/new"
+                  href="/opal/new"
                   rel="noopener noreferrer"
                   target="_blank"
                   type="scene"
@@ -566,7 +566,7 @@ class MediaBrowserContainer extends Component {
               } else if (entry.type === "scene") {
                 onEdit = e => {
                   e.preventDefault();
-                  const spokeProjectUrl = getReticulumFetchUrl(`/spoke/projects/${entry.project_id}`);
+                  const spokeProjectUrl = getReticulumFetchUrl(`/opal/projects/${entry.project_id}`);
                   window.open(spokeProjectUrl);
                 };
               }
