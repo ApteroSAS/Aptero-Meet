@@ -143,8 +143,10 @@ export class ApteroServices {
       sendIframeMessage("entered", {});
     }, 1000);
     window.dispatchEvent(new CustomEvent("apt_scene_entered", {}));
-    window.fullyInRoom = true;
-    console.log("FULLY IN ROOM!")
+    setTimeout(() => {
+      window.fullyInRoom = true;
+      console.log("FULLY IN ROOM!")
+    }, 100);
   }
 
   notifyLoadingState(state, action) {

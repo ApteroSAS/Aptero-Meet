@@ -808,8 +808,14 @@ export class HyperbeamService{
   }
 
   
-  tryCaptureCursor(intersection) {
+  tryCaptureCursor(intersection, obstructed) {
     if (!intersection) {
+      window.cursorOutBounds = true;
+      return;
+    }
+
+    // Avoid clicking through solids unless we are already using a screen
+    if (obstructed && !window.lockMovement) {
       window.cursorOutBounds = true;
       return;
     }

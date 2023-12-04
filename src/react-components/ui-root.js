@@ -1914,8 +1914,8 @@ export class UIRoot extends Component {
                 sidebar={
                   this.state.sidebarId ? (
                     <>
-                      {this.state.sidebarId === "custom" ||
-                       this.state.sidebarId === "psidebar" && (
+                      {(this.state.sidebarId === "custom" ||
+                       this.state.sidebarId === "psidebar") && (
                         <CustomSidebarContainer onClose={() => this.setSidebar(null)}/>
                       )}
 
