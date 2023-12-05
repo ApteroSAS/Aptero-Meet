@@ -3,19 +3,23 @@ import PropTypes from "prop-types";
 import { customMenuService } from "../CustomMenuService";
 import { Sidebar } from "../../../../react-components/sidebar/Sidebar";
 import { CloseButton } from "../../../../react-components/input/CloseButton";
+import {container} from "../../axolotis/IOCConfig";
+import {CustomURL, CustomURLName} from "../../customURL/CustomURL";
 
 export function CustomSidebarContainer({ onClose }) {
   const [currentButtonTitle, setcurrentButtonTitle] = useState(0);
-  const [currentUrl, setCurrentUrl] = useState(0);
+  const [currentUrl, setCurrentUrl] = useState<string>();
 
   const handleChangeOfSideBar = (event) => {
     setcurrentButtonTitle(event.detail.title? event.detail.title :  "viewer");
-    setCurrentUrl(event.detail.url);
+    const url = container.get<CustomURL>(CustomURLName).processURL(event.detail.url);
+    setCurrentUrl(url);
   }
 
   useEffect(() => {
     setcurrentButtonTitle(customMenuService.getButtonTitle());
-    setCurrentUrl(customMenuService.getIframeContentURL());
+    const url = container.get<CustomURL>(CustomURLName).processURL(customMenuService.getIframeContentURL());
+    setCurrentUrl(url);
 
     window.addEventListener("action_toggle_custom_sidebar_info", handleChangeOfSideBar)
 

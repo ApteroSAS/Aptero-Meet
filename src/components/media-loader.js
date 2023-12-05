@@ -27,6 +27,8 @@ import { SHAPE } from "three-ammo/constants";
 import { IN_APP_WEB_BROWSER_PROTOCOL } from "../aptero/module/RemoteScreen/RemoteControlServiceV2";
 import { HYPERBEAM_PROTOCOL } from "../aptero/module/RemoteScreen/HyperbeamService";
 import {msTeamsAPILight} from "../aptero/module/axolotis/modules/basic/ImportHelper";
+import {container} from "../aptero/module/axolotis/IOCConfig";
+import {CustomURL, CustomURLName} from "../aptero/module/customURL/CustomURL";
 
 let loadingObjectEnvMap;
 let loadingObject;
@@ -351,7 +353,8 @@ AFRAME.registerComponent("media-loader", {
 
   async update(oldData, forceLocalRefresh) {
     const { version, contentSubtype } = this.data;
-    let src = this.data.src;
+    //let src = this.data.src;
+    let src = container.get<CustomURL>(CustomURLName).processURL(this.data.src);//aptero
     if (!src) return;
 
     //aptero change content code

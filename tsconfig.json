@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "experimentalDecorators": true,
     "noImplicitAny": false,
     "outDir": "build/types",
     "module": "esnext",

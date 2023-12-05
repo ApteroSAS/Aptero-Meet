@@ -3,6 +3,7 @@ const plugins = [
   // TODO: When i18n build pipeline is finished move to: [ "react-intl", { "removeDefaultMessage": true } ]
   "react-intl",
   "transform-react-jsx-img-import",
+  ["@babel/plugin-proposal-decorators", { "legacy": true }],//Aptero used for inversify
   ["@babel/proposal-class-properties", { "loose": true }],
   "@babel/proposal-object-rest-spread",
   // Samsung Internet on the Oculus Go version is stuck at version 5.2, which is a

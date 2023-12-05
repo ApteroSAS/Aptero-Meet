@@ -5,6 +5,9 @@ import { handleExitTo2DInterstitial } from "../utils/vr-interstitial";
 import {setupIframeButton} from "../aptero/module/CustomPanel/react-component/openIframe";
 import { duplicateEntryModeOnSrc } from "../aptero/module/HubsBridge/utils/EntryMode";
 import { propertiesService } from "../aptero/module/properties/propertiesService";
+import {SampleServiceA, SampleServiceAName} from "../aptero/module/axolotis/modules/basic/SampleServiceA";
+import {container} from "../aptero/module/axolotis/IOCConfig";
+import {CustomURL, CustomURLName} from "../aptero/module/customURL/CustomURL";
 
 //aptero
 const checkIfFrameable = async (url) => {
@@ -101,20 +104,7 @@ AFRAME.registerComponent("open-media-button", {
       const visible = src && guessContentType(src) !== "video/vnd.hubs-webrtc";
       const mayChangeScene = this.el.sceneEl.systems.permissions.canOrWillIfCreator("update_hub");
 
-      //Aptero feature custom query string
-      const wurl = new URL(window.location.href)
-      const dirtyJson = wurl.searchParams.get("cqs")
-      if(dirtyJson) {
-        let correctJson = dirtyJson.replace(/(['"])?([a-z0-9A-Z_]+)(['"])?:/g, '"$2": ');
-        correctJson = correctJson.replaceAll("'", "\"")
-        const qsJson = JSON.parse(correctJson);
-        const newUrl = new URL(this.src);
-        for (const entry in qsJson) {
-          newUrl.searchParams.set(entry, qsJson[entry]);
-        }
-        console.log("custom link :"+newUrl.toString());
-        this.src = newUrl.toString();
-      }
+      this.src = container.get<CustomURL>(CustomURLName).processURL(this.src);
 
       this.el.object3D.visible = !!visible;
 
