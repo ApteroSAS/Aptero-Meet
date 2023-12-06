@@ -11,78 +11,83 @@ import {CustomURL, CustomURLName} from "../aptero/module/customURL/CustomURL";
 
 //aptero
 const checkIfFrameable = async (url) => {
-  /*
-    We'll use our own CORS proxy server to get around the CORS issues
-    and use it to check if the url is frameable by checking the headers
-  */
-  if (url && (
-    url.startsWith("hyperbeam") || 
-    url.startsWith("https://hyperbeam") || 
-    url.startsWith("https://meet.aptero.co") || 
-    url.startsWith("https://alphahub.aptero.co"))
-    ) {
-    return true;
-  }
-
-  // If the url come from our own page, return true
-  const wurl = new URL(window.location.href);
-  const urlObj = new URL(url);
-  if (wurl.host === urlObj.host) {
-    return true;
-  }
-
-  // If the URL is an image, video, return true
-  const contentType = guessContentType(url);
-  if (
-      contentType && 
-      typeof contentType === "string" && 
-      contentType.startsWith("image") &&
-      contentType.startsWith("video") &&
-      contentType.startsWith("application")
-    ) {
-    return true;
-  }
-
-  // If the URL is a Hubs room, return true
-  const hubId = await isHubsRoomUrl(url);
-  if (hubId) {
-    return true;
-  }
-
-  // If the URL is a local Hubs room, return true
-  if (await isLocalHubsUrl(url)) {
-    return true;
-  }
-
-  // If the URL is a local Hubs scene, return true
-  if (await isLocalHubsSceneUrl(url)) {
-    return true;
-  }
-
-  // If the URL is a local Hubs avatar, return true
-  if (await isLocalHubsAvatarUrl(url)) {
-    return true;
-  }
-
-  const proxyURL = `https://corsproxy.aptero.co/${url}`;
-
-  const response = await fetch(proxyURL, {
-    headers: {
-      'X-Requested-With': 'XMLHttpRequest'
+  try {
+    /*
+      We'll use our own CORS proxy server to get around the CORS issues
+      and use it to check if the url is frameable by checking the headers
+    */
+    if (url && (
+      url.startsWith("hyperbeam") || 
+      url.startsWith("https://hyperbeam") || 
+      url.startsWith("https://meet.aptero.co") || 
+      url.startsWith("https://alphahub.aptero.co"))
+      ) {
+      return true;
     }
-  });
 
-  const xFrameOptions = response.headers.get('x-frame-options')?.toLowerCase();
-  const csp = response.headers.get('content-security-policy')?.toLowerCase();
+    // If the url come from our own page, return true
+    const wurl = new URL(window.location.href);
+    const urlObj = new URL(url);
+    if (wurl.host === urlObj.host) {
+      return true;
+    }
 
-  if (xFrameOptions && !['allow-all', 'allow-from *', '*'].includes(xFrameOptions)) {
-    return false;
+    // If the URL is an image, video, return true
+    const contentType = guessContentType(url);
+    if (
+        contentType && 
+        typeof contentType === "string" && 
+        contentType.startsWith("image") &&
+        contentType.startsWith("video") &&
+        contentType.startsWith("application")
+      ) {
+      return true;
+    }
+
+    // If the URL is a Hubs room, return true
+    const hubId = await isHubsRoomUrl(url);
+    if (hubId) {
+      return true;
+    }
+
+    // If the URL is a local Hubs room, return true
+    if (await isLocalHubsUrl(url)) {
+      return true;
+    }
+
+    // If the URL is a local Hubs scene, return true
+    if (await isLocalHubsSceneUrl(url)) {
+      return true;
+    }
+
+    // If the URL is a local Hubs avatar, return true
+    if (await isLocalHubsAvatarUrl(url)) {
+      return true;
+    }
+
+    const proxyURL = `https://corsproxy.aptero.co/${url}`;
+
+    const response = await fetch(proxyURL, {
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    });
+
+    const xFrameOptions = response.headers.get('x-frame-options')?.toLowerCase();
+    const csp = response.headers.get('content-security-policy')?.toLowerCase();
+
+    if (xFrameOptions && !['allow-all', 'allow-from *', '*'].includes(xFrameOptions)) {
+      return false;
+    }
+
+    if (csp && (csp.includes('frame-ancestors') || csp.includes('frame-src'))) {
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error("Cannot detect iframeability",e);
+    return true;
   }
-
-  if (csp && (csp.includes('frame-ancestors') || csp.includes('frame-src'))) {
-    return false;
-  }
-  return true;
 };
 
 //aptero

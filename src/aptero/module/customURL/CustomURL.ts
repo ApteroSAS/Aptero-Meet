@@ -28,6 +28,10 @@ export class CustomURL {
      * @returns {string} - The processed URL with all placeholders replaced with actual values.
      */
     processURL(url: string): string {
+        if (!url) {
+            return url;
+        }
+
         const { email, token } = APP.store?.state?.credentials;
         const { displayName } = APP.store?.state?.profile;
         const { hub_id, name: room_name } = APP.hub;
