@@ -15,7 +15,12 @@ const checkIfFrameable = async (url) => {
     We'll use our own CORS proxy server to get around the CORS issues
     and use it to check if the url is frameable by checking the headers
   */
-  if (url.startsWith("hyperbeam") || url.startsWith("https://hyperbeam") || url.startsWith("https://meet.aptero.co") || url.startsWith("https://alphahub.aptero.co")){
+  if (url && (
+    url.startsWith("hyperbeam") || 
+    url.startsWith("https://hyperbeam") || 
+    url.startsWith("https://meet.aptero.co") || 
+    url.startsWith("https://alphahub.aptero.co"))
+    ) {
     return true;
   }
 
@@ -32,7 +37,8 @@ const checkIfFrameable = async (url) => {
       contentType && 
       typeof contentType === "string" && 
       contentType.startsWith("image") &&
-      contentType.startsWith("video")
+      contentType.startsWith("video") &&
+      contentType.startsWith("application")
     ) {
     return true;
   }

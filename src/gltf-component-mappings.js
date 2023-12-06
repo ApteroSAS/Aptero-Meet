@@ -205,7 +205,6 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
 
 async function mediaInflator(el, componentName, componentData, components) {
   let isControlled = true;
-  console.log("componentName",componentName,"componentData", componentData);
   if (componentName === "link" && (components.video || components.image)) {
     // video/image component will set link url specified in link component.
     return;

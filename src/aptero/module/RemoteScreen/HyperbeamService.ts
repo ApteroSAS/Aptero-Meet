@@ -94,27 +94,59 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
     });
   });
 
-  //const aspectRatio = 16 / 9;
   const width = hbProperties.HBRes ? Math.floor(hbProperties.HBRes * 16 / 9) : 1280;
   const height = hbProperties.HBRes ? hbProperties.HBRes : 720;
-
+  const sProp = height / 720;
+  
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
   const context = canvas.getContext('2d');
-
-  context.fillStyle = 'black';
+  
+  // Gradient background with less bright colors
+  const gradient = context.createLinearGradient(0, 0, width, height);
+  gradient.addColorStop(0, '#483D8B'); // Darker purple
+  gradient.addColorStop(1, '#9370DB'); // Muted purple
+  context.fillStyle = gradient;
   context.fillRect(0, 0, width, height);
-  context.fillStyle = '#A788FD';
+  
+  // Rounded rectangle
+  context.fillStyle = 'rgba(255, 255, 255, 0.2)';
   context.beginPath();
-  context.roundRect(20, 20, width-40, height-40, 40);
+  context.roundRect(20 * sProp, 20 * sProp, width - 40 * sProp, height - 40 * sProp, 40 * sProp);
   context.fill();
-
-  context.font = '158px calibri'
-  context.fillStyle = 'black'
-  context.textAlign = 'center'
-  context.textBaseline = 'middle'
-  context.fillText('Loading Browser', width / 2, height / 2)
+  
+  // Loading text
+  context.font = `${sProp * 94}px Arial`; // Scaled font size
+  context.fillStyle = '#FFFFFF';
+  context.textAlign = 'center';
+  context.textBaseline = 'middle';
+  context.fillText('Loading Browser', width / 2, height / 2 - 120 * sProp);
+  
+  // Animated Loading Circle
+  let angle = 0;
+  const drawLoadingCircle = () => {
+      // Apply sProp for scaling the loading circle
+      const radius = 80 * sProp;
+      const lineWidth = 16 * sProp;
+      const circleCenterY = height / 2 + 90 * sProp;
+  
+      context.beginPath();
+      context.arc(width / 2, circleCenterY, radius, 0, Math.PI * 2);
+      context.strokeStyle = '#FFFFFF';
+      context.lineWidth = lineWidth;
+      context.stroke();
+  
+      // Draw a smaller arc to create the rotating effect
+      context.beginPath();
+      context.arc(width / 2, circleCenterY, radius, angle, angle + Math.PI / 2);
+      context.strokeStyle = '#FFA700'; // Gold color for visibility
+      context.stroke();
+  
+      angle += 0.1; // Change this value to adjust the speed of rotation
+  };
+  
+  let animationInterval = setInterval(drawLoadingCircle, 20);  
 
   //Create a canvas to draw the mouse
   const finalCanvas = document.createElement('canvas');
@@ -190,35 +222,64 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
    // Make a local map for the current user cursor
   let localCursorMap = new Map();
   let connectionState = "";
+  let reconnectTimeout = 0;
+  let hbCatch = null;
+  let attempts = 0;
 
-  const hb = await Hyperbeam(screenElement, embedURL, {
-    /*
-      This section represent the Options object of Hyperbeam, more info here:
-      https://docs.hyperbeam.com/client-sdk/javascript/reference#method-parameters
-    */
-    onConnectionStateChange: ({state}) => {
-      connectionState = state;
-    },
-    
-    delegateKeyboard: false,
+  while(true || hbCatch == null){
+    try {
+      console.log("Hyperbeam: Attempt",attempts);
+      attempts++;
+      hbCatch = await Hyperbeam(screenElement, embedURL, {
+        /*
+          This section represent the Options object of Hyperbeam, more info here:
+          https://docs.hyperbeam.com/client-sdk/javascript/reference#method-parameters
+        */
+        onConnectionStateChange: ({state}) => {
+          connectionState = state;
+        },
+        
+        delegateKeyboard: false,
 
-    // Handle audio from Hyperbeam
-    audioTrackCb: (track) => {
-      const audioListener = screenElement.sceneEl.audioListener;
-      const audio = new THREE.PositionalAudio(audioListener);
-      audio.setMediaStreamSource(new MediaStream([track]));
-      audio.setRefDistance(0.5);
-      screenElement.setObject3D(screenElement.attrName, audio);
-    },
-    // We use frameCb to get our texture updated with the video stream
-    frameCb: (frame) => {
-      if (texture.image !== null) {
-        //Draw on top of the canvas
-        context.drawImage(frame, 0, 0, canvas.width, canvas.height);
-        texture.needsUpdate = true;
-      }
-    },
-  });
+        // Handle audio from Hyperbeam
+        audioTrackCb: (track) => {
+          const audioListener = screenElement.sceneEl.audioListener;
+          const audio = new THREE.PositionalAudio(audioListener);
+          audio.setMediaStreamSource(new MediaStream([track]));
+          audio.setRefDistance(0.5);
+          screenElement.setObject3D(screenElement.attrName, audio);
+        },
+        // We use frameCb to get our texture updated with the video stream
+        frameCb: (frame) => {
+          // Draw the video frame
+          if (texture.image !== null) {
+            //Draw on top of the canvas
+            context.drawImage(frame, 0, 0, canvas.width, canvas.height);
+            clearInterval(animationInterval);
+            texture.needsUpdate = true;
+            reconnectTimeout = 0;
+          }
+        },
+      });
+      break;
+    } catch (e) {
+      console.log("Error initializing Hyperbeam",e);
+      // Wait 1 second before trying again
+      await new Promise(r => setTimeout(r, 1000));
+    }
+  }
+  const hb = hbCatch;
+
+  // Add reconnectTimeout constantly
+  setInterval(() => {
+    reconnectTimeout++;
+    if (reconnectTimeout > 5) {
+      console.log("No frame received in the last 5 seconds, reconnecting...");
+      reconnectTimeout = -5;
+      hb.reconnect();
+    }
+  }, 1000);
+  
 
   // Register a global variable to call Hyperbeam from anywhere
   if (!window.cursorOutBounds) {window.cursorOutBounds = false;}

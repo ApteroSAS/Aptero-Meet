@@ -814,11 +814,7 @@ AFRAME.registerComponent("media-video", {
       }
 
       // Set src on video to begin loading.
-
       if(url.startsWith(HYPERBEAM_PROTOCOL)) {
-
-        console.log("hyperbeam protocol")
-        console.log(texture)
         texture = await hyperbeamBrowser(this.el,texture,this.data);
 
       } else if (url.startsWith(IN_APP_WEB_BROWSER_PROTOCOL)) {
