@@ -277,6 +277,7 @@ async function mediaInflator(el, componentName, componentData, components) {
       HBSession: componentData.HBSession,
       HBNoCursors: componentData.HBNoCursors,
       HBRestricted: componentData.HBRestricted,
+      HBFalloffDistance: componentData.HBFalloffDistance,
       HBPermissions: componentData.HBPermissions,
     });
   }

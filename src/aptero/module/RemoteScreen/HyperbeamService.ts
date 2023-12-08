@@ -69,6 +69,7 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
       HBNoCursors: null,
       HBStready: null,
       HBRestricted: null,
+      HBFalloffDistance: null,
       HBPermissions: {},
     };
   }
@@ -173,7 +174,6 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
     {
       try {
           embedURL = await processHyperbeamEntity(screenElement,mediaData,hb_objid,hbProperties);
-          //console.log("Define EmbedURL",screenElement.getAttribute("media-video").hsrc);
       }
           catch (e) {
           console.log("Error getting Aptero Hyperbeam",e);
@@ -224,12 +224,9 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
   let connectionState = "";
   let reconnectTimeout = 0;
   let hbCatch = null;
-  let attempts = 0;
 
   while(true || hbCatch == null){
     try {
-      console.log("Hyperbeam: Attempt",attempts);
-      attempts++;
       hbCatch = await Hyperbeam(screenElement, embedURL, {
         /*
           This section represent the Options object of Hyperbeam, more info here:
@@ -246,7 +243,7 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
           const audioListener = screenElement.sceneEl.audioListener;
           const audio = new THREE.PositionalAudio(audioListener);
           audio.setMediaStreamSource(new MediaStream([track]));
-          audio.setRefDistance(0.5);
+          audio.setRefDistance(hbProperties.HBFalloffDistance ? hbProperties.HBFalloffDistance : 3);
           screenElement.setObject3D(screenElement.attrName, audio);
         },
         // We use frameCb to get our texture updated with the video stream
@@ -270,11 +267,14 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
   }
   const hb = hbCatch;
 
+  let hbTimeout = 3;
+
   // Add reconnectTimeout constantly
   setInterval(() => {
     reconnectTimeout++;
-    if (reconnectTimeout > 5) {
-      console.log("No frame received in the last 5 seconds, reconnecting...");
+    if (reconnectTimeout > hbTimeout) {
+      hbTimeout *= 2;
+      if (hbTimeout > 30) {hbTimeout = 30;}
       reconnectTimeout = -5;
       hb.reconnect();
     }
@@ -821,7 +821,7 @@ export const processHyperbeamEntity = async (entity,mediaData,objIdentifier,hbPr
     webgl: hbProperties.HBWebGL ? hbProperties.HBWebGL : false,
     kiosk: hbProperties.HBBrowserNav ? hbProperties.HBBrowserNav : false, // Nav bar
     dark: hbProperties.HBDarkMode ? hbProperties.HBDarkMode : false,
-    fps: hbProperties.HBFps ? hbProperties.HBFps : 24,
+    fps: hbProperties.HBFps ? Math.min(Math.max(hbProperties.HBFps,24),60) : 24,
     quality: {
       mode: hbProperties.HBQlty ? hbProperties.HBQlty : "smooth",
     },
