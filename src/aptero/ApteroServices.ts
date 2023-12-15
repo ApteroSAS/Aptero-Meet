@@ -77,6 +77,7 @@ if (new URL(window.location.href).searchParams.get("hideui")) {
 export class ApteroServices {
   thirdPersonService = new ThirdPersonService();
   private audioSettingsSystem: any;
+  private sceneEntered: boolean = false;
   constructor() {
     startSelfTest();
     roomParameters.getRoomParameters(); //called as soon as possible
@@ -136,6 +137,11 @@ export class ApteroServices {
   }
 
   notifySceneEntered() {
+    if(this.sceneEntered){
+      console.error("notifySceneEntered called multiple times");
+      return;
+    }
+    this.sceneEntered = true;
     minimumQualityService.initialCheckFinished();
     testServiceNotifySceneEntered();
     setTimeout(() => {

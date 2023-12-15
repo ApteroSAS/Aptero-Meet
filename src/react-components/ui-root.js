@@ -752,14 +752,16 @@ export class UIRoot extends Component {
   };
 
   beginOrSkipAudioSetup = () => {
-    const skipAudioSetup = this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now");
+    const skipAudioSetup = (this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now"))
+      || getAdapterParams().adapter === "none"
+      || msTeamsAPILight().msTeams();
 
     AFRAME.scenes[0].audioListener.gain.gain.setTargetAtTime(
       1,
       AFRAME.scenes[0].audioListener.context.currentTime,
       0.2
     );
-    if (skipAudioSetup || getAdapterParams().adapter === "none" || msTeamsAPILight().msTeams()) {
+    if (skipAudioSetup) {
       this.onAudioReadyButton();
     } else {
       this.pushHistoryState("entry_step", "audio");
@@ -782,7 +784,8 @@ export class UIRoot extends Component {
     }
 
     // Push the new history state before going into VR, otherwise menu button will take us back
-    clearHistoryState(this.props.history);
+    // Aptero This will cause the onJoinRoom to be called twice and that will cause a bug
+    //clearHistoryState(this.props.history);
 
     const muteOnEntry = msTeamsAPILight().msTeams() ||
       getAdapterParams().adapter === "none" ||
@@ -1086,17 +1089,17 @@ export class UIRoot extends Component {
             roomName={this.props.hub.name}
             showJoinRoom={!this.state.waitingOnAudio && !this.props.entryDisallowed}
             onJoinRoom={() => {
-              //aptero
-              if (!(this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now"))) {
+              if (promptForNameAndAvatarBeforeEntry || !this.props.forcedVREntryType) {
                 this.setState({ entering: true });
                 this.props.hubChannel.sendEnteringEvent();
-
                 if (promptForNameAndAvatarBeforeEntry) {
                   this.pushHistoryState("entry_step", "profile");
                 } else {
                   this.onRequestMicPermission();
                   this.pushHistoryState("entry_step", "mic_grant");
                 }
+              } else {
+                this.handleForceEntry();
               }
             }}
             showEnterOnDevice={!this.state.waitingOnAudio && !this.props.entryDisallowed && !isMobileVR}
