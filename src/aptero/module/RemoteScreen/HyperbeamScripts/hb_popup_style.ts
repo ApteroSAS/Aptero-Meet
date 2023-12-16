@@ -33,13 +33,24 @@ export const hb_popup_style = /*css*/`
   padding: 0.25em 1em;
   background-color: #7ed320;
   border-radius: 0.5em;
-  font-size: 1em;
+  font-size: 0.8em;
   font-weight: bold;
   line-height: 1.5em;
   text-align: center;
   margin: 0.3em 0.5em 0;
   border: none;
   box-shadow: 0 0 0.5em #00000033;
+  transition: background-color 0.3s, transform 0.2s;
+}
+.hyperbeam-popup button:hover {
+  background-color: #8de02c;
+  cursor: pointer;
+  transform: scale(1.05);
+}
+
+.hyperbeam-popup button:active {
+  background-color: #6cbf1f;
+  transform: scale(0.95);
 }
 
 @keyframes fadein {

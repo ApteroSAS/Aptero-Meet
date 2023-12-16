@@ -6,7 +6,6 @@ const colliderWorldPositionVec = new THREE.Vector3();
 
 function startPFrame(data) {
   // Create iframe
-  console.log("CREATING A PERSISTENT IFRAME")
   const iframe = document.createElement("iframe");
   iframe.src = data.linkSource;
   iframe.width = "20%";
@@ -25,8 +24,6 @@ function startPFrame(data) {
     name: data.sidebarName,
     icon: data.buttonIcon,
   };
-
-  console.log("PFrameProps: ", window.PFrameProps)
 
   const obj = {
     url : "psidebar",
@@ -85,14 +82,12 @@ AFRAME.registerComponent("trigger", {
 
     if (!window.fullyInRoom) {
       this.wip = false;
-      //console.log("not fully in room");
       return;
     }
 
     const colliders = this.data.colliders;
     if (colliders.length === 0) {
       this.wip = false;
-      //console.log("no colliders");
       return;
     }
 
@@ -105,8 +100,6 @@ AFRAME.registerComponent("trigger", {
       const collidingLastFrame = this.collidingLastFrame[object3D.id];
 
       // We FIRST check if the user has selected their avatar + microphone
-    
-      //console.log("fully in room",isColliding,collidingLastFrame);
       if (isColliding && !collidingLastFrame) {
         console.log("entering zone");
         if (!window.PERSISTENTIFRAME) {
@@ -125,5 +118,15 @@ AFRAME.registerComponent("trigger", {
   
 
     this.wip = false;
+  },
+
+  remove() {
+    if (window.PERSISTENTIFRAME) {
+      window.PERSISTENTIFRAME.remove();
+      window.PERSISTENTIFRAME = null;
+      const sceneEl = document.querySelector("a-scene");
+      sceneEl.emit("togglePFrameButtonVisibility");
+      sceneEl.emit("action_toggle_custom_psidebar");
+    }
   }
 });

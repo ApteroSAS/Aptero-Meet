@@ -7,7 +7,7 @@ declare const AFRAME;
 
 // This way of adding the popup is questionable, but it works
 
-export function hyperbeamPopup(hyperbeamExit,hbProperties) {
+export function hyperbeamPopup(hyperbeamExit,hbProperties,hb) {
   if (!window.hyperbeam_popup) { // Ensure we only add ONE popup
     // Create the popup
     const hbPopup = window.hyperbeam_popup = document.createElement("div");
@@ -23,7 +23,6 @@ export function hyperbeamPopup(hyperbeamExit,hbProperties) {
     const hbButtons = document.createElement("div");
     hbButtons.className = "hyperbeam-buttons";
     hbPopup.appendChild(hbButtons);
-    
     // Add a Button to open a Sidebar inside a div
     const hbPopupButton2 = document.createElement("button");
     hbPopupButton2.innerHTML = "Fullscreen";
@@ -53,6 +52,13 @@ export function hyperbeamPopup(hyperbeamExit,hbProperties) {
       }
     });
 
+    // Add a Button to reconnect (hb.reconnect)
+    const hbPopupButton3 = document.createElement("button");
+    hbPopupButton3.innerHTML = "Reconnect";
+    hbButtons.appendChild(hbPopupButton3);
+    hbPopupButton3.addEventListener("click", () => {
+      hb.reconnect();
+    });
     
     // Check if the device is mobile
     if (AFRAME.utils.device.isMobile()) {
