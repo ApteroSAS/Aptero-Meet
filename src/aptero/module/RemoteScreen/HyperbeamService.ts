@@ -1,9 +1,12 @@
-
 import Hyperbeam from "@hyperbeam/web";
 import { getCurrentHubId } from "../../../utils/hub-utils";
 import apteroCursor from "../../../assets/aptero/apteroCursor.svg";
 
-import {hyperbeamPopup} from "./HyperbeamScripts/HyperbeamPopup"
+import { hyperbeamPopup } from "./HyperbeamScripts/HyperbeamPopup"
+import { cleanProtocol } from "./HyperbeamScripts/cleanProtocol";
+import { updatePermission } from "./HyperbeamScripts/updatePermission";
+import { loadingScreen, pinElScreen } from "./HyperbeamScripts/hbScreens";
+import { HyperbeamInitialize } from "./HyperbeamScripts/HyperbeamInitialize";
 
 export const HYPERBEAM_PROTOCOL = "hyperbeam:";
 export const HYPERBEAM_TRAIL = "/hyperbeam.mp4";
@@ -13,37 +16,11 @@ declare const NAF;
 declare const THREE;
 declare const window;
 
-// Function to correct URL protocol
-function cleanurl(url) {
-  url = url.replace(HYPERBEAM_PROTOCOL, "https:");
-  url = url.replace("http://", "https://");
-  url = url.replace("https://https://", "https://"); //Avoid duplicates!
-  return url;
-}
-
-function updatePermission(hbProperties,screenElement) {
-  let allowInput = false;
-    console.log("Manage Permissions",hbProperties.HBPermissions);
-
-    for (const [key, value] of Object.entries(hbProperties.HBPermissions)) {
-      console.log("Check Permission",key,value);
-      if (value && window.APP.hubChannel.can(key)) {
-        console.log("Allow Input",key,value)
-        allowInput = true;
-        break;
-      }
-    }
-
-    window.APP.hubChannel.addEventListener("permissions_updated", () => {
-      const allowInputNew = updatePermission(hbProperties,screenElement);
-      screenElement.acceptsInput = allowInputNew;
-    });
-  
-    return allowInput;
-}
-
 
 export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
+
+  // Wait 3 seconds before starting the Hyperbeam session
+  await new Promise(r => setTimeout(r, 500));
 
   // Load the cursor SVG image
   let hbCursor = new Image();
@@ -83,7 +60,6 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
   screenElement.acceptsInput = allowInput;
   
 
-
   // Getting the networked entity and setting its attributes
   // We also get rid of the Hover menu component
   let screenId = await new Promise((resolve) => {
@@ -97,57 +73,13 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
 
   const width = hbProperties.HBRes ? Math.floor(hbProperties.HBRes * 16 / 9) : 1280;
   const height = hbProperties.HBRes ? hbProperties.HBRes : 720;
-  const sProp = height / 720;
+
+  // Create a base canvas with a Loading screen as a base texture
+  const loadScreen = loadingScreen(width,height);
+  const canvas = loadScreen.canvas;
+  const context = loadScreen.context;
+  const animationInterval = loadScreen.animationInterval;
   
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const context = canvas.getContext('2d');
-  
-  // Gradient background with less bright colors
-  const gradient = context.createLinearGradient(0, 0, width, height);
-  gradient.addColorStop(0, '#483D8B'); // Darker purple
-  gradient.addColorStop(1, '#9370DB'); // Muted purple
-  context.fillStyle = gradient;
-  context.fillRect(0, 0, width, height);
-  
-  // Rounded rectangle
-  context.fillStyle = 'rgba(255, 255, 255, 0.2)';
-  context.beginPath();
-  context.roundRect(20 * sProp, 20 * sProp, width - 40 * sProp, height - 40 * sProp, 40 * sProp);
-  context.fill();
-  
-  // Loading text
-  context.font = `${sProp * 94}px Arial`; // Scaled font size
-  context.fillStyle = '#FFFFFF';
-  context.textAlign = 'center';
-  context.textBaseline = 'middle';
-  context.fillText('Loading Browser', width / 2, height / 2 - 120 * sProp);
-  
-  // Animated Loading Circle
-  let angle = 0;
-  const drawLoadingCircle = () => {
-      // Apply sProp for scaling the loading circle
-      const radius = 80 * sProp;
-      const lineWidth = 16 * sProp;
-      const circleCenterY = height / 2 + 90 * sProp;
-  
-      context.beginPath();
-      context.arc(width / 2, circleCenterY, radius, 0, Math.PI * 2);
-      context.strokeStyle = '#FFFFFF';
-      context.lineWidth = lineWidth;
-      context.stroke();
-  
-      // Draw a smaller arc to create the rotating effect
-      context.beginPath();
-      context.arc(width / 2, circleCenterY, radius, angle, angle + Math.PI / 2);
-      context.strokeStyle = '#FFA700'; // Gold color for visibility
-      context.stroke();
-  
-      angle += 0.1; // Change this value to adjust the speed of rotation
-  };
-  
-  let animationInterval = setInterval(drawLoadingCircle, 20);  
 
   //Create a canvas to draw the mouse
   const finalCanvas = document.createElement('canvas');
@@ -157,62 +89,33 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
 
 
   let embedURL = "";
-
-  let mediaLoader = await screenElement.getAttribute("media-video");
-  let testUrl = await mediaLoader.hsrc;
+  let hbElement = await screenElement.getAttribute("media-video");
+  let testUrl = await hbElement.hsrc;
   
+  const hubId = getCurrentHubId();
+  const hb_objid = 'hb_objid_'+hubId+'_'+screenElement.id;
 
   if (testUrl) {
     embedURL = testUrl;
   } else {
-    const hubId = getCurrentHubId();
-    const hb_objid = 'hb_objid_'+hubId+'_'+screenElement.id;
     // If the object doesn't have a defined HB ID, we assign one
     let apteroTimeout = 2000;
     // Try get the Hyperbeam session from Aptero
     while(embedURL === "")
     {
       try {
-          embedURL = await processHyperbeamEntity(screenElement,mediaData,hb_objid,hbProperties);
+        embedURL = await processHyperbeamEntity(screenElement,mediaData,hb_objid,hbProperties);
       }
-          catch (e) {
-          console.log("Error getting Aptero Hyperbeam",e);
+        catch (e) {
+        console.log("Error getting Aptero Hyperbeam",e);
       }
       
       if (embedURL === "") {
-          // Wait an increasing amount of time before trying again
-          await new Promise(r => setTimeout(r, apteroTimeout));
-          apteroTimeout = Math.min(10000, apteroTimeout + 1000);
+        // Wait an increasing amount of time before trying again
+        await new Promise(r => setTimeout(r, apteroTimeout));
+        apteroTimeout = Math.min(10000, apteroTimeout + 1000);
       }
     }
-  }
-
-  if (embedURL === "") {
-    // We can't get a Hyperbeam session, we just display an Error message
-
-    context.fillStyle = '#A788FD';
-    context.beginPath();
-    context.roundRect(20, 20, canvas.width-40, canvas.height-40, 40);
-    context.fill();
-
-    context.font = 'bold 130px Helvetica'
-    context.fillStyle = 'black'
-    context.textAlign = 'center'
-    context.textBaseline = 'middle'
-    context.fillText('Unable to load VM', canvas.width / 2, canvas.height / 2 -50);
-    context.font = '70px Helvetica'
-    context.fillText('Hyperbeam was unable to', canvas.width / 2, canvas.height / 2 +60);
-    context.fillText('return a valid Session', canvas.width / 2, canvas.height / 2 +130);
-
-    console.log("Hyperbeam not available");
-    screenElement.emit("video-loaded", { projection: "flat" });
-
-    
-    texture.flipY = false
-    texture.image = canvas;
-    texture.needsUpdate = true;
-    texture.generateMipmaps = false
-    return texture;
   }
 
   /*----------------------------------------------------
@@ -227,40 +130,19 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
 
   while(true || hbCatch == null){
     try {
-      hbCatch = await Hyperbeam(screenElement, embedURL, {
-        /*
-          This section represent the Options object of Hyperbeam, more info here:
-          https://docs.hyperbeam.com/client-sdk/javascript/reference#method-parameters
-        */
-        onConnectionStateChange: ({state}) => {
-          connectionState = state;
-        },
-        
-        delegateKeyboard: false,
-
-        // Handle audio from Hyperbeam
-        audioTrackCb: (track) => {
-          const audioListener = screenElement.sceneEl.audioListener;
-          const audio = new THREE.PositionalAudio(audioListener);
-          audio.setMediaStreamSource(new MediaStream([track]));
-          audio.setRefDistance(hbProperties.HBFalloffDistance ? hbProperties.HBFalloffDistance : 3);
-          screenElement.setObject3D(screenElement.attrName, audio);
-        },
-        // We use frameCb to get our texture updated with the video stream
-        frameCb: (frame) => {
-          // Draw the video frame
-          if (texture.image !== null) {
-            //Draw on top of the canvas
-            context.drawImage(frame, 0, 0, canvas.width, canvas.height);
-            clearInterval(animationInterval);
-            texture.needsUpdate = true;
-            reconnectTimeout = 0;
-          }
-        },
-      });
+      const hbProcess = await HyperbeamInitialize(screenElement, embedURL, hbProperties, texture, context, canvas, animationInterval, reconnectTimeout);
+      hbCatch = hbProcess.hbRet;
+      connectionState = hbProcess.connectionState;
+      reconnectTimeout = hbProcess.reconnectTimeout;
+      
       break;
     } catch (e) {
       console.log("Error initializing Hyperbeam",e);
+      // If the embed URL has been terminated, get a new one. The error would start by saying "SessionTerminatedError"
+      if (e.name === "SessionTerminatedError") {
+        console.log("Session Terminated || Retry new embedURL");
+        embedURL = await processHyperbeamEntity(screenElement,mediaData,hb_objid,hbProperties);
+      }
       // Wait 1 second before trying again
       await new Promise(r => setTimeout(r, 1000));
     }
@@ -268,18 +150,18 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
   const hb = hbCatch;
 
   let hbTimeout = 3;
-
+  let retries = 0;
   // Add reconnectTimeout constantly
   setInterval(() => {
     reconnectTimeout++;
-    if (reconnectTimeout > hbTimeout) {
-      hbTimeout *= 2;
-      if (hbTimeout > 30) {hbTimeout = 30;}
+    if (reconnectTimeout > hbTimeout && (retries < 4 || hbProperties.HBNoCursors)) {
+      hbTimeout = Math.min(20, hbTimeout*3);
       reconnectTimeout = -5;
+      retries++;
       hb.reconnect();
     }
   }, 1000);
-  
+
 
   // Register a global variable to call Hyperbeam from anywhere
   if (!window.cursorOutBounds) {window.cursorOutBounds = false;}
@@ -291,7 +173,6 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
   if (!window.hyperbeam_hb) {window.hyperbeam_hb = null;}
   if (!window.hyperbeam_popup) {window.hyperbeam_popup = null;}
 
-  
 
   // Tell the loader element that we are ready, so it stop doing the wawawa loading noise
   screenElement.emit("video-loaded", { projection: "flat" });
@@ -609,32 +490,7 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
     } else {
       // Show a message asking to PIN the screenElement
       if (connectionState === "playing") {
-        // -Shadow
-        finalContext.shadowColor = 'rgba(0, 0, 0, 0.5)';
-        finalContext.shadowBlur = 20;
-        finalContext.shadowOffsetX = 0;
-        finalContext.shadowOffsetY = 10; 
-        // -Background
-        const hcenter = height / 2;
-        finalContext.fillStyle = 'black';
-        finalContext.beginPath();
-        finalContext.roundRect(30, hcenter-160, width-60, 280, 40);
-        finalContext.fill();
-        finalContext.shadowColor = 'rgba(0, 0, 0, 0)';
-        // -Inner Background
-        finalContext.fillStyle = '#ffcc00';
-        finalContext.beginPath();
-        finalContext.roundRect(50, hcenter-140, width-100, 240, 30);
-        finalContext.fill();
-
-        // -Text
-        finalContext.font = 'bold 130px Helvetica'
-        finalContext.fillStyle = 'black'
-        finalContext.textAlign = 'center'
-        finalContext.textBaseline = 'middle'
-        finalContext.fillText('PIN this element', width / 2, hcenter -50);
-        finalContext.font = '70px Helvetica'
-        finalContext.fillText('to enable input control', width / 2, hcenter +50);
+        pinElScreen(finalContext, width, height);
       }
     }
 
@@ -700,7 +556,7 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
   hb.resize(width, height);
 
   // Display on the screen a popup that shows that we are locked to a Hyperbeam screen
-  hyperbeamPopup(hyperbeamExit,hbProperties);
+  hyperbeamPopup(hyperbeamExit,hbProperties,hb);
 
   // Destroy hb when the object is destroyed
   screenElement.addEventListener("componentremoved", (evt) => {
@@ -752,8 +608,14 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
       window.hyperbeam_popup.style.opacity = 0;
       window.hyperbeam_popup.style.display = "none";
     }, 300);
-
   }
+ 
+  // End hb when the object is destroyed
+  screenElement.addEventListener("componentremoved", (evt) => {
+    if (evt.detail.name === "networked") {
+      hb.destroy();
+    }
+  });
   
   if (hbProperties.HBNoCursors) {
     texture.image = canvas;
@@ -786,7 +648,7 @@ function readQueryVariable(name, defaultValue) {
 
 export const processHyperbeamEntity = async (entity,mediaData,objIdentifier,hbProperties) => {
   // Get the VM session from Aptero or from the Hyperbeam demo server
-  let url = readQueryVariable('url', cleanurl(mediaData.src));
+  let url = readQueryVariable('url', cleanProtocol(mediaData.src, HYPERBEAM_PROTOCOL));
 
   let fetchfrom = 'https://hyperbeam.serverless.aptero.co/objcomputer';
   // If we are running from localhost, fetch directly using CORS proxy
@@ -851,7 +713,6 @@ export const processHyperbeamEntity = async (entity,mediaData,objIdentifier,hbPr
     if (data.embed_url) {
       // Define hsrc for media-video
       entity.setAttribute("media-video", {hsrc: data.embed_url});
-
       return data.embed_url;
     }
   }
