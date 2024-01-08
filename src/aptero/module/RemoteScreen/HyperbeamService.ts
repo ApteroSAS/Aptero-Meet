@@ -46,8 +46,19 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
       HBNoCursors: null,
       HBStready: null,
       HBRestricted: null,
-      HBFalloffDistance: null,
       HBPermissions: {},
+      HBaudioParamsComp: {},
+      HBFalloffDistance: null,
+      HBAdvancedAudio: null,
+      audioType: null,
+      gain: null,
+      distanceModel: null,
+      rolloffFactor: null,
+      refDistance: null,
+      maxDistance: null,
+      coneInnerAngle: null,
+      coneOuterAngle: null,
+      coneOuterGain: null,
     };
   }
 

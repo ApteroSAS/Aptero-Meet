@@ -279,6 +279,17 @@ async function mediaInflator(el, componentName, componentData, components) {
       HBRestricted: componentData.HBRestricted,
       HBFalloffDistance: componentData.HBFalloffDistance,
       HBPermissions: componentData.HBPermissions,
+      // Advanced audio properties
+      HBAdvancedAudio: componentData.HBAdvancedAudio,
+      audioType: componentData.audioType,
+      gain: componentData.gain,
+      distanceModel: componentData.distanceModel,
+      rolloffFactor: componentData.rolloffFactor,
+      refDistance: componentData.refDistance,
+      maxDistance: componentData.maxDistance,
+      coneInnerAngle: componentData.coneInnerAngle,
+      coneOuterAngle: componentData.coneOuterAngle,
+      coneOuterGain: componentData.coneOuterGain,
     });
   }
 
