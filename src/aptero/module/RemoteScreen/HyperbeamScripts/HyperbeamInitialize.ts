@@ -67,8 +67,10 @@ export async function HyperbeamInitialize(screenElement, embedURL, hbProperties,
 
   // I tried to use the gain property of the audio object, but it didn't work
   // So I used the volume property of Hyperbeam instead
-  hbRet.volume = hbProperties.gain;
-
+  if (hbProperties.gain){
+    hbRet.volume = hbProperties.gain;
+  }
+  
   return {
     hbRet,
     reconnectTimeout,
