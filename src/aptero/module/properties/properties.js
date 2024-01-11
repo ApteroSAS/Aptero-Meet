@@ -62,6 +62,10 @@ window.APP_PROPS = {
     RETICULUM_SOCKET_PROTOCOL: "",
     RETICULUM_SOCKET_SERVER: ""
   },
+  "@aptero/http-event-log":{
+    SERVICE_URL:"DISABLED",//"https://meet.aptero.co/service/logger/trace"
+    //SERVICE_URL:"https://meet.aptero.co/service/logger/trace"
+  },
 
   APP_CONFIG: {
     GLOBAL_ASSETS_PATH: "https://meet.aptero.co/data/global/",
