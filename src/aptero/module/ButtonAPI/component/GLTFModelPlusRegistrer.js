@@ -10,6 +10,8 @@ export function registerCustomGLTFModelPlusComponents(){
         sidebarName,
         linkSource,
         buttonIcon,
+        audioMode,
+        universalAudio,
         // legacy properties
         enterComponent,
         enterProperty,
@@ -27,6 +29,8 @@ export function registerCustomGLTFModelPlusComponents(){
         sidebarName: sidebarName,
         linkSource: linkSource,
         buttonIcon: buttonIcon,
+        audioMode: audioMode,
+        universalAudio: universalAudio,
         // legacy properties
         enterComponent: enterComponent,
         enterProperty: enterProperty,

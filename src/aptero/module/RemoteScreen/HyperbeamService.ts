@@ -49,6 +49,7 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
       HBPermissions: {},
       HBaudioParamsComp: {},
       HBFalloffDistance: null,
+      universalStream: null,
       HBAdvancedAudio: null,
       audioType: null,
       gain: null,
@@ -103,8 +104,16 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
   let hbElement = await screenElement.getAttribute("media-video");
   let testUrl = await hbElement.hsrc;
   
-  const hubId = getCurrentHubId();
-  const hb_objid = 'hb_objid_'+hubId+'_'+screenElement.id;
+
+  let hubId = "";
+
+  if (!hbProperties.universalStream) {
+    hubId = getCurrentHubId();
+  } else {
+    hubId = "universal";
+  }
+
+  const hb_objid = hubId+'_hb_objid'+'_'+screenElement.id;
 
   if (testUrl) {
     embedURL = testUrl;

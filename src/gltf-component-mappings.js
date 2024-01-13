@@ -279,6 +279,7 @@ async function mediaInflator(el, componentName, componentData, components) {
       HBRestricted: componentData.HBRestricted,
       HBFalloffDistance: componentData.HBFalloffDistance,
       HBPermissions: componentData.HBPermissions,
+      universalStream: componentData.universalStream,
       // Advanced audio properties
       HBAdvancedAudio: componentData.HBAdvancedAudio,
       audioType: componentData.audioType,

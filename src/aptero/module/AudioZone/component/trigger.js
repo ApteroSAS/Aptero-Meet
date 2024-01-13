@@ -1,4 +1,6 @@
 
+import {CustomURL} from "../../customURL/CustomURL"
+
 const sizeVec = new THREE.Vector3();
 const boundingBoxWorldPositionVec = new THREE.Vector3();
 const colliderWorldPositionVec = new THREE.Vector3();
@@ -7,7 +9,20 @@ const colliderWorldPositionVec = new THREE.Vector3();
 function startPFrame(data) {
   // Create iframe
   const iframe = document.createElement("iframe");
-  iframe.src = data.linkSource;
+
+  let triggerSrc = data.linkSource;
+  if (data.audioMode) {
+    let baseURL = "https://horus.aptero.co/room/"
+    if (!data.universalAudio) {
+      baseURL += "{ROOM_ID}/";
+    }
+    baseURL += "{ROOM_NAME}";
+
+    const customURL = new CustomURL();
+    triggerSrc = customURL.processURL(baseURL);
+  }
+
+  iframe.src = triggerSrc;
   iframe.width = "20%";
   iframe.height = "20%";
   iframe.allow = "camera; microphone; display-capture; fullscreen; vr; xr; xr-spatial-tracking;";
@@ -49,6 +64,8 @@ AFRAME.registerComponent("trigger", {
     sidebarName: { type: "string" },
     linkSource: { type: "string" },
     buttonIcon: { type: "string" },
+    audioMode: { type: "boolean" },
+    universalAudio: { type: "boolean" },
     // legacy properties
     enterComponent: { type: "string" },
     enterProperty: { type: "string" },
