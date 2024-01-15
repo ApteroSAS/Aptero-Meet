@@ -16,7 +16,6 @@ import SoundSystem from "./module/DistributedSound/SoundSystem";
 //adapter
 import "./module/webRTCadapter/adapter-config";
 import { ThirdPersonService } from "./module/ThirdPerson/ThirdPersonService";
-import { aptLogger } from "./module/telemetry/log/Logger";
 import { minimumQualityService } from "./module/perf/MinimumQualityService";
 import { testServiceNotifySceneEntered, startSelfTest, testTick } from "./module/TestHelper/SelfTestService.loader";
 import { setlistenerEndShareVideo } from "./module/webRTCadapter/adapter-config";
@@ -25,6 +24,8 @@ import { wait } from "./util/AsyncWaiter";
 import { networkService } from "./module/HubsBridge/service/NetworkService";
 import { roomParameters } from "./module/HubsBridge/service/RoomParameters";
 import { tryMSMatchTheme } from "./module/microsoft/react-components/components/MSThemeMatcher";
+import {container} from "./module/axolotis/IOCConfig";
+import {HttpEventService, HttpEventServiceName} from "@aptero/axolotis-module-basic";
 
 declare let window:any;
 declare let AFRAME:any;
@@ -81,8 +82,6 @@ export class ApteroServices {
   constructor() {
     startSelfTest();
     roomParameters.getRoomParameters(); //called as soon as possible
-    aptLogger.setProperties(window.APP_CONFIG.LOGGER);
-    aptLogger.setAdditionalData("version", process.env.BUILD_VERSION);
   }
 
   start(audioSettingsSystem) {
@@ -96,7 +95,6 @@ export class ApteroServices {
       await video360Service.start();
       await gltfExtensionProcessorService.start();
       await this.thirdPersonService.start();
-      await aptLogger.start();
       await remoteControlServiceV2.start();
     });
   }
@@ -109,15 +107,6 @@ export class ApteroServices {
     });
     await setlistenerEndShareVideo();
     await roomParameters.applyRoomParameters();
-    aptLogger.setUserId(window.APP.store.credentialsAccountId);
-    const qs = new URLSearchParams(window.location.search);
-    const roomSID = qs.get("hub_id") || document.location.pathname.substring(1).split("/")[0];
-    aptLogger.track("room_entered", {
-      datastr: roomSID,
-      roomsid: roomSID,
-      email: window.APP?.store?.state?.credentials?.email,
-      name: window.APP?.store?.state?.profile?.displayName
-    });
     await wait(() => {
       return this.audioSettingsSystem;
     });
@@ -125,6 +114,24 @@ export class ApteroServices {
     window.document.dispatchEvent(new Event(ENTERED_EVENT))
     await tryMSMatchTheme();
     sendIframeMessage(ENTERED_EVENT,{});
+    setTimeout(() => {
+      try {
+        const qs = new URLSearchParams(window.location.search);
+        const roomSID = qs.get("hub_id") || document.location.pathname.substring(1).split("/")[0] || window.APP?.hub?.hub_id;
+        const roomName = window.APP?.hub?.name;
+        container.get<HttpEventService>(HttpEventServiceName).trackEvent("room_entered", {
+          roomsid: roomSID,
+          roomName: roomName,
+          accontid: window.APP.store.credentialsAccountId,
+          email: window.APP?.store?.state?.credentials?.email,
+          name: window.APP?.store?.state?.profile?.displayName,
+          version: process.env.BUILD_VERSION,
+        });
+      } catch (e) {
+        //log error but don't block
+        console.error(e);
+      }
+    },30000);//must be at least a 30s session to count
   }
 
   tick() {

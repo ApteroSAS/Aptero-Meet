@@ -15,7 +15,8 @@ export async function setupIframeButton(t) {
       allowedSRC = true;
   }
   //test if url is allowed host
-  if (allowedSRC) return;
+  //added exception to prevent the pdf embed tool from being opened outside of the iframe
+  if (allowedSRC && !link.href.startsWith("https://meet.aptero.co/service/pdf-embed-tool")) return;
   
   // iframeable is dead, not big surprise, we don't use it anymore
   // The new code is on the open-media-button.js

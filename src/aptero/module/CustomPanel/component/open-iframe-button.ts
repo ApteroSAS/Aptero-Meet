@@ -1,6 +1,8 @@
 import { setTimeout } from "core-js";
 //import UIRoot from "../../react-components/ui-root";
 
+declare const AFRAME:any;
+
 AFRAME.registerComponent("open-iframe-button", {
 
   init() {

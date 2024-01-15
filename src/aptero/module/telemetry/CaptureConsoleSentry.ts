@@ -22,7 +22,7 @@ export class CaptureConsoleSentry {
     /**
      * @inheritDoc
      */
-    constructor(options = {}) {
+    constructor(options:any = {}) {
         if (options.levels) {
             this._levels = options.levels;
         }
@@ -37,7 +37,7 @@ export class CaptureConsoleSentry {
         }
 
         this._levels.forEach((level) => {
-            if (!(level in global.console)) {
+            if (!(level in (global as any).console)) {
                 return;
             }
 
