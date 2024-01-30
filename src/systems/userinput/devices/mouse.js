@@ -115,6 +115,12 @@ export class MouseDevice {
       }
     }
 
+    if (window.lockMovement) {
+      this.buttonLeft = false;
+      this.buttonRight = false;
+      this.buttonMiddle = false;
+    }
+
     if (!this.didStopProcessingEarly) {
       this.events.length = 0;
     }

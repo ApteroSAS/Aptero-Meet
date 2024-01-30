@@ -6,7 +6,7 @@ import configs from "../../utils/configs";
 import jwtDecode from "jwt-decode";
 import AuthChannel from "../../utils/auth-channel";
 import { connectToReticulum } from "../../utils/phoenix-utils";
-import {msTeamsAPI} from "@aptero/axolotis-module-teams";
+import {msTeamsAPI} from "../../aptero/module/axolotis/modules/basic/ImportHelper";
 
 export const AuthContext = createContext();
 

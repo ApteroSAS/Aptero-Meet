@@ -16,7 +16,8 @@ import { ReactComponent as HandRaisedIcon } from "../icons/HandRaised.svg";
 import { List, ButtonListItem } from "../layout/List";
 import { FormattedMessage, useIntl } from "react-intl";
 import { PermissionNotification } from "./PermissionNotifications";
-import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
+import {msTeamsAPILight} from "../../aptero/module/axolotis/modules/basic/ImportHelper";
+import {getAdapterParams} from "../../aptero/module/webRTCadapter/adapter-config";
 
 function getDeviceLabel(ctx, intl) {
   if (ctx) {
@@ -118,7 +119,7 @@ export function PeopleSidebar({
       }
       beforeTitle={<CloseButton onClick={onClose} />}
       afterTitle={
-        showMuteAll && !msTeamsAPILight().msTeams()? (
+        showMuteAll && !(msTeamsAPILight().msTeams() || getAdapterParams().adapter === "none")? (
           <IconButton onClick={onMuteAll}>
             <FormattedMessage id="people-sidebar.mute-all-button" defaultMessage="Mute All" />
           </IconButton>

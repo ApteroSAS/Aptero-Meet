@@ -14,6 +14,25 @@
   }
 }
 
+:local(.fullmodeButton) {
+  position: absolute;
+  right: 0px;
+  margin-right: 12px;
+  background: none;
+  border: none;
+}
+
+:local(.fullmode) {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  margin: 0;
+  width: 100%;
+  z-index: 9;
+}
+
 :local(.header) {
   display: flex;
   height: 48px;

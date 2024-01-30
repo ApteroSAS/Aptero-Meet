@@ -52,7 +52,7 @@ import { MicSetupModalContainer } from "./room/MicSetupModalContainer";
 import { InvitePopoverContainer } from "./room/InvitePopoverContainer";
 import { MoreMenuPopoverButton, CompactMoreMenuButton, MoreMenuContextProvider } from "./room/MoreMenuPopover";
 import { ChatSidebarContainer } from "./room/ChatSidebarContainer";
-import { ContentMenu, PeopleMenuButton, ObjectsMenuButton, ECSDebugMenuButton } from "./room/ContentMenu";
+import { ContentMenu, PeopleMenuButton, ObjectsMenuButton } from "./room/ContentMenu";
 import { ReactComponent as CameraIcon } from "./icons/Camera.svg";
 import { ReactComponent as AvatarIcon } from "./icons/Avatar.svg";
 import { ReactComponent as AddIcon } from "./icons/Add.svg";
@@ -112,11 +112,11 @@ import { propertiesService } from "../aptero/module/properties/propertiesService
 import AptRoot from "../aptero/module/HubsBridge/AptRoot";
 import { minimumQualityService } from "../aptero/module/perf/MinimumQualityService";
 import { adapterReady, getAdapterParams } from "../aptero/module/webRTCadapter/adapter-config";
-import { msTeamsAPI, msTeamsAPILight } from "@aptero/axolotis-module-teams";
 import { CustomMenuButton } from "../aptero/module/CustomPanel/react-component/CustomMenuButton";
 import { InstancesMenuButton } from "../aptero/module/load-balancer/ui/InstancesMenuButton";
 import { InstancesSidebarContainer } from "../aptero/module/load-balancer/ui/InstancesSidebarContainer";
 import { isTeamsLimitedOK } from "../aptero/module/microsoft/TeamsLimit";
+import {msTeamsAPI, msTeamsAPILight} from "../aptero/module/axolotis/modules/basic/ImportHelper";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 const IN_ROOM_MODAL_ROUTER_PATHS = ["/media"];
@@ -230,7 +230,10 @@ export class UIRoot extends Component {
     presenceCount: 0,
     chatPrefix: "",
     chatAutofocus: false,
-    msTeamsAPI: null
+    msTeamsAPI: null,
+
+    persistentIframe: null,
+    psidebarIcon: null,
   };
 
   constructor(props) {
@@ -247,6 +250,27 @@ export class UIRoot extends Component {
       });
     }
   }
+
+  //aptero
+  syncPersistentIframe = () => {
+    this.setState({ persistentIframe: window.PERSISTENTIFRAME });
+    // console log whenever we set the sidebar to the persistent iframe, which we do by checking the state
+    if (window.PERSISTENTIFRAME && this.state.persistentIframe === window.PERSISTENTIFRAME) {
+      const obj = {
+        url : "psidebar",
+        type : "sidebar_iframe",
+        title: window.PFrameProps.name,
+        icon: window.PFrameProps.icon,
+      }
+      this.setState({ psidebarIcon: obj.icon });
+      setTimeout(()=>{
+        const sceneEl = document.querySelector("a-scene");
+        sceneEl.emit("action_toggle_custom_sidebar_info",obj)
+      },10);
+    }
+
+    this.forceUpdate();
+  };
 
   componentDidUpdate(prevProps) {
     const { hubChannel, showSignInDialog } = this.props;
@@ -433,12 +457,37 @@ export class UIRoot extends Component {
       }
     });
     this.props.scene.addEventListener("devicechange", () => {
-      this.forceUpdate();
+      this.forceUpdate();syncPersistentIframe = () => {
+        this.setState({ persistentIframe: window.PERSISTENTIFRAME });
+      };
     });
 
     this.props.scene.addEventListener("action_toggle_custom_sidebar", () => {
       this.toggleSidebar("custom");
     });
+    this.props.scene.addEventListener("action_toggle_custom_psidebar", () => {
+      this.toggleSidebar("psidebar");
+    });
+    window.addEventListener("action_toggle_custom_sidebar_fullscreen", () => {
+      setTimeout(() => {
+        this.adjustIframeSize(";)", this.state.sidebarId);
+      }, 10);
+    });
+
+    //sidebar!!
+
+
+    // Add listener for adjustIframeSize
+    this.props.scene.addEventListener("adjustIframeSize", (e) => {
+      this.adjustIframeSize(e.detail.currentState, e.detail.newState);
+    });
+    // Also for when we resize the window
+    window.addEventListener("resize", () => {
+      this.adjustIframeSize(";)", this.state.sidebarId);
+    });
+
+    this.syncPersistentIframe();
+    window.addEventListener('togglePFrameButtonVisibility', this.syncPersistentIframe);
 
     const scene = this.props.scene;
 
@@ -510,6 +559,14 @@ export class UIRoot extends Component {
     this.props.scene.removeEventListener("action_toggle_custom_sidebar", () => {
       this.toggleSidebar("custom");
     });
+    this.props.scene.removeEventListener("action_toggle_custom_psidebar", () => {
+      this.toggleSidebar("psidebar");
+    });
+    if (window.hyperbeam_popup) {
+      console.log("Remove hyperbeam popup DIV");
+      window.hyperbeam_popup.remove();
+    }
+    window.removeEventListener('togglePFrameButtonVisibility', this.syncPersistentIframe);
   }
 
   storeUpdated = () => {
@@ -677,13 +734,13 @@ export class UIRoot extends Component {
   performDirectEntryFlow = async enterInVR => {
     this.setState({ enterInVR, waitingOnAudio: true });
     let hasGrantedMic = false;
-    if (msTeamsAPILight().msTeams()) {
+    if (msTeamsAPILight().msTeams() || getAdapterParams().adapter === "none") {
       hasGrantedMic = true;
     } else {
       hasGrantedMic = (await grantedMicLabels()).length > 0;
     }
 
-    if (hasGrantedMic || new URL(window.location.href).searchParams.get("offline2") || msTeamsAPILight().msTeams()) {
+    if (hasGrantedMic || new URL(window.location.href).searchParams.get("offline2") || msTeamsAPILight().msTeams() || getAdapterParams().adapter === "none") {
       if (!this.mediaDevicesManager.isMicShared && !msTeamsAPILight().msTeams()) {
         await this.mediaDevicesManager.startMicShare({});
       }
@@ -722,8 +779,10 @@ export class UIRoot extends Component {
   };
 
   beginOrSkipAudioSetup = () => {
-    const skipAudioSetup = this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now");
-    if (skipAudioSetup || getAdapterParams().adapter === "none" || msTeamsAPILight().msTeams()) {
+    const skipAudioSetup = (this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now"))
+      || getAdapterParams().adapter === "none"
+      || msTeamsAPILight().msTeams();
+    if (skipAudioSetup) {
       console.log(`Skipping audio setup (forcedVREntryType = ${this.props.forcedVREntryType})`);
       this.onAudioReadyButton();
     } else {
@@ -743,7 +802,8 @@ export class UIRoot extends Component {
     }
 
     // Push the new history state before going into VR, otherwise menu button will take us back
-    clearHistoryState(this.props.history);
+    // Aptero This will cause the onJoinRoom to be called twice and that will cause a bug
+    //clearHistoryState(this.props.history);
 
     const muteOnEntry =
       msTeamsAPILight().msTeams() ||
@@ -884,8 +944,57 @@ export class UIRoot extends Component {
 
   pushHistoryState = (k, v) => pushHistoryState(this.props.history, k, v);
 
+  adjustIframeSize(currentState, newState) {
+    if (window.PERSISTENTIFRAME && currentState !== newState) {
+      if (newState === "psidebar") {
+        // Sync persistent iframe with the sidebar bounds
+        const iframe = window.PERSISTENTIFRAME;
+        const sidebar = document.querySelector(".psidebar");
+        if (!sidebar) {
+          iframe.style.visibility = "hidden";
+          return;
+        }
+        const sidebarRect = sidebar.getBoundingClientRect();
+        iframe.style.left = sidebarRect.left + "px";
+        iframe.style.top = sidebarRect.top + "px";
+        iframe.style.width = sidebarRect.width + "px";
+        iframe.style.height = sidebarRect.height + "px";
+        iframe.style.visibility = "visible";
+
+        // Adjust Z index for fullscreen
+        if (sidebarRect.width > window.innerWidth/2) {
+          iframe.style.zIndex = 11;
+        } else {
+          iframe.style.zIndex = 1;
+        }
+
+        // Sync Sidebar with the new name
+        const obj = {
+          url : "psidebar",
+          type : "sidebar_iframe",
+          title: window.PFrameProps.name,
+          icon: window.PFrameProps.icon,
+        }
+        setTimeout(()=>{
+          const sceneEl = document.querySelector("a-scene");
+          sceneEl.emit("action_toggle_custom_sidebar_info",obj)
+        },10);
+
+      } else {
+        // Hide persistent iframe
+        const iframe = window.PERSISTENTIFRAME;
+        iframe.style.visibility = "hidden";
+      }
+    }
+  }
+
   setSidebar(sidebarId, otherState) {
     this.setState({ sidebarId, chatPrefix: "", chatAutofoucs: false, selectedUserId: null, ...otherState });
+    this.unmuteHBElement();
+    // Also adjust iframe size if we are in the persistent iframe (or close it)
+    if (sidebarId === "psidebar" || this.state.sidebarId === "psidebar") {
+      this.adjustIframeSize(this.state.sidebarId, sidebarId);
+    }
   }
 
   toggleSidebar(sidebarId, otherState) {
@@ -898,6 +1007,37 @@ export class UIRoot extends Component {
 
     this.setState(({ sidebarId: curSidebarId }) => {
       const nextSidebarId = curSidebarId === sidebarId ? null : sidebarId;
+      console.log("Current sidebar: " + curSidebarId + " Next sidebar: " + nextSidebarId);
+
+      // Unmute Hyperbeam element if we DO NOT set sidebarId to "custom"
+      if (nextSidebarId !== "custom") {
+        this.unmuteHBElement();
+      }
+
+      // Handle when we want to CLOSE the persistent iframe
+      if (nextSidebarId === "psidebar" 
+      && window.PERSISTENTIFRAME === null) {
+        // We were indeed in the persistent iframe, so we should close it
+        if (curSidebarId === "psidebar") {
+          console.log("End persistent iframe")
+          this.setState({ sidebarId: null });
+          return {
+            sidebarId: null,
+            selectedUserId: null,
+            ...otherState
+          }
+        } else { // There's something else in the Sidebar (Like the chat for example)
+          return;
+        }
+      }
+
+      if (nextSidebarId === "psidebar" || curSidebarId === "psidebar") {
+        console.log("Adjust iframe size")
+        // Wait 15 ms first
+        setTimeout(() => {
+          this.adjustIframeSize(curSidebarId, nextSidebarId);
+        }, 15);
+      }
 
       return {
         sidebarId: nextSidebarId,
@@ -905,6 +1045,19 @@ export class UIRoot extends Component {
         ...otherState
       };
     });
+  }
+
+  unmuteHBElement = () => {
+    // Unmumte Hyperbeam element if defined
+    const hb_source = window.mutedHBElement;
+    if (hb_source) {
+      const audio = hb_source.getObject3D(hb_source.attrName);
+      if (audio) {
+        audio.setVolume(1);
+        console.log("Unmuting Hyperbeam element")
+      }
+      window.mutedHBElement = undefined;
+    }    
   }
 
   onFocusChat = e => {
@@ -963,8 +1116,8 @@ export class UIRoot extends Component {
               }
               return this.onAudioReadyButton();
             }
-            //aptero
-            if (!(this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now"))) {
+              //aptero
+              if (promptForNameAndAvatarBeforeEntry || !this.props.forcedVREntryType) {
               this.setState({ entering: true });
               this.props.hubChannel.sendEnteringEvent();
               if (promptForNameAndAvatarBeforeEntry) {
@@ -1040,11 +1193,7 @@ export class UIRoot extends Component {
       <MicSetupModalContainer
         scene={this.props.scene}
         onEnterRoom={() => {
-          if (minimumQualityService.getErrorDetected()) {
-            this.pushHistoryState("entry_step", "fallback");
-          } else {
-            this.onAudioReadyButton();
-          }
+          this.onAudioReadyButton();
         }}
         onBack={() => this.props.history.goBack()}
       />
@@ -1204,15 +1353,6 @@ export class UIRoot extends Component {
         <>
           <StateRoute stateKey="entry_step" stateValue="device" history={this.props.history}>
             {this.renderDevicePanel()}
-          </StateRoute>
-          <StateRoute stateKey="entry_step" stateValue="fallback" history={this.props.history}>
-            {/*aptero*/}
-            <FallbackModal
-              onBack={() => this.props.history.goBack()}
-              onEnterRoom={() => {
-                this.onAudioReadyButton();
-              }}
-            />
           </StateRoute>
           <StateRoute stateKey="entry_step" stateValue="audio" history={this.props.history}>
             {this.renderAudioSetupPanel()}
@@ -1743,6 +1883,14 @@ export class UIRoot extends Component {
                                 onClick={() => this.toggleSidebar("objects")}
                               />
                             )}
+                          {//Aptero
+                            this.state.persistentIframe && (
+                            <PSidebarButton
+                              active={this.state.sidebarId === "psidebar"}
+                              onClick={() => this.toggleSidebar("psidebar")}
+                              icon={this.state.psidebarIcon}
+                            />
+                          )}
                           <PeopleMenuButton
                             active={this.state.sidebarId === "people"}
                             disabled={isLockedDownDemo}
@@ -1823,7 +1971,8 @@ export class UIRoot extends Component {
                 sidebar={
                   this.state.sidebarId ? (
                     <>
-                      {this.state.sidebarId === "custom" && (
+                      {(this.state.sidebarId === "custom" ||
+                       this.state.sidebarId === "psidebar") && (
                         <CustomSidebarContainer onClose={() => this.setSidebar(null)} />
                       )}
 
@@ -2141,7 +2290,7 @@ function getUrl(avatarGlb) {
 async function getUserProfile(store) {
   const mail = store.state.credentials.email;
   return axios
-    .get(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/user/get/user/" + mail)
+  return axios.get(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/user/get/user/" + mail).then(resp => {
     .then(resp => {
       const data = resp.data;
       if (data) {

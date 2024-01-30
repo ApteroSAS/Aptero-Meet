@@ -37,8 +37,7 @@ export function EmailVerified({ origin }) {
       <p>
         <FormattedMessage
           id="verify-modal.close-window"
-          defaultMessage="Please close this browser window and return to {origin}."
-          values={{ origin }}
+          defaultMessage="Please close this browser window and return to Spoke."
         />
       </p>
     </Column>

@@ -20,7 +20,7 @@ const inviteSelector = `.ApteroStyles .${stylesUtils.showLg}.${stylesToolbar.con
 const leaveSelector =
   ".ApteroStyles.entered " + `.${stylesUtils.showLg}.${stylesToolbar.content}:last-child > *:first-child`;
 const moreSelector = `.ApteroStyles .${stylesUtils.showLg}.${stylesToolbar.content}:last-child > *:nth-last-child(2)`; //Also present before loading
-const voiceSelector = `.ApteroStyles.entered .${stylesToolbar.content}:nth-child(2) > *:first-child`;
+const voiceSelector = '#voice-button-container-toolbar-button';
 const shareSelector = `.ApteroStyles.entered .${stylesToolbar.content}:nth-child(2) > *:nth-child(2)`;
 const placeSelector = `.ApteroStyles.entered .${stylesToolbar.content}:nth-child(2) > *:nth-child(3)`;
 const reactSelector = `.ApteroStyles.entered .${stylesToolbar.content}:nth-child(2) > *:nth-child(4)`;

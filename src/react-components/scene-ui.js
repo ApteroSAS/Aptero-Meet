@@ -207,7 +207,7 @@ class SceneUI extends Component {
                   <a
                     target="_blank"
                     rel="noopener noreferrer"
-                    href={getReticulumFetchUrl(`/spoke/projects/${sceneProjectId}`)}
+                  href={getReticulumFetchUrl(`/opal/projects/${sceneProjectId}`)}
                     className={styles.scenePreviewButton}
                   >
                     <Pen />
@@ -222,7 +222,7 @@ class SceneUI extends Component {
                     <a
                       target="_blank"
                       rel="noopener noreferrer"
-                      href={getReticulumFetchUrl(`/spoke/projects/new?sceneId=${sceneId}`)}
+                    href={getReticulumFetchUrl(`/opal/projects/new?sceneId=${sceneId}`)}
                       className={styles.scenePreviewButton}
                     >
                       <CodeBranch />
@@ -247,6 +247,7 @@ class SceneUI extends Component {
             <div className={styles.name}>{this.props.sceneName}</div>
             <div className={styles.attribution}>{attributions}</div>
           </div>
+                    <a href="/spoke">
         </div>
       </div>
     );

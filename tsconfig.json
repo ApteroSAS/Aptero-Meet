@@ -1,39 +1,24 @@
 {
-    "compilerOptions": {
-        "allowJs": true,
-        "allowSyntheticDefaultImports": true,
-        "baseUrl": "./",
-        "declaration": false,
-        "emitDeclarationOnly": false,
-        "esModuleInterop": true,
-        "isolatedModules": true,
-        "jsx": "react",
-        "lib": [
-            "ESNext",
-            "DOM"
-        ],
-        "module": "esnext",
-        "moduleResolution": "node",
-        "noEmit": true,
-        "noImplicitAny": false,
-        "outDir": "build/types",
-        "resolveJsonModule": true,
-        "skipLibCheck": true,
-        "sourceMap": true,
-        "strictNullChecks": true,
-        "target": "esnext",
-        "typeRoots": [
-            "./node_modules/@types",
-            "./types"
-        ]
-    },
-    "exclude": [
-        "src/**/*.js",
-        "node_modules/**"
-    ],
-    "include": [
-        "types/",
-        "src/**/*.ts",
-        "src/**/*.tsx"
+  "compilerOptions": {
+    "outDir": "./dist/",
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "moduleResolution": "node",
+    "module": "es6",
+    "target": "es6",
+    "jsx": "react",
+    "allowJs": true,
+    "noEmit": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "typeRoots": [
+      "./node_modules/@types",
+      "./types"
     ]
+  },
+  "include": [
+    "types/",
+    "src/"
+  ]
 }

@@ -1,5 +1,5 @@
-import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
 import {propertiesService} from "../properties/propertiesService";
+import {msTeamsAPILight} from "../axolotis/modules/basic/ImportHelper";
 const configs = propertiesService;
 
 export function isTeamsLimitedOK(){

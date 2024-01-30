@@ -22,7 +22,7 @@ import {
   setMaxResolution
 } from "../utils/screen-orientation-utils";
 import { AAModes } from "../constants";
-import { isLockedDownDemoRoom } from "../utils/hub-utils";
+import {getAdapterParams} from "../aptero/module/webRTCadapter/adapter-config";
 
 import dropdownArrowUrl from "../assets/images/dropdown_arrow.png";
 import dropdownArrow2xUrl from "../assets/images/dropdown_arrow@2x.png";
@@ -695,7 +695,7 @@ const CATEGORY_MOVEMENT = 3;
 const CATEGORY_TOUCHSCREEN = 4;
 const CATEGORY_ACCESSIBILITY = 5;
 const CATEGORY_GRAPHICS = 6;
-const TOP_LEVEL_CATEGORIES = [CATEGORY_AUDIO, CATEGORY_CONTROLS, CATEGORY_MISC];
+const TOP_LEVEL_CATEGORIES = (isMsTeams() || getAdapterParams().adapter === "none")?[CATEGORY_CONTROLS, CATEGORY_MISC]:[CATEGORY_AUDIO,CATEGORY_CONTROLS, CATEGORY_MISC];
 const categoryNames = defineMessages({
   [CATEGORY_AUDIO]: { id: "preferences-screen.category.audio", defaultMessage: "Audio" },
   [CATEGORY_CONTROLS]: { id: "preferences-screen.category.controls", defaultMessage: "Controls" },
@@ -875,7 +875,7 @@ class PreferencesScreen extends Component {
     this.mediaDevicesManager = APP.mediaDevicesManager;
 
     this.state = {
-      category: CATEGORY_AUDIO,
+      category: CATEGORY_CONTROLS,
       toastHeight: "150px",
       preferredMic: {
         key: "preferredMic",

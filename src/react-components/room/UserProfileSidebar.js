@@ -11,7 +11,8 @@ import { ReactComponent as VolumeHigh } from "../icons/VolumeHigh.svg";
 import { ReactComponent as VolumeMuted } from "../icons/VolumeMuted.svg";
 import useAvatarVolume from "./hooks/useAvatarVolume";
 import { calcLevel, calcGainMultiplier, MAX_VOLUME_LABELS } from "../../utils/avatar-volume-utils";
-import { msTeamsAPILight, msTeamsAPI } from "@aptero/axolotis-module-teams";
+import {msTeamsAPI, msTeamsAPILight} from "../../aptero/module/axolotis/modules/basic/ImportHelper";
+import {getAdapterParams} from "../../aptero/module/webRTCadapter/adapter-config";
 
 const MIN = 0;
 const MAX = MAX_VOLUME_LABELS - 1;
@@ -216,7 +217,7 @@ export function UserProfileSidebar({
           >
             <FormattedMessage id="avatar-teleport" defaultMessage="Go to"/>
         </Button>
-          {(canMute && !msTeamsAPILight().msTeams()) && (
+          {(canMute && !(msTeamsAPILight().msTeams() || getAdapterParams().adapter === "none")) && (
           <Button preset="cancel" onClick={onMute}>
             <FormattedMessage id="user-profile-sidebar.mute-button" defaultMessage="Mute" />
           </Button>

@@ -10,8 +10,7 @@ module.exports = {
     THREE: true,
     AFRAME: true,
     NAF: true,
-    APP: true,
-    APP_PROPS: true
+    APP: true
   },
   settings: {
     react: {
@@ -19,7 +18,7 @@ module.exports = {
     }
   },
   plugins: ["prettier", "react", "react-hooks", "@calm/react-intl"],
-
+  // https://eslint.org/docs/rules/
   rules: {
     "prettier/prettier": "warn",
 
@@ -36,7 +35,7 @@ module.exports = {
     ],
     // Light console usage is useful but remove debug logs before merging to master.
     "no-console": "warn",
-
+    // https://www.npmjs.com/package/eslint-plugin-react-hooks
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "error",
     // https://github.com/calm/eslint-plugin-react-intl

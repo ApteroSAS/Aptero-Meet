@@ -182,7 +182,6 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
 
 async function mediaInflator(el, componentName, componentData, components, fitToBox = true) {
   let isControlled = true;
-
   if (componentName === "link" && (components.video || components.image)) {
     // video/image component will set link url specified in link component.
     return;
@@ -261,6 +260,39 @@ async function mediaInflator(el, componentName, componentData, components, fitTo
 
   const src = componentName === "link" ? componentData.href : componentData.src;
 
+
+  if (componentName === "link" && componentData.HBRes) {
+    //Load Hyperbeam properties into mediaOptions.customOptions
+    mediaOptions.customOptions = JSON.stringify({
+      HBRes: componentData.HBRes,
+      HBFps: componentData.HBFps,
+      HBQlty: componentData.HBQlty,
+      HBWebGL: componentData.HBWebGL,
+      HBRegion: componentData.HBRegion,
+      HBDarkMode: componentData.HBDarkMode,
+      HBuBlock: componentData.HBuBlock,
+      HBBrowserNav: componentData.HBBrowserNav,
+      HBSession: componentData.HBSession,
+      HBNoCursors: componentData.HBNoCursors,
+      HBRestricted: componentData.HBRestricted,
+      HBFalloffDistance: componentData.HBFalloffDistance,
+      HBPermissions: componentData.HBPermissions,
+      universalStream: componentData.universalStream,
+      // Advanced audio properties
+      HBAdvancedAudio: componentData.HBAdvancedAudio,
+      audioType: componentData.audioType,
+      gain: componentData.gain,
+      distanceModel: componentData.distanceModel,
+      rolloffFactor: componentData.rolloffFactor,
+      refDistance: componentData.refDistance,
+      maxDistance: componentData.maxDistance,
+      coneInnerAngle: componentData.coneInnerAngle,
+      coneOuterAngle: componentData.coneOuterAngle,
+      coneOuterGain: componentData.coneOuterGain,
+    });
+  }
+
+
   el.setAttribute("media-loader", {
     src: sanitizeUrl(src),
     fitToBox,
@@ -270,6 +302,8 @@ async function mediaInflator(el, componentName, componentData, components, fitTo
     mediaOptions,
     moveTheParentNotTheMesh: true
   });
+
+  
 }
 
 const mediaInflatorNoResize = (el, componentName, componentData, components) =>

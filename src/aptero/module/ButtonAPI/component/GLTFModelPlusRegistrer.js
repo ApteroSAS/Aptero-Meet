@@ -7,6 +7,12 @@ export function registerCustomGLTFModelPlusComponents(){
       const {
         size,
         target,
+        sidebarName,
+        linkSource,
+        buttonIcon,
+        audioMode,
+        universalAudio,
+        // legacy properties
         enterComponent,
         enterProperty,
         enterValue,
@@ -20,6 +26,12 @@ export function registerCustomGLTFModelPlusComponents(){
         colliders: "#avatar-pov-node",
         size,
         target: target,
+        sidebarName: sidebarName,
+        linkSource: linkSource,
+        buttonIcon: buttonIcon,
+        audioMode: audioMode,
+        universalAudio: universalAudio,
+        // legacy properties
         enterComponent: enterComponent,
         enterProperty: enterProperty,
         enterValue: enterValue,

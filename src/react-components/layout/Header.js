@@ -8,7 +8,7 @@ import styles from "./Header.scss";
 import { Container } from "./Container";
 import { SocialBar } from "../home/SocialBar";
 import { SignInButton } from "../home/SignInButton";
-import { msTeamsAPILight } from "@aptero/axolotis-module-teams";
+import {msTeamsAPILight} from "../../aptero/module/axolotis/modules/basic/ImportHelper";
 import { AppLogo } from "../misc/AppLogo";
 
 export function Header({
@@ -44,6 +44,7 @@ export function Header({
                   </a>
                 </li>
               )}
+                <a href="/spoke">{editorName}</a>
               {showDocsLink && (
                 <li>
                   <a href={docsUrl}>

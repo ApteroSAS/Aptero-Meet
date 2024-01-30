@@ -2,8 +2,8 @@ import { EventEmitter } from "eventemitter3";
 import { MediaDevicesEvents, PermissionStatus, MediaDevices, NO_DEVICE_ID } from "./media-devices-utils";
 import { detectOS, detect } from "detect-browser";
 import { isIOS as detectIOS } from "./is-mobile";
-import { createTrack } from "../aptero/module/webRTCadapter/adapter-config";
-import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
+import {createTrack, getAdapterParams} from "../aptero/module/webRTCadapter/adapter-config";
+import {msTeamsAPILight} from "../aptero/module/axolotis/modules/basic/ImportHelper";
 
 const isMobile = AFRAME.utils.device.isMobile();
 const isIOS = detectIOS();
@@ -47,7 +47,7 @@ export default class MediaDevicesManager extends EventEmitter {
     };
 
     this.onDeviceChange = this.onDeviceChange.bind(this);
-    if(!msTeamsAPILight().msTeams()) {
+    if(!(msTeamsAPILight().msTeams() || getAdapterParams().adapter === "none")) {
       navigator.mediaDevices.addEventListener("devicechange", this.onDeviceChange);
     }
     this.onPermissionsUpdated = this.onPermissionsUpdated.bind(this);
@@ -233,8 +233,8 @@ export default class MediaDevicesManager extends EventEmitter {
       const { preferredMic } = this._store.state.preferences;
       deviceId = preferredMic !== NO_DEVICE_ID ? preferredMic : undefined;
     }
-    if(msTeamsAPILight().msTeams()){
-      console.error("no audio device in Teams");
+    if(msTeamsAPILight().msTeams() || getAdapterParams().adapter === "none"){
+      console.error("no audio should be started");
     }
     if(this.lastDeviceId && JSON.stringify(deviceId) === JSON.stringify(this.lastDeviceId)){
       return this.lastResult;

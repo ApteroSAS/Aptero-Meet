@@ -1,10 +1,9 @@
 import { getReticulumFetchUrl, hubUrl } from "./utils/phoenix-utils";
-import { updateEnvironmentForHub, getSceneUrlForHub, updateUIForHub, remountUI } from "./hub";
+import { updateEnvironmentForHub, updateUIForHub, remountUI } from "./hub";
 import { loadLegacyRoomObjects } from "./utils/load-legacy-room-objects";
 import { loadSavedEntityStates } from "./utils/entity-state-utils";
 import qsTruthy from "./utils/qs_truthy";
 import { localClientID, pendingMessages, pendingParts } from "./bit-systems/networking";
-import { storedUpdates } from "./bit-systems/network-receive-system";
 
 function unloadRoomObjects() {
   document.querySelectorAll("[pinnable]").forEach(el => {
@@ -63,14 +62,16 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
   const hub = data.hubs[0];
 
   if (addToHistory) {
-    const search = new URLSearchParams(location.search);
-    const params = {};
-    for (const [key, value] of search.entries()) {
-      if (key !== "hub_id") {
-        params[key] = value;
+    //Aptero
+    const extraParams = {};
+    const searchParams = new URL(window.location).searchParams;
+    for (const key of searchParams.keys()) {
+      if(["hub_id","vr_entry_type"].indexOf(key)!==-1){
+        continue;//skip specific params
       }
+      extraParams[key] = searchParams.get(key);
     }
-    window.history.pushState(null, null, hubUrl(hubId, params, hub.slug, waypoint));
+    window.history.pushState(null, null, hubUrl(hubId, extraParams, hub.slug, waypoint));
   }
 
   APP.hub = hub;
@@ -84,23 +85,22 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
     initialIsFavorited: data.subscriptions.favorites
   });
 
-  NAF.entities.removeRemoteEntities();
-  await NAF.connection.adapter.disconnect();
   await APP.dialog.disconnect();
   if (!qsTruthy("newLoader")) {
-    unloadRoomObjects();
+
   }
+  //We do not disconnect at connection level to keep the adapter
+  NAF.connection.entities.removeRemoteEntities();
+  NAF.connection.adapter.disconnect();
   NAF.connection.connectedClients = {};
   NAF.connection.activeDataChannels = {};
-  if (pendingMessages.length || storedUpdates.size) {
-    console.log(
       `Deleting ${pendingMessages.length + storedUpdates.size} unapplied network messages from previous hub.`
     );
     pendingMessages.length = 0;
     storedUpdates.clear();
   }
 
-  NAF.room = hub.hub_id;
+  unloadRoomObjects();//unload object after NAF is fully disconnected
 
   if (
     // TODO: With newLoader (and new net code), we need to clear any network state
@@ -111,13 +111,18 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
       (await getSceneUrlForHub(hub))
   ) {
     const fader = document.getElementById("viewing-camera").components["fader"];
-    fader.fadeOut().then(() => {
-      scene.emit("reset_scene");
+  fader.fadeOut().then(async () => {
+
+    scene.emit("reset_scene");
+  //update environment before connecting the network adapter to prevent visible invisible elements issue
       updateEnvironmentForHub(hub, APP.entryManager);
-    });
   }
 
   APP.retChannel.push("change_hub", { hub_id: hub.hub_id });
+
+  NAF.room = hub.hub_id;
+
+  loadRoomObjects(hubId); // load object before NAF reconnection
 
   await Promise.all([
     APP.dialog.connect({
@@ -130,7 +135,6 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
       forceTurn: APP.dialog._forceTurn,
       iceTransportPolicy: APP.dialog._iceTransportPolicy
     }),
-
     NAF.connection.adapter.connect()
   ]);
 
@@ -138,7 +142,6 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
     loadSavedEntityStates(APP.hubChannel);
     loadLegacyRoomObjects(hubId);
   } else {
-    loadRoomObjects(hubId);
   }
 
   await APP.hubChannel.sendEnteredEvent();

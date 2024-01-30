@@ -2,12 +2,19 @@ import EventEmitter from "eventemitter3";
 import { adapterFactory } from "./adapter-config";
 import { wait } from "../../util/AsyncWaiter";
 import { roomParameters } from "../HubsBridge/service/RoomParameters";
+import {Adapter} from "./AdapterI";
 
-export class AdapterWrapper {
+declare const AFRAME;
+
+/**
+ * Adapter loading will be async so this clas will be used to wrap the adapter waiting for it to load
+ * implements AdapterI interface
+ */
+export class AdapterWarpper{
   lasyLoadingFinished = false;
   tmplisteners = {};
   private tmpEventEmiter: EventEmitter<string | symbol, any>;
-  private on: (event: any, fn:any) => void;
+  private on;
   private __proto__: any;
 
    constructor() {
@@ -27,27 +34,25 @@ export class AdapterWrapper {
      //wait for room parameters retreived
      await roomParameters.applyRoomParameters();
      let adapter = await adapterFactory();
+
      //events emitter
-     // @ts-ignore
      delete this["on"];
      Object.keys(this.tmplisteners).forEach((event)=>{
        const listeners = this.tmplisteners[event];
        if(listeners) {
-         listeners.forEach((entry: any) => {
-           // @ts-ignore
-           adapter.on(event, entry.fn)
+         listeners.forEach(entry => {
+           (adapter as any).on(event, entry.fn)
          })
        }
      });
 
      //variables
-     Object.keys(adapter as Object).forEach(key => {
-       // @ts-ignore
+     Object.keys(adapter).forEach(key => {
        this[key] = adapter[key];
      })
 
      //function
-     this.__proto__ = Object.getPrototypeOf(adapter);
+     this.__proto__ = (adapter as any).__proto__;
 
      this.lasyLoadingFinished=true;
    }

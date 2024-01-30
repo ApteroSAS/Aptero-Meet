@@ -21,7 +21,7 @@ window.APP_PROPS = {
   THUMBNAIL_SERVER: "",
 
   // Comma-separated list of domains which are known to not need CORS proxying
-  NON_CORS_PROXY_DOMAINS: "aptero.co",
+  NON_CORS_PROXY_DOMAINS: "aptero.co,wowza.com",
 
   // A comma-separated list of environment URLs to make available in the picker, besides the defaults.
   // These URLs are expected to be relative to ASSET_BUNDLE_SERVER.
@@ -44,14 +44,28 @@ window.APP_PROPS = {
     ROOM_TOKEN_SERVICE: "https://alphahub.aptero.co"
   },
   "@aptero/axolotis-module-teams":{
-    MICROSOFT_APP_ID: "c89c5d54-37ec-49d6-952a-befc9b770079",
-    //MICROSOFT_APP_AUTHORITY: "https://login.microsoftonline.com/apteroco.onmicrosoft.com",
-    MICROSOFT_APP_AUTHORITY:"https://login.microsoftonline.com/common",
+    //you can find the information in the https://admin.teams.microsoft.com/policies/manage-apps/934817ce-ddcc-48b6-9a8b-1f7ac5f654ce or for local in the install link
+    //External App Id App identifier defined during app creation. This is only applicable for custom apps.
+    //MICROSOFT_APP_ID is the AAD_APP_CLIENT_ID
+    //TEAMS_APP_ID: "934817ce-ddcc-48b6-9a8b-1f7ac5f654ce", //alpha
+    TEAMS_APP_ID: "2b5b7def-36fb-4329-98a1-77b316e02b13", //local
+    //TEAMS_APP_ID: "83e15843-4af6-4b33-bacc-d11827352c3e", //public
+
+    //MICROSOFT_APP_ID: "c89c5d54-37ec-49d6-952a-befc9b770079", //alpha (does not work for debug localhost)
+    //MICROSOFT_APP_AUTHORITY:"https://login.microsoftonline.com/common",//alpha (does not work for debug localhost)
+    MICROSOFT_APP_ID: "12ee7a90-4b99-4717-becc-9384ab5d09c3", //local
+    MICROSOFT_APP_AUTHORITY: "https://login.microsoftonline.com/apteroco.onmicrosoft.com",//local
+    APP_SOURCE_LINK: "https://appsource.microsoft.com/en-us/product/web-apps/aptero1644253171882.offer-saas-aptero",
+    APP_SOURCE_TEAMS_APP_LINK: "https://appsource.microsoft.com/en-us/product/office/WA200004108",
   },
   "@aptero/axolotis-module-phoenix-auth":{
     RETICULUM_SERVER: "alphahub.aptero.co",
     RETICULUM_SOCKET_PROTOCOL: "",
     RETICULUM_SOCKET_SERVER: ""
+  },
+  "@aptero/http-event-log":{
+    SERVICE_URL:"DISABLED",//"https://meet.aptero.co/service/logger/trace"
+    //SERVICE_URL:"https://meet.aptero.co/service/logger/trace"
   },
 
   APP_CONFIG: {

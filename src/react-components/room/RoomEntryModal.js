@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect} from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import { Modal } from "../modal/Modal";
@@ -27,10 +27,13 @@ export function RoomEntryModal({
   onRoomSettings,
   ...rest
 }) {
+  useEffect(() => {
+    //APTERO we keep the modal code to be compliant with the open source part in case of a merge
+    //directly join the room and do not display the modal
+    setTimeout(() => onJoinRoom(),0);
+  }, []);
   const breakpoint = useCssBreakpoints();
-  setTimeout(() => {
-    onJoinRoom(); //Aptero
-  }, 0);
+    onJoinRoom()//Aptero
   return (
     <Modal className={classNames(styles.roomEntryModal, className)} disableFullscreen {...rest}>
       <Column center className={styles.content}>

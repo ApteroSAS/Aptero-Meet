@@ -108,6 +108,10 @@ $input-height: 40px;
   &:focus {
     box-shadow: none;
   }
+
+  &::placeholder {
+    color: gray;
+  }
 }
 
 :local(.invalid-icon) {

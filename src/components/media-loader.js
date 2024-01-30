@@ -26,8 +26,11 @@ import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { SHAPE } from "three-ammo/constants";
 import { addComponent, entityExists, removeComponent } from "bitecs";
 import { MediaContentBounds, MediaLoading } from "../bit-components";
-import { IN_APP_WEB_BROWSER_PROTOCOL } from "../aptero/module/HubsBridge/react-components/media-utils-lib";
-import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
+import { IN_APP_WEB_BROWSER_PROTOCOL } from "../aptero/module/RemoteScreen/RemoteControlServiceV2";
+import { HYPERBEAM_PROTOCOL } from "../aptero/module/RemoteScreen/HyperbeamService";
+import {msTeamsAPILight} from "../aptero/module/axolotis/modules/basic/ImportHelper";
+import {container} from "../aptero/module/axolotis/IOCConfig";
+import {CustomURL, CustomURLName} from "../aptero/module/customURL/CustomURL";
 
 let loadingObject;
 
@@ -36,6 +39,13 @@ waitForDOMContentLoaded().then(() => {
     loadingObject = gltf;
   });
 });
+  console.log("Fetch type B",url);
+
+  return fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
+
+  console.log("bb",bb)
+
+  return bb;
 
 AFRAME.registerComponent("media-loader", {
   schema: {
@@ -57,7 +67,7 @@ AFRAME.registerComponent("media-loader", {
       default: {},
       parse: v => (typeof v === "object" ? v : JSON.parse(v)),
       stringify: JSON.stringify
-    }
+    },
   },
 
   init() {
@@ -332,7 +342,8 @@ AFRAME.registerComponent("media-loader", {
 
   async update(oldData, forceLocalRefresh) {
     const { version, contentSubtype } = this.data;
-    let src = this.data.src;
+    //let src = this.data.src;
+    let src = container.get<CustomURL>(CustomURLName).processURL(this.data.src);//aptero
     if (!src) return;
 
     //aptero change content code
@@ -367,6 +378,8 @@ AFRAME.registerComponent("media-loader", {
     }
 
     try {
+      console.log("Detect content type:",src);
+
       if ((forceLocalRefresh || srcChanged) && !this.showLoaderTimeout) {
         this.showLoaderTimeout = setTimeout(this.showLoader, 100);
         addComponent(APP.world, MediaLoading, this.el.eid);
@@ -402,7 +415,7 @@ AFRAME.registerComponent("media-loader", {
         isNonCorsProxyDomain(parsedUrl.hostname) && (guessContentType(src) || "").startsWith("model/gltf");
 
       try {
-        if (this.data.resolve && !src.startsWith(IN_APP_WEB_BROWSER_PROTOCOL) && !src.startsWith("data:") && !src.startsWith("hubs:") && !isLocalModelAsset) {
+        if (this.data.resolve && !src.startsWith(HYPERBEAM_PROTOCOL)  && !src.startsWith(IN_APP_WEB_BROWSER_PROTOCOL) && !src.startsWith("data:") && !src.startsWith("hubs:") && !isLocalModelAsset) {
         const is360 = !!(this.data.mediaOptions.projection && this.data.mediaOptions.projection.startsWith("360"));
         const quality = getDefaultResolveQuality(is360);
         const result = await resolveUrl(src, quality, version, forceLocalRefresh);
@@ -424,6 +437,14 @@ AFRAME.registerComponent("media-loader", {
       }catch(ex){
         contentType = "text/html; charset=utf-8";
         console.error(ex);
+      }
+
+      //Hyperbeam type
+      if (src.startsWith(HYPERBEAM_PROTOCOL)) {
+        contentType = HYPERBEAM_PROTOCOL;
+        //We need to remove the protocol to resolve the url
+        src = src.replace(HYPERBEAM_PROTOCOL, "https:");
+        src = src.replace("https://https://", "https://"); //Avoid duplicates!
       }
 
       if (!thumbnail) {
@@ -464,13 +485,14 @@ AFRAME.registerComponent("media-loader", {
       } else {
         this.el.emit("media_refreshed", { src, raw: accessibleUrl, contentType });
       }
-
+      
       if (
         contentType.startsWith("video/") ||
         contentType.startsWith("audio/") ||
         contentType.startsWith("application/dash") ||
-        AFRAME.utils.material.isHLS(canonicalUrl, contentType)
-      ) {
+        AFRAME.utils.material.isHLS(canonicalUrl, contentType) ||
+        contentType.startsWith(HYPERBEAM_PROTOCOL)
+      ) {//------
         let linkedVideoTexture, linkedAudioSource, linkedMediaElementAudioSource;
         if (this.data.linkedEl) {
           const linkedMediaVideo = this.data.linkedEl.components["media-video"];
@@ -513,7 +535,7 @@ AFRAME.registerComponent("media-loader", {
         if (this.el.components["position-at-border__freeze-unprivileged"]) {
           this.el.setAttribute("position-at-border__freeze-unprivileged", { isFlat: true });
         }
-      } else if (contentType.startsWith("image/")) {
+      } else if (contentType.startsWith("image/")) {//------
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-video");
         this.el.removeAttribute("audio-zone-source");

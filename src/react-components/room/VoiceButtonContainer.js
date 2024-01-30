@@ -6,7 +6,7 @@ import { ToolbarButton } from "../input/ToolbarButton";
 import { useMicrophone } from "./useMicrophone";
 import { FormattedMessage } from "react-intl";
 import { getAdapterParams } from "../../aptero/module/webRTCadapter/adapter-config";
-import {msTeamsAPILight} from "@aptero/axolotis-module-teams";
+import {msTeamsAPILight} from "../../aptero/module/axolotis/modules/basic/ImportHelper";
 
 export function VoiceButtonContainer({ scene, microphoneEnabled }) {
   if(getAdapterParams().adapter === "none" || msTeamsAPILight().msTeams()){
@@ -36,6 +36,7 @@ export function VoiceButtonContainer({ scene, microphoneEnabled }) {
 
   return (
     <ToolbarButton
+      id = "voice-button-container-toolbar-button"
       ref={buttonRef}
       icon={isMuted || !microphoneEnabled ? <MicrophoneMutedIcon /> : <MicrophoneIcon />}
       label={<FormattedMessage id="voice-button-container.label" defaultMessage="Voice" />}

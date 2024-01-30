@@ -31,7 +31,7 @@ const EVENT = "room-updated";
 export async function redirectIfNeeded() {
   try {
     //initial fetch load balancer meta data in a non blocking way
-    if (!window.location.host.includes("localhost")) {
+    if (window.location.host!=="localhost") {
       //at this point the body corespond to the right room we just need to update the url to be coherent with the body
       let roomUrl = new URL((document.querySelector('[property~="og:url"][content]') as any).content);
       let windowUrl = new URL(window.location.href);
@@ -111,6 +111,14 @@ export async function getClones(): Promise<{
   clones: ClonesI,
 }> {
   instances = await getData();
+  return instances;
+}
+
+/** returns last data */
+export function getClonesSync(): {
+  roomSID: string,
+  clones: ClonesI,
+} {
   return instances;
 }
 

@@ -13,7 +13,7 @@ import { sets } from "../systems/userinput/sets";
 import { getLastWorldPosition } from "../utils/three-utils";
 import { Layers } from "../camera-layers";
 import {remoteControlServiceV2} from "../aptero/module/RemoteScreen/RemoteControlServiceV2";
-
+import { hyperbeamService } from "../aptero/module/RemoteScreen/HyperbeamService";
 export function findRemoteHoverTarget(world, object3D) {
   if (!object3D) return null;
   if (!object3D.eid) return findRemoteHoverTarget(world, object3D.parent);
@@ -186,6 +186,24 @@ AFRAME.registerComponent("cursor-controller", {
         this.distance = remoteHoverTarget ? this.intersection.distance : this.data.defaultDistance * playerScale;
 
       }
+      let obstructed = false;
+      if (rawIntersections.length > 0) {
+        /*
+          We check if the cursor is NOT intersecting a Solid first
+        */
+        const solidList = AFRAME.scenes[0].querySelectorAll(".collidable, .interactable, #environment-root");
+
+        const validObjects = Array.from(solidList).map(el => el.object3D).filter(obj => obj && obj.raycast);
+
+        const obstacles = [];
+        this.raycaster.intersectObjects(validObjects,true,obstacles);
+
+        if (obstacles.length > 0 && obstacles[0].distance !== rawIntersections[0].distance) {
+          // I compare "distance" since by definition that would mean that these are 2 different objects
+          obstructed = true;
+        }
+      }
+      hyperbeamService.tryCaptureCursor(this.intersection,obstructed);
       remoteControlServiceV2.tryCaptureCursor(this.intersection);
 
       const { cursor, minDistance, far, camera } = this.data;

@@ -2,18 +2,10 @@ import "@babel/polyfill";
 
 import "aframe";
 import "./utils/aframe-overrides";
-// A-Frame hardcodes THREE.Cache.enabled = true
-// But we don't want to use THREE.Cache because
-// web browser cache should work well.
-// So we disable it here.
 import * as THREE from "three";
-THREE.Cache.enabled = false;
 THREE.Object3D.DefaultMatrixAutoUpdate = false;
-
 import "./utils/logging";
 import {patchWebGLRenderingContext} from "./utils/webgl";
-patchWebGLRenderingContext();
-
 import "networked-aframe/src/index";
 import "webrtc-adapter";
 import "./phoenix-adapter";/*Aptero dependance pour components*/
@@ -130,21 +122,17 @@ import { VideoMenuPrefab } from "./prefabs/video-menu";
 import { ObjectMenuPrefab } from "./prefabs/object-menu";
 import { loadWaypointPreviewModel, WaypointPreview } from "./prefabs/waypoint-preview";
 import { preload } from "./utils/preload";
-
-window.APP = new App();
-window.APP.dialog = new AdapterWrapper() as unknown as DialogAdapter; // Aptero
-renderAsEntity(APP.world, VideoMenuPrefab());
-renderAsEntity(APP.world, VideoMenuPrefab());
-function addToScene(entityDef, visible) {
-  return getScene().then(scene => {
+window.APP.dialog = new AdapterWarpper();
+window.APP.RENDER_ORDER = {
+  HUD_BACKGROUND: 1,
+  HUD_ICONS: 2,
+  CURSOR: 3
     const eid = renderAsEntity(APP.world, entityDef);
     const obj = APP.world.eid2obj.get(eid);
     if (!obj) return;
     scene.add(obj);
     obj.visible = !!visible;
   });
-}
-
 import "./components/owned-object-limiter";
 import "./components/owned-object-cleanup-timeout";
 import "./components/set-unowned-body-kinematic";
@@ -166,9 +154,30 @@ import "./components/body-helper";
 import "./components/shape-helper";
 
 //ax
-import {getService} from "@aptero/axolotis-player"
-import {MICROSOFT_STATIC_SERVICE, PROPERTIES_SERVICE} from "@aptero/axolotis-module-teams";
 import {redirectIfNeeded} from "./aptero/module/load-balancer/LoadBalancer";
+// A-Frame hardcodes THREE.Cache.enabled = true
+// But we don't want to use THREE.Cache because
+// web browser cache should work well.
+// So we disable it here.
+THREE.Cache.enabled = false;
+
+patchWebGLRenderingContext();
+
+// It seems we need to use require to import modules
+// under the three/examples/js to avoid tree shaking
+// in webpack production mode.
+require("three/examples/js/loaders/GLTFLoader");
+
+window.APP = new App();
+window.APP.dialog = new AdapterWarpper();
+window.APP.RENDER_ORDER = {
+  HUD_BACKGROUND: 1,
+  HUD_ICONS: 2,
+  CURSOR: 3
+}
+
+declare const THREE;
+THREE.Object3D.DefaultMatrixAutoUpdate = false;
 import { Object3D } from "three";
 import DialogAdapter from "./aptero/module/webRTCadapter/naf-dialog-io-adapter";
 
@@ -201,10 +210,8 @@ async function aframeReady() {
 export {};
 (async () => {
   await redirectIfNeeded();
-  const {initAxolotisPlayer} = await import("./aptero/module/axolotis/AxInit");
-  await initAxolotisPlayer();
-  await getService(PROPERTIES_SERVICE);
-  await getService(MICROSOFT_STATIC_SERVICE);
+  const {initIOC} = await import("./aptero/module/axolotis/AxInit");
+  await initIOC();
   console.log("Start hub");
   await domReady();
   console.log("dom loaded");

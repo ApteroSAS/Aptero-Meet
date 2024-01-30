@@ -1,4 +1,4 @@
-import { tryMSMatchTheme } from "./aptero/module/microsoft/react-components/MSThemeMatcher";
+import {msTeamsAPILight} from "./aptero/module/axolotis/modules/basic/ImportHelper";
 
 console.log(`App version: ${process.env.BUILD_VERSION || "?"}`);
 
@@ -215,7 +215,6 @@ import { apteroService } from "./aptero/ApteroServices";
 import { roomController } from "./aptero/module/ButtonAPI/api/RoomController";
 import { fetchICEservers } from "./aptero/module/webRTCadapter/adapter-config";
 
-import { msTeamsAPILight } from "@aptero/axolotis-module-teams";
 
 //aptero service end
 window.APP = new App();
@@ -523,56 +522,43 @@ export async function updateEnvironmentForHub(hub, entryManager) {
     environmentEl.addEventListener(
       "model-loaded",
       () => {
-        environmentEl.addEventListener(
-          "model-loaded",
-          () => {
-            environmentEl.removeEventListener("model-error", sceneErrorHandler);
+        environmentEl.removeEventListener("model-error", sceneErrorHandler);
 
             envSystem.updateEnvironment(environmentEl);
 
             console.log(`Scene file update load took ${Math.round(performance.now() - loadStart)}ms`);
 
-            traverseMeshesAndAddShapes(environmentEl);
+        traverseMeshesAndAddShapes(environmentEl);
 
-            if (!sameSceneAsBefore) {
-              // We've already entered, so move to new spawn point once new environment is loaded
-              if (sceneEl.is("entered")) {
-                waypointSystem.moveToSpawnPoint();
-              }
-            }
+            if(!sameSceneAsBefore) {
+          // We've already entered, so move to new spawn point once new environment is loaded
+          if (sceneEl.is("entered")) {
+            waypointSystem.moveToSpawnPoint();
+          }
+        }
 
-            const fader = document.getElementById("viewing-camera").components["fader"];
+        const fader = document.getElementById("viewing-camera").components["fader"];
 
-            // Add a slight delay before de-in to reduce hitching.
-            setTimeout(() => fader.fadeIn(), 2000);
-          },
-          { once: true }
-        );
+        // Add a slight delay before de-in to reduce hitching.
+        setTimeout(() => fader.fadeIn(), 2000);
+      },
+      { once: true }
+    );
 
         // If we had a loop-animation component on the environment, we need to remove it
         // before loading a new model with gltf-model-plus, or else the component won't
         // find and play animations in the new scene.
         environmentEl.removeAttribute("loop-animation");
 
-        sceneEl.emit("leaving_loading_environment");
-        if (environmentEl.components["gltf-model-plus"].data.src === sceneUrl) {
-          console.warn("Updating environment to the same url.");
-          environmentEl.setAttribute("gltf-model-plus", { src: "" });
-        }
-        environmentEl.setAttribute("gltf-model-plus", { src: sceneUrl });
-      },
-      { once: true }
-    );
-
+    sceneEl.emit("leaving_loading_environment");
+    if (environmentEl.components["gltf-model-plus"].data.src === sceneUrl) {
+      console.warn("Updating environment to the same url.");
+      environmentEl.setAttribute("gltf-model-plus", { src: "" });
+    }
+    environmentEl.setAttribute("gltf-model-plus", { src: sceneUrl });
     if (!sceneEl.is("entered")) {
       environmentEl.addEventListener("model-error", sceneErrorHandler, { once: true });
     }
-
-    if (environmentEl.components["gltf-model-plus"].data.src === loadingEnvironment) {
-      console.warn("Transitioning to loading environment but was already in loading environment.");
-      environmentEl.setAttribute("gltf-model-plus", { src: "" });
-    }
-    environmentEl.setAttribute("gltf-model-plus", { src: loadingEnvironment });
   }
 }
 

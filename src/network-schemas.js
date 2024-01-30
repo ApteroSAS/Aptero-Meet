@@ -109,6 +109,10 @@ function registerNetworkSchemas() {
         component: "media-video",
         property: "videoPaused"
       },
+      { //aptero
+        component: "media-video",
+        property: "hsrc"
+      },
       {
         component: "media-pdf",
         property: "index"
@@ -123,6 +127,10 @@ function registerNetworkSchemas() {
       {
         component: "media-video",
         property: "videoPaused"
+      },
+      { //aptero
+        component: "media-video",
+        property: "hsrc"
       },
       {
         component: "media-pager",
@@ -194,6 +202,10 @@ function registerNetworkSchemas() {
         component: "media-video",
         property: "videoPaused"
       },
+      { //aptero
+        component: "media-video",
+        property: "hsrc"
+      },
       {
         component: "media-pdf",
         property: "index"
@@ -207,6 +219,10 @@ function registerNetworkSchemas() {
       {
         component: "media-video",
         property: "videoPaused"
+      },
+      { //aptero
+        component: "media-video",
+        property: "hsrc"
       },
       {
         component: "media-pager",

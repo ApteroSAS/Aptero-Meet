@@ -6,7 +6,6 @@ import { ReactComponent as AvatarIcon } from "../icons/Avatar.svg";
 import { SharePopoverButton } from "./SharePopover";
 import { FormattedMessage } from "react-intl";
 import useAvatar from "./hooks/useAvatar";
-import { MediaDevicesEvents, MediaDevices } from "../../utils/media-devices-utils";
 
 function useShare(scene, hubChannel) {
   const mediaDevicesManager = APP.mediaDevicesManager;
@@ -110,6 +109,9 @@ function useShare(scene, hubChannel) {
 }
 
 export function SharePopoverContainer({ scene, hubChannel }) {
+  if(getAdapterParams().adapter === "none"){
+    return <></>
+  }
   const {
     sharingSource,
     canShareCamera,

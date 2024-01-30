@@ -12,6 +12,8 @@ const TOML = require("@iarna/toml");
 const fetch = require("node-fetch");
 const request = require("request");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
+
+///APTERO
 const versionJson = require("./version.json");
 
 const moduleTeamsPackagePath = path.dirname(require.resolve("@aptero/axolotis-module-teams"));
@@ -34,6 +36,7 @@ console.log("basisTranscoderPath : " + basisTranscoderPath);
 console.log("dracoWasmWrapperPath : " + dracoWasmWrapperPath);
 console.log("basisWasmPath : " + basisWasmPath);
 console.log("dracoWasmPath : " + dracoWasmPath);
+///APTERO END
 
 const PORT = 53000; //Teams needs port 53000
 
@@ -126,6 +129,7 @@ function createDefaultAppConfig() {
   return appConfig;
 }
 
+/**
 async function fetchAppConfigAndEnvironmentVars() {
   const { internalIpV4 } = await import("internal-ip");
 
@@ -177,6 +181,7 @@ async function fetchAppConfigAndEnvironmentVars() {
 
   return appConfig;
 }
+ **/
 
 function htmlPagePlugin({ filename, extraChunks = [], chunksSortMode, inject }) {
   const chunkName = filename.match(/(.+).html/)[1];
@@ -196,6 +201,12 @@ function htmlPagePlugin({ filename, extraChunks = [], chunksSortMode, inject }) 
 
   return new HTMLWebpackPlugin(options);
 }
+
+const threeExamplesDir = path.resolve(__dirname, "node_modules", "three", "examples");
+const basisTranscoderPath = path.resolve(threeExamplesDir, "js", "libs", "basis", "basis_transcoder.js");
+const dracoWasmWrapperPath = path.resolve(threeExamplesDir, "js", "libs", "draco", "gltf", "draco_wasm_wrapper.js");
+const basisWasmPath = path.resolve(threeExamplesDir, "js", "libs", "basis", "basis_transcoder.wasm");
+const dracoWasmPath = path.resolve(threeExamplesDir, "js", "libs", "draco", "gltf", "draco_decoder.wasm");
 
 module.exports = async (env, argv) => {
   env = env || {};
@@ -265,7 +276,7 @@ module.exports = async (env, argv) => {
   const internalHostname = process.env.INTERNAL_HOSTNAME || "hubs.local";
   return {
     cache: {
-      type: "memory"
+      type: "filesystem"
     },
     resolve: {
       alias: {
@@ -273,8 +284,8 @@ module.exports = async (env, argv) => {
         // but they are "smart" and have builds for both ESM and CJS depending on if import or require is used.
         // This forces the ESM version to be used otherwise we end up with multiple instances of the libraries,
         // and for example AFRAME.THREE.Object3D !== THREE.Object3D in Hubs code, which breaks many things.
-        three$: moduleThreePackagePath,
-        bitecs$: moduleBitecsPackagePath,
+        three$: path.resolve(__dirname, "./node_modules/three/build/three.module.js"),
+        bitecs$: path.resolve(__dirname, "./node_modules/bitecs/dist/index.mjs"),
 
         // TODO these aliases are reequired because `three` only "exports" stuff in examples/jsm
         "three/examples/js/libs/basis/basis_transcoder.js": basisTranscoderPath,
@@ -298,15 +309,15 @@ module.exports = async (env, argv) => {
       /*APTERO Keep .async files */
       "microsoft-settings": path.join(__dirname, "src/aptero/module/microsoft/page", "microsoft-settings.tsx"),
       support: path.join(__dirname, "src", "support.js"),
-      index: path.join(__dirname, "src", "index.async.ts"),
-      hub: path.join(__dirname, "src", "hub.js"), //Aptero removed hub.async.ts
+      index: path.join(__dirname, "src", "index.js"),
+      hub: path.join(__dirname, "src", "hub.js"),
       scene: path.join(__dirname, "src", "scene.js"),
       avatar: path.join(__dirname, "src", "avatar.js"),
       link: path.join(__dirname, "src", "link.js"),
       discord: path.join(__dirname, "src", "discord.js"),
       cloud: path.join(__dirname, "src", "cloud.js"),
-      signin: path.join(__dirname, "src", "signin.async.ts"),
-      verify: path.join(__dirname, "src", "verify.async.ts"),
+      signin: path.join(__dirname, "src", "signin.js"),
+      verify: path.join(__dirname, "src", "verify.js"),
       tokens: path.join(__dirname, "src", "tokens.js"),
       "whats-new": path.join(__dirname, "src", "whats-new.js"),
       "webxr-polyfill": path.join(__dirname, "src", "webxr-polyfill.js")
@@ -395,8 +406,6 @@ module.exports = async (env, argv) => {
       }
     },
     performance: {
-      //maxEntrypointSize: 500 * 1000,//500kb
-      maxAssetSize: 2 * 1000 * 1000, //2mb
       // Ignore media and sourcemaps when warning about file size.
       assetFilter(assetFilename) {
         return !/\.(map|png|jpg|gif|glb|webm)$/.test(assetFilename);
@@ -498,7 +507,7 @@ module.exports = async (env, argv) => {
         },
         {
           test: /\.svg$/,
-          include: [path.resolve(__dirname, "src", "react-components"), path.resolve(__dirname, "src")],
+          include: [path.resolve(__dirname, "src", "react-components")],
           use: [
             {
               loader: "@svgr/webpack",
@@ -523,8 +532,7 @@ module.exports = async (env, argv) => {
                   ]
                 }
               }
-            },
-            "url-loader"
+            }
           ]
         },
         {
@@ -543,7 +551,6 @@ module.exports = async (env, argv) => {
                     parts.shift();
                     rootPath = parts.join(path.sep);
                   }
-                  // console.log(path, name, contenthash, ext);
                   return rootPath + "[name]-[contenthash].[ext]";
                 }
               }
@@ -569,8 +576,45 @@ module.exports = async (env, argv) => {
     },
     optimization: {
       splitChunks: {
-        maxAsyncRequests: 30,
-        maxInitialRequests: 10
+        maxAsyncRequests: 10,
+        maxInitialRequests: 10,
+        cacheGroups: {
+          frontend: {
+            test: deepModuleDependencyTest([
+              "react",
+              "react-dom",
+              "prop-types",
+              "raven-js",
+              "react-intl",
+              "classnames",
+              "react-router",
+              "@fortawesome/fontawesome-svg-core",
+              "@fortawesome/free-solid-svg-icons",
+              "@fortawesome/react-fontawesome"
+            ]),
+            name: "frontend",
+            chunks: "initial",
+            priority: 40
+          },
+          engine: {
+            test: deepModuleDependencyTest(["aframe", "three"]),
+            name: "engine",
+            chunks: "initial",
+            priority: 30
+          },
+          store: {
+            test: deepModuleDependencyTest(["phoenix", "jsonschema", "event-target-shim", "jwt-decode", "js-cookie"]),
+            name: "store",
+            chunks: "initial",
+            priority: 20
+          },
+          hubVendors: {
+            test: /[\\/]node_modules[\\/]/,
+            name: "hub-vendors",
+            chunks: chunk => chunk.name === "hub",
+            priority: 10
+          }
+        }
       }
     },
     plugins: [
@@ -636,9 +680,9 @@ module.exports = async (env, argv) => {
       htmlPagePlugin({
         filename: "verify.html"
       }),
-      // htmlPagePlugin({
-      //   filename: "tokens.html"
-      // }),
+      htmlPagePlugin({
+        filename: "tokens.html"
+      }),
       new CopyWebpackPlugin({
         patterns: [
           { from: "src/hub.service.js", to: "hub.service.js" },
@@ -662,10 +706,25 @@ module.exports = async (env, argv) => {
           }
         ]
       }),
+      new CopyWebpackPlugin({
+        patterns: [
+          {
+            from: "src/hub.service.js",
+            to: "hub.service.js"
+          }
+        ]
+      }),
+      new CopyWebpackPlugin({
+        patterns: [
+          {
+            from: "src/schema.toml",
+            to: "schema.toml"
+          }
+        ]
+      }),
       // Extract required css and add a content hash.
       new MiniCssExtractPlugin({
-        filename: "assets/stylesheets/[name]-[contenthash].css",
-        ignoreOrder: true
+        filename: "assets/stylesheets/[name]-[contenthash].css"
       }),
       // Define process.env variables in the browser context.
       new webpack.DefinePlugin({

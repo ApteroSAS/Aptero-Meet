@@ -1,30 +1,17 @@
-import {
-    createWorld,
-    getGlobalStorageValue,
-    GLOBAL_WORLDS_ENTITY,
-    WorldEntity
-} from "@aptero/axolotis-player";
-import {register as registerBasic} from "./modules/basic";
-import {registerWithImport as registerTeams} from "@aptero/axolotis-module-teams";
+import {container} from "./IOCConfig";
+import {BasicModule, Properties, PROPERTIES_SERVICE,HttpEventServiceName,HttpEventService} from "@aptero/axolotis-module-basic";
+//import {TeamsModule} from "@aptero/axolotis-module-teams/index.async"; //TODO activate async to free some loading time
+import {TeamsModule} from "@aptero/axolotis-module-teams";
+import {SampleServiceA, SampleServiceAName} from "./modules/basic/SampleServiceA";
+import {GenericModule} from "./GenericModules";
 
-export async function initAxolotisPlayer() {
-    const worlds = getGlobalStorageValue<WorldEntity[]>(GLOBAL_WORLDS_ENTITY, false);
-    if ((worlds && worlds.length > 0)) {
-        throw new Error("Axolotis World already initialized");
-    }
-    await createWorld();
-    registerBasic();
-    registerTeams(
-        //asynchron import should be done it the parent project to avoid issue with webpack packing the async files
-        async () => {
+export async function initIOC() {
+    container.load(BasicModule());
+    container.load(TeamsModule());
+    container.load(GenericModule);
             // @ts-ignore
-            let module = await import("@aptero/axolotis-module-teams/dist-index-ms");
-            return {module, classname: "MsTeamsAPIFactory" /*module.MsTeamsAPIFactory.name*/};
-        }, async () => {
             // @ts-ignore
-            let module = await import("@aptero/axolotis-module-teams/dist-index-ms-light");
-            return {module, classname: "MsTeamsAPILight" /*module.MsTeamsAPILight.name*/};
-        }
-    );
-    console.log("Axolotis player : loaded");
+    console.log("IOC : loaded");
+    //container.get<SampleServiceA>(SampleServiceAName);
+    //console.log(container.get<Properties>(PROPERTIES_SERVICE).getGlobalProperties());
 }
