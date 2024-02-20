@@ -35,8 +35,7 @@ export class GLTFExtensionProcessorService {
     });
   }
 
-  processGltfFile(children,sceneuuid) {
-    let root = {children};
+  processGltfFile(root,sceneuuid) {
     this.processMeshFile(root,sceneuuid);
   }
 }

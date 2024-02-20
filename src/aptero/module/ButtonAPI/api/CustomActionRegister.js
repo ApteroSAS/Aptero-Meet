@@ -22,7 +22,7 @@ export class CustomActionRegister {
     let actionData = this.actions[id];
     if (actionData) {
       if (actionData.action.type === "animation") {
-        actionData.callback();
+        //actionData.callback(); // Animate only once
         networkService.sendMessage("animation_play", { id });
       } else if (actionData.action.type === "spawn_attach") {
         let entry = this.convertToEntry(id, data);
