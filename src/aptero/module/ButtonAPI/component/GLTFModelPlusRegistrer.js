@@ -12,6 +12,10 @@ export function registerCustomGLTFModelPlusComponents(){
         buttonIcon,
         audioMode,
         universalAudio,
+        audioChannel,
+        triggerModels,
+        customTitle,
+
         // legacy properties
         enterComponent,
         enterProperty,
@@ -31,6 +35,9 @@ export function registerCustomGLTFModelPlusComponents(){
         buttonIcon: buttonIcon,
         audioMode: audioMode,
         universalAudio: universalAudio,
+        audioChannel: audioChannel,
+        customTitle: customTitle,
+        triggerModels: triggerModels,
         // legacy properties
         enterComponent: enterComponent,
         enterProperty: enterProperty,

@@ -7,6 +7,7 @@ import { cleanProtocol } from "./HyperbeamScripts/cleanProtocol";
 import { updatePermission } from "./HyperbeamScripts/updatePermission";
 import { loadingScreen, pinElScreen } from "./HyperbeamScripts/hbScreens";
 import { HyperbeamInitialize } from "./HyperbeamScripts/HyperbeamInitialize";
+import { CustomURL } from "../customURL/CustomURL";
 
 export const HYPERBEAM_PROTOCOL = "hyperbeam:";
 export const HYPERBEAM_TRAIL = "/hyperbeam.mp4";
@@ -51,6 +52,7 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
       HBFalloffDistance: null,
       universalStream: null,
       HBAdvancedAudio: null,
+      customTitle: null,
       audioType: null,
       gain: null,
       distanceModel: null,
@@ -60,6 +62,9 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
       coneInnerAngle: null,
       coneOuterAngle: null,
       coneOuterGain: null,
+      audioChannel: null,
+      screenShareMode: null,
+      screenShareMuted: null,
     };
   }
 
@@ -102,17 +107,16 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
 
   let embedURL = "";
   let hbElement = await screenElement.getAttribute("media-video");
-  let testUrl = await hbElement.hsrc;
   
-
+  
   let hubId = "";
-
   if (!hbProperties.universalStream) {
     hubId = getCurrentHubId();
   } else {
     hubId = "universal";
   }
 
+  let testUrl = await hbElement.hsrc;
   const hb_objid = hubId+'_hb_objid'+'_'+screenElement.id;
 
   if (testUrl) {
@@ -669,6 +673,46 @@ function readQueryVariable(name, defaultValue) {
 export const processHyperbeamEntity = async (entity,mediaData,objIdentifier,hbProperties) => {
   // Get the VM session from Aptero or from the Hyperbeam demo server
   let url = readQueryVariable('url', cleanProtocol(mediaData.src, HYPERBEAM_PROTOCOL));
+
+  
+  // Screen share mode fill URL
+  if (hbProperties.screenShareMode){
+
+    const sceneEl = document.querySelector('a-scene');
+    const sceneClass = 
+      (sceneEl.className !== undefined && sceneEl.className !== "") ? 
+      sceneEl.className.split(' ')[1] : "";
+
+    url = "https://horus.aptero.co/view/";
+
+    if (hbProperties.universalStream) {
+      url+= (sceneClass !== "") ? sceneClass : "{ROOM_NAME}";
+      url+= "_";
+    } else {
+      url+= "{ROOM_ID}_";
+    }
+
+    url+= hbProperties.audioChannel ? hbProperties.audioChannel : ("0");
+    url+= "?userName="+encodeURI("Screen Share Stream")
+
+    if (hbProperties.screenShareMuted) {
+      url+= "&disableSound=true";
+    }
+
+    if (hbProperties.customTitle) {
+      const cleanTitle = decodeURIComponent(hbProperties.customTitle);
+      url += "&room_name=" + cleanTitle;
+    }
+
+    const customURL = new CustomURL();
+    url = customURL.processURL(url);
+  }
+
+
+
+
+
+
 
   let fetchfrom = 'https://hyperbeam.serverless.aptero.co/objcomputer';
   // If we are running from localhost, fetch directly using CORS proxy

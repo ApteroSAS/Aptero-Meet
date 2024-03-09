@@ -647,8 +647,12 @@ AFRAME.registerComponent("gltf-model-plus", {
 
       this.model = gltf.scene;
 
+      /*
+        Please note that this system will most of the time be used for loading the Scene GLTF file, and not each individual model.
+        The models are processed using processGltfFile, which is called from the GLTFExtensionProcessorService.
+      */
       if (this.data.batch) {
-        this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.addObject(this.model);
+        this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.addObject(this.model.animations);
       }
 
       if (gltf.animations.length > 0) {

@@ -44,7 +44,6 @@ export class ActionController {
     let element = jquery("#" + elid);
     let htmlElement = element.get()[0];
     let networkId = await networkService.getElementNetworkId(htmlElement) || "local";
-    console.log("registered custom controller", sceneuuid, meshuuid, meshName);
     let actionIds = [];
     entry.actions.forEach((action, index) => {
       let actionid = networkId + "_" + meshName + "_" + masterindex + "_" + pairIndex + "_" + index + "_" + (action.data || "");

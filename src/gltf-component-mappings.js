@@ -280,6 +280,7 @@ async function mediaInflator(el, componentName, componentData, components) {
       HBFalloffDistance: componentData.HBFalloffDistance,
       HBPermissions: componentData.HBPermissions,
       universalStream: componentData.universalStream,
+      customTitle: componentData.customTitle,
       // Advanced audio properties
       HBAdvancedAudio: componentData.HBAdvancedAudio,
       audioType: componentData.audioType,
@@ -291,6 +292,9 @@ async function mediaInflator(el, componentName, componentData, components) {
       coneInnerAngle: componentData.coneInnerAngle,
       coneOuterAngle: componentData.coneOuterAngle,
       coneOuterGain: componentData.coneOuterGain,
+      audioChannel: componentData.audioChannel,
+      screenShareMode: componentData.screenShareMode,
+      screenShareMuted: componentData.screenShareMuted,
     });
   }
 

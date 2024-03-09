@@ -1,25 +1,50 @@
-
-import {CustomURL} from "../../customURL/CustomURL"
+import { addMedia } from "../../../../utils/media-utils";
+import { CustomURL } from "../../customURL/CustomURL"
 
 const sizeVec = new THREE.Vector3();
 const boundingBoxWorldPositionVec = new THREE.Vector3();
 const colliderWorldPositionVec = new THREE.Vector3();
 
 
-function startPFrame(data) {
+function startPFrame(data,objid) {
   // Create iframe
   const iframe = document.createElement("iframe");
 
   let triggerSrc = data.linkSource;
   if (data.audioMode) {
-    let baseURL = "https://horus.aptero.co/room/"
-    if (!data.universalAudio) {
-      baseURL += "{ROOM_ID}/";
+    let baseURL = data.linkSource;
+
+    const sceneEl = document.querySelector('a-scene');
+    const sceneClass = 
+      (sceneEl.className !== undefined && sceneEl.className !== "") ? 
+      sceneEl.className.split(' ')[1] : "";
+
+
+    if (data.universalAudio) {
+      baseURL += (sceneClass !== "") ? sceneClass : "{ROOM_NAME}";
+      baseURL += "_";
+    } else {
+      baseURL += "{ROOM_ID}_"
     }
-    baseURL += "{ROOM_NAME}";
+    
+    if (data.audioChannel !== undefined) {
+      baseURL += data.audioChannel;
+    } else {
+      baseURL += objid;
+    }
+
+
+    if (data.customTitle) {
+      const cleanTitle = decodeURIComponent(data.customTitle);
+      if (data.customTitle !== "") {
+        baseURL += "?room_name=" + cleanTitle;
+      }
+    }
+  
 
     const customURL = new CustomURL();
     triggerSrc = customURL.processURL(baseURL);
+
   }
 
   iframe.src = triggerSrc;
@@ -66,6 +91,8 @@ AFRAME.registerComponent("trigger", {
     buttonIcon: { type: "string" },
     audioMode: { type: "boolean" },
     universalAudio: { type: "boolean" },
+    audioChannel: { type: "number" },
+    triggerModels: { type: "string"},
     // legacy properties
     enterComponent: { type: "string" },
     enterProperty: { type: "string" },
@@ -86,6 +113,40 @@ AFRAME.registerComponent("trigger", {
     this.boundingBox = new THREE.Box3();
     this.collidingLastFrame = {};
     this.wip = false;
+
+    if (this.data && this.data.triggerModels) {
+      const modelsData = JSON.parse(this.data.triggerModels);
+      // Access the models data here
+      const barrierCore = modelsData.barrierCore;
+      const logoCore = modelsData.logoCore;
+    
+      // Spawn models
+      const sceneEl = document.querySelector("a-scene");
+      for (let key in modelsData) {
+        const modelData = modelsData[key];
+        //const { src, position, scale } = modelData;
+        
+        // Load the model
+        const { entity, orientation } = addMedia(
+          modelData.src, // Source URL
+          '#static-media', // The template ID for the entity
+          undefined, // contentOrigin
+          null, // contentSubtype
+          true, // resolve URLs to get the actual file URL
+          false, // fitToBox
+          true, // animate
+          {}, // mediaOptions
+          false // networked
+        );
+
+        // Set the position and scale of the entity
+        entity.setAttribute('position', modelData.position);
+        entity.setAttribute('scale', modelData.scale);
+        //entity.setAttribute('animation-mixer', '');
+        document.querySelector('a-scene').appendChild(entity);
+
+      }
+    }
   },
   update() {
     this.el.object3D.getWorldPosition(boundingBoxWorldPositionVec);
@@ -120,7 +181,7 @@ AFRAME.registerComponent("trigger", {
       if (isColliding && !collidingLastFrame) {
         console.log("entering zone");
         if (!window.PERSISTENTIFRAME) {
-          startPFrame(this.data);
+          startPFrame(this.data,object3D.id);
         }
       } else if (!isColliding && collidingLastFrame && window.PERSISTENTIFRAME) {
         console.log("leaving zone");

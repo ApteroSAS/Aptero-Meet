@@ -21,6 +21,7 @@ export class ActionAnimationController{
         const mixerEl = findAncestorWithComponent(htmlElement, "animation-mixer");
         let mixer = mixerEl && mixerEl.components["animation-mixer"].mixer;
         let actionAnimation = mixer.clipAction(action.data);
+        // Add uuid to the action data
         if (actionAnimation) {
             const repeat = action.repeat || 1;
 
@@ -68,13 +69,16 @@ export class ActionAnimationController{
                                 actionAnimation.reset();
                                 actionAnimation.setEffectiveTimeScale(1);
                                 actionAnimation.originalTimeScale = 1;
-                            } else {
+                            } else { // Click / Reclick functionality
                                 // Play or change speed
                                 const animData = [action.data, action.speed, action.reclick, action.loop, action.repeat];
 
-                                // Is not moving || last animation is different || reclick is undefined
-                                if (!actionAnimation.isRunning() 
-                                || (actionAnimation.lastAnimation !== undefined && JSON.stringify(actionAnimation.lastAnimation) !== JSON.stringify(animData))
+                                // Is not moving AND is unpaused 
+                                if ((!actionAnimation.isRunning() && actionAnimation.getEffectiveTimeScale() !== 0)
+                                // First animation, or last one was different
+                                || (actionAnimation.lastAnimation !== undefined 
+                                && JSON.stringify(actionAnimation.lastAnimation) !== JSON.stringify(animData))
+                                // reclick functionality is undefined
                                 || action.reclick === undefined ) {
                                     // This animation is NEW
                                     actionAnimation.setEffectiveTimeScale(action.speed);

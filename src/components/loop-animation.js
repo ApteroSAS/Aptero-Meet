@@ -64,7 +64,12 @@ AFRAME.registerComponent("loop-animation", {
           }
         }
       } else {
-        clips = [animations[activeClipIndex]];
+        // Remove all animations which name starts with "ApteroANIM"
+        let clipFilter = [animations[activeClipIndex]];
+        if (activeClipIndex === 0) {
+          clipFilter = animations.filter(clip => !clip.name.startsWith("ApteroANIM"));
+        }
+        clips = clipFilter;
       }
     }
 
