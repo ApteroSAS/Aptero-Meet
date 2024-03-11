@@ -25,11 +25,11 @@ function InvitePopoverContent({ url, embed, inviteRequired, fetchingInvite, invi
             buttonPreset="accent3"
           />
           {embed && (
-          {/* APTERO remove <CopyableTextInputField
-            label={<FormattedMessage id="invite-popover.embed-code" defaultMessage="Embed Code" />}
-            value={embed}
-            buttonPreset="purple"
-          />*/}
+            <CopyableTextInputField
+              label={<FormattedMessage id="invite-popover.embed-code" defaultMessage="Embed Code" />}
+              value={embed}
+              buttonPreset="accent5"
+            />
           )}
         </>
       )}

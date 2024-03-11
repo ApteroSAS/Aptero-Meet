@@ -13,8 +13,7 @@ AFRAME.registerSystem("auto-pixel-ratio", {
   init() {
     // For now let's only enabled this on macs, since they tend to have retina displays.
     // Note this test will also include iPads running iPadOS.
-    //this.enabled = window.devicePixelRatio > 1 && /macintosh/i.test(navigator.userAgent);
-    this.enabled = false;// we have ou own pixel adjuster
+    this.enabled = window.devicePixelRatio > 1 && /macintosh/i.test(navigator.userAgent);
     this.deltas = [];
     this.secondsSinceMeasurementStart = 0;
     this.secondsSinceSceneVisible = 0;

@@ -10,32 +10,21 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 const TOML = require("@iarna/toml");
 const fetch = require("node-fetch");
+const packageLock = require("./package-lock.json");
 const request = require("request");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 
 ///APTERO
 const versionJson = require("./version.json");
 
-const moduleTeamsPackagePath = path.dirname(require.resolve("@aptero/axolotis-module-teams"));
+const moduleTeamsPackagePath = path.dirname(path.dirname(require.resolve("@aptero/axolotis-module-teams")));
 const moduleThreePackagePath = path.join(path.dirname(require.resolve("three")), "three.module.js");
 const moduleBitecsPackagePath = path.join(path.dirname(require.resolve("bitecs")), "index.mjs");
-
-const threeExamplesDir = path.join(path.dirname(require.resolve("three")), "..", "examples");
-
-const basisTranscoderPath = path.resolve(threeExamplesDir, "js", "libs", "basis", "basis_transcoder.js");
-const dracoWasmWrapperPath = path.resolve(threeExamplesDir, "js", "libs", "draco", "gltf", "draco_wasm_wrapper.js");
-const basisWasmPath = path.resolve(threeExamplesDir, "js", "libs", "basis", "basis_transcoder.wasm");
-const dracoWasmPath = path.resolve(threeExamplesDir, "js", "libs", "draco", "gltf", "draco_decoder.wasm");
 
 console.log("Current directory : " + __dirname);
 console.log("three : " + moduleThreePackagePath);
 console.log("bitecs : " + moduleBitecsPackagePath);
 console.log("moduleTeamsPackagePath : " + moduleTeamsPackagePath);
-console.log("threeExamplesDir : " + threeExamplesDir);
-console.log("basisTranscoderPath : " + basisTranscoderPath);
-console.log("dracoWasmWrapperPath : " + dracoWasmWrapperPath);
-console.log("basisWasmPath : " + basisWasmPath);
-console.log("dracoWasmPath : " + dracoWasmPath);
 ///APTERO END
 
 const PORT = 53000; //Teams needs port 53000
@@ -88,6 +77,46 @@ function createHTTPSConfig() {
   }
 }
 
+function getModuleDependencies(moduleName) {
+  const deps = packageLock.packages;
+  const arr = [];
+
+  const gatherDeps = name => {
+    arr.push(path.join(__dirname, "node_modules", name) + path.sep);
+
+    const moduleDef = deps[name];
+
+    if (moduleDef && moduleDef.requires) {
+      for (const requiredModuleName in moduleDef.requires) {
+        gatherDeps(requiredModuleName);
+      }
+    }
+  };
+
+  gatherDeps(moduleName);
+
+  return arr;
+}
+
+function deepModuleDependencyTest(modulesArr) {
+  const deps = [];
+
+  for (const moduleName of modulesArr) {
+    const moduleDependencies = getModuleDependencies(moduleName);
+    deps.push(...moduleDependencies);
+  }
+
+  return module => {
+    if (!module.nameForCondition) {
+      return false;
+    }
+
+    const name = module.nameForCondition();
+
+    return deps.some(depName => name?.startsWith(depName));
+  };
+}
+
 function createDefaultAppConfig() {
   const schemaPath = path.join(__dirname, "src", "schema.toml");
   const schemaString = fs.readFileSync(schemaPath).toString();
@@ -129,7 +158,6 @@ function createDefaultAppConfig() {
   return appConfig;
 }
 
-/**
 async function fetchAppConfigAndEnvironmentVars() {
   const { internalIpV4 } = await import("internal-ip");
 
@@ -181,7 +209,6 @@ async function fetchAppConfigAndEnvironmentVars() {
 
   return appConfig;
 }
- **/
 
 function htmlPagePlugin({ filename, extraChunks = [], chunksSortMode, inject }) {
   const chunkName = filename.match(/(.+).html/)[1];
@@ -223,36 +250,7 @@ module.exports = async (env, argv) => {
    * Initialize the Webpack build envrionment for the provided environment.
    */
 
-  if (argv.mode !== "production" || env.bundleAnalyzer) {
-    if (env.loadAppConfig || process.env.LOAD_APP_CONFIG) {
-      if (!env.localDev) {
-        // Load and set the app config and environment variables from the remote server.
-        // A Hubs Cloud server or dev.reticulum.io can be used.
-        appConfig = await fetchAppConfigAndEnvironmentVars();
-      }
-    } else {
-      if (!env.localDev) {
-        // Use the default app config with all features enabled.
-        appConfig = createDefaultAppConfig();
-      }
-    }
 
-    if (env.localDev) {
-      const localDevHost = "hubs.local";
-      // Local Dev Environment (npm run local)
-      Object.assign(process.env, {
-        HOST: localDevHost,
-        RETICULUM_SOCKET_SERVER: localDevHost,
-        CORS_PROXY_SERVER: "hubs-proxy.local:4000",
-        NON_CORS_PROXY_DOMAINS: `${localDevHost},dev.reticulum.io`,
-        BASE_ASSETS_PATH: `https://${localDevHost}:8080/`,
-        RETICULUM_SERVER: `${localDevHost}:4000`,
-        POSTGREST_SERVER: "",
-        ITA_SERVER: "",
-        UPLOADS_HOST: `https://${localDevHost}:4000`
-      });
-    }
-  }
 
   // In production, the environment variables are defined in CI or loaded from ita and
   // the app config is injected into the head of the page by Reticulum.
@@ -299,10 +297,28 @@ module.exports = async (env, argv) => {
         // need to specify this manually because some random lodash code will try to access
         // Buffer on the global object if it exists, so webpack will polyfill on its behalf
         Buffer: false,
-        fs: false,
-        stream: require.resolve("stream-browserify"),
-        path: require.resolve("path-browserify")
+        fs: false, // for ammo.js dep
+        stream: require.resolve("stream-browserify"),// for react-dom dep
+        path: require.resolve("path-browserify"),
+        //https://gist.github.com/ef4/d2cf5672a93cf241fd47c020b9b3066a
+        'process/browser': require.resolve("process/browser"),
+        'zlib': require.resolve('browserify-zlib'),
+        'util': require.resolve('util/'),
+        'events': require.resolve('events/'),
+        "buffer": require.resolve("buffer/"),
+        "http": require.resolve("stream-http"),
+        "https": require.resolve("https-browserify"),
+        //"crypto": require.resolve("crypto-browserify"),
+        "crypto":false,
+        "net": false, // net is typically not used in the browser, so we can safely disable it
+        "tls": false, // tls is also typically not used in the browser
+        "tty": require.resolve("tty-browserify"),
+        "timers": require.resolve("timers-browserify"),
+        "os": require.resolve("os-browserify/browser"),
+        "constants": require.resolve("constants-browserify"),
+        "child_process": false // child_process is not available in the browser
       },
+      //extensions: [".*", ".js", ".jsx", ".tsx", ".ts", ".json"]
       extensions: [".ts", ".tsx", ".js", ".jsx"]
     },
     entry: {
@@ -348,13 +364,13 @@ module.exports = async (env, argv) => {
       historyApiFallback: {
         rewrites: [
           { from: /^\/link/, to: "/link.html" },
-          //          { from: /^\/avatars/, to: "/avatar.html" },
+          { from: /^\/avatars/, to: "/avatar.html" },
           { from: /^\/scenes/, to: "/scene.html" },
           { from: /^\/signin/, to: "/signin.html" },
-          //          { from: /^\/discord/, to: "/discord.html" },
+          { from: /^\/discord/, to: "/discord.html" },
           { from: /^\/cloud/, to: "/cloud.html" },
           { from: /^\/verify/, to: "/verify.html" },
-          //          { from: /^\/tokens/, to: "/tokens.html" },
+          { from: /^\/tokens/, to: "/tokens.html" },
           { from: /^\/whats-new/, to: "/whats-new.html" }
         ]
       },
@@ -507,7 +523,8 @@ module.exports = async (env, argv) => {
         },
         {
           test: /\.svg$/,
-          include: [path.resolve(__dirname, "src", "react-components")],
+          exclude: /node_modules/, // Exclude SVGs from node_modules unless you specifically need to include them
+          //include: [path.resolve(__dirname, "src", "react-components")],
           use: [
             {
               loader: "@svgr/webpack",
@@ -652,20 +669,20 @@ module.exports = async (env, argv) => {
         chunksSortMode: "manual",
         inject: "head"
       }),
-      // htmlPagePlugin({
-      //   filename: "avatar.html",
-      //   extraChunks: ["support"],
-      //   chunksSortMode: "manual",
-      //   inject: "head"
-      // }),
+      htmlPagePlugin({
+        filename: "avatar.html",
+        extraChunks: ["support"],
+        chunksSortMode: "manual",
+        inject: "head"
+      }),
       htmlPagePlugin({
         filename: "link.html",
         extraChunks: ["support"],
         chunksSortMode: "manual"
       }),
-      // htmlPagePlugin({
-      //   filename: "discord.html"
-      // }),
+      htmlPagePlugin({
+        filename: "discord.html"
+      }),
       htmlPagePlugin({
         filename: "whats-new.html",
         inject: "head"
@@ -685,7 +702,6 @@ module.exports = async (env, argv) => {
       }),
       new CopyWebpackPlugin({
         patterns: [
-          { from: "src/hub.service.js", to: "hub.service.js" },
           { from: "src/schema.toml", to: "schema.toml" },
           { from: "src/aptero/module/properties/properties.js", to: "properties.js" },
           { from: "src/assets/images/favicon.ico", to: "favicon.ico" },
@@ -700,10 +716,6 @@ module.exports = async (env, argv) => {
           },
           { from: "src/assets/manifest.webmanifest", to: "manifest.webmanifest" },
           { from: "src/assets/static/", to: "assets/static/" },
-          {
-            from: "src/workers/pdfjs-dist@2.1.266/build/pdf.worker.js",
-            to: "workers/pdfjs-dist@2.1.266/build/pdf.worker.js"
-          }
         ]
       }),
       new CopyWebpackPlugin({
@@ -727,7 +739,7 @@ module.exports = async (env, argv) => {
         filename: "assets/stylesheets/[name]-[contenthash].css"
       }),
       // Define process.env variables in the browser context.
-      new webpack.DefinePlugin({
+      /*new webpack.DefinePlugin({
         "process.env": JSON.stringify({
           NODE_ENV: argv.mode,
           SHORTLINK_DOMAIN: process.env.SHORTLINK_DOMAIN,
@@ -744,7 +756,7 @@ module.exports = async (env, argv) => {
           BASE_ASSETS_PATH: process.env.BASE_ASSETS_PATH,
           APP_CONFIG: appConfig
         })
-      })
+      })*/
     ]
   };
 };

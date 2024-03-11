@@ -1,4 +1,3 @@
-
 window.APP_PROPS = {
   // To override these variables, create a .env file containing the overrides.
 
@@ -76,8 +75,7 @@ window.APP_PROPS = {
       ORIGIN:"meet-frontend-localhost"
     },
     adapterParams: {
-      adapter: "twilio",//dialog,dialog-io,janus,twilio,agora,default,none,socketio
-      transport:"WebSocketTransport"
+      adapter: "none",//dialog,dialog-io,janus,twilio,agora,default,none,socketio
     },
     features: {
       teams_limited:false,//for publication we limit bugged feature

@@ -82,8 +82,8 @@ export function ChatSidebarContainer({
           // intentionally only doing this on "enter" press and not clicking of send button
           if (e.target.value.startsWith("/")) {
             onClose();
+          }
         }
-      }
       } else if (e.key === "Escape") {
         onClose();
       }
@@ -95,8 +95,8 @@ export function ChatSidebarContainer({
   );
 
   const onSendMessage = useCallback(() => {
-      sendMessage(message.substring(0, MAX_MESSAGE_LENGTH));
-      setMessage("");
+    sendMessage(message.substring(0, MAX_MESSAGE_LENGTH));
+    setMessage("");
   }, [message, sendMessage, setMessage]);
 
   const onSpawnMessage = () => {
@@ -118,7 +118,7 @@ export function ChatSidebarContainer({
 
   const onSelectEmoji = useCallback(
     ({ emoji, pickerRemainedOpen }) => {
-      setMessage(message => message + emoji.native);
+      setMessage(message => message + emoji);
       // If the picker remained open, avoid selecting the input so that the
       // user can keep picking emojis.
       if (!pickerRemainedOpen) inputRef.current.select();
@@ -138,9 +138,9 @@ export function ChatSidebarContainer({
   }, []);
 
   useEffect(() => {
-      if (scrolledToBottom) {
-        setMessagesRead();
-      }
+    if (scrolledToBottom) {
+      setMessagesRead();
+    }
   }, [messageGroups, scrolledToBottom, setMessagesRead]);
 
   const discordBridges = discordBridgesForPresences(presences);
@@ -169,9 +169,6 @@ export function ChatSidebarContainer({
 
   const isMobile = AFRAME.utils.device.isMobile();
   const isOverMaxLength = message.length > MAX_MESSAGE_LENGTH;
-  const users = [];
-  const users_private = [];
-  var i = 1;
   const isDisabled = message.length === 0 || isOverMaxLength || !canTextChat;
   return (
     <ChatSidebar onClose={onClose}>
@@ -180,10 +177,10 @@ export function ChatSidebarContainer({
           const { id, systemMessage, type } = entry;
           if (systemMessage) {
             return <SystemMessage key={id} {...entry} />;
-              } else {
+          } else {
             if (type === "permission") {
               return <PermissionMessageGroup key={id} {...entry} />;
-          } else {
+            } else {
               return <ChatMessageGroup key={id} {...entry} />;
             }
           }

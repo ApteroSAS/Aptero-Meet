@@ -2,8 +2,6 @@ import { EventEmitter } from "eventemitter3";
 import { MediaDevicesEvents, PermissionStatus, MediaDevices, NO_DEVICE_ID } from "./media-devices-utils";
 import { detectOS, detect } from "detect-browser";
 import { isIOS as detectIOS } from "./is-mobile";
-import {createTrack, getAdapterParams} from "../aptero/module/webRTCadapter/adapter-config";
-import {msTeamsAPILight} from "../aptero/module/axolotis/modules/basic/ImportHelper";
 
 const isMobile = AFRAME.utils.device.isMobile();
 const isIOS = detectIOS();
@@ -47,9 +45,7 @@ export default class MediaDevicesManager extends EventEmitter {
     };
 
     this.onDeviceChange = this.onDeviceChange.bind(this);
-    if(!(msTeamsAPILight().msTeams() || getAdapterParams().adapter === "none")) {
-      navigator.mediaDevices.addEventListener("devicechange", this.onDeviceChange);
-    }
+    navigator.mediaDevices.addEventListener("devicechange", this.onDeviceChange);
     this.onPermissionsUpdated = this.onPermissionsUpdated.bind(this);
     APP.hubChannel.addEventListener("permissions_updated", this.onPermissionsUpdated);
   }
@@ -61,7 +57,7 @@ export default class MediaDevicesManager extends EventEmitter {
   static get isAudioInputSelectEnabled() {
     return audioInputSelectEnabled;
   }
-  
+
   get deviceId() {
     return this._deviceId;
   }
@@ -233,19 +229,12 @@ export default class MediaDevicesManager extends EventEmitter {
       const { preferredMic } = this._store.state.preferences;
       deviceId = preferredMic !== NO_DEVICE_ID ? preferredMic : undefined;
     }
-    if(msTeamsAPILight().msTeams() || getAdapterParams().adapter === "none"){
-      console.error("no audio should be started");
-    }
-    if(this.lastDeviceId && JSON.stringify(deviceId) === JSON.stringify(this.lastDeviceId)){
-      return this.lastResult;
-    }
-    this.lastDeviceId = deviceId;
     let constraints = { audio: {} };
     if (deviceId) {
       constraints = { audio: { deviceId: { ideal: [deviceId] } } };
     }
 
-    this.lastResult = await this._startMicShare(constraints);
+    const result = await this._startMicShare(constraints);
 
     await this.fetchMediaDevices();
 
@@ -273,7 +262,7 @@ export default class MediaDevicesManager extends EventEmitter {
       APP.dialog.enableMicrophone(true);
     }
 
-    if (this.lastResult) {
+    if (result) {
       this._permissionsStatus[MediaDevices.MICROPHONE] = PermissionStatus.GRANTED;
       this._scene.emit(MediaDevicesEvents.MIC_SHARE_STARTED);
       this.emit(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, {
@@ -289,7 +278,7 @@ export default class MediaDevicesManager extends EventEmitter {
       });
     }
 
-    return this.lastResult;
+    return result;
   }
 
   async _startMicShare(constraints = { audio: {} }) {
@@ -303,8 +292,7 @@ export default class MediaDevicesManager extends EventEmitter {
 
     try {
       console.log("Adding microphone media stream");
-      //aptero
-      const newStream = await createTrack(constraints);//Type MediaStream
+      const newStream = await navigator.mediaDevices.getUserMedia(constraints);
       this.audioSystem.addStreamToOutboundAudio("microphone", newStream);
       this.audioTrack = newStream.getAudioTracks()[0];
       this.audioTrack.addEventListener("ended", async () => {
@@ -320,9 +308,7 @@ export default class MediaDevicesManager extends EventEmitter {
             "Oculus Browser 6 bug hit: Audio stream track ended without calling stop. Recreating audio stream."
           );
 
-          //aptero
-          const newStream = await createTrack(constraints);//Type MediaStream
-
+          const newStream = await navigator.mediaDevices.getUserMedia(constraints);
           this.audioTrack = newStream.getAudioTracks()[0];
 
           this.audioSystem.addStreamToOutboundAudio("microphone", newStream);
@@ -338,7 +324,7 @@ export default class MediaDevicesManager extends EventEmitter {
       return true;
     } catch (e) {
       // Error fetching audio track, most likely a permission denial.
-      console.warn("Error during getUserMedia: ", e);
+      console.error("Error during getUserMedia: ", e);
       this.audioTrack = null;
       return false;
     }

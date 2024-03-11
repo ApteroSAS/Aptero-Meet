@@ -37,13 +37,11 @@ import "./utils/aframe-overrides";
 // web browser cache should work well.
 // So we disable it here.
 import * as THREE from "three";
-
 THREE.Cache.enabled = false;
 THREE.Object3D.DefaultMatrixAutoUpdate = false;
 
 import "./utils/logging";
 import { patchWebGLRenderingContext } from "./utils/webgl";
-
 patchWebGLRenderingContext();
 
 import "networked-aframe/src/index";
@@ -60,14 +58,12 @@ import {
 } from "./utils/phoenix-utils";
 import { Presence } from "phoenix";
 import { emitter } from "./emitter";
+import "./phoenix-adapter";
 
 import nextTick from "./utils/next-tick";
 import { addAnimationComponents } from "./utils/animation";
 import Cookies from "js-cookie";
-import {
-  DIALOG_CONNECTION_ERROR_FATAL,
-  DIALOG_CONNECTION_CONNECTED
-} from "./aptero/module/webRTCadapter/naf-dialog-io-adapter";
+import { DIALOG_CONNECTION_ERROR_FATAL, DIALOG_CONNECTION_CONNECTED } from "./aptero/module/webRTCadapter/AdapterI";
 import "./change-hub";
 
 import "./components/scene-components";
@@ -148,8 +144,8 @@ import "./components/avatar-inspect-collider";
 import "./components/video-texture-target";
 import "./components/mirror";
 
-import ReactDOM from "react-dom";
 import React from "react";
+import { createRoot } from "react-dom/client";
 import { Router, Route } from "react-router-dom";
 import { createBrowserHistory, createMemoryHistory } from "history";
 import { pushHistoryState } from "./utils/history";
@@ -190,37 +186,29 @@ import "./systems/linked-media";
 import "./systems/audio-debug-system";
 import "./systems/audio-gain-system";
 import "./gltf-component-mappings";
-//Aptero support for multiple Adapters
-import {AdapterWrapper} from "./aptero/module/webRTCadapter/AdapterWrapper";
+
 import { App, getScene } from "./app";
 import MediaDevicesManager from "./utils/media-devices-manager";
 import PinningHelper from "./utils/pinning-helper";
 import { sleep } from "./utils/async-utils";
 import { platformUnsupported } from "./support";
 import { renderAsEntity } from "./utils/jsx-entity";
-import { VideoMenuPrefab } from "./prefabs/video-menu";
-import { ObjectMenuPrefab } from "./prefabs/object-menu";
+import { VideoMenuPrefab, loadVideoMenuButtonIcons } from "./prefabs/video-menu";
+import { loadObjectMenuButtonIcons, ObjectMenuPrefab } from "./prefabs/object-menu";
+import { loadMirrorMenuButtonIcons, MirrorMenuPrefab } from "./prefabs/mirror-menu";
+import { loadPDFMenuButtonIcons } from "./prefabs/pdf-menu";
 import { LinkHoverMenuPrefab } from "./prefabs/link-hover-menu";
 import { PDFMenuPrefab } from "./prefabs/pdf-menu";
 import { loadWaypointPreviewModel, WaypointPreview } from "./prefabs/waypoint-preview";
 import { preload } from "./utils/preload";
 
-//aptero service//ax
-import {getService} from "@aptero/axolotis-player"
-import {MICROSOFT_STATIC_SERVICE, PROPERTIES_SERVICE} from "@aptero/axolotis-module-teams";
-import {redirectIfNeeded} from "./aptero/module/load-balancer/LoadBalancer";
-import { Object3D } from "three";
-import DialogAdapter from "./aptero/module/webRTCadapter/naf-dialog-io-adapter";
+initIOC();
+
+//aptero service
 import { apteroService } from "./aptero/ApteroServices";
 import { roomController } from "./aptero/module/ButtonAPI/api/RoomController";
-import { fetchICEservers } from "./aptero/module/webRTCadapter/adapter-config";
-
-
 //aptero service end
 window.APP = new App();
-window.APP.dialog = new AdapterWrapper(); // Aptero
-renderAsEntity(APP.world, VideoMenuPrefab());
-renderAsEntity(APP.world, VideoMenuPrefab());
 
 function addToScene(entityDef, visible) {
   return getScene().then(scene => {
@@ -230,11 +218,17 @@ function addToScene(entityDef, visible) {
     obj.visible = !!visible;
   });
 }
-preload(addToScene(PDFMenuPrefab(), false));
-preload(addToScene(ObjectMenuPrefab(), false));
-preload(addToScene(ObjectMenuPrefab(), false));
+preload(loadPDFMenuButtonIcons().then(() => addToScene(PDFMenuPrefab(), false)));
+preload(loadObjectMenuButtonIcons().then(() => addToScene(ObjectMenuPrefab(), false)));
+preload(loadMirrorMenuButtonIcons().then(() => addToScene(MirrorMenuPrefab(), false)));
 preload(addToScene(LinkHoverMenuPrefab(), false));
 preload(loadWaypointPreviewModel().then(() => addToScene(WaypointPreview(), false)));
+preload(
+  loadVideoMenuButtonIcons().then(() => {
+    addToScene(VideoMenuPrefab(), false);
+    addToScene(VideoMenuPrefab(), false);
+  })
+);
 
 const store = window.APP.store;
 store.update({ preferences: { shouldPromptForRefresh: false } }); // Clear flag that prompts for refresh from preference screen
@@ -246,7 +240,6 @@ const qs = new URLSearchParams(location.search);
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
 const isEmbed = window.self !== window.top;
-
 if (isEmbed && !qs.get("embed_token")) {
   // Should be covered by X-Frame-Options, but just in case.
   throw new Error("no embed token");
@@ -277,7 +270,6 @@ import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY, ONLY_SCREEN_AVAILABLE
 import detectConcurrentLoad from "./utils/concurrent-load-detector";
 
 import qsTruthy from "./utils/qs_truthy";
-
 import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
 import { ExitReason } from "./react-components/room/ExitedRoomScreen";
 import { OAuthScreenContainer } from "./react-components/auth/OAuthScreenContainer";
@@ -291,11 +283,10 @@ import { listenForNetworkMessages } from "./utils/listen-for-network-messages";
 import { exposeBitECSDebugHelpers } from "./bitecs-debug-helpers";
 import { loadLegacyRoomObjects } from "./utils/load-legacy-room-objects";
 import { loadSavedEntityStates } from "./utils/entity-state-utils";
-import { wait } from "./aptero/util/AsyncWaiter";
-import { setupVersionComp } from "./aptero/module/HubsBridge/utils/Version";
-import { minimumQualityService } from "./aptero/module/perf/MinimumQualityService";
+import { shouldUseNewLoader } from "./utils/bit-utils";
 import { networkService } from "./aptero/module/HubsBridge/service/NetworkService";
 import { getEntryMode } from "./aptero/module/HubsBridge/utils/EntryMode";
+import {initIOC} from "./aptero/module/axolotis/AxInit";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -304,6 +295,7 @@ NAF.options.syncSource = PHOENIX_RELIABLE_NAF;
 let isOAuthModal = false;
 
 // OAuth popup handler
+//APTERO
 /*// TODO: Replace with a new oauth callback route that has this postMessage script.
 try {
 if (window.opener && window.opener.doingTwitterOAuth) {
@@ -318,6 +310,8 @@ if (window.opener && window.opener.doingTwitterOAuth) {
 const isBotMode = qsTruthy("bot");
 const isTelemetryDisabled = qsTruthy("disable_telemetry");
 const isDebug = qsTruthy("debug");
+
+let root;
 
 if (!isBotMode && !isTelemetryDisabled) {
   registerTelemetry("/hub", "Room Landing Page");
@@ -334,7 +328,7 @@ if (qsTruthy("ecsDebug")) {
 }
 
 function setupLobbyCamera() {
-  console.log("[preview] Setting up lobby camera");
+  console.log("Setting up lobby camera");
   const camera = document.getElementById("scene-preview-node");
   const previewCamera = document.getElementById("environment-scene").object3D.getObjectByName("scene-preview-camera");
 
@@ -373,7 +367,8 @@ function mountUI(props = {}) {
   const disableAutoExitOnIdle =
     qsTruthy("allow_idle") || (process.env.NODE_ENV === "development" && !qs.get("idle_timeout"));
   const forcedVREntryType = qsVREntryType;
-  ReactDOM.render(
+
+  root.render(
     <WrappedIntlProvider>
       <ThemeProvider store={store}>
         <Router history={history}>
@@ -401,8 +396,7 @@ function mountUI(props = {}) {
           />
         </Router>
       </ThemeProvider>
-    </WrappedIntlProvider>,
-    document.getElementById("ui-root")
+    </WrappedIntlProvider>
   );
 }
 
@@ -429,22 +423,19 @@ export async function getSceneUrlForHub(hub) {
     isLegacyBundle = !(glbAsset || hasExtension);
   }
 
-  //aptero
-  //await microsoftUrlService.preFetchConvertMicrosoftUrl(sceneUrl);
-
   if (qsTruthy("debugLocalScene") && sceneUrl?.startsWith("blob:")) {
     // we skip doing this if you haven't entered because refreshing the page will invalidate blob urls and break loading
     sceneUrl = document.querySelector("a-scene").is("entered") ? sceneUrl : loadingEnvironment;
   } else if (isLegacyBundle) {
     // Deprecated
-    const res = await fetch(sceneUrl);
-    try {//Aptero TryCatch (c'est ok de supprimer ce if)
+    try {
+      const res = await fetch(sceneUrl);
       const data = await res.json();
       const baseURL = new URL(THREE.LoaderUtils.extractUrlBase(sceneUrl), window.location.href);
       sceneUrl = new URL(data.assets[0].src, baseURL).href;
     } catch (e) {
-      //The 360toScene api is misinterpreted as legacy while being a working glb. We can filter by looking for errors
-      sceneUrl = proxiedUrlFor(sceneUrl);
+      sceneUrl = loadingEnvironment;
+      console.error("Error fetching the scene: ", e);
     }
   } else {
     sceneUrl = proxiedUrlFor(sceneUrl);
@@ -455,14 +446,8 @@ export async function getSceneUrlForHub(hub) {
 export async function updateEnvironmentForHub(hub, entryManager) {
   console.log("Updating environment for hub");
   const sceneUrl = await getSceneUrlForHub(hub);
-  let sameSceneAsBefore;
-  try {
-    sameSceneAsBefore = document.querySelector("#environment-scene").childNodes[0].components["gltf-model-plus"].data.src === sceneUrl;
-  } catch (e) {
-    sameSceneAsBefore = false;
-  }
 
-  if (qsTruthy("newLoader")) {
+  if (shouldUseNewLoader()) {
     console.log("Using new loading path for scenes.");
     swapActiveScene(APP.world, sceneUrl);
     return;
@@ -522,49 +507,60 @@ export async function updateEnvironmentForHub(hub, entryManager) {
     environmentEl.addEventListener(
       "model-loaded",
       () => {
-        environmentEl.removeEventListener("model-error", sceneErrorHandler);
+        environmentEl.addEventListener(
+          "model-loaded",
+          () => {
+            environmentEl.removeEventListener("model-error", sceneErrorHandler);
 
             envSystem.updateEnvironment(environmentEl);
 
             console.log(`Scene file update load took ${Math.round(performance.now() - loadStart)}ms`);
 
-        traverseMeshesAndAddShapes(environmentEl);
+            traverseMeshesAndAddShapes(environmentEl);
 
-            if(!sameSceneAsBefore) {
-          // We've already entered, so move to new spawn point once new environment is loaded
-          if (sceneEl.is("entered")) {
-            waypointSystem.moveToSpawnPoint();
-          }
-        }
+            // We've already entered, so move to new spawn point once new environment is loaded
+            if (sceneEl.is("entered")) {
+              waypointSystem.moveToSpawnPoint();
+            }
 
-        const fader = document.getElementById("viewing-camera").components["fader"];
+            const fader = document.getElementById("viewing-camera").components["fader"];
 
-        // Add a slight delay before de-in to reduce hitching.
-        setTimeout(() => fader.fadeIn(), 2000);
-      },
-      { once: true }
-    );
+            // Add a slight delay before de-in to reduce hitching.
+            setTimeout(() => fader.fadeIn(), 2000);
+          },
+          { once: true }
+        );
 
         // If we had a loop-animation component on the environment, we need to remove it
         // before loading a new model with gltf-model-plus, or else the component won't
         // find and play animations in the new scene.
         environmentEl.removeAttribute("loop-animation");
 
-    sceneEl.emit("leaving_loading_environment");
-    if (environmentEl.components["gltf-model-plus"].data.src === sceneUrl) {
-      console.warn("Updating environment to the same url.");
-      environmentEl.setAttribute("gltf-model-plus", { src: "" });
-    }
-    environmentEl.setAttribute("gltf-model-plus", { src: sceneUrl });
+        sceneEl.emit("leaving_loading_environment");
+        if (environmentEl.components["gltf-model-plus"].data.src === sceneUrl) {
+          console.warn("Updating environment to the same url.");
+          environmentEl.setAttribute("gltf-model-plus", { src: "" });
+        }
+        environmentEl.setAttribute("gltf-model-plus", { src: sceneUrl });
+      },
+      { once: true }
+    );
+
     if (!sceneEl.is("entered")) {
       environmentEl.addEventListener("model-error", sceneErrorHandler, { once: true });
     }
+
+    if (environmentEl.components["gltf-model-plus"].data.src === loadingEnvironment) {
+      console.warn("Transitioning to loading environment but was already in loading environment.");
+      environmentEl.setAttribute("gltf-model-plus", { src: "" });
+    }
+    environmentEl.setAttribute("gltf-model-plus", { src: loadingEnvironment });
   }
 }
 
-export async function updateUIForHub(hub, hubChannel) {
+export async function updateUIForHub(hub, hubChannel, showBitECSBasedClientRefreshPrompt = false) {
   roomController.setRoom(hub, hubChannel); //Aptero
-  remountUI({ hub, entryDisallowed: !hubChannel.canEnterRoom(hub) });
+  remountUI({ hub, entryDisallowed: !hubChannel.canEnterRoom(hub), showBitECSBasedClientRefreshPrompt });
 }
 
 function onConnectionError(entryManager, connectError) {
@@ -578,7 +574,6 @@ function onConnectionError(entryManager, connectError) {
 // TODO: Find a home for this
 // TODO: Naming. Is this an "event bus"?
 const events = emitter();
-
 function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data) {
   const scene = document.querySelector("a-scene");
   const isRejoin = NAF.connection.isConnected();
@@ -600,14 +595,12 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
 
   // Turn off NAF for embeds as an optimization, so the user's browser isn't getting slammed
   // with NAF traffic on load.
+  //APTERO
   if (isEmbed && !msTeamsAPILight().msTeams()) {
     hubChannel.allowNAFTraffic(false);
   }
 
   const hub = data.hubs[0];
-  if (qs.has("offline")) {
-    hub.port = 666;
-  }
 
   console.log(`Dialog host: ${hub.host}:${hub.port}`);
 
@@ -622,17 +615,14 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
       audioSystem.setMediaGainOverride(1);
       store.executeOnLoadActions(scene);
     },
-    //aptero modification
-    onMediaSearchResultEntrySelected: (entry, selectAction) => {
-      scene.emit("action_selected_media_result_entry", { entry, selectAction });
-    },
+    onMediaSearchResultEntrySelected: (entry, selectAction) =>
+      scene.emit("action_selected_media_result_entry", { entry, selectAction }),
     onMediaSearchCancelled: entry => scene.emit("action_media_search_cancelled", entry),
     onAvatarSaved: entry => scene.emit("action_avatar_saved", entry)
   });
 
   scene.addEventListener("action_selected_media_result_entry", e => {
     const { entry, selectAction } = e.detail;
-    if (!entry) return;
     if ((entry.type !== "scene_listing" && entry.type !== "scene") || selectAction !== "use") return;
     if (!hubChannel.can("update_hub")) return;
 
@@ -641,20 +631,19 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
 
   // Handle request for user gesture
   scene.addEventListener("2d-interstitial-gesture-required", () => {
-    //aptero modification remove anoying messages in oculus quest
-    /*remountUI({
+    remountUI({
       showInterstitialPrompt: true,
       onInterstitialPromptClicked: () => {
         remountUI({ showInterstitialPrompt: false, onInterstitialPromptClicked: null });
         scene.emit("2d-interstitial-gesture-complete");
       }
-    });*/
+    });
   });
 
   scene.addEventListener(
     "didConnectToNetworkedScene",
     () => {
-      if (qsTruthy("newLoader")) {
+      if (shouldUseNewLoader()) {
         loadSavedEntityStates(APP.hubChannel);
         loadLegacyRoomObjects(hub.hub_id);
       } else {
@@ -721,6 +710,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
     window.APP.hub = hub;
     updateUIForHub(hub, hubChannel);
     scene.emit("hub_updated", { hub });
+    //APTERO
     const hideui = new URL(window.location.href).searchParams.get("hideui");
     if (!isEmbed || hideui || msTeamsAPILight().msTeams()) {
       console.log("Page is not embedded so environment initialization will start immediately");
@@ -747,8 +737,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
 
 async function runBotMode(scene, entryManager) {
   console.log("Running in bot mode...");
-  const noop = () => {
-  };
+  const noop = () => {};
   const alwaysFalse = () => false;
   scene.renderer = {
     setAnimationLoop: noop,
@@ -762,22 +751,11 @@ async function runBotMode(scene, entryManager) {
   entryManager.enterSceneWhenLoaded(false, false);
 }
 
-const init = async () => {
-  //APTERO
-  await redirectIfNeeded();
-  const { initAxolotisPlayer } = await import("./aptero/module/axolotis/AxInit");
-  await initAxolotisPlayer();
-  await getService(PROPERTIES_SERVICE);
-  await getService(MICROSOFT_STATIC_SERVICE);
-  msTeamsAPILight().redirectToTeamsSidePanel();
-  let iceServer = await fetchICEservers();
-  await minimumQualityService.checkTurnServerAndSwitchToTCP(iceServer);
-  console.log("lazy loading start");
-  await wait(() => {
-    return APP.dialog.lasyLoadingFinished;
-  });
-  console.log("lazy loading finished");
-  setupVersionComp();
+document.addEventListener("DOMContentLoaded", async () => {
+  if (!root) {
+    const container = document.getElementById("ui-root");
+    root = createRoot(container);
+  }
   if (isOAuthModal) {
     return;
   }
@@ -797,8 +775,8 @@ const init = async () => {
     const browser = detect();
     // HACK - it seems if we don't initialize the mic track up-front, voices can drop out on iOS
     // safari when initializing it later.
-  // Seems to be working for Safari >= 16.4. We should revisit this in the future and remove it completely.
-    if (["iOS", "Mac OS"].includes(detectedOS) && ["safari", "ios"].includes(browser.name)) {
+    // Seems to be working for Safari >= 16.4. We should revisit this in the future and remove it completely.
+    if (["iOS", "Mac OS"].includes(detectedOS) && ["safari", "ios"].includes(browser.name) && browser.version < "16.4") {
       try {
         //await createTrack({ audio: true });//Type MediaStream
         //note aptero we do not need to use create track here since this is just a hack to trigger safari audio authorization popup
@@ -1259,6 +1237,7 @@ const init = async () => {
   });
 
   events.on(`hub:join`, ({ key, meta }) => {
+    console.log(`[hub:join] ${key} joined.`);
     scene.emit("presence_updated", {
       sessionId: key,
       profile: meta.profile,
@@ -1278,12 +1257,12 @@ const init = async () => {
     ) {
       return;
     }
+    console.log(`presence: ${meta.presence}`)
     messageDispatch.receive({
       type: "join",
       presence: meta.presence,
       name: meta.profile.displayName
     });
-    //scene.emit("join", { presences:});
   });
 
   events.on(`hub:leave`, ({ meta }) => {
@@ -1341,18 +1320,6 @@ const init = async () => {
     });
   });
 
-  events.on(`hub:change`, ({ key, current }) => {
-    scene.emit("presence_updated", {
-      sessionId: key,
-      profile: current.profile,
-      roles: current.roles,
-      permissions: current.permissions,
-      streaming: current.streaming,
-      recording: current.recording,
-      hand_raised: current.hand_raised,
-      typing: current.typing
-    });
-  });
   // We need to be able to wait for initial presence syncs across reconnects and socket migrations,
   // so we create this object in the outer scope and assign it a new promise on channel join.
   const presenceSync = {
@@ -1370,6 +1337,7 @@ const init = async () => {
     updateSceneCopresentState(presence, scene);
   });
   events.on(`hub:sync`, ({ presence }) => {
+    console.log(`[hub:sync] ${presence.list().length} occupants.`);
     remountUI({
       sessionId: socket.params().session_id,
       presences: presence.state,
@@ -1419,7 +1387,7 @@ const init = async () => {
       console.error(res);
     });
 
-  hubPhxChannel.on("message", ({ session_id, type, body, receiverClientId, type_chat, from }) => {
+  hubPhxChannel.on("message", ({ session_id, type, body, from }) => {
     const getAuthor = () => {
       const userInfo = hubChannel.presence.state[session_id];
       if (from) {
@@ -1433,13 +1401,12 @@ const init = async () => {
 
     const name = getAuthor();
     const maySpawn = scene.is("entered");
+
     const incomingMessage = {
       name,
       type,
       body,
       maySpawn,
-      receiverClientId,
-      type_chat,
       sessionId: session_id,
       sent: session_id === socket.params().session_id
     };
@@ -1456,8 +1423,17 @@ const init = async () => {
     const userInfo = hubChannel.presence.state[session_id];
     const displayName = (userInfo && userInfo.metas[0].profile.displayName) || "API";
 
+    let showBitECSBasedClientRefreshPrompt = false;
+
+    if (!!hub.user_data?.hubs_use_bitecs_based_client !== !!window.APP.hub.user_data?.hubs_use_bitecs_based_client) {
+      showBitECSBasedClientRefreshPrompt = true;
+      setTimeout(() => {
+        document.location.reload();
+      }, 5000);
+    }
+
     window.APP.hub = hub;
-    updateUIForHub(hub, hubChannel);
+    updateUIForHub(hub, hubChannel, showBitECSBasedClientRefreshPrompt);
 
     if (
       stale_fields.includes("scene") ||
@@ -1544,5 +1520,4 @@ const init = async () => {
 
   authChannel.setSocket(socket);
   linkChannel.setSocket(socket);
-};
-init();
+});

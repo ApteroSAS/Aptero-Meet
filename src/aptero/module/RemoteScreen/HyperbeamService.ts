@@ -1,6 +1,6 @@
 import Hyperbeam from "@hyperbeam/web";
 import { getCurrentHubId } from "../../../utils/hub-utils";
-import apteroCursor from "../../../assets/aptero/apteroCursor.svg";
+import {ReactComponent as apteroCursor} from "../../../assets/aptero/apteroCursor.svg";
 
 import { hyperbeamPopup } from "./HyperbeamScripts/HyperbeamPopup"
 import { cleanProtocol } from "./HyperbeamScripts/cleanProtocol";

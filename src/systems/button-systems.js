@@ -25,24 +25,24 @@ export class HoldableButtonSystem {
 
     if (this.prevHeldLeft && this.prevHeldLeft !== heldLeft) {
       isTagged(this.prevHeldLeft, "holdableButton") &&
-      this.prevHeldLeft.object3D.dispatchEvent({
-        type: "holdable-button-up",
-        object3D: interaction.options.leftRemote.entity.object3D
-      });
+        this.prevHeldLeft.object3D.dispatchEvent({
+          type: "holdable-button-up",
+          object3D: interaction.options.leftRemote.entity.object3D
+        });
     }
     if (heldLeft && this.prevHeldLeft !== heldLeft) {
       isTagged(this.heldLeft, "holdableButton") &&
-      heldLeft.object3D.dispatchEvent({
-        type: "holdable-button-down",
-        object3D: interaction.options.leftRemote.entity.object3D
-      });
+        heldLeft.object3D.dispatchEvent({
+          type: "holdable-button-down",
+          object3D: interaction.options.leftRemote.entity.object3D
+        });
     }
 
     this.prevHeldLeft = heldLeft;
   }
 }
 
-const hasButtonComponent = (function() {
+const hasButtonComponent = (function () {
   const BUTTON_COMPONENT_NAMES = [
     "icon-button",
     "text-button",
@@ -73,9 +73,6 @@ function getHoverableButton(hovered) {
   if (hovered.children) {
     // TODO: not sure if looping thru children here is desireable, but we did this to accomodate the rounded-button mixins
     for (let i = 0; i < hovered.children.length; i++) {
-      if(!hovered.children[i].components){
-        break;//aptero
-      }
       if (
         hasButtonComponent(hovered.children[i].components) ||
         hovered.children[i].classList.contains("teleport-waypoint-icon") ||

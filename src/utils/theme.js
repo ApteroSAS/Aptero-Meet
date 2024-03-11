@@ -1,7 +1,7 @@
 import { waitForDOMContentLoaded } from "./async-utils";
 import { store } from "./store-instance";
 
-// Node these should be synchronized with the top of shared.scss
+// NOTE these should be synchronized with the top of shared.scss
 const DEFAULT_ACTION_COLOR = "#FF3464";
 const DEFAULT_ACTION_COLOR_LIGHT = "#FF74A4";
 
@@ -105,7 +105,8 @@ function getCurrentTheme() {
 
 function getThemeColor(name) {
   const theme = getCurrentTheme();
-  return theme?.variables?.[name] || DEFAULT_COLORS[name];
+  // config?.theme?.[name] ensures legacy variables for nametag colors are taken into account
+  return theme?.variables?.[name] || config?.theme?.[name] || DEFAULT_COLORS[name];
 }
 
 function updateTextButtonColors() {
@@ -159,7 +160,7 @@ function onThemeChanged(listener) {
     store.removeEventListener("themechanged", listener);
     removeDarkModeListener();
   };
-    }
+}
 
 waitForDOMContentLoaded().then(() => {
   if (process.env.NODE) {

@@ -237,7 +237,6 @@ function onboardingSteps({ intl, step }) {
         }
       };
     case "tips.desktop.locomotion":
-      console.log(`moveKeyFront = ${moveKeyFront}`);
       return {
         control: {
           type: Step,

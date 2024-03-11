@@ -13,7 +13,11 @@ import { register, registerCustomGLTFModelPlusComponents } from "./aptero/module
 const inflatorWrapper = inflator => (el, _componentName, componentData) =>
   inflator(APP.world, el.object3D.eid, componentData);
 
-
+AFRAME.GLTFModelPlus.registerComponent("duck", "duck", el => {
+  el.setAttribute("duck", "");
+  el.setAttribute("quack", { quackPercentage: 0.1 });
+});
+AFRAME.GLTFModelPlus.registerComponent("quack", "quack");
 AFRAME.GLTFModelPlus.registerComponent("sound", "sound");
 AFRAME.GLTFModelPlus.registerComponent("css-class", "css-class");
 AFRAME.GLTFModelPlus.registerComponent("interactable", "css-class", (el, componentName) => {
@@ -106,7 +110,7 @@ AFRAME.GLTFModelPlus.registerComponent("spawn-point", "spawn-point", el => {
     willMaintainWorldUp: true
   });
 });
-  // There isn't actually an a-frame nav-mesh component, but we want to tag this el as a nav-mesh since
+
 AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh");
 
 AFRAME.GLTFModelPlus.registerComponent("pinnable", "pinnable");
@@ -130,6 +134,7 @@ import { setInitialNetworkedData } from "./utils/assign-network-ids";
 /** @jsx createElementEntity */ createElementEntity;
 
 AFRAME.GLTFModelPlus.registerComponent("media-frame", "media-frame", (el, _componentName, componentData) => {
+  // eslint-disable-next-line react/no-unknown-property
   const eid = renderAsEntity(APP.world, <entity mediaFrame={componentData} />);
 
   addComponent(APP.world, Networked, eid);
@@ -182,6 +187,7 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
 
 async function mediaInflator(el, componentName, componentData, components, fitToBox = true) {
   let isControlled = true;
+
   if (componentName === "link" && (components.video || components.image)) {
     // video/image component will set link url specified in link component.
     return;
@@ -260,7 +266,7 @@ async function mediaInflator(el, componentName, componentData, components, fitTo
 
   const src = componentName === "link" ? componentData.href : componentData.src;
 
-
+  //APTERO
   if (componentName === "link" && componentData.HBRes) {
     //Load Hyperbeam properties into mediaOptions.customOptions
     mediaOptions.customOptions = JSON.stringify({
@@ -302,8 +308,6 @@ async function mediaInflator(el, componentName, componentData, components, fitTo
     mediaOptions,
     moveTheParentNotTheMesh: true
   });
-
-  
 }
 
 const mediaInflatorNoResize = (el, componentName, componentData, components) =>
@@ -398,7 +402,7 @@ AFRAME.GLTFModelPlus.registerComponent(
 
       // indexToEntityMap should be considered depredcated. These references are now resovled by the GLTFHubsComponentExtension
       if (typeof target === "number") {
-      targetEntity = indexToEntityMap[target];
+        targetEntity = indexToEntityMap[target];
       } else {
         targetEntity = target?.el;
       }
@@ -578,11 +582,11 @@ AFRAME.GLTFModelPlus.registerComponent("audio-params", "audio-params", (el, comp
   const audio = APP.audios.get(el);
   if (audio) {
     updateAudioSettings(el, audio);
-    }
+  }
 });
 
 AFRAME.GLTFModelPlus.registerComponent("audio-zone", "audio-zone", (el, componentName, componentData) => {
-    el.setAttribute(componentName, { ...componentData });
+  el.setAttribute(componentName, { ...componentData });
 });
 
 AFRAME.GLTFModelPlus.registerComponent("background", "background", (el, _componentName, componentData) => {

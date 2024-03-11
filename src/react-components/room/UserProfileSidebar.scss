@@ -5,27 +5,15 @@
   flex-direction: column;
   position: relative;
   align-items: center;
-  overflow: hidden;
-  width: 160px;
-  height: 299px;
-  border-radius: 8px;
 
   /* TODO: This styling into AvatarPreview */
   & > :first-child {
-    max-width: none;
-    width: 350px;
-    /* height: 329px; */
+    width: 168px;
+    height: 300px;
     min-height: 300px;
-    /* overflow: hidden; */
     border-radius: 8px;
-    background-color: var(--tile-bg-color);
+    background-color: theme.$tile-bg-color;
   }
-
-}
-.div_spinner{
-  display: flex;
-  justify-content: center;
-  padding-top: 50%;
 }
 
 :local(.slider-container) {
@@ -35,4 +23,13 @@
 
 :local(.slider-input-container) {
   width: 209px;
+}
+
+:local(.displayName) {
+  font-weight: 400;
+  color: theme.$text1-color;
+}
+
+:local(.pronouns) {
+  color: theme.$text2-color;
 }

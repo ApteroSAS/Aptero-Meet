@@ -115,6 +115,7 @@ export class MouseDevice {
       }
     }
 
+    //APTERO
     if (window.lockMovement) {
       this.buttonLeft = false;
       this.buttonRight = false;

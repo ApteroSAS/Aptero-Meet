@@ -67,10 +67,6 @@ const noop = function () {};
 AFRAME.registerComponent("text-raycast-hack", {
   dependencies: ["text"],
   init() {
-    if(this.el.getObject3D("text")) {
-      this.el.getObject3D("text").raycast = noop;
-    }else{
-      console.warn("this.el.getObject3D(\"text\") is undefined")
-    }
+    this.el.getObject3D("text").raycast = noop;
   }
 });

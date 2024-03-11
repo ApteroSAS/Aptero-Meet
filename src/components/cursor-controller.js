@@ -12,6 +12,7 @@ import { paths } from "../systems/userinput/paths";
 import { sets } from "../systems/userinput/sets";
 import { getLastWorldPosition } from "../utils/three-utils";
 import { Layers } from "../camera-layers";
+
 import {remoteControlServiceV2} from "../aptero/module/RemoteScreen/RemoteControlServiceV2";
 import { hyperbeamService } from "../aptero/module/RemoteScreen/HyperbeamService";
 export function findRemoteHoverTarget(world, object3D) {
@@ -48,7 +49,7 @@ AFRAME.registerComponent("cursor-controller", {
         depthTest: false,
         uniforms: {
           color: { value: new THREE.Color(0x2f80ed) }
-      },
+        },
         vertexShader: `
           varying vec2 vPos;
           void main() {
@@ -59,7 +60,7 @@ AFRAME.registerComponent("cursor-controller", {
             vec2 scale = vec2(
               length( vec3( modelMatrix[ 0 ].x, modelMatrix[ 0 ].y, modelMatrix[ 0 ].z ) ),
               length( vec3( modelMatrix[ 1 ].x, modelMatrix[ 1 ].y, modelMatrix[ 1 ].z ) )
-    );
+            );
 
             float distance = -mvPosition.z;
             scale *= distance; // negates projection scale
@@ -124,7 +125,7 @@ AFRAME.registerComponent("cursor-controller", {
     this.el.setObject3D("line", this.line);
   },
 
-  update: function() {
+  update: function () {
     this.raycaster.far = this.data.far;
     this.raycaster.near = this.data.near;
   },
@@ -134,7 +135,7 @@ AFRAME.registerComponent("cursor-controller", {
     const cameraPos = new THREE.Vector3();
     const v = new THREE.Vector3();
 
-    return function(t, left) {
+    return function (t, left) {
       const userinput = AFRAME.scenes[0].systems.userinput;
       const cursorPose = userinput.get(left ? paths.actions.cursor.left.pose : paths.actions.cursor.right.pose);
       const hideLine = userinput.get(left ? paths.actions.cursor.left.hideLine : paths.actions.cursor.right.hideLine);
@@ -184,7 +185,6 @@ AFRAME.registerComponent("cursor-controller", {
           }
         }
         this.distance = remoteHoverTarget ? this.intersection.distance : this.data.defaultDistance * playerScale;
-
       }
       let obstructed = false;
       if (rawIntersections.length > 0) {

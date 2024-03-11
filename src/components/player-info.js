@@ -5,6 +5,8 @@ import defaultAvatar from "../assets/models/DefaultAvatar.glb";
 import { MediaDevicesEvents } from "../utils/media-devices-utils";
 import { createHeadlessModelForSkinnedMesh } from "../utils/three-utils";
 import { Layers } from "../camera-layers";
+import { addComponent, removeComponent } from "bitecs";
+import { LocalAvatar, RemoteAvatar } from "../bit-components";
 
 function ensureAvatarNodes(json) {
   const { nodes } = json;
@@ -31,6 +33,7 @@ function ensureAvatarNodes(json) {
   return json;
 }
 
+//APTERO TODO move to aptero folder
 AFRAME.registerComponent("identity-name-click", {
   init() {
     this.onClick = async () => {
@@ -55,11 +58,6 @@ AFRAME.registerComponent("player-info", {
     isSharingAvatarCamera: { default: false }
   },
   init() {
-    this.displayName = null;
-    this.companyName=null;
-    this.identityName = null;
-    this.isOwner = false;
-    this.isRecording = false;
     this.applyProperties = this.applyProperties.bind(this);
     this.handleModelError = this.handleModelError.bind(this);
     this.handleRemoteModelError = this.handleRemoteModelError.bind(this);
@@ -70,6 +68,7 @@ AFRAME.registerComponent("player-info", {
 
     this.isLocalPlayerInfo = this.el.id === "avatar-rig";
     this.playerSessionId = null;
+    this.displayName = null;
 
     if (!this.isLocalPlayerInfo) {
       NAF.utils.getNetworkedEntity(this.el).then(networkedEntity => {
@@ -77,17 +76,20 @@ AFRAME.registerComponent("player-info", {
         const playerPresence = window.APP.hubChannel.presence.state[this.playerSessionId];
         if (playerPresence) {
           this.permissions = playerPresence.metas[0].permissions;
+          this.displayName = playerPresence.metas[0].profile.displayName;
         }
       });
     }
 
     registerComponentInstance(this, "player-info");
+    addComponent(APP.world, this.isLocalPlayerInfo ? LocalAvatar : RemoteAvatar, this.el.object3D.eid);
   },
 
   remove() {
     const avatarEl = this.el.querySelector("[avatar-audio-source]");
     APP.isAudioPaused.delete(avatarEl);
     deregisterComponentInstance(this, "player-info");
+    removeComponent(APP.world, this.isLocalPlayerInfo ? LocalAvatar : RemoteAvatar, this.el.object3D.eid);
   },
 
   onAvatarModelLoaded(e) {
@@ -116,7 +118,6 @@ AFRAME.registerComponent("player-info", {
   },
 
   play() {
-   
     this.el.addEventListener("model-loaded", this.onAvatarModelLoaded);
     this.el.sceneEl.addEventListener("presence_updated", this.onPresenceUpdated);
     if (this.isLocalPlayerInfo) {
@@ -162,11 +163,6 @@ AFRAME.registerComponent("player-info", {
     if (!this.playerSessionId || this.playerSessionId !== presenceMeta.sessionId) return;
 
     this.permissions = presenceMeta.permissions;
-    this.displayName = presenceMeta.profile.displayName;
-    this.companyName=presenceMeta.profile.companyName;
-    this.identityName = presenceMeta.profile.identityName;
-    this.isRecording = !!(presenceMeta.streaming || presenceMeta.recording);
-    this.isOwner = !!(presenceMeta.roles && presenceMeta.roles.owner);
   },
 
   update(oldData) {
@@ -179,6 +175,7 @@ AFRAME.registerComponent("player-info", {
   can(perm) {
     return !!this.permissions && this.permissions[perm];
   },
+
   applyProperties(e) {
     const modelEl = this.el.querySelector(".model");
     if (this.data.avatarSrc && modelEl) {

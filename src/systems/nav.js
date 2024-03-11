@@ -11,7 +11,7 @@ AFRAME.registerSystem("nav", {
 
   loadMesh: function (mesh, zone) {
     if (this.mesh) {
-      console.warn("tried to load multiple nav meshes");
+      console.error("tried to load multiple nav meshes");
       this.removeNavMeshData();
     }
     const geometry = mesh.geometry.clone();

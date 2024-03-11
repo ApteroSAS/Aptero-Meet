@@ -2,15 +2,16 @@ import "./utils/configs";
 import { getAbsoluteHref } from "./utils/media-url-utils";
 import { isValidSceneUrl } from "./utils/scene-url-utils";
 import { spawnChatMessage } from "./react-components/chat-message";
-import { SOUND_CHAT_MESSAGE } from "./systems/sound-effects-system";
+import { SOUND_CHAT_MESSAGE, SOUND_QUACK, SOUND_SPECIAL_QUACK } from "./systems/sound-effects-system";
+import ducky from "./assets/models/DuckyMesh.glb";
 import { EventTarget } from "event-target-shim";
 import { ExitReason } from "./react-components/room/ExitedRoomScreen";
 import { LogMessageType } from "./react-components/room/ChatSidebar";
 import { createNetworkedEntity } from "./utils/create-networked-entity";
-import qsTruthy from "./utils/qs_truthy";
 import { add, testAsset, respawn } from "./utils/chat-commands";
 import { isLockedDownDemoRoom } from "./utils/hub-utils";
 import { loadState, clearState } from "./utils/entity-state-utils";
+import { shouldUseNewLoader } from "./utils/bit-utils";
 
 let uiRoot;
 // Handles user-entered messages
@@ -23,10 +24,11 @@ export default class MessageDispatch extends EventTarget {
     this.remountUI = remountUI;
     this.mediaSearchStore = mediaSearchStore;
     this.presenceLogEntries = [];
-    this.presenceLogEntriesPrivate = [];
   }
+
   addToPresenceLog(entry) {
     entry.key = Date.now().toString();
+
     const lastEntry = this.presenceLogEntries.length > 0 && this.presenceLogEntries[this.presenceLogEntries.length - 1];
     if (lastEntry && entry.type === "permission" && lastEntry.type === "permission") {
       if (
@@ -44,7 +46,6 @@ export default class MessageDispatch extends EventTarget {
     }
 
     // Fade out and then remove
-    
     setTimeout(() => {
       entry.expired = true;
       this.remountUI({ presenceLogEntries: this.presenceLogEntries });
@@ -56,26 +57,11 @@ export default class MessageDispatch extends EventTarget {
     }, 20000);
   }
 
-  addToPresenceLogPrivate(entry) {
-    entry.key = Date.now().toString();
-    this.presenceLogEntriesPrivate.push(entry);
-    this.remountUI({ presenceLogEntries: this.presenceLogEntries });
-    if (entry.type === "chat" && this.scene.is("loaded")) {
-      this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_CHAT_MESSAGE);
-    }
-  }
-
   receive(message) {
     if (isLockedDownDemoRoom()) return;
-    if (message.receiverClientId == null) {
-      this.addToPresenceLog(message);
-      this.dispatchEvent(new CustomEvent("message", { detail: message }));
-    } else {
-      if (message.receiverClientId == NAF.clientId || message.sessionId == NAF.clientId) {
-        this.addToPresenceLogPrivate(message);
-        this.dispatchEvent(new CustomEvent("private", { detail: message }));
-      }
-    }
+
+    this.addToPresenceLog(message);
+    this.dispatchEvent(new CustomEvent("message", { detail: message }));
   }
 
   log = (messageType, props) => {
@@ -98,7 +84,7 @@ export default class MessageDispatch extends EventTarget {
     const isGhost = !entered && uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("isGhost");
 
     // TODO: Some of the commands below should be available without requiring room entry.
-    if (!entered && !isGhost) {
+    if (!entered && (!isGhost || command === "duck")) {
       this.log(LogMessageType.roomEntryRequired);
       return;
     }
@@ -145,6 +131,39 @@ export default class MessageDispatch extends EventTarget {
         this.entryManager.exitScene();
         this.remountUI({ roomUnavailableReason: ExitReason.left });
         break;
+
+      case "oldduck":
+        spawnChatMessage(getAbsoluteHref(location.href, ducky));
+        if (Math.random() < 0.01) {
+          this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SPECIAL_QUACK);
+        } else {
+          this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_QUACK);
+        }
+        break;
+      case "duck":
+        if (shouldUseNewLoader()) {
+          const avatarPov = document.querySelector("#avatar-pov-node").object3D;
+          const eid = createNetworkedEntity(APP.world, "duck");
+          const obj = APP.world.eid2obj.get(eid);
+          obj.position.copy(avatarPov.localToWorld(new THREE.Vector3(0, 0, -1.5)));
+          obj.lookAt(avatarPov.getWorldPosition(new THREE.Vector3()));
+        } else {
+          spawnChatMessage(getAbsoluteHref(location.href, ducky));
+        }
+        if (Math.random() < 0.01) {
+          this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SPECIAL_QUACK);
+        } else {
+          this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_QUACK);
+        }
+        break;
+      case "cube": {
+        const avatarPov = document.querySelector("#avatar-pov-node").object3D;
+        const eid = createNetworkedEntity(APP.world, "cube");
+        const obj = APP.world.eid2obj.get(eid);
+        obj.position.copy(avatarPov.localToWorld(new THREE.Vector3(0, 0, -1.5)));
+        obj.lookAt(avatarPov.getWorldPosition(new THREE.Vector3()));
+        break;
+      }
       case "debug":
         physicsSystem = document.querySelector("a-scene").systems["hubs-systems"].physicsSystem;
         physicsSystem.setDebug(!physicsSystem.debugEnabled);
@@ -192,17 +211,6 @@ export default class MessageDispatch extends EventTarget {
             captureSystem.start();
             this.log(LogMessageType.captureStarted);
           }
-        }
-        break;
-      case "audiomode":
-        {
-          const shouldEnablePositionalAudio = window.getPreferences("audioOutputMode") === "audio";
-          window.APP.store.update({
-            preferences: { audioOutputMode: shouldEnablePositionalAudio ? "panner" : "audio" }
-          });
-          this.log(
-            shouldEnablePositionalAudio ? LogMessageType.positionalAudioEnabled : LogMessageType.positionalAudioDisabled
-          );
         }
         break;
       case "audioNormalization":

@@ -10,7 +10,7 @@ export function InvitePopoverContainer({ hub, hubChannel, scene, store, ...rest 
   // TODO: Move to Hub class
   const shortUrl = `https://${configs.SHORTLINK_DOMAIN}`;
   const url = `${shortUrl}/${hub.hub_id}`;
-  console.log("starting InvitePopoverContainer");
+
   let embedText = null;
   const embedToken = hub.embed_token || store.getEmbedTokenForHub(hub);
   if (embedToken) {

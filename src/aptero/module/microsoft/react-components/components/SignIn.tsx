@@ -1,14 +1,9 @@
 import * as React from "react";
 import {Button, Loader} from "@fluentui/react-northstar";
-import {LightProfileCard} from "./LightProfileCard";
 import {FormattedMessage} from "react-intl";
 import {useEffect, useState, useRef} from "react";
 import {MsTeamsAPI} from "@aptero/axolotis-module-teams";
 import {msTeamsAPI} from "../../../axolotis/modules/basic/ImportHelper";
-import {License} from "./License";
-import {Authorize} from "./Authorize";
-import Popover from '@material-ui/core/Popover';
-import MenuItem from '@material-ui/core/MenuItem';
 
 export function SignIn(props) {
     const [loading, setLoading] = useState(true);

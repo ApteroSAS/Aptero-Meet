@@ -24,6 +24,7 @@ export function VerifyingEmail() {
 }
 
 export function EmailVerified({ origin }) {
+  //Aptero feature auto reload page on signin
   if(origin=="hubs"){
     setTimeout(()=>{
       window.location.href = window.location.origin;
@@ -37,7 +38,7 @@ export function EmailVerified({ origin }) {
       <p>
         <FormattedMessage
           id="verify-modal.close-window"
-          defaultMessage="Please close this browser window and return to Spoke."
+          defaultMessage="Please close this browser window and return to Opal."
         />
       </p>
     </Column>

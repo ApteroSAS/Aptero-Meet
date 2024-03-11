@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import { defineMessages, FormattedMessage, useIntl } from "react-intl";
 import { LoadingScreenLayout } from "../layout/LoadingScreenLayout";
 import { Button } from "../input/Button";
-import { comboFallbackButton } from "../../aptero/module/Fallback/FallbackModal";
 
 export const ExitReason = {
   exited: "exited",
@@ -48,7 +47,7 @@ const messages = defineMessages({
   },
   [ExitReason.connectError]: {
     id: "exited-room-screen.reason.connect-error",
-    defaultMessage: "Unable to connect to this room due to network issues (VPN proxy etc...)."
+    defaultMessage: "Unable to connect to this room, please try again later."
   },
   [ExitReason.versionMismatch]: {
     id: "exited-room-screen.reason.version-mismatch",
@@ -122,8 +121,19 @@ export function ExitedRoomScreen({ reason, showTerms, termsUrl, showSourceLink }
       <>
         <b>{intl.formatMessage(messages[reason])}</b>
 
-        {reason === ExitReason.connectError && comboFallbackButton()}
-        {/*![ExitReason.left, ExitReason.disconnected, ExitReason.sceneError].includes(reason) && (
+        {reason === ExitReason.connectError && (
+          <p>
+            <FormattedMessage
+              id="exited-room-screen.connect-tcp"
+              defaultMessage="You can try <a>connecting via TCP</a>, which may work better on some networks."
+              values={{
+                // eslint-disable-next-line react/display-name
+                a: chunks => <a href={tcpUrl.toString()}>{chunks}</a>
+              }}
+            />
+          </p>
+        )}
+        {![ExitReason.left, ExitReason.disconnected, ExitReason.sceneError].includes(reason) && (
           <p>
             <FormattedMessage
               id="exited-room-screen.create-room"
@@ -134,7 +144,7 @@ export function ExitedRoomScreen({ reason, showTerms, termsUrl, showSourceLink }
               }}
             />
           </p>
-        )*/}
+        )}
 
         <Button as="a" preset="accept" href={window.location.href}>
           <FormattedMessage id="exited-room-screen.refresh-page-button" defaultMessage="Refresh Page" />

@@ -247,7 +247,6 @@ class SceneUI extends Component {
             <div className={styles.name}>{this.props.sceneName}</div>
             <div className={styles.attribution}>{attributions}</div>
           </div>
-                    <a href="/spoke">
         </div>
       </div>
     );

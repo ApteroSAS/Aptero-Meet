@@ -19,33 +19,33 @@ window.APP = { store };
 
 const WrappedIntlProviderAny: any = WrappedIntlProvider;
 
-export class MicrosoftSettings extends React.Component<any, { page: string }> {
-
-  render() {
-    return <WrappedIntlProviderAny>
+const MicrosoftSettings = () => {
+  return (
+      <WrappedIntlProviderAny>
         <AuthContextProvider store={store}>
           <ThemeProvider store={store}>
-
             <Provider container={container}>
-            <MSettingsMain />
-            <span onClick={() => {
-              window.location.reload();
-            }} id="version" style={{
-              "margin": 0,
-              "top": 0,
-              "left": "auto",
-              "right": "4px",
-              "bottom": "2px",
-              "fontSize": "0.7em",
-              "position": "fixed"
-            }}>{process.env.BUILD_VERSION}</span>
+              <MSettingsMain />
+              <span onClick={() => {
+                window.location.reload();
+              }} id="version" style={{
+                margin: 0,
+                top: 0,
+                left: 'auto',
+                right: '4px',
+                bottom: '2px',
+                fontSize: '0.7em',
+                position: 'fixed'
+              }}>{process.env.BUILD_VERSION}</span>
             </Provider>
           </ThemeProvider>
         </AuthContextProvider>
-      </WrappedIntlProviderAny>;
-  }
+      </WrappedIntlProviderAny>
+  );
+};
 
-}
+export default MicrosoftSettings;
+
 
 (async () => {
   const {initIOC} = await import("../../axolotis/AxInit");

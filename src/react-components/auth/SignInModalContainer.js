@@ -89,9 +89,9 @@ export function SignInModalContainer() {
   const redirectUrl = qs.get("sign_in_destination_url") || "/";
 
   useEffect(() => {
-      if (step === SignInStep.complete) {
-        window.location = redirectUrl;
-      }
+    if (step === SignInStep.complete) {
+      window.location = redirectUrl;
+    }
   }, [step, redirectUrl]);
   if(!authenticationType.microsoftAuhtentication) {
   return (

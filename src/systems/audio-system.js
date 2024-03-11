@@ -1,11 +1,5 @@
 import { LogMessageType } from "../react-components/room/ChatSidebar";
-import { getAdapterParams } from "../aptero/module/webRTCadapter/adapter-config";
 import { GAIN_TIME_CONST, SourceType } from "../components/audio-params";
-
-export const MixerType = Object.freeze({
-  AVATAR: 0,
-  MEDIA: 1
-});
 
 let delayedReconnectTimeout = null;
 function performDelayedReconnect(gainNode) {
@@ -31,8 +25,8 @@ function isThreeAudio(node) {
 }
 
 async function enableChromeAEC(gainNode) {
-  if(["dialog-io-data-only","naf-socketio-adapter","none"].includes(getAdapterParams().adapter)){
-    return;//disabled aptero specific adapter
+  if(true){
+    return;//APTERO disabled aptero specific adapter
   }
   /**
    *  workaround for: https://bugs.chromium.org/p/chromium/issues/detail?id=687574
@@ -135,7 +129,7 @@ export class AudioSystem {
 
     this.audioContext = THREE.AudioContext.getContext();
     this.audioNodes = new Map();
-    this.mediaStreamDestinationNode = this.audioContext.createMediaStreamDestination();
+    this.mediaStreamDestinationNode = this.audioContext.createMediaStreamDestination(); // Voice, camera, screenshare
     this.audioDestination = this.audioContext.createMediaStreamDestination(); // Media elements
     this.outboundStream = this.mediaStreamDestinationNode.stream;
     this.outboundGainNode = this.audioContext.createGain();
@@ -290,7 +284,7 @@ export class AudioSystem {
         document.body.removeEventListener("touchend", this._resumeAudioContext, false);
         document.body.removeEventListener("mouseup", this._resumeAudioContext, false);
       }
-    }, 100);
+    }, 0);
   };
 
   // Webkit mobile fix
@@ -302,9 +296,7 @@ export class AudioSystem {
         // When you unplug the headphone or when the bluetooth headset disconnects on
         // iOS Safari or Chrome, the state changes to suspended.
         // Chrome Android doesn't go in suspended state for this case.
-        if(document.getElementById("avatar-rig") && document.getElementById("avatar-rig").messageDispatch) {
         document.getElementById("avatar-rig").messageDispatch.log(LogMessageType.audioSuspended);
-        }
         document.body.addEventListener("touchend", this._resumeAudioContext, false);
         document.body.addEventListener("mouseup", this._resumeAudioContext, false);
         this.audioContextNeedsToBeResumed = true;

@@ -34,7 +34,7 @@ export function PresenceLog({ entries, preset, hubId, history, presences, onView
     const isBot = !!presenceContext.discord;
 
     switch (e.type) {
-      case "chat" :
+      case "chat":
         return (
           <ChatMessage
             key={e.key}

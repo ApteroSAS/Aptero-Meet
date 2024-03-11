@@ -1,5 +1,5 @@
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
 import registerTelemetry from "./telemetry";
 import "./utils/theme";
@@ -10,10 +10,13 @@ import { ThemeProvider } from "./react-components/styles/theme";
 import { store } from "./utils/store-instance";
 import { setupVersionComp } from "./aptero/module/HubsBridge/utils/Version";
 import AptHomeRoot from "./aptero/module/HubsBridge/AptHomeRoot";
+import {initIOC} from "./aptero/module/axolotis/AxInit";
 registerTelemetry("/home", "Hubs Home Page");
 
+initIOC();
+
 window.APP = { store };
-function Root() {
+function HomeRoot() {
   setupVersionComp();
   return (
     <WrappedIntlProvider>
@@ -27,4 +30,6 @@ function Root() {
   );
 }
 
-ReactDOM.render(<Root />, document.getElementById("home-root"));
+const container = document.getElementById("home-root");
+const root = createRoot(container);
+root.render(<HomeRoot />);

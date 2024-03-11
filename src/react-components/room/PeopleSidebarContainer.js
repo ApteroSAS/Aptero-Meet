@@ -7,8 +7,6 @@ import { UserProfileSidebarContainer } from "./UserProfileSidebarContainer";
 import { useCan } from "./hooks/useCan";
 import { useRoomPermissions } from "./hooks/useRoomPermissions";
 import { useRole } from "./hooks/useRole";
-let selectedId;
-let selectedName;
 
 export function userFromPresence(sessionId, presence, micPresences, mySessionId, voiceEnabled) {
   const meta = presence.metas[presence.metas.length - 1];
@@ -19,9 +17,8 @@ export function userFromPresence(sessionId, presence, micPresences, mySessionId,
   return { id: sessionId, isMe: mySessionId === sessionId, micPresence, ...meta };
 }
 
-export function usePeopleList(presences, mySessionId, micUpdateFrequency = 500) {
-  // eslint-disable-next-line prefer-const
-  let [people, setPeople] = useState([]);
+function usePeopleList(presences, mySessionId, micUpdateFrequency = 500) {
+  const [people, setPeople] = useState([]);
   const { voice_chat: voiceChatEnabled } = useRoomPermissions();
 
   useEffect(() => {
@@ -46,10 +43,6 @@ export function usePeopleList(presences, mySessionId, micUpdateFrequency = 500) 
     };
   }, [presences, micUpdateFrequency, setPeople, mySessionId, voiceChatEnabled]);
 
-  //aptero state cleanup
-  people = people.filter(value => {
-    return presences[value.id];
-  });
   return people;
 }
 
@@ -96,30 +89,22 @@ export function PeopleSidebarContainer({
   performConditionalSignIn,
   onCloseDialog,
   showNonHistoriedDialog,
-  onClose,
-  toggleChatSidebar,
-  signedIn
+  onClose
 }) {
   const people = usePeopleList(presences, mySessionId);
   const [selectedPersonId, setSelectedPersonId] = useState(null);
   const selectedPerson = people.find(person => person.id === selectedPersonId);
-  let iSignedIn = true;
-  if (selectedPerson) {
-    iSignedIn = selectedPerson.roles.signed_in;
-  }
-
   const setSelectedPerson = useCallback(
     person => {
       setSelectedPersonId(person.id);
     },
     [setSelectedPersonId]
   );
+
   if (selectedPerson) {
     if (selectedPerson.id === mySessionId) {
       return (
         <ProfileEntryPanel
-          isSignedIn={iSignedIn}
-          people={people}
           containerType="sidebar"
           displayNameOverride={displayNameOverride}
           store={store}
@@ -128,27 +113,18 @@ export function PeopleSidebarContainer({
           history={history}
           showBackButton
           onBack={() => setSelectedPersonId(null)}
-          signedIn={signedIn}
         />
       );
     } else {
       return (
         <UserProfileSidebarContainer
-          mySessionId={mySessionId}
           user={selectedPerson}
-          toggleChatSidebar={toggleChatSidebar}
           hubChannel={hubChannel}
-          presences={presences}
           performConditionalSignIn={performConditionalSignIn}
           showBackButton
           onBack={() => setSelectedPersonId(null)}
-          onSelectPerson={setSelectedPerson}
-          onClose={onClose}
           onCloseDialog={onCloseDialog}
           showNonHistoriedDialog={showNonHistoriedDialog}
-          store={store}
-          mediaSearchStore={mediaSearchStore}
-          signedIn={signedIn}
         />
       );
     }
@@ -158,24 +134,17 @@ export function PeopleSidebarContainer({
     <PeopleListContainer onSelectPerson={setSelectedPerson} onClose={onClose} hubChannel={hubChannel} people={people} />
   );
 }
-export function getSelectedPersonId() {
-  return selectedId;
-}
-export function getSelectedPersonName() {
-  return selectedName;
-}
+
 PeopleSidebarContainer.propTypes = {
   displayNameOverride: PropTypes.string,
   store: PropTypes.object.isRequired,
   mediaSearchStore: PropTypes.object.isRequired,
   hubChannel: PropTypes.object.isRequired,
-  history: PropTypes.object,
+  history: PropTypes.object.isRequired,
   onClose: PropTypes.func.isRequired,
   mySessionId: PropTypes.string.isRequired,
   presences: PropTypes.object.isRequired,
   performConditionalSignIn: PropTypes.func.isRequired,
   onCloseDialog: PropTypes.func.isRequired,
-  showNonHistoriedDialog: PropTypes.func.isRequired,
-  toggleChatSidebar: PropTypes.func,
-  signedIn: PropTypes.func
+  showNonHistoriedDialog: PropTypes.func.isRequired
 };

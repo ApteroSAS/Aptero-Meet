@@ -11,7 +11,6 @@ export async function loadWaypointPreviewModel() {
   model = ((await loadModel(modelSrc, null, false)) as LoadModelResult).scene;
 }
 
-console.warn("[preview] export WaypointPreview as entity with waypointPreview as component")
 export function WaypointPreview() {
   if (!model) throw new Error("Must load the model before creating waypoint preview entity.");
 

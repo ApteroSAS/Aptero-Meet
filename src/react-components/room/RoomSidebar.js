@@ -1,15 +1,13 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { FormattedMessage, useIntl } from "react-intl";
 import styles from "./RoomSidebar.scss";
-import { Button } from "../input/Button";
-import { CloseButton } from "../input/CloseButton";
-import { Column } from "../layout/Column";
-import { IconButton } from "../input/IconButton";
-import { InputField } from "../input/InputField";
 import { Sidebar } from "../sidebar/Sidebar";
-import configs from "../../utils/configs"
-import ApteroRoomEditPlugin from "../../aptero/module/HubsBridge/react-components/ApteroRoomEditPlugin";
+import { CloseButton } from "../input/CloseButton";
+import { InputField } from "../input/InputField";
+import { IconButton } from "../input/IconButton";
+import { Button } from "../input/Button";
+import { Column } from "../layout/Column";
+import { FormattedMessage, useIntl } from "react-intl";
 
 function SceneAttribution({ attribution }) {
   const intl = useIntl();
@@ -150,15 +148,15 @@ SceneInfo.propTypes = {
   showAttributions: PropTypes.bool,
   canChangeScene: PropTypes.bool,
   onChangeScene: PropTypes.func,
-  scene: {
-    attributions: {
-      content: PropTypes.string,
+  scene: PropTypes.shape({
+    attributions: PropTypes.shape({
+      content: PropTypes.array,
       creator: PropTypes.string
-    },
+    }),
     url: PropTypes.string,
     screenshot_url: PropTypes.string,
     name: PropTypes.string
-  }
+  })
 };
 
 export function RoomSidebar({ room, accountId, onClose, canEdit, onEdit, onChangeScene }) {
@@ -190,7 +188,6 @@ export function RoomSidebar({ room, accountId, onClose, canEdit, onEdit, onChang
           canChangeScene={canEdit}
           onChangeScene={onChangeScene}
         />
-        <ApteroRoomEditPlugin />
       </Column>
     </Sidebar>
   );

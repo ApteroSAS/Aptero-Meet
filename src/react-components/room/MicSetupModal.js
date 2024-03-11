@@ -76,7 +76,7 @@ export function MicSetupModal({
                     )}
                     {permissionStatus === PermissionStatus.GRANTED && isMicrophoneEnabled && !isMicrophoneMuted ? (
                       <MicrophoneIcon className={iconStyle} />
-              ) : (
+                    ) : (
                       <MicrophoneMutedIcon className={iconStyle} />
                     )}
                   </div>
@@ -90,11 +90,15 @@ export function MicSetupModal({
                         checked={isMicrophoneMuted}
                         onChange={onChangeMicrophoneMuted}
                       />
-                      <ToolTip category="primary" description="Toggle mic on/off anytime after you enter the room (M)">
+                      <ToolTip
+                        location="right"
+                        category="primary"
+                        description="Toggle mic on/off anytime after you enter the room (M)"
+                      >
                         <InfoIcon className={styles.infoIcon} />
                       </ToolTip>
                     </>
-              ) : (
+                  ) : (
                     (permissionStatus === PermissionStatus.PROMPT && (
                       <p>
                         <FormattedMessage
@@ -118,8 +122,8 @@ export function MicSetupModal({
                         />
                       </p>
                     ))
-              )}
-            </div>
+                  )}
+                </div>
                 {permissionStatus === PermissionStatus.GRANTED && isAudioInputSelectAvailable && (
                   <div className={styles.selectionContainer}>
                     <p style={{ alignSelf: "start" }}>
@@ -143,10 +147,10 @@ export function MicSetupModal({
                     defaultMessage="Voice chat is <bold>turned off</bold> for this room."
                     values={{
                       bold: str => <b>{str}</b>
-              }}
-                />
+                    }}
+                  />
                 </p>
-            </div>
+              </div>
             )}
           </div>
           <div className={styles.audioIoContainer}>
@@ -169,8 +173,8 @@ export function MicSetupModal({
                   className={styles.selectionInput}
                   buttonClassName={styles.selectionInput}
                   {...speakerOptions}
-          />
-        </div>
+                />
+              </div>
             )}
           </div>
         </div>

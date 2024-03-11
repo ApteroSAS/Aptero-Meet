@@ -4,6 +4,7 @@ import { LoadingScreenLayout } from "../layout/LoadingScreenLayout";
 import { Spinner } from "../misc/Spinner";
 import { useRandomMessageTransition } from "./hooks/useRandomMessageTransition";
 export function LoadingScreen({ message, infoMessages }) {
+   //APTERO
   //const infoMessage = useRandomMessageTransition(infoMessages);
   return (
     <LoadingScreenLayout

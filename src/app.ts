@@ -23,14 +23,13 @@ import {
 } from "three";
 import { AudioSettings, SourceType } from "./components/audio-params";
 import { createEffectsComposer } from "./effects";
-import DialogAdapter from "./aptero/module/webRTCadapter/naf-dialog-io-adapter";
 import { mainTick } from "./systems/hubs-systems";
 import { waitForPreloads } from "./utils/preload";
 import SceneEntryManager from "./scene-entry-manager";
 import { store } from "./utils/store-instance";
 import { addObject3DComponent } from "./utils/jsx-entity";
 import { ElOrEid } from "./utils/bit-utils";
-import { Channel } from "phoenix";
+import {AdapterWrapper} from "./aptero/module/webRTCadapter/AdapterWrapper";
 
 declare global {
   interface Window {
@@ -66,6 +65,7 @@ export function getScene() {
 
 interface HubDescription {
   hub_id: string;
+  user_data?: any;
 }
 
 export class App {
@@ -88,6 +88,7 @@ export class App {
   supplementaryAttenuation = new Map<ElOrEid, number>();
   clippingState = new Set<ElOrEid>();
   mutedState = new Set<ElOrEid>();
+  linkedMutedState = new Set<ElOrEid>();
   isAudioPaused = new Set<ElOrEid>();
   audioDebugPanelOverrides = new Map<SourceType, Partial<AudioSettings>>();
   sceneAudioDefaults = new Map<SourceType, Partial<AudioSettings>>();
@@ -101,7 +102,7 @@ export class App {
 
   audioListener: AudioListener;
 
-  dialog = new DialogAdapter();
+  dialog = new AdapterWrapper();
 
   RENDER_ORDER = {
     HUD_BACKGROUND: 1,

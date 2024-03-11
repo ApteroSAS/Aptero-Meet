@@ -94,14 +94,14 @@ export class ShadowSystem {
     this.shadowCameraBoundingBox = new THREE.Box3();
     this.previousShadowsEnabled = this.realtimeShadowsEnabled = null;
 
-
+    // Defaults previously in hub.html
     sceneEl.renderer.shadowMap.enabled = false;
     sceneEl.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     sceneEl.renderer.shadowMap.autoUpdate = true;
 
     window.APP.store.addEventListener("statechanged", this.updatePrefs.bind(this));
     this.updatePrefs();
-    }
+  }
 
   updatePrefs() {
     this.realtimeShadowsEnabled =
@@ -117,10 +117,10 @@ export class ShadowSystem {
             updateMaterials(node, material => {
               material.needsUpdate = true;
               return material;
-        });
+            });
           }
-      });
-    }
+        });
+      }
     }
     this.previousShadowsEnabled = this.realtimeShadowsEnabled;
   }

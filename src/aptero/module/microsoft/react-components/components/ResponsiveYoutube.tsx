@@ -26,6 +26,7 @@ const ResponsiveYouTube: React.FC<IProps> = ({ videoId, minWidth = 800,opts }) =
         return null;
     }
 
+    // @ts-ignore
     return <YouTube videoId={videoId} opts={opts} />;
 }
 

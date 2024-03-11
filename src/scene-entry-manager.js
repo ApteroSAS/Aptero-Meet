@@ -24,7 +24,7 @@ import { SOUND_ENTER_SCENE } from "./systems/sound-effects-system";
 import { MediaDevices, MediaDevicesEvents } from "./utils/media-devices-utils";
 import { addComponent, removeEntity } from "bitecs";
 import { MyCameraTool } from "./bit-components";
-import { anyEntityWith } from "./utils/bit-utils";
+import { anyEntityWith, shouldUseNewLoader } from "./utils/bit-utils";
 import { moveToSpawnPoint } from "./bit-systems/waypoint";
 import { spawnFromFileList, spawnFromUrl } from "./load-media-on-paste-or-drop";
 import { isLockedDownDemoRoom } from "./utils/hub-utils";
@@ -32,8 +32,6 @@ import { isLockedDownDemoRoom } from "./utils/hub-utils";
 import { mediaViewEventEmitter, lastVideoShareData } from "./aptero/module/ButtonAPI/service/ChangeVideoService";
 import { searchService } from "./aptero/module/ButtonAPI/service/SearchService";
 import { networkService } from "./aptero/module/HubsBridge/service/NetworkService";
-
-const useNewLoader = qsTruthy("newLoader");
 
 export default class SceneEntryManager {
   constructor(hubChannel, authChannel, history) {
@@ -46,6 +44,9 @@ export default class SceneEntryManager {
     this.leftCursorController = document.getElementById("left-cursor-controller");
     this.avatarRig = document.getElementById("avatar-rig");
     this._entered = false;
+    /**
+     * @type {Function}
+     */
     this.performConditionalSignIn = () => {};
     this.history = history;
   }
@@ -84,7 +85,7 @@ export default class SceneEntryManager {
       await exit2DInterstitialAndEnterVR(true);
     }
 
-    if (useNewLoader) {
+    if (shouldUseNewLoader()) {
       moveToSpawnPoint(APP.world, this.scene.systems["hubs-systems"].characterController);
     } else {
       const waypointSystem = this.scene.systems["hubs-systems"].waypointSystem;
@@ -227,18 +228,16 @@ export default class SceneEntryManager {
 
   _setupMedia = () => {
     // HACK we only care about the return value in 1 spot, don't want to deal with that in the newLoader path
-    const spawnMediaInfrontOfPlayerAndReturn = (src, contentOrigin, data) => {
+    const spawnMediaInfrontOfPlayerAndReturn = (src, contentOrigin) => {
       if (!this.hubChannel.can("spawn_and_move_media")) return;
       const offset = { x: 0, y: 0, z: -1.5 };
       const { entity, orientation } = addMedia(
         src,
         "#interactable-media",
         contentOrigin,
-        data && data.type && data.type.includes("360") ? "360-equirectangular" : null,
+        null,
         !(src instanceof MediaStream),
-        true,
-        true,
-        data ? data : {}
+        true
       );
       orientation.then(or => {
         entity.setAttribute("offset-relative-to", {
@@ -252,7 +251,7 @@ export default class SceneEntryManager {
     };
 
     const spawnMediaInfrontOfPlayer = (src, contentOrigin) => {
-      if (useNewLoader) {
+      if (shouldUseNewLoader()) {
         console.warn(
           "Spawning newLoader object using `spawnMediaInFrontOfPlayer`. This codepath should likely be made more direct.",
           src,
@@ -264,19 +263,13 @@ export default class SceneEntryManager {
           spawnFromFileList([src]);
         }
       } else {
-        spawnMediaInfrontOfPlayerAndReturn(src, contentOrigin).eid;
+        spawnMediaInfrontOfPlayerAndReturn(src, contentOrigin);
       }
     };
 
     this.scene.addEventListener("add_media", e => {
       const contentOrigin = e.detail instanceof File ? ObjectContentOrigins.FILE : ObjectContentOrigins.URL;
 
-      if (searchService.resultAwaited) {
-        const entry = { url: e.detail, contentOrigin };
-        const selectAction = "result";
-        this.scene.emit("action_selected_media_result_entry", { entry, selectAction });
-        return;
-      }
       spawnMediaInfrontOfPlayer(e.detail, contentOrigin);
     });
 
@@ -307,8 +300,9 @@ export default class SceneEntryManager {
 
     this.scene.addEventListener("action_vr_notice_closed", () => forceExitFrom2DInterstitial());
 
-    if (!useNewLoader) {
+    {
       document.addEventListener("paste", e => {
+        if (shouldUseNewLoader()) return;
         if (
           (e.target.matches("input, textarea") || e.target.contentEditable === "true") &&
           document.activeElement === e.target
@@ -332,6 +326,7 @@ export default class SceneEntryManager {
 
       let lastDebugScene;
       document.addEventListener("drop", e => {
+        if (shouldUseNewLoader()) return;
         e.preventDefault();
 
         if (qsTruthy("debugLocalScene")) {
@@ -374,20 +369,17 @@ export default class SceneEntryManager {
       isHandlingVideoShare = false;
 
       if (isVideoTrackAdded) {
-        if (lastVideoShareData.data && lastVideoShareData.data.selectAction === "result") {
-          //Aptero integration
-          lastVideoShareData.data.src = `hubs://clients/${NAF.clientId}/video`;
-          mediaViewEventEmitter.emit("share_video_media_stream_created", { ...lastVideoShareData.data });
-          lastVideoShareData.data = null;
-        } else if (target === "avatar") {
+        if (target === "avatar") {
           this.avatarRig.setAttribute("player-info", { isSharingAvatarCamera: true });
         } else {
           currentVideoShareEntity = spawnMediaInfrontOfPlayerAndReturn(this.mediaDevicesManager.mediaStream, undefined);
           // Wire up custom removal event which will stop the stream.
-          currentVideoShareEntity.setAttribute(
-            "emit-scene-event-on-remove",
-            `event:${MediaDevicesEvents.VIDEO_SHARE_ENDED}`
-          );
+          if (currentVideoShareEntity) {
+            currentVideoShareEntity.setAttribute(
+              "emit-scene-event-on-remove",
+              `event:${MediaDevicesEvents.VIDEO_SHARE_ENDED}`
+            );
+          }
         }
 
         this.scene.emit("share_video_enabled", { source: isDisplayMedia ? MediaDevices.SCREEN : MediaDevices.CAMERA });
@@ -456,12 +448,10 @@ export default class SceneEntryManager {
       // If user has HMD lifted up or gone through interstitial, delay spawning for now. eventually show a modal
       if (delaySpawn) {
         setTimeout(() => {
-          //aptero
-          spawnMediaInfrontOfPlayer(entry.url, ObjectContentOrigins.URL, entry);
+          spawnMediaInfrontOfPlayer(entry.url, ObjectContentOrigins.URL);
         }, 3000);
       } else {
-        //aptero
-        spawnMediaInfrontOfPlayer(entry.url, ObjectContentOrigins.URL, entry);
+        spawnMediaInfrontOfPlayer(entry.url, ObjectContentOrigins.URL);
       }
     });
 

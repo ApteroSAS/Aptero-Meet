@@ -1,6 +1,3 @@
-import { addComponent, removeComponent } from "bitecs";
-import { Pinnable, Pinned } from "../bit-components";
-
 AFRAME.registerComponent("pinnable", {
   schema: {
     pinned: { default: false }
@@ -10,24 +7,16 @@ AFRAME.registerComponent("pinnable", {
     this._persist = this._persist.bind(this);
     this._persistAndAnimate = this._persistAndAnimate.bind(this);
 
-    // Fire pinned events when media is refreshed since the version will be bumped.
+    // Persist when media is refreshed since the version will be bumped.
     this.el.addEventListener("media_refreshed", this._persistAndAnimate);
 
     this.el.addEventListener("owned-pager-page-changed", this._persist);
-    // Fire pinned events when page changes so we can persist the page.
-    this.el.addEventListener("owned-video-state-changed", this._persistAndAnimate);
 
-    addComponent(APP.world, Pinnable, this.el.object3D.eid);
+    this.el.addEventListener("owned-video-state-changed", this._persistAndAnimate);
   },
-    // Fire pinned events when video state changes so we can persist the page.
+
   update() {
     this._animate();
-
-    if (this.data.pinned) {
-      addComponent(APP.world, Pinned, this.el.object3D.eid);
-    } else {
-      removeComponent(APP.world, Pinned, this.el.object3D.eid);
-    }
   },
 
   _persistAndAnimate() {
@@ -36,10 +25,10 @@ AFRAME.registerComponent("pinnable", {
   },
 
   _persist() {
-    // We need to guard against _fireEventsAndAnimate being called during entity initialization,
+    // Re-pin or unpin entity to reflect state changes.
     window.APP.pinningHelper.setPinned(this.el, this.data.pinned);
   },
-    // when the networked component isn't initialized yet.
+
   _isMine() {
     return this.el.components.networked?.data && NAF.utils.isMine(this.el);
   },
@@ -50,31 +39,31 @@ AFRAME.registerComponent("pinnable", {
       this.el.components["animation__pin-end"]?.animationIsPlaying;
 
     if (this._isMine() && this.data.pinned && !isAnimationRunning) {
-        this.el.removeAttribute("animation__pin-start");
-        this.el.removeAttribute("animation__pin-end");
-        const currentScale = this.el.object3D.scale;
+      this.el.removeAttribute("animation__pin-start");
+      this.el.removeAttribute("animation__pin-end");
+      const currentScale = this.el.object3D.scale;
 
-        this.el.setAttribute("animation__pin-start", {
-          property: "scale",
-          dur: 200,
-          from: { x: currentScale.x, y: currentScale.y, z: currentScale.z },
-          to: { x: currentScale.x * 1.1, y: currentScale.y * 1.1, z: currentScale.z * 1.1 },
-          easing: "easeOutElastic"
-        });
+      this.el.setAttribute("animation__pin-start", {
+        property: "scale",
+        dur: 200,
+        from: { x: currentScale.x, y: currentScale.y, z: currentScale.z },
+        to: { x: currentScale.x * 1.1, y: currentScale.y * 1.1, z: currentScale.z * 1.1 },
+        easing: "easeOutElastic"
+      });
 
-        this.el.setAttribute("animation__pin-end", {
-          property: "scale",
-          delay: 200,
-          dur: 200,
-          from: { x: currentScale.x * 1.1, y: currentScale.y * 1.1, z: currentScale.z * 1.1 },
-          to: { x: currentScale.x, y: currentScale.y, z: currentScale.z },
-          easing: "easeOutElastic"
-        });
+      this.el.setAttribute("animation__pin-end", {
+        property: "scale",
+        delay: 200,
+        dur: 200,
+        from: { x: currentScale.x * 1.1, y: currentScale.y * 1.1, z: currentScale.z * 1.1 },
+        to: { x: currentScale.x, y: currentScale.y, z: currentScale.z },
+        easing: "easeOutElastic"
+      });
 
-        if (this.el.components["body-helper"] && !this.el.sceneEl.systems.interaction.isHeld(this.el)) {
-          this.el.setAttribute("body-helper", { type: "kinematic" });
-        }
+      if (this.el.components["body-helper"] && !this.el.sceneEl.systems.interaction.isHeld(this.el)) {
+        this.el.setAttribute("body-helper", { type: "kinematic" });
       }
+    }
   },
 
   tick() {

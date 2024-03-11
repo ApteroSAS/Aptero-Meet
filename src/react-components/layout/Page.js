@@ -1,10 +1,10 @@
 import React from "react";
 import PropTypes from "prop-types";
-import Banner from "../banner/Banner";
+import "./Page.scss";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
 import { MobileNav } from "./MobileNav";
-import "./Page.scss";
+import Banner from "../banner/Banner";
 
 export function Page({
   showCloud,

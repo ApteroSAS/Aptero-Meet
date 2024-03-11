@@ -5,7 +5,6 @@ import { replaceHistoryState } from "../utils/history";
 import { AvatarSettingsSidebar } from "./room/AvatarSettingsSidebar";
 import { AvatarSetupModal } from "./room/AvatarSetupModal";
 import AvatarPreview from "./avatar-preview";
-import axios from "axios";
 import { propertiesService } from "../aptero/module/properties/propertiesService";
 
 export default class ProfileEntryPanel extends Component {
@@ -32,12 +31,8 @@ export default class ProfileEntryPanel extends Component {
   state = {
     avatarId: null,
     displayName: null,
-    companyName: null,
-    jobTitleName: null,
-    email: null,
-    phoneNumber: null,
-    description: null,
-    avatar: null
+    avatar: null,
+    pronouns: null
   };
 
   constructor(props) {
@@ -54,8 +49,8 @@ export default class ProfileEntryPanel extends Component {
   }
 
   getStateFromProfile = () => {
-    const { displayName, avatarId, companyName, jobTitleName, email, phoneNumber, description } = this.props.store.state.profile;
-    return { displayName, avatarId, companyName, jobTitleName, email, phoneNumber, description };
+    const { displayName, avatarId, pronouns } = this.props.store.state.profile;
+    return { displayName, avatarId, pronouns };
   };
 
   storeUpdated = () => this.setState(this.getStateFromProfile());
@@ -63,132 +58,25 @@ export default class ProfileEntryPanel extends Component {
   saveStateAndFinish = e => {
     e && e.preventDefault();
 
-    const { displayName } = this.props.store.state.profile;
-    const { hasChangedName } = this.props.store.state.activity;
+    const { displayName, pronouns } = this.props.store.state.profile;
+    const { hasChangedNameOrPronouns } = this.props.store.state.activity;
 
-    const hasChangedNowOrPreviously = hasChangedName || this.state.displayName !== displayName;
+    const hasChangedNowOrPreviously =
+      hasChangedNameOrPronouns || this.state.displayName !== displayName || this.state.pronouns !== pronouns;
     this.props.store.update({
       activity: {
-        hasChangedName: hasChangedNowOrPreviously,
+        hasChangedNameOrPronouns: hasChangedNowOrPreviously,
         hasAcceptedProfile: true
       },
       profile: {
         displayName: this.state.displayName,
         avatarId: this.state.avatarId,
-        companyName: this.state.companyName,
-        jobTitleName: this.state.jobTitleName,
-        email: this.props.store.state.credentials.email,
-        phoneNumber: this.state.phoneNumber,
-        description: this.state.description
+        pronouns: this.state.pronouns
       }
     });
     this.props.finished();
     this.scene.emit("avatar_updated");
-    if (this.props.store.state.activity.hasChangedAvatar) {
-      this.scene.emit("avatarChanged");
-    }
   };
-
-  async updateUserDisplayName(displayName) {
-    this.setState({ displayName: displayName });
-    const profile = {
-      displayName: displayName,
-      phoneNumber: this.state.phoneNumber,
-      companyName: this.state.companyName,
-      jobTitleName: this.state.jobTitleName,
-      bio: this.state.description
-    };
-    const json = JSON.stringify({ mail: this.state.email, profile: profile });
-
-    await axios.post(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/dbapi/update/user", json, {
-      headers: {
-        // Overwrite Axios's automatically set Content-Type
-        "Content-Type": "application/json"
-      }
-    });
-  }
-
-  async updateUserJobTitle(jobTitleName) {
-    const profile = {
-      displayName: this.state.displayName,
-      phoneNumber: this.state.phoneNumber,
-      companyName: this.state.companyName,
-      jobTitleName: jobTitleName,
-      bio: this.state.description
-    };
-    this.setState({ jobTitleName: jobTitleName });
-    const json = JSON.stringify({ mail: this.state.email, profile: profile });
-
-    await axios.post(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/dbapi/update/user", json, {
-      headers: {
-        // Overwrite Axios's automatically set Content-Type
-        "Content-Type": "application/json"
-      }
-    });
-  }
-
-  async updateUserCompanyName(companyName) {
-    const profile = {
-      displayName: this.state.displayName,
-      phoneNumber: this.state.phoneNumber,
-      companyName: companyName,
-      jobTitle: this.state.jobTitle,
-      bio: this.state.description
-    };
-    this.setState({ companyName: companyName });
-    const json = JSON.stringify({ mail: this.state.email, profile: profile });
-
-    await axios.post(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/dbapi/update/user", json, {
-      headers: {
-        // Overwrite Axios's automatically set Content-Type
-        "Content-Type": "application/json"
-      }
-    });
-  }
-
-  async updateUserPhoneNumber(phoneNumber) {
-    const profile = {
-      displayName: this.state.displayName,
-      phoneNumber: phoneNumber,
-      companyName: this.state.companyName,
-      jobTitle: this.state.jobTitle,
-      bio: this.state.description
-    };
-    this.setState({ phoneNumber: phoneNumber });
-    const json = JSON.stringify({ mail: this.state.email, profile: profile });
-
-    await axios.post(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/dbapi/update/user", json, {
-      headers: {
-        // Overwrite Axios's automatically set Content-Type
-        "Content-Type": "application/json"
-      }
-    });
-  }
-
-  async getUserProfile() {
-    const mail = this.props.store.state.credentials.email;
-    return axios.get(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/service/dbapi/get/user/" + mail).then(resp => {
-      let data = resp.data;
-      if(data) {
-        this.setState({ displayName: data.displayName });
-        this.setState({ jobTitleName: data.jobTitleName });
-        this.setState({ companyName: data.companyName });
-        this.setState({ phoneNumber: data.phoneNumber });
-        this.props.store.update({
-          profile: {
-            displayName: data.displayName,
-            avatarId: this.state.avatarId,
-            companyName: this.state.companyName,
-            jobTitle: data.jobTitle,
-            email: this.props.store.state.credentials.email,
-            phoneNumber: data.phoneNumber
-          }
-        });
-      }
-    }).catch(reason => {
-      console.error(reason);
-    });
-  }
 
   stopPropagation = e => {
     e.stopPropagation();
@@ -205,8 +93,7 @@ export default class ProfileEntryPanel extends Component {
   };
 
   componentDidMount() {
-    //this.getUserProfile();
-    if (this.nameInput) {
+    if (this.nameInput || this.pronounsInput) {
       // stop propagation so that avatar doesn't move when wasd'ing during text input.
       this.nameInput.addEventListener("keydown", this.stopPropagation);
       this.nameInput.addEventListener("keypress", this.stopPropagation);
@@ -226,9 +113,8 @@ export default class ProfileEntryPanel extends Component {
   }
 
   componentWillUnmount() {
-
     this.props.store.removeEventListener("statechanged", this.storeUpdated);
-    if (this.nameInput) {
+    if (this.nameInput || this.pronounsInput) {
       this.nameInput.removeEventListener("keydown", this.stopPropagation);
       this.nameInput.removeEventListener("keypress", this.stopPropagation);
       this.nameInput.removeEventListener("keyup", this.stopPropagation);
@@ -245,30 +131,15 @@ export default class ProfileEntryPanel extends Component {
 
   render() {
     const avatarSettingsProps = {
-      containerType: this.props.containerType,
-      isSignedIn: this.props.isSignedIn,
       displayNameInputRef: inp => (this.nameInput = inp),
+      pronounsInputRef: inp => (this.pronounsInput = inp),
       disableDisplayNameInput: !!this.props.displayNameOverride,
       displayName: this.props.displayNameOverride ? this.props.displayNameOverride : this.state.displayName,
-      companyName: this.state.companyName,
-      jobTitle: this.state.jobTitle,
-      email: this.state.email,
-      phoneNumber: this.state.phoneNumber,
-      description: this.state.description,
+      pronouns: this.state.pronouns,
       displayNamePattern: this.props.store.schema.definitions.profile.properties.displayName.pattern,
+      pronounsPattern: this.props.store.schema.definitions.profile.properties.pronouns.pattern,
       onChangeDisplayName: e => this.setState({ displayName: e.target.value }),
-      onChangeCompanyName: e => this.setState({ companyName: e.target.value }),
-      onChangeJobTitle: e => this.setState({ jobTitle: e.target.value }),
-      onChangePhoneNumber: e => this.setState({ phoneNumber: e.target.value }),
-      submit_info: () => {
-        if (!this.props.store.state.profile.microsoftUser) {
-          this.updateUserDisplayName(this.state.displayName);
-          this.updateUserCompanyName(this.state.companyName);
-          this.updateUserJobTitle(this.state.jobTitle);
-          this.updateUserPhoneNumber(this.state.phoneNumber);
-        }
-      },
-      //onChangeUserBio: e => ,
+      onChangePronouns: e => this.setState({ pronouns: e.target.value }),
       avatarPreview: <AvatarPreview avatarGltfUrl={this.state.avatar && this.state.avatar.gltf_url} />,
       onChangeAvatar: e => {
         e.preventDefault();
@@ -276,9 +147,9 @@ export default class ProfileEntryPanel extends Component {
       },
       onSubmit: this.saveStateAndFinish,
       onClose: this.props.onClose,
-      onBack: this.props.onBack,
-      signedIn: this.props.signedIn
+      onBack: this.props.onBack
     };
+
     if (this.props.containerType === "sidebar") {
       return <AvatarSettingsSidebar {...avatarSettingsProps} showBackButton={this.props.showBackButton} />;
     }

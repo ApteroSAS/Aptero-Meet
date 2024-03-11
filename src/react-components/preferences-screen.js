@@ -22,11 +22,12 @@ import {
   setMaxResolution
 } from "../utils/screen-orientation-utils";
 import { AAModes } from "../constants";
-import {getAdapterParams} from "../aptero/module/webRTCadapter/adapter-config";
+import { isLockedDownDemoRoom } from "../utils/hub-utils";
 
 import dropdownArrowUrl from "../assets/images/dropdown_arrow.png";
 import dropdownArrow2xUrl from "../assets/images/dropdown_arrow@2x.png";
 import { PermissionNotification } from "./room/PermissionNotifications";
+import {isMsTeams} from "../aptero/module/HubsBridge/utils/EntryMode";
 
 export const CLIPPING_THRESHOLD_MIN = 0.0;
 export const CLIPPING_THRESHOLD_MAX = 0.1;
@@ -178,18 +179,18 @@ export class NumberRangeSelector extends Component {
           />
         </div>
         <Slider
-            step={this.props.step}
-            min={this.props.min}
-            max={this.props.max}
+          step={this.props.step}
+          min={this.props.min}
+          max={this.props.max}
           value={this.props.store.state.preferences[this.props.storeKey]}
           onChange={value => {
             const num = value.toFixed(this.props.digits);
             this.setState({ displayValue: num, digitsFromUser: 0 });
             this.props.setValue(parseFloat(num));
-            }}
+          }}
           disabled={this.props.disabled}
-          />
-        </div>
+        />
+      </div>
     );
   }
 }
@@ -599,27 +600,27 @@ class PreferenceListItem extends Component {
           this.props.store.state.preferences[this.props.storeKey] !== prefSchema[this.props.storeKey].default;
     const resetToDefault =
       !this.props.disabled && hasPref ? (
-      <ResetToDefaultButton
-        onClick={() => {
-          switch (this.props.itemProps.prefType) {
-            case PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION:
-              this.props.store.update({
-                preferences: {
-                  maxResolutionWidth: undefined,
-                  maxResolutionHeight: undefined
-                }
-              });
-              break;
-            default:
+        <ResetToDefaultButton
+          onClick={() => {
+            switch (this.props.itemProps.prefType) {
+              case PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION:
+                this.props.store.update({
+                  preferences: {
+                    maxResolutionWidth: undefined,
+                    maxResolutionHeight: undefined
+                  }
+                });
+                break;
+              default:
                 this.props.setValue(prefSchema[this.props.storeKey].default);
-              break;
-          }
-          this.forceUpdate();
-        }}
-      />
-    ) : (
-      <ResetToDefaultButtonPlaceholder />
-    );
+                break;
+            }
+            this.forceUpdate();
+          }}
+        />
+      ) : (
+        <ResetToDefaultButtonPlaceholder />
+      );
 
     const disabled =
       (this.props.itemProps.disableIfTrue && this.props.store.state.preferences[this.props.itemProps.disableIfTrue]) ||
@@ -695,7 +696,7 @@ const CATEGORY_MOVEMENT = 3;
 const CATEGORY_TOUCHSCREEN = 4;
 const CATEGORY_ACCESSIBILITY = 5;
 const CATEGORY_GRAPHICS = 6;
-const TOP_LEVEL_CATEGORIES = (isMsTeams() || getAdapterParams().adapter === "none")?[CATEGORY_CONTROLS, CATEGORY_MISC]:[CATEGORY_AUDIO,CATEGORY_CONTROLS, CATEGORY_MISC];
+const TOP_LEVEL_CATEGORIES = [CATEGORY_CONTROLS, CATEGORY_MISC];//APTERO removed CATEGORY audio
 const categoryNames = defineMessages({
   [CATEGORY_AUDIO]: { id: "preferences-screen.category.audio", defaultMessage: "Audio" },
   [CATEGORY_CONTROLS]: { id: "preferences-screen.category.controls", defaultMessage: "Controls" },
@@ -875,7 +876,7 @@ class PreferencesScreen extends Component {
     this.mediaDevicesManager = APP.mediaDevicesManager;
 
     this.state = {
-      category: CATEGORY_CONTROLS,
+      category: CATEGORY_AUDIO,
       toastHeight: "150px",
       preferredMic: {
         key: "preferredMic",
@@ -893,7 +894,7 @@ class PreferencesScreen extends Component {
           key: "preferredSpeakers",
           prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
           options: [{ value: "none", text: "None" }]
-      }
+        }
       }),
       canVoiceChat
     };
@@ -928,7 +929,7 @@ class PreferencesScreen extends Component {
     preferredSpeakers.disabled =
       !this.state.canVoiceChat &&
       this.mediaDevicesManager.getPermissionsStatus(MediaDevices.SPEAKERS) !== PermissionStatus.GRANTED;
-    // Video devices update
+
     // Video devices update
     const videoOptions = this.mediaDevicesManager.videoDevicesOptions.map(device => ({
       value: device.value,

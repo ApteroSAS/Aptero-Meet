@@ -1,4 +1,5 @@
 export default function maskEmail(email) {
+  //APTERO
   /*if (!email) return "";
   const emailParts = email.split("@");
   const emailIdentity = emailParts[0];

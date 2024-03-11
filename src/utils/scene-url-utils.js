@@ -3,20 +3,22 @@ import {msTeamsAPILight} from "../aptero/module/axolotis/modules/basic/ImportHel
 
 export async function isValidGLB(url) {
   url = await msTeamsAPILight().preFetchConvertMicrosoftUrl(url);
-  return fetch(url).then(async r => {
-    const reader = r.body.getReader();
-    let header = "";
-    function readChunk({ done, value }) {
-      header += String.fromCharCode.apply(null, value.slice(0, 4));
-      if (!done && header.length < 4) {
-        return reader.read().then(readChunk);
-      } else {
-        reader.cancel();
+  return fetch(url)
+    .then(async r => {
+      const reader = r.body.getReader();
+      let header = "";
+      function readChunk({ done, value }) {
+        header += String.fromCharCode.apply(null, value.slice(0, 4));
+        if (!done && header.length < 4) {
+          return reader.read().then(readChunk);
+        } else {
+          reader.cancel();
+        }
       }
-    }
-    await reader.read().then(readChunk);
-    return header.startsWith("glTF");
-  });
+      await reader.read().then(readChunk);
+      return header.startsWith("glTF");
+    })
+    .catch(e => console.error(e));
 }
 
 export async function isValidSceneUrl(url) {
@@ -29,7 +31,7 @@ export async function isValidSceneUrl(url) {
   }
 }
 
-//Aptero
+//Aptero TODO move to Aptero code source
 export async function isValidRemoteImage(url) {
   url = await msTeamsAPILight().preFetchConvertMicrosoftUrl(url);
   //try catch fausse url

@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Sidebar } from "../../../../react-components/sidebar/Sidebar";
+import { Sidebar } from "../../CustomPanel/Sidebar/Sidebar";
 import { CloseButton } from "../../../../react-components/input/CloseButton";
 import { ClonesI, getClones, getClonesSync } from "../LoadBalancer";
 import { List, ListItem, ListItemIcon, ListItemText } from "@material-ui/core";

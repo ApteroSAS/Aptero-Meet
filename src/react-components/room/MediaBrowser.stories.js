@@ -326,7 +326,6 @@ export const AvatarListings = () => (
 export const Avatars = () => (
   <React.Fragment>
     {createAvatarCustomTileV2()}
-    <div> AVATEST </div>
     <MediaBrowser
       searchPlaceholder="Search Avatars..."
       mediaSources={mediaSources}

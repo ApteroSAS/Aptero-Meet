@@ -1,6 +1,14 @@
 import { AComponent, AElement } from "aframe";
 import { addComponent, defineQuery, enterQuery, exitQuery } from "bitecs";
-import { Vector3, Object3D, LineSegments, WireframeGeometry, SphereBufferGeometry, PositionalAudio } from "three";
+import {
+  Vector3,
+  Object3D,
+  LineSegments,
+  WireframeGeometry,
+  SphereBufferGeometry,
+  PositionalAudio,
+  MathUtils
+} from "three";
 import { HubsWorld } from "../app";
 import { AudioSettingsChanged, AudioSource, AudioTarget } from "../bit-components";
 import { SourceType } from "../components/audio-params";
@@ -100,7 +108,7 @@ export function audioTargetSystem(world: HubsWorld, audioSystem: AudioSystem) {
     if (maxDelay > 0) {
       const audio = APP.audios.get(audioEid)!;
       const delayNode = ctx.createDelay(maxDelay);
-      delayNode.delayTime.value = THREE.MathUtils.randFloat(minDelay, maxDelay);
+      delayNode.delayTime.value = MathUtils.randFloat(minDelay, maxDelay);
       audio.setFilters([delayNode]);
     }
 

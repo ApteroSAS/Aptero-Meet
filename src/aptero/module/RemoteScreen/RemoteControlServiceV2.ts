@@ -191,7 +191,9 @@ export class RemoteControlServiceV2 {
     }
 
     tryCaptureCursor(intersection) {
-        if (intersection) {
+        return;
+        //NOTE modification needed to make it work code deprecated
+        /*if (intersection) {
             if (intersection?.object?.el?.components["media-video"]?.el === intersection?.object?.el) { // check type of object
                 NAF.utils
                     .getNetworkedEntity(intersection.object.el)
@@ -208,7 +210,7 @@ export class RemoteControlServiceV2 {
                         }
                     });
             }
-        }
+        }*/
     }
 }
 

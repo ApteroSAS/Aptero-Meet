@@ -4,14 +4,14 @@ import {BasicModule, Properties, PROPERTIES_SERVICE,HttpEventServiceName,HttpEve
 import {TeamsModule} from "@aptero/axolotis-module-teams";
 import {SampleServiceA, SampleServiceAName} from "./modules/basic/SampleServiceA";
 import {GenericModule} from "./GenericModules";
+import {CustomURL, CustomURLName} from "../customURL/CustomURL";
 
-export async function initIOC() {
+export function initIOC() {
     container.load(BasicModule());
     container.load(TeamsModule());
     container.load(GenericModule);
-            // @ts-ignore
-            // @ts-ignore
     console.log("IOC : loaded");
     //container.get<SampleServiceA>(SampleServiceAName);
     //console.log(container.get<Properties>(PROPERTIES_SERVICE).getGlobalProperties());
+    container.get<CustomURL>(CustomURLName).processURL("");
 }

@@ -90,8 +90,8 @@ export function RoomSection(props: {
         },
 
     ];
-    const sortedFavoriteRooms = Array.from(favoriteRooms).sort((a, b) => b.member_count - a.member_count);
-    const sortedSpokeProject = Array.from(spokeProject).sort((a, b) => b.member_count - a.member_count);
+    const sortedFavoriteRooms = Array.from(favoriteRooms).sort((a:any, b:any) => b.member_count - a.member_count);
+    const sortedSpokeProject = Array.from(spokeProject).sort((a:any, b:any) => b.member_count - a.member_count);
 
     const mySceneDisplay = sortedSpokeProject.length > 0;
     const myRoomDisplay = sortedFavoriteRooms.length > 0;
@@ -190,7 +190,7 @@ export function RoomSection(props: {
                         <Container as={undefined} className={undefined}>
                             <Column2 grow padding>
                                 <MediaGrid center className={undefined} isVariableWidth={undefined} sm={undefined}>
-                                    {sortedSpokeProject.map((room) => {
+                                    {sortedSpokeProject.map((room:any) => {
                                         return (
                                             <MediaTile
                                                 onClick={async (event) => {
@@ -220,7 +220,7 @@ export function RoomSection(props: {
                         <Container className={undefined} as={undefined}>
                             <Column2 grow padding>
                                 <MediaGrid center className={undefined} isVariableWidth={undefined} sm={undefined}>
-                                    {sortedFavoriteRooms.map((room) => {
+                                    {sortedFavoriteRooms.map((room:any) => {
                                         return (
                                             <MediaTile
                                                 onClick={async (event) => {

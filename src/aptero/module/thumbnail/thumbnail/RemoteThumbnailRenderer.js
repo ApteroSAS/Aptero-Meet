@@ -11,6 +11,9 @@ export default class RemoteThumbnailRenderer {
 
   generateThumbnailFromUrlRemote = async (glbFileUrl) => {
     return new Promise((resolve, reject) => {
+      if(!propertiesService.RETICULUM_SERVER){
+        reject("No reticulum server");
+      }
       axios.post(propertiesService.PROTOCOL + propertiesService.RETICULUM_SERVER + "/thumbnail/compute/hash", { url: glbFileUrl }).then(data => {
         const res = data.data;
         const hash = res.hash;

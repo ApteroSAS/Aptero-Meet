@@ -1,5 +1,3 @@
-import microsoftErrorImageSrc from "!!url-loader!../assets/images/media-error_microsoft_not_authorized.png";
-
 import audioIcon from "../assets/images/audio.png";
 import { paths } from "../systems/userinput/paths";
 import HLS from "hls.js";
@@ -25,7 +23,6 @@ import { scaleToAspectRatio } from "../utils/scale-to-aspect-ratio";
 import { isSafari } from "../utils/detect-safari";
 import { isIOS as detectIOS } from "../utils/is-mobile";
 import { Layers } from "../camera-layers";
-import { IN_APP_WEB_BROWSER_PROTOCOL, remoteWebBrowser } from "../aptero/module/HubsBridge/react-components/media-utils-lib";
 
 const ONCE_TRUE = { once: true };
 const TYPE_IMG_PNG = { type: "image/png" };
@@ -41,34 +38,6 @@ for (let i = 0; i <= 20; i++) {
   }
   s += "]";
   VOLUME_LABELS[i] = s;
-}
-
-//aptero microsoft feature
-const microsoftErrorImage = new Image();
-microsoftErrorImage.src = microsoftErrorImageSrc;
-const microsoftErrorTexture = new THREE.Texture(microsoftErrorImage);
-microsoftErrorTexture.magFilter = THREE.NearestFilter;
-microsoftErrorImage.onload = () => {
-  microsoftErrorTexture.needsUpdate = true;
-};
-
-//aptero microsoft feature
-function getErrorTexture(src) {
-  if(typeof src === 'string' && src.endsWith("microsoft_not_authorized")){
-    return microsoftErrorTexture;
-  }else{
-    return errorTexture;
-  }
-}
-
-//aptero microsoft feature
-function getErrorCacheItem(){
-  return { texture: errorTexture, ratio: 1 };
-}
-
-//aptero microsoft feature
-function isErrorTexture(texture) {
-  return texture === errorTexture || texture === microsoftErrorTexture;
 }
 
 export function timeFmt(t) {
@@ -88,7 +57,7 @@ const MAX_GAIN_MULTIPLIER = 2;
 AFRAME.registerComponent("media-video", {
   schema: {
     src: { type: "string" },
-    audioSrc: { type: "string" },
+    audioSrc: { type: "string" }, // set only if audio track is separated from video track (eg. 360 video)
     contentType: { type: "string" },
     loop: { type: "boolean", default: true },
     hidePlaybackControls: { type: "boolean", default: false },
@@ -174,20 +143,15 @@ AFRAME.registerComponent("media-video", {
       this.updatePlaybackState();
     });
 
-    /*this.reloadSrcCallBack = (event)=>{
-      this.reloadSrc(event.detail)
-    };*/
     NAF.utils
       .getNetworkedEntity(this.el)
       .then(networkedEl => {
         this.networkedEl = networkedEl;
-
         applyPersistentSync(this.networkedEl.components.networked.data.networkId);
         this.updatePlaybackState();
 
         this.networkedEl.addEventListener("pinned", this.updateHoverMenu);
         this.networkedEl.addEventListener("unpinned", this.updateHoverMenu);
-        //this.networkedEl.addEventListener("reload_src_after_change", this.reloadSrcCallBack);
         window.APP.hubChannel.addEventListener("permissions_updated", this.updateHoverMenu);
 
         // For scene-owned videos, take ownership after a random delay if nobody
@@ -211,13 +175,14 @@ AFRAME.registerComponent("media-video", {
     this.onPreferenceChanged = () => {
       const newDisableLeftRightPanning = APP.store.state.preferences.disableLeftRightPanning;
       const newAudioPanningQuality = APP.store.state.preferences.audioPanningQuality;
-    // from a-sound
+
       const shouldRecreateAudio =
         disableLeftRightPanning !== newDisableLeftRightPanning && this.audio && this.mediaElementAudioSource;
       const shouldUpdateAudioSettings = audioPanningQuality !== newAudioPanningQuality;
 
       disableLeftRightPanning = newDisableLeftRightPanning;
       audioPanningQuality = newAudioPanningQuality;
+
       if (shouldRecreateAudio) {
         this.setupAudio();
       } else if (shouldUpdateAudioSettings) {
@@ -388,7 +353,6 @@ AFRAME.registerComponent("media-video", {
       this.updateSrc(oldData);
       return;
     }
-
   },
 
   setupAudio() {
@@ -409,7 +373,7 @@ AFRAME.registerComponent("media-video", {
     } else {
       this.audio = new THREE.Audio(audioListener);
     }
-
+    // Default to being quiet so it fades in when volume is set by audio systems
     this.audio.gain.gain.value = 0;
     this.audioSystem.addAudio({ sourceType: SourceType.MEDIA_VIDEO, node: this.audio });
 
@@ -475,16 +439,8 @@ AFRAME.registerComponent("media-video", {
       this.video.addEventListener("pause", this.onPauseStateChange);
       this.video.addEventListener("play", this.onPauseStateChange);
 
-      //aptero livescream bugfix //TODO still necessary?
-      if (src.startsWith("hubs://")  && !src.startsWith(IN_APP_WEB_BROWSER_PROTOCOL) ) {
-        setTimeout(() => {
-          this.video.play();
-        }, 2000);
-      }
-
       if (texture.hls) {
         const updateHLSLiveState = () => {
-          this.video.play(); //Aptero
           if (texture.hls.currentLevel >= 0) {
             this.videoIsLive = texture.hls.levels[texture.hls.currentLevel].details.live;
             this.updateHoverMenu();
@@ -509,16 +465,11 @@ AFRAME.registerComponent("media-video", {
         });
       }
 
-      //aptero change content feature
-      if (this.videoTexture) {
-        disposeTexture(this.videoTexture);
-      }
       this.videoTexture = texture;
       this.audioSource = audioSourceEl;
     } catch (e) {
       console.error("Error loading video", this.data.src, e);
-      //aptero microsoft feature
-      texture = getErrorTexture(this.data.src);
+      texture = errorTexture;
       this.videoTexture = this.audioSource = null;
     }
 
@@ -580,11 +531,10 @@ AFRAME.registerComponent("media-video", {
       }
 
       let resolved = false;
-      const failLoad = function(e) {
+      const failLoad = function (e) {
         if (resolved) return;
         resolved = true;
         clearTimeout(pollTimeout);
-        console.error(e);
         reject(e);
       };
 
@@ -618,11 +568,7 @@ AFRAME.registerComponent("media-video", {
       }
 
       // Set src on video to begin loading.
-
-      if (url.startsWith(IN_APP_WEB_BROWSER_PROTOCOL)) {
-        //APTERO
-        texture = await remoteWebBrowser(this.el,texture,this.data);
-      }else if (url.startsWith("hubs://")) {
+      if (url.startsWith("hubs://")) {
         const streamClientId = url.substring(7).split("/")[1]; // /clients/<client id>/video is only URL for now
         const stream = await APP.dialog.getMediaStream(streamClientId, "video");
         // We subscribe to video stream notifications for this peer to update the video element
@@ -676,7 +622,7 @@ AFRAME.registerComponent("media-video", {
           // There seems no way to detect whether the error is caused by the problem mentioned above.
           // So always retrying.
           videoEl.onerror = async () => {
-        videoEl.onerror = failLoad;
+            videoEl.onerror = failLoad;
             try {
               const res = await fetch(url);
               videoEl.srcObject = await res.blob();
@@ -688,7 +634,7 @@ AFRAME.registerComponent("media-video", {
           videoEl.onerror = failLoad;
         }
 
-
+        // audioSrc is non-empty only if audio track is separated from video track (eg. 360 video)
         if (this.data.audioSrc) {
           // Mute video track just in case
           videoEl.muted = true;
@@ -743,7 +689,7 @@ AFRAME.registerComponent("media-video", {
         this.hasAudioTracks && !this.data.hidePlaybackControls && !!this.video;
 
     this.snapButton.object3D.visible =
-      !!this.video && !this.data.contentType.startsWith("audio/") && window.APP.hubChannel.can("show_spawn_and_move_media");
+      !!this.video && !this.data.contentType.startsWith("audio/") && window.APP.hubChannel.can("spawn_and_move_media");
     this.seekForwardButton.object3D.visible = !!this.video && !this.videoIsLive;
 
     const mayModifyPlayHead =
@@ -771,7 +717,7 @@ AFRAME.registerComponent("media-video", {
   },
 
   tick: (() => {
-    return function() {
+    return function () {
       if (!this.video) return;
 
       const userinput = this.el.sceneEl.systems.userinput;
@@ -847,7 +793,6 @@ AFRAME.registerComponent("media-video", {
     if (this.networkedEl) {
       this.networkedEl.removeEventListener("pinned", this.updateHoverMenu);
       this.networkedEl.removeEventListener("unpinned", this.updateHoverMenu);
-      //this.networkedEl.removeEventListener("reload_src_after_change", this.reloadSrcCallBack);
     }
 
     window.APP.hubChannel.removeEventListener("permissions_updated", this.updateHoverMenu);

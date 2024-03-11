@@ -22,5 +22,5 @@ AvatarSettingsSidebar.propTypes = {
   showBackButton: PropTypes.bool,
   className: PropTypes.string,
   onBack: PropTypes.func,
-  onClose: PropTypes.func,
+  onClose: PropTypes.func
 };

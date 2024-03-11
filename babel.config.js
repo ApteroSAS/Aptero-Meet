@@ -1,3 +1,11 @@
+// Instrument for code coverage in development mode
+if (process.env.USE_BABEL_PLUGIN_ISTANBUL) {
+  console.log(
+    "Detected USE_BABEL_PLUGIN_ISTANBUL. Instrumenting code for coverage."
+  );
+  plugins.push("babel-plugin-istanbul");
+}
+
 module.exports = {
   presets: [
     "@babel/react",
@@ -24,6 +32,7 @@ module.exports = {
   plugins: [
     // TODO: When i18n build pipeline is finished move to: [ "react-intl", { "removeDefaultMessage": true } ]
     "react-intl",
+    ["@babel/plugin-proposal-decorators", { "legacy": true }],//Aptero used for inversify
     ["@babel/proposal-class-properties", { loose: true }],
     ["@babel/plugin-proposal-private-property-in-object", { loose: true }],
     ["@babel/plugin-proposal-private-methods", { loose: true }],

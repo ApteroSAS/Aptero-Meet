@@ -6,6 +6,7 @@ import { ReactComponent as AvatarIcon } from "../icons/Avatar.svg";
 import { SharePopoverButton } from "./SharePopover";
 import { FormattedMessage } from "react-intl";
 import useAvatar from "./hooks/useAvatar";
+import { MediaDevicesEvents, MediaDevices } from "../../utils/media-devices-utils";
 
 function useShare(scene, hubChannel) {
   const mediaDevicesManager = APP.mediaDevicesManager;
@@ -109,10 +110,9 @@ function useShare(scene, hubChannel) {
 }
 
 export function SharePopoverContainer({ scene, hubChannel }) {
-  if(getAdapterParams().adapter === "none"){
-    return <></>
-  }
-  const {
+  //APTERO disable microphone and camera sharing
+  return <></>
+  /*const {
     sharingSource,
     canShareCamera,
     toggleShareCamera,
@@ -127,7 +127,7 @@ export function SharePopoverContainer({ scene, hubChannel }) {
       id: "camera",
       icon: VideoIcon,
       color: "accent5",
-      label: <FormattedMessage id="share-popover.source.camera" defaultMessage="Webcam" />,
+      label: <FormattedMessage id="share-popover.source.camera" defaultMessage="Camera" />,
       onSelect: toggleShareCamera,
       active: sharingSource === MediaDevices.CAMERA
     },
@@ -149,7 +149,7 @@ export function SharePopoverContainer({ scene, hubChannel }) {
     }
   ];
 
-  return <SharePopoverButton items={items} />;
+  return <SharePopoverButton items={items} />;*/
 }
 
 SharePopoverContainer.propTypes = {

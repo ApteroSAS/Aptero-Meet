@@ -1,10 +1,10 @@
 import React, { useEffect, useState }  from "react";
 import PropTypes from "prop-types";
 import { customMenuService } from "../CustomMenuService";
-import { Sidebar } from "../../../../react-components/sidebar/Sidebar";
 import { CloseButton } from "../../../../react-components/input/CloseButton";
 import {container} from "../../axolotis/IOCConfig";
 import {CustomURL, CustomURLName} from "../../customURL/CustomURL";
+import {Sidebar} from "../Sidebar/Sidebar";
 
 export function CustomSidebarContainer({ onClose }) {
   const [currentButtonTitle, setcurrentButtonTitle] = useState(0);
@@ -31,7 +31,7 @@ export function CustomSidebarContainer({ onClose }) {
   return (
     <Sidebar
       title={currentButtonTitle}
-      beforeTitle={<CloseButton onClick={onClose} />}
+      beforeTitle={<CloseButton onClick={onClose} lg={undefined} className={undefined} />}
     >
       {/* https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Feature-Policy#directives */}
       {currentUrl !== "psidebar" && (

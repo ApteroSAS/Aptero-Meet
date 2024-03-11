@@ -1,4 +1,4 @@
-import { Euler } from "three";
+import {Euler, Quaternion} from "three";
 import { HubsWorld } from "../app";
 import { Fit, inflatePhysicsShape, Shape } from "./physics-shape";
 
@@ -19,7 +19,7 @@ export function inflateBoxCollider(world: HubsWorld, eid: number, params: BoxCol
 
   const euler = new Euler();
   euler.set(params.rotation.x, params.rotation.y, params.rotation.z);
-  const orientation = new THREE.Quaternion().setFromEuler(euler);
+  const orientation = new Quaternion().setFromEuler(euler);
 
   inflatePhysicsShape(world, eid, {
     type: Shape.BOX,

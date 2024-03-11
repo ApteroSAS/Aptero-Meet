@@ -1,6 +1,4 @@
 import { SOUND_SPAWN_PEN } from "../systems/sound-effects-system";
-import { adapterReady, getAdapterParams } from "../aptero/module/webRTCadapter/adapter-config";
-
 /**
  * HUD panel for muting, freezing, and other controls that don't necessarily have hardware buttons.
  * @namespace ui
@@ -8,11 +6,10 @@ import { adapterReady, getAdapterParams } from "../aptero/module/webRTCadapter/a
  */
 AFRAME.registerComponent("in-world-hud", {
   init() {
-    this.quitbtn = this.el.querySelector(".quitbtn");
     this.mic = this.el.querySelector(".mic");
     this.spawn = this.el.querySelector(".spawn");
     this.pen = this.el.querySelector(".penhud");
-    //this.cameraBtn = this.el.querySelector(".camera-btn");
+    this.cameraBtn = this.el.querySelector(".camera-btn");
     this.inviteBtn = this.el.querySelector(".invite-btn");
     this.background = this.el.querySelector(".bg");
 
@@ -21,18 +18,14 @@ AFRAME.registerComponent("in-world-hud", {
     };
     APP.dialog.on("mic-state-changed", this.onMicStateChanged);
 
-
     this.updateButtonStates = () => {
       this.mic.setAttribute("mic-button", "active", APP.dialog.isMicEnabled);
       this.pen.setAttribute("icon-button", "active", this.el.sceneEl.is("pen"));
-      //this.cameraBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("camera"));
+      this.cameraBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("camera"));
       if (window.APP.hubChannel) {
-        this.spawn.setAttribute("icon-button", "disabled", !window.APP.hubChannel.can("show_spawn_and_move_media"));
+        this.spawn.setAttribute("icon-button", "disabled", !window.APP.hubChannel.can("spawn_and_move_media"));
         this.pen.setAttribute("icon-button", "disabled", !window.APP.hubChannel.can("spawn_drawing"));
-        adapterReady().then(() => {
-          this.mic.setAttribute("visible", getAdapterParams().adapter !== "none");
-        });
-        //this.cameraBtn.setAttribute("icon-button", "disabled", !window.APP.hubChannel.can("spawn_camera"));
+        this.cameraBtn.setAttribute("icon-button", "disabled", !window.APP.hubChannel.can("spawn_camera"));
       }
     };
 
@@ -46,7 +39,7 @@ AFRAME.registerComponent("in-world-hud", {
     };
 
     this.onSpawnClick = () => {
-      if (!window.APP.hubChannel.can("show_spawn_and_move_media")) return;
+      if (!window.APP.hubChannel.can("spawn_and_move_media")) return;
       this.el.emit("action_spawn");
     };
 
@@ -65,12 +58,8 @@ AFRAME.registerComponent("in-world-hud", {
       this.el.emit("action_invite");
     };
 
-    this.onQuitClick = () => {
-      window.location = window.location.origin;
-    };
     this.onHubUpdated = e => {
       this.inviteBtn.object3D.visible = e.detail.hub.entry_mode !== "invite";
-      this.inviteBtn.setAttribute("visible", false);//Aptero Disable visibility
     };
   },
 
@@ -81,12 +70,10 @@ AFRAME.registerComponent("in-world-hud", {
     this.el.sceneEl.addEventListener("hub_updated", this.onHubUpdated);
     this.updateButtonStates();
 
-
-    this.quitbtn.object3D.addEventListener("interact", this.onQuitClick);
     this.mic.object3D.addEventListener("interact", this.onMicClick);
     this.spawn.object3D.addEventListener("interact", this.onSpawnClick);
     this.pen.object3D.addEventListener("interact", this.onPenClick);
-    //this.cameraBtn.object3D.addEventListener("interact", this.onCameraClick);
+    this.cameraBtn.object3D.addEventListener("interact", this.onCameraClick);
     this.inviteBtn.object3D.addEventListener("interact", this.onInviteClick);
   },
 
@@ -96,12 +83,10 @@ AFRAME.registerComponent("in-world-hud", {
     window.APP.hubChannel.removeEventListener("permissions_updated", this.updateButtonStates);
     this.el.sceneEl.removeEventListener("hub_updated", this.onHubUpdated);
 
-    this.quitbtn.object3D.removeEventListener("interact", this.onQuitClick);
-
     this.mic.object3D.removeEventListener("interact", this.onMicClick);
     this.spawn.object3D.removeEventListener("interact", this.onSpawnClick);
     this.pen.object3D.removeEventListener("interact", this.onPenClick);
-    //this.cameraBtn.object3D.removeEventListener("interact", this.onCameraClick);
+    this.cameraBtn.object3D.removeEventListener("interact", this.onCameraClick);
     this.inviteBtn.object3D.removeEventListener("interact", this.onInviteClick);
   }
 });

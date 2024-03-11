@@ -44,6 +44,9 @@ export const BLOCKED_EVENT = "blocked";
 export const UNBLOCKED_EVENT = "unblocked";
 export const RTC_EVENT = "rtc_event";
 
+export const DIALOG_CONNECTION_CONNECTED = "dialog-connection-connected";
+export const DIALOG_CONNECTION_ERROR_FATAL = "dialog-connection-error-fatal";
+
 // Extend the EventEmitter to type the possible custom events
 export interface AdapterEvents {
     [MIC_EVENT]: (data: { enabled: boolean }) => void;
@@ -51,6 +54,7 @@ export interface AdapterEvents {
     [BLOCKED_EVENT]: (detail: { clientId: string }) => void;
     [UNBLOCKED_EVENT]: (detail: { clientId: string }) => void;
     [RTC_EVENT]: (detail: any) => void;
+    [DIALOG_CONNECTION_CONNECTED]: () => void;
 }
 
 // Augment the MediaStreamTrack type to include the _hubs_contentHint property.

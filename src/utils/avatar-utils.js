@@ -1,6 +1,5 @@
 import { fetchReticulumAuthenticated } from "./phoenix-utils";
 import { proxiedUrlFor } from "./media-url-utils";
-import configs from "./configs";
 import avatarUnavailableImage from "../assets/images/avatar_unavailable.png";
 
 const AVATARS_API = "/api/v1/avatars";
@@ -17,7 +16,6 @@ export function getAvatarType(avatarId) {
 
 async function fetchSkinnableAvatar(avatarId) {
   const resp = await fetchReticulumAuthenticated(`/api/v1/avatars/${avatarId}`);
-  console.log(resp);
   return resp && resp.avatars && resp.avatars[0];
 }
 
@@ -33,7 +31,7 @@ export async function fetchAvatar(avatarId) {
   }
 }
 
-export async function fetchAvatarGltfUrl(avatarId) {
+async function fetchAvatarGltfUrl(avatarId) {
   return fetchAvatar(avatarId).then(avatar => avatar && avatar.gltf_url);
 }
 

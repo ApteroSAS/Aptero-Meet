@@ -121,7 +121,7 @@ AFRAME.registerComponent("open-media-button", {
       const visible = src && guessContentType(src) !== "video/vnd.hubs-webrtc";
       const mayChangeScene = this.el.sceneEl.systems.permissions.canOrWillIfCreator("update_hub");
 
-      this.src = container.get<CustomURL>(CustomURLName).processURL(this.src);
+      this.src = container.get(CustomURLName).processURL(this.src);
 
       this.el.object3D.visible = !!visible;
 
@@ -197,8 +197,12 @@ AFRAME.registerComponent("open-media-button", {
         if (url.hash && window.APP.hub.hub_id === hubId) {
           // move to waypoint w/o writing to history
           window.history.replaceState(null, null, window.location.href.split("#")[0] + url.hash);
-          isLocalHubsUrl(this.src) &&
+        } else if (
+            window.APP_PROPS.APP_CONFIG.features.fast_room_switching &&
+            //await isLocalHubsUrl(this.src) &&
             wurlSearchParams.toString() === urlSearchParams.toString() && //If we have different option do not FRS
+          !wurl.searchParams.get("offline2")
+        ) {
           const waypoint = url.hash && url.hash.substring(1);
           // move to new room without page load or entry flow
           const { changeHub } = await import("../change-hub");
@@ -211,15 +215,18 @@ AFRAME.registerComponent("open-media-button", {
         }
       } else {
         await exitImmersive();
-        window.open(this.clean_src,"_blank","popup");
+        window.open(this.src);
       }
     };
 
-    NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
-      this.targetEl = networkedEl;
-      this.targetEl.addEventListener("media_resolved", this.updateSrc, { once: true });
-      this.updateSrc();
-    });
+    NAF.utils
+      .getNetworkedEntity(this.el)
+      .then(networkedEl => {
+        this.targetEl = networkedEl;
+        this.targetEl.addEventListener("media_resolved", this.updateSrc, { once: true });
+        this.updateSrc();
+      })
+      .catch(() => {});
   },
 
   play() {

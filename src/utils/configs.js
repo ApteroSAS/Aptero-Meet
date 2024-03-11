@@ -7,9 +7,11 @@ import { propertiesService } from "../aptero/module/properties/propertiesService
 import { getLocale, getMessage } from "./i18n";
 
 // Read configs from global variable if available, otherwise use the process.env injected from build.
-const configs = propertiesService;
+const configs = {...propertiesService};
+//window.APP_CONFIG = {...configs.APP_CONFIG};
+window.DEBUG_configs = configs;
 let isAdmin = false;
-[
+/*[
   "PROTOCOL",
   "RETICULUM_SERVER",
   "THUMBNAIL_SERVER",
@@ -22,11 +24,11 @@ let isAdmin = false;
   "UPLOADS_HOST"
 ].forEach(x => {
   const el = document.querySelector(`meta[name='env:${x.toLowerCase()}']`);
-  configs[x] = el ? el.getAttribute("content") : process.env[x] ? process.env[x] : propertiesService[x];
+  configs[x] = el ? el.getAttribute("content") : process.env[x];
 
   const BASE_ASSETS_PATH_KEY = "BASE_ASSETS_PATH";
   if (x === BASE_ASSETS_PATH_KEY && configs[BASE_ASSETS_PATH_KEY]) {
-    // eslint-disable-next-line no-undef
+    // BASE_ASSETS_PATH might be a relative URL like "/" when it is set in
     // .env or .defaults.env when running locally. We need to convert that
     // to an absolute URL.
     if (!configs[BASE_ASSETS_PATH_KEY].startsWith("http")) {
@@ -36,15 +38,16 @@ let isAdmin = false;
     // eslint-disable-next-line no-undef
     __webpack_public_path__ = configs[BASE_ASSETS_PATH_KEY];
   }
-});
+});*/
 
-// Also include configs that reticulum injects as a script in the page head.
+// Custom clients do not use <meta> tags for passing data, so if thumbnail_server meta tag exists, it is not a custom client
 const hasThumbnailServerMetaTag = !!document.querySelector("meta[name='env:thumbnail_server']");
 configs.IS_LOCAL_OR_CUSTOM_CLIENT = !hasThumbnailServerMetaTag;
 
 // Also include configs that reticulum injects as a script in the page head.
 
-configs.AVAILABLE_INTEGRATIONS = configs.AVAILABLE_INTEGRATIONS || window.AVAILABLE_INTEGRATIONS || {};
+configs.AVAILABLE_INTEGRATIONS = window.AVAILABLE_INTEGRATIONS || {};
+
 
 if (window.APP_CONFIG) {
   configs.APP_CONFIG = window.APP_CONFIG;
@@ -69,23 +72,33 @@ if (window.APP_CONFIG) {
   };
 }
 
+const isLocalDevelopment = process.env.NODE_ENV === "development";
+
 configs.feature = featureName => {
-  const value = configs.APP_CONFIG.features[featureName];
+  const value = configs.APP_CONFIG && configs.APP_CONFIG.features && configs.APP_CONFIG.features[featureName];
+  if (typeof value === "boolean" || featureName === "enable_spoke") {
+    const forceEnableSpoke = featureName === "enable_spoke" && isAdmin;
+    return forceEnableSpoke || value;
+  } else {
     return value;
+  }
 };
 
-const localImages = {
+let localDevImages = {};
+if (isLocalDevelopment) {
+  localDevImages = {
     logo: appLogo,
     logo_dark: appLogoDark,
     company_logo: companyLogo,
     editor_logo: sceneEditorLogo,
     home_background: homeHeroBackground
   };
+}
 
 configs.image = (imageName, cssUrl) => {
   const url =
     (configs.APP_CONFIG && configs.APP_CONFIG.images && configs.APP_CONFIG.images[imageName]) ||
-    localImages[imageName];
+    localDevImages[imageName];
   return url && cssUrl ? `url(${url})` : url;
 };
 

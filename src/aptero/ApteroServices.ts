@@ -1,25 +1,15 @@
-import { liveStream } from "./module/video360/LiveStream";
-import { video360Service } from "./module/video360/Video360Service";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 
 import "./module/ButtonAPI/component/custom-controller-button";
-import "./module/HubsBridge/component/rtmp-auto-refresh";
 import "./module/ButtonAPI/component/media-limiter";
 import "./module/CustomPanel/component/open-iframe-button";
 import "./module/ButtonAPI/component/stop-share-screen-on-destroy";
 import "./module/ButtonAPI/component/release-media-frame-on-destroy";
-import "./module/AudioZone/component/trigger";
 import { gltfExtensionProcessorService } from "./module/ButtonAPI/api/GLTFExtensionProcessorService";
-//import DistributedSoundSystem from "./service/DistributedSoundSystem";
-import SoundSystem from "./module/DistributedSound/SoundSystem";
-import { AudioSettingsSystem } from "./../systems/audio-settings-system";
+import { AudioSettingsSystem } from "../systems/audio-settings-system";
 
 //adapter
-import "./module/webRTCadapter/adapter-config";
 import { ThirdPersonService } from "./module/ThirdPerson/ThirdPersonService";
-import { minimumQualityService } from "./module/perf/MinimumQualityService";
-import { testServiceNotifySceneEntered, startSelfTest, testTick } from "./module/TestHelper/SelfTestService.loader";
-import { setlistenerEndShareVideo } from "./module/webRTCadapter/adapter-config";
 import { remoteControlServiceV2 } from "./module/RemoteScreen/RemoteControlServiceV2";
 import { wait } from "./util/AsyncWaiter";
 import { networkService } from "./module/HubsBridge/service/NetworkService";
@@ -81,7 +71,6 @@ export class ApteroServices {
   private audioSettingsSystem: any;
   private sceneEntered: boolean = false;
   constructor() {
-    startSelfTest();
     roomParameters.getRoomParameters(); //called as soon as possible
   }
 
@@ -89,11 +78,6 @@ export class ApteroServices {
     this.audioSettingsSystem = audioSettingsSystem;
     waitForDOMContentLoaded().then(async () => {
       await networkService.start();
-      await new SoundSystem(networkService).start();
-      //await new DistributedSoundSystem(networkService).start();
-      await liveStream.start();
-      //await microsoftService.start(); //TODO Warning produce lots of payload in hub-vendor => lazy load this
-      await video360Service.start();
       await gltfExtensionProcessorService.start();
       await this.thirdPersonService.start();
       await remoteControlServiceV2.start();
@@ -106,7 +90,6 @@ export class ApteroServices {
     await wait(() => {
       return AFRAME && AFRAME.scenes && AFRAME.scenes[0] && AFRAME.scenes[0].systems;
     });
-    await setlistenerEndShareVideo();
     await roomParameters.applyRoomParameters();
     await wait(() => {
       return this.audioSettingsSystem;
@@ -136,8 +119,6 @@ export class ApteroServices {
   }
 
   tick() {
-    minimumQualityService.tick();
-    testTick();
   }
 
   async remove() {
@@ -150,8 +131,6 @@ export class ApteroServices {
       return;
     }
     this.sceneEntered = true;
-    minimumQualityService.initialCheckFinished();
-    testServiceNotifySceneEntered();
     setTimeout(() => {
       this.thirdPersonService.storeUpdated();
       sendIframeMessage("entered", {});

@@ -232,10 +232,8 @@ export function disposeTexture(texture) {
   if (texture.image instanceof HTMLVideoElement) {
     const video = texture.image;
     video.pause();
-    video.removeAttribute('src'); // empty source
-    video.srcObject = null;
+    video.src = "";
     video.load();
-    texture.image = null;
   }
 
   if (texture.hls) {

@@ -53,13 +53,10 @@ export class KeyboardDevice {
     ["blur"].map(x => window.addEventListener(x, this.events.push.bind(this.events)));
   }
 
-  
   write(frame) {
-    //Also ignore key inputs if we are using Hyperbeam
-
     for (let i = 0; i < this.events.length; i++) {
       const event = this.events[i];
-      if (event.type === "blur" || window.lockMovement) {
+      if (event.type === "blur" || window.lockMovement /*aptero*/) {
         this.keys = {};
         this.seenKeys.clear();
       } else {

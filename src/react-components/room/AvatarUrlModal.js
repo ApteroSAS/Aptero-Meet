@@ -14,12 +14,12 @@ export function AvatarUrlModal({ onSubmit, onClose }) {
     <Modal title="Custom Avatar URL" beforeTitle={<CloseButton onClick={onClose} />}>
       <Column as="form" padding center onSubmit={handleSubmit(onSubmit)}>
         <TextInputField
-          name="url"
           label={<FormattedMessage id="avatar-url-modal.avatar-url-label" defaultMessage="Avatar GLB URL" />}
           placeholder="https://example.com/avatar.glb"
           type="url"
-          required
-          ref={register}
+          {...register("url", {
+            required: true
+          })}
           description={<>
             {/*removed APTERO <a href="https://www.aptero.co/docs/intro-avatars.html" target="_blank" rel="noopener noreferrer">
               <FormattedMessage

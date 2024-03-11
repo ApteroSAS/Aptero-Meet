@@ -14,26 +14,26 @@ import { ReactComponent as ExternalLinkIcon } from "../icons/ExternalLink.svg";
 
 const PUBLISHER_FOR_ENTRY_TYPE = {
   sketchfab_model: "Sketchfab",
-  objects : "Objects",
+  objects : "Objects",//APTERO
   twitch_stream: "Twitch"
 };
 
 function useThumbnailSize(isImage, isAvatar, imageAspect) {
   return useMemo(() => {
-      let imageHeight = 220;
-      if (isAvatar) imageHeight = Math.floor(imageHeight * 1.5);
+    let imageHeight = 220;
+    if (isAvatar) imageHeight = Math.floor(imageHeight * 1.5);
 
-      // Aspect ratio can vary per image if its an image result. Avatars are a taller portrait aspect, o/w assume 720p
-      let imageWidth;
-      if (isImage) {
-        imageWidth = Math.floor(Math.max(imageAspect * imageHeight, imageHeight * 0.85));
-      } else if (isAvatar) {
-        imageWidth = Math.floor((9 / 16) * imageHeight);
-      } else {
-        imageWidth = Math.floor(Math.max((16 / 9) * imageHeight, imageHeight * 0.85));
-      }
+    // Aspect ratio can vary per image if its an image result. Avatars are a taller portrait aspect, o/w assume 720p
+    let imageWidth;
+    if (isImage) {
+      imageWidth = Math.floor(Math.max(imageAspect * imageHeight, imageHeight * 0.85));
+    } else if (isAvatar) {
+      imageWidth = Math.floor((9 / 16) * imageHeight);
+    } else {
+      imageWidth = Math.floor(Math.max((16 / 9) * imageHeight, imageHeight * 0.85));
+    }
 
-      return [imageWidth, imageHeight];
+    return [imageWidth, imageHeight];
   }, [isImage, isAvatar, imageAspect]);
 }
 
@@ -140,10 +140,10 @@ export function MediaTile({ entry, processThumbnailUrl, onClick, onEdit, onShowS
           {creator && creator.name === undefined && <span>{creator}</span>}
           {creator && creator.name && !creator.url && <span>{creator.name}</span>}
           {creator && creator.name && creator.url && (
-              <a href={creator.url} target="_blank" rel="noopener noreferrer">
-                {creator.name}
-              </a>
-            )}
+            <a href={creator.url} target="_blank" rel="noopener noreferrer">
+              {creator.name}
+            </a>
+          )}
           {publisherName && (
             <>
               <a href={entry.url} target="_blank" rel="noopener noreferrer">
@@ -203,13 +203,13 @@ export function MediaTile({ entry, processThumbnailUrl, onClick, onEdit, onShowS
           </TileAction>
         )*/}
         {entry.type === "scene" && entry.project_id && (
-            <TileAction
-              onClick={onEdit}
-              title={intl.formatMessage({ id: "media-tile.action.edit-scene", defaultMessage: "Edit scene" })}
-            >
-              <PenIcon />
-            </TileAction>
-          )}
+          <TileAction
+            onClick={onEdit}
+            title={intl.formatMessage({ id: "media-tile.action.edit-scene", defaultMessage: "Edit scene" })}
+          >
+            <PenIcon />
+          </TileAction>
+        )}
         {entry.type === "avatar_listing" && (
           <TileAction
             title={intl.formatMessage({
@@ -222,38 +222,38 @@ export function MediaTile({ entry, processThumbnailUrl, onClick, onEdit, onShowS
           </TileAction>
         )}
         {entry.type === "avatar_listing" && entry.allow_remixing && (
-            <TileAction
-              title={intl.formatMessage({
-                id: "media-tile.action.copy-avatar",
-                defaultMessage: "Copy to my avatars"
-              })}
-              onClick={onCopy}
-            >
-              <DuplicateIcon />
-            </TileAction>
+          <TileAction
+            title={intl.formatMessage({
+              id: "media-tile.action.copy-avatar",
+              defaultMessage: "Copy to my avatars"
+            })}
+            onClick={onCopy}
+          >
+            <DuplicateIcon />
+          </TileAction>
         )}
         {entry.type === "scene_listing" && entry.allow_remixing && (
-            <TileAction
-              title={intl.formatMessage({
-                id: "media-tile.action.copy-scene",
-                defaultMessage: "Copy to my scenes"
-              })}
-              onClick={onCopy}
-            >
-              <DuplicateIcon />
-            </TileAction>
-          )}
+          <TileAction
+            title={intl.formatMessage({
+              id: "media-tile.action.copy-scene",
+              defaultMessage: "Copy to my scenes"
+            })}
+            onClick={onCopy}
+          >
+            <DuplicateIcon />
+          </TileAction>
+        )}
         {entry.type === "room" && onInfo && entry.description && (
-            <TileAction
-              title={intl.formatMessage({
-                id: "media-tile.action.room-info",
-                defaultMessage: "Room info"
-              })}
-              onClick={onInfo}
-            >
-              <HelpIcon />
-            </TileAction>
-          )}
+          <TileAction
+            title={intl.formatMessage({
+              id: "media-tile.action.room-info",
+              defaultMessage: "Room info"
+            })}
+            onClick={onInfo}
+          >
+            <HelpIcon />
+          </TileAction>
+        )}
       </div>
     </BaseTile>
   );

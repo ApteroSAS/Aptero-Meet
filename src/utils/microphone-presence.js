@@ -19,7 +19,7 @@ export const getMicrophonePresences = (() => {
         const playerInfo = playerInfos[i];
         const playerSessionId = playerInfo.playerSessionId;
         let talking = false;
-        if (playerInfo.isLocalPlayerInfo && sceneEl) {
+        if (playerInfo.isLocalPlayerInfo) {
           talking = sceneEl.systems["local-audio-analyser"].volume > MIC_PRESENCE_VOLUME_THRESHOLD;
         }
         if (sessionIds.indexOf(playerSessionId) === -1) {

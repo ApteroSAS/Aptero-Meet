@@ -16,9 +16,6 @@ import { formatMessageBody } from "../../utils/chat-message";
 import { FormattedMessage, useIntl, defineMessages, FormattedRelativeTime } from "react-intl";
 import { permissionMessage } from "./PermissionNotifications";
 import { customFormatSystemMessage } from "../../aptero/module/HubsBridge/react-components/ChatSidebarCustom";
-import {DropDownChatList} from "./DropDownChatList";
-import { useState } from "react";
-import {getPresences} from "./DropDownChatList";
 export function SpawnMessageButton(props) {
   return (
     <IconButton className={styles.chatInputIcon} {...props}>
@@ -62,12 +59,14 @@ export const EmojiPickerPopoverButton = React.memo(({ onSelectEmoji, disabled })
   return (
     <Popover
       title=""
+      popoverClass={styles.emojiPopover}
+      showHeader={false}
       content={({ closePopover }) => (
         <EmojiPicker
-          onSelect={emoji => {
+          onEmojiClick={emoji => {
             const keepPickerOpen = shiftKeyDown.current;
-            onSelectEmoji({ emoji, pickerRemainedOpen: keepPickerOpen });
-            // eslint-disable-next-line react/prop-types
+            onSelectEmoji({ emoji: emoji.emoji, pickerRemainedOpen: keepPickerOpen });
+            // Keep the picker open if the Shift key was held down to allow
             // for multiple emoji selections.
             if (!keepPickerOpen) closePopover();
           }}
@@ -133,7 +132,7 @@ ChatLengthWarning.propTypes = {
 
 export const ChatInput = forwardRef(({ warning, isOverMaxLength, ...props }, ref) => {
   const intl = useIntl();
-  const [selected, setSelected] = useState("Choose One");
+
   return (
     <div className={styles.chatInputContainer}>
       <TextAreaInput
@@ -144,7 +143,6 @@ export const ChatInput = forwardRef(({ warning, isOverMaxLength, ...props }, ref
         {...props}
       />
       {warning}
-      
     </div>
   );
 });
@@ -428,9 +426,7 @@ export function ChatMessageGroup({ sent, sender, timestamp, messages }) {
       <ul className={styles.messageGroupMessages}>{messages.map(message => getMessageComponent(message, intl))}</ul>
     </li>
   );
-
 }
-
 
 ChatMessageGroup.propTypes = {
   sent: PropTypes.bool,
@@ -481,18 +477,15 @@ ChatMessageList.propTypes = {
 
 ChatMessageList.displayName = "ChatMessageList";
 
-export function ChatSidebar({ onClose,userName, children, ...rest }) {
-  
+export function ChatSidebar({ onClose, children, ...rest }) {
   return (
     <Sidebar
-      title={userName}
+      title={<FormattedMessage id="chat-sidebar.title" defaultMessage="Chat" />}
       beforeTitle={<CloseButton onClick={onClose} />}
       contentClassName={styles.content}
       disableOverflowScroll
       {...rest}
-      
     >
-      
       {children}
     </Sidebar>
   );
@@ -502,6 +495,5 @@ ChatSidebar.propTypes = {
   onClose: PropTypes.func,
   onScrollList: PropTypes.func,
   children: PropTypes.node,
-  listRef: PropTypes.func,
-  userName:PropTypes.string
+  listRef: PropTypes.func
 };

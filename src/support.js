@@ -9,7 +9,7 @@ and polyfilling.
 */
 
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import copy from "copy-to-clipboard";
 import { detectOS } from "detect-browser";
 import "./react-components/styles/global.scss";
@@ -102,8 +102,8 @@ class Support extends React.Component {
     const detectedOS = detectOS(navigator.userAgent);
 
     return (
-          <div className={styles.supportMain}>
-            <div className={styles.supportContent}>
+      <div className={styles.supportMain}>
+        <div className={styles.supportContent}>
           <h1>Mozilla Hubs</h1>
           <br />
           <p className={styles.unsupportedLangs}>
@@ -114,50 +114,52 @@ class Support extends React.Component {
             <span>не поддерживается</span> · <span>サポートされていません</span> ·
           </p>
           <br />
-              <p>
+          <p>
             <span>Your browser is missing required features.</span>
-                <br />
-                {inAppBrowser ? (
-                  detectedOS === "iOS" ? (
+            <br />
+            {inAppBrowser ? (
+              detectedOS === "iOS" ? (
                 <span>Copy and paste this link directly into Safari</span>
-                  ) : (
+              ) : (
                 <span>Copy and paste this link directly into Chrome or Firefox</span>
-                  )
-                ) : (
+              )
+            ) : (
               <span>Please try switching or updating to a newer browser</span>
-                )}
-                <br />
-                <br />
-                <input type="text" readOnly onFocus={e => e.target.select()} value={document.location} />
-                <a className="copy-link" href="#" onClick={this.onCopyClicked}>
+            )}
+            <br />
+            <br />
+            <input type="text" readOnly onFocus={e => e.target.select()} value={document.location} />
+            <a className="copy-link" href="#" onClick={this.onCopyClicked}>
               {this.state.hasCopied ? "copied!" : "copy"}
-                </a>
-                <br />
-                <br />
-                <a className={styles.detailsLink} href="#" onClick={this.toggleDetails}>
+            </a>
+            <br />
+            <br />
+            <a className={styles.detailsLink} href="#" onClick={this.toggleDetails}>
               <span>details</span>
-                </a>
-              </p>
-              {this.state.showDetails && (
-                <table className={styles.details}>
-                  <tbody>
+            </a>
+          </p>
+          {this.state.showDetails && (
+            <table className={styles.details}>
+              <tbody>
                 {platformSupport
                   .sort((a, b) => (a.supported && !b.supported ? 1 : -1))
                   .map(s => (
-                      <tr key={s.name}>
-                        <td>{s.name}</td>
+                    <tr key={s.name}>
+                      <td>{s.name}</td>
                       <td>{s.supported ? "supported" : "unsupported"}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
-          </div>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </div>
     );
   }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  ReactDOM.render(<Support />, document.getElementById("support-root"));
+  const container = document.getElementById("support-root");
+  const root = createRoot(container);
+  root.render(<Support />);
 });

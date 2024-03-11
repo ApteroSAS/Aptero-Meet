@@ -1,10 +1,10 @@
 /* eslint-disable @calm/react-intl/missing-formatted-message */
 import React from "react";
-import { Button } from "./Button";
-import { Column } from "../layout/Column";
-import { IconButton } from "./IconButton";
 import { TextInputField } from "./TextInputField";
+import { Button } from "./Button";
 import { ReactComponent as WandIcon } from "../icons/Wand.svg";
+import { IconButton } from "./IconButton";
+import { Column } from "../layout/Column";
 
 export default {
   title: "Input/TextInputField"

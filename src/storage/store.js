@@ -37,8 +37,8 @@ const defaultMaterialQuality = (function () {
   return "high";
 })();
 
-// Durable (via local-storage) schema-enforced state that is meant to be consumed via forward data flow.
-// (Think flux but with way less incidental complexity, at least for now :))
+// WebAudio on Android devices (only non-VR devices?) seems to have
+// a bug and audio can be broken if there are many people in a room.
 // We have reported the problem to the Android devs. We found that
 // using equal power panning mode can mitigate the problem so we
 // use low audio panning quality (= equal power mode) by default
@@ -63,17 +63,9 @@ export const SCHEMA = {
       type: "object",
       additionalProperties: false,
       properties: {
-        displayName: { type: "string", pattern: "^[A-Za-z0-9_~ -]{3,32}$" },
+        displayName: { type: "string", pattern: "^[A-Za-z0-9_~\\s\\-]{3,32}$" },
         avatarId: { type: "string" },
-        //aptero
-        companyName: { type: "string" },
-        jobTitleName: { type: "string" },
-        phoneNumber: { type: "string" },
-        description: { type: "string" },
-        email: { type: "string" },
-        profilePicture: { type: "string" },
-        microsoftUserprofilePicture: { type: "string" },
-        microsoftUser: { type: "string" },
+        pronouns: { type: "string", pattern: "^([a-zA-Z]{1,32}\\/){0,4}[a-zA-Z]{1,32}$" },
         // personalAvatarId is obsolete, but we need it here for backwards compatibility.
         personalAvatarId: { type: "string" }
       }
@@ -93,10 +85,8 @@ export const SCHEMA = {
       additionalProperties: false,
       properties: {
         hasFoundFreeze: { type: "boolean" },
-        hasChangedName: { type: "boolean" },
+        hasChangedNameOrPronouns: { type: "boolean" },
         hasAcceptedProfile: { type: "boolean" },
-        hasChangedPicture: { type: "boolean" },
-        hasChangedAvatar: { type: "boolean" },
         lastEnteredAt: { type: "string" },
         hasPinned: { type: "boolean" },
         hasRotated: { type: "boolean" },
@@ -289,7 +279,6 @@ export default class Store extends EventTarget {
     this._shouldResetAvatarOnInit = false;
 
     const oauthFlowCredentials = Cookies.getJSON(OAUTH_FLOW_CREDENTIALS_KEY);
-
     if (oauthFlowCredentials) {
       this.update({ credentials: oauthFlowCredentials });
       this._shouldResetAvatarOnInit = true;
@@ -331,11 +320,8 @@ export default class Store extends EventTarget {
     }
 
     // Regenerate name to encourage users to change it.
-    if (!this.state.activity.hasChangedName) {
-      //const authenticationModule= new MicrosoftLoginService();
-      this.update({
-        profile: { displayName: generateRandomName() }
-      });
+    if (!this.state.activity.hasChangedNameOrPronouns) {
+      this.update({ profile: { displayName: generateRandomName() } });
     }
   };
 
@@ -420,16 +406,16 @@ export default class Store extends EventTarget {
     const finalState = merge({ ...this.state, preferences: this._preferences }, newState, mergeOpts);
     const { valid, errors } = validator.validate(finalState, SCHEMA);
 
-
+    // Cleanup unsupported properties
     if (!valid) {
       errors.forEach(error => {
         console.error(`Removing invalid preference from store: ${error.message}`);
         delete error.instance[error.argument];
       });
     }
-    // Intentionally not including details about the state or validation result here, since we don't want to leak
+
     if (newState.preferences) {
-      // sensitive data in the error message.
+      // clear preference if equal to default value so that, when client is updated with different defaults,
       // new defaults will apply without user action
       for (const [key, value] of Object.entries(finalState.preferences)) {
         if (

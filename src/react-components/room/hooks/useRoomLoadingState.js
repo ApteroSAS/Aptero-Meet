@@ -1,7 +1,7 @@
 import { useEffect, useReducer, useRef, useCallback } from "react";
 import { useIntl, defineMessages } from "react-intl";
 import { waitForPreloads } from "../../../utils/preload";
-import qsTruthy from "../../../utils/qs_truthy";
+import { shouldUseNewLoader } from "../../../utils/bit-utils";
 import { apteroService } from "../../../aptero/ApteroServices";
 
 function reducer(state, action) {
@@ -62,7 +62,6 @@ const messages = defineMessages({
   }
 });
 
-const newLoader = qsTruthy("newLoader");
 export function useRoomLoadingState(sceneEl) {
   // Holds the id of the current
   const loadingTimeoutRef = useRef();
@@ -89,8 +88,8 @@ export function useRoomLoadingState(sceneEl) {
     donePreloading: false,
     lazyLoadMedia
   });
-
-  const doneLoadingObjects = lazyLoadMedia || newLoader || allObjectsLoaded;
+  // Skip object loading callbacks for the newLoader, since they don't yet fire events we can listen to.
+  const doneLoadingObjects = lazyLoadMedia || shouldUseNewLoader() || allObjectsLoaded;
   const done =
     sceneEl.is("loaded") ||
     (environmentLoaded && networkConnected && dialogConnected && doneLoadingObjects && donePreloading);
@@ -107,39 +106,39 @@ export function useRoomLoadingState(sceneEl) {
   }
 
   const onObjectLoading = useCallback(() => {
-      clearTimeout(loadingTimeoutRef.current);
-      dispatch({ type: "object-loading" });
+    clearTimeout(loadingTimeoutRef.current);
+    dispatch({ type: "object-loading" });
   }, [dispatch]);
 
   const onObjectLoaded = useCallback(() => {
-      clearTimeout(loadingTimeoutRef.current);
+    clearTimeout(loadingTimeoutRef.current);
 
-      dispatch({ type: "object-loaded" });
+    dispatch({ type: "object-loaded" });
 
-      // Objects can start loading as a result of loading another object. Wait 1.5 seconds before calling
-      // all-objects-loaded to try to catch loading all objects.
-      // TODO: Determine a better way to ensure the object dependency chain has resolved, or switch to a
-      // progressive loading model where all objects don't have to be loaded to enter the room.
-      loadingTimeoutRef.current = setTimeout(() => {
-        dispatch({ type: "all-objects-loaded" });
-      }, 1500);
+    // Objects can start loading as a result of loading another object. Wait 1.5 seconds before calling
+    // all-objects-loaded to try to catch loading all objects.
+    // TODO: Determine a better way to ensure the object dependency chain has resolved, or switch to a
+    // progressive loading model where all objects don't have to be loaded to enter the room.
+    loadingTimeoutRef.current = setTimeout(() => {
+      dispatch({ type: "all-objects-loaded" });
+    }, 1500);
   }, [dispatch]);
 
   const onEnvironmentLoaded = useCallback(() => {
-      dispatch({ type: "environment-loaded" });
+    dispatch({ type: "environment-loaded" });
   }, [dispatch]);
 
   const onNetworkConnected = useCallback(() => {
-      dispatch({ type: "network-connected" });
+    dispatch({ type: "network-connected" });
   }, [dispatch]);
 
   const onDialogConnected = useCallback(() => {
     dispatch({ type: "dialog-connected" });
   }, [dispatch]);
-      // Once the scene has loaded the dependencies to this hook will change,
+
   useEffect(() => {
     waitForPreloads().then(() => {
-      // the event listeners will be removed, and we can prevent adding them again.
+      // TODO: Is this OK to do? Seems bad to be async here somehow
       dispatch({ type: "done-preloading" });
     });
     return () => {};
@@ -160,12 +159,12 @@ export function useRoomLoadingState(sceneEl) {
         sceneEl.addEventListener("video-loaded", onObjectLoaded);
         sceneEl.addEventListener("model-error", onObjectLoaded);
       }
-        sceneEl.addEventListener("environment-scene-loaded", onEnvironmentLoaded);
-        sceneEl.addEventListener("didConnectToNetworkedScene", onNetworkConnected);
+      sceneEl.addEventListener("environment-scene-loaded", onEnvironmentLoaded);
+      sceneEl.addEventListener("didConnectToNetworkedScene", onNetworkConnected);
       sceneEl.addEventListener("didConnectToDialog", onDialogConnected);
-      }
+    }
 
-      return () => {
+    return () => {
       if (!lazyLoadMedia) {
         sceneEl.removeEventListener("model-loading", onObjectLoading);
         sceneEl.removeEventListener("image-loading", onObjectLoading);
@@ -177,10 +176,10 @@ export function useRoomLoadingState(sceneEl) {
         sceneEl.removeEventListener("video-loaded", onObjectLoaded);
         sceneEl.removeEventListener("model-error", onObjectLoaded);
       }
-        sceneEl.removeEventListener("environment-scene-loaded", onEnvironmentLoaded);
-        sceneEl.removeEventListener("didConnectToNetworkedScene", onNetworkConnected);
+      sceneEl.removeEventListener("environment-scene-loaded", onEnvironmentLoaded);
+      sceneEl.removeEventListener("didConnectToNetworkedScene", onNetworkConnected);
       sceneEl.removeEventListener("didConnectToDialog", onDialogConnected);
-      };
+    };
   }, [
     sceneEl,
     done,
@@ -202,10 +201,10 @@ export function useRoomLoadingState(sceneEl) {
 
   useEffect(() => {
     if (done) {
-        // The loaded state on the scene signifies that the loading screen is no longer visible,
-        // the initial scene was loaded, and the network connection is established.
-        sceneEl.addState("loaded");
-      }
+      // The loaded state on the scene signifies that the loading screen is no longer visible,
+      // the initial scene was loaded, and the network connection is established.
+      sceneEl.addState("loaded");
+    }
   }, [sceneEl, done]);
 
   // Ensure timeout is cleared on unmount.

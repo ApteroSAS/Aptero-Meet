@@ -7,9 +7,7 @@ import { processResponse } from "../aptero/module/HubsBridge/service/EntryAPI";
 const EMPTY_RESULT = { entries: [], meta: {} };
 
 const URL_SOURCE_TO_TO_API_SOURCE = {
-  objects: "objects",
-  videos360: "videos360",
-  videos2d: "video2d",
+  objects: "objects",//APTERO
   scenes: "scene_listings",
   images: "bing_images",
   videos: "bing_videos",
@@ -20,13 +18,13 @@ const URL_SOURCE_TO_TO_API_SOURCE = {
   favorites: "favorites"
 };
 
-const desiredSources = ["objects", "videos360", "videos2d", "sketchfab", "videos", "scenes", "avatars", "gifs", "images"];
+const desiredSources = ["objects", "sketchfab", "videos", "scenes", "avatars", "gifs", "images"];
 const availableSources = desiredSources.filter(source => {
   const apiSource = URL_SOURCE_TO_TO_API_SOURCE[source];
   return configs.integration(apiSource);
 });
 //export const SOURCES = availableSources;
-export const SOURCES = ["objects", "videos360", "videos2d", "scenes", "avatars"];
+export const SOURCES = ["objects", "scenes", "avatars"];
 
 
 export const MEDIA_SOURCE_DEFAULT_FILTERS = {
@@ -35,8 +33,6 @@ export const MEDIA_SOURCE_DEFAULT_FILTERS = {
   scenes: "featured",
   favorites: "my-favorites",
   objects: "model/gltf-binary",
-  videos2d: "my-videos-2d",
-  videos360: "my-videos-360"
 };
 
 const SEARCH_CONTEXT_PARAMS = ["q", "filter", "cursor", "similar_to"];
@@ -84,7 +80,7 @@ export default class MediaSearchStore extends EventTarget {
       filter = "my-objects";
       searchParams.set("filter", "model/gltf-binary");// filter in request
     }
-    const isMy = filter && filter.startsWith("my-");
+    const isMy = locationSearchParams.get("filter") && locationSearchParams.get("filter").startsWith("my-");
 
     for (const param of SEARCH_CONTEXT_PARAMS) {
       if (!urlParams.get(param)) continue;
@@ -105,11 +101,13 @@ export default class MediaSearchStore extends EventTarget {
 
     let fetch = true;
 
-    if (isMy) {
-      if (window.APP.store.credentialsAccountId) {
-        searchParams.set("user", window.APP.store.credentialsAccountId);
-      } else {
-        fetch = false; // Don't fetch my-* if not signed in
+    if (source === "avatars" || source === "scenes" || source === "favorites") {
+      if (isMy) {
+        if (window.APP.store.credentialsAccountId) {
+          searchParams.set("user", window.APP.store.credentialsAccountId);
+        } else {
+          fetch = false; // Don't fetch my-* if not signed in
+        }
       }
     }
 
@@ -256,7 +254,6 @@ export default class MediaSearchStore extends EventTarget {
         }
       } else {
         if (source === "avatars") {
-          window.APP.store.update({activity :{hasChangedAvatar:true}});
           const hasAccountWithAvatars = await this._hasAccountWithAvatars();
           searchParams.set("filter", hasAccountWithAvatars ? "my-avatars" : "featured");
         } else if (MEDIA_SOURCE_DEFAULT_FILTERS[source]) {
@@ -313,9 +310,9 @@ export default class MediaSearchStore extends EventTarget {
     const { pathname } = history.location;
     const hasMediaPath = sluglessPath(history.location).startsWith("/media");
     pushHistoryPath(
-        history,
-        hasMediaPath ? withSlug(history.location, "/") : pathname,
-        this.getSearchClearedSearchParams(history.location).toString()
+      history,
+      hasMediaPath ? withSlug(history.location, "/") : pathname,
+      this.getSearchClearedSearchParams(history.location).toString()
     );
     this.dispatchEvent(new CustomEvent("media-exit"));
   };

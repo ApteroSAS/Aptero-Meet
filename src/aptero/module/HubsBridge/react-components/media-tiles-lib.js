@@ -1,6 +1,5 @@
 import classNames from "classnames";
 import React from "react";
-import { liveStream } from "../../video360/LiveStream";
 import { remoteControlServiceV2 } from "../../RemoteScreen/RemoteControlServiceV2";
 import CreateAvatar from "../../AvatarReadyPlayerMe/CreateAvatar";
 import styles from "./scss/component/MediaTiles.scss";
@@ -126,8 +125,6 @@ export class MediaTilesLib {
     </BaseTile>
   }
 
-  
-
   createShareScreenTile() {
     const clickAction = (e) => {
       this.handleEntryClicked && this.handleEntryClicked(e, { shareScreen: {} });
@@ -238,15 +235,7 @@ export const mlHandleEntryClicked = (evt, entry, parent) => {
     const urlSource = parent.getUrlSource(searchParams);
     is360 = urlSource === "videos360";
   }
-  if (entry.createLiveEntry) {
-    liveStream.createStream(is360).then(entry => {
-      parent.setState((state) => {
-        const newState = { ...state };
-        newState.result.entries.push(entry);
-        return newState;
-      });
-    });
-  }else if (entry.shareScreen || entry.webBrowser || entry.camera) {
+  if (entry.shareScreen || entry.webBrowser || entry.camera) {
     const entryCompeted = completeEntry(entry,is360,parent.state.selectAction);
     parent.selectEntry(entryCompeted);
   } else if (!entry.lucky_query) {

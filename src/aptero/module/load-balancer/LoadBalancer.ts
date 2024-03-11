@@ -1,6 +1,4 @@
 import { networkService } from "../HubsBridge/service/NetworkService";
-import { Object3D } from "three";
-import { App } from "../../../app";
 
 declare global {
   interface Window {

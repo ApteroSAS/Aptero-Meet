@@ -1,43 +1,27 @@
 import React, { useCallback, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { PromoteClientModal } from "./PromoteClientModal";
+import { getAvatarThumbnailUrl } from "../../utils/avatar-utils";
 import { UserProfileSidebar } from "./UserProfileSidebar.js";
 import { SignInMessages } from "../auth/SignInModal";
-import { usePeopleList } from "./PeopleSidebarContainer";
-import { getAvatarThumbnailUrl } from "../../utils/avatar-utils";
 
 export function UserProfileSidebarContainer({
-                                              mySessionId,
-                                              user,
-                                              hubChannel,
-                                              presences,
-                                              performConditionalSignIn,
-                                              showBackButton,
-                                              onBack,
-                                              onClose,
-                                              onCloseDialog,
-                                              showNonHistoriedDialog,
-                                              toggleChatSidebar,
-                                              onSelectPerson,
-                                              store,
-                                              mediaSearchStore,
-                                              signedIn
-
-                                            }) {
-  const micUpdateFrequency = 500;
+  user,
+  hubChannel,
+  performConditionalSignIn,
+  showBackButton,
+  onBack,
+  onClose,
+  onCloseDialog,
+  showNonHistoriedDialog
+}) {
   const [avatarThumbnailUrl, setAvatarThumbnailUrl] = useState();
-  const people = usePeopleList(presences, mySessionId, micUpdateFrequency);
+
   const {
     id: userId,
-    profile: { displayName, identityName, avatarId },
+    profile: { displayName, identityName, avatarId, pronouns },
     roles
   } = user;
-  useEffect(() => {
-    if (avatarId) {
-      getAvatarThumbnailUrl(avatarId).then(avatarThumbnailUrl => setAvatarThumbnailUrl(avatarThumbnailUrl));
-    }
-  }, []);
-  let avatarPreview = avatarThumbnailUrl;//default url
   const mayKick = hubChannel.canOrWillIfCreator("kick_users");
   const hasMicPresence = !!user.micPresence;
   const isNetworkMuted = user.micPresence?.muted;
@@ -114,21 +98,14 @@ export function UserProfileSidebarContainer({
       onBack();
     }
   }, [performConditionalSignIn, hubChannel, userId, onClose, onBack]);
-  people.map(person => {
-    if (person.id === userId) {
-      avatarPreview = person.profile.profilePicture;
-    }
-  });
+
   return (
     <UserProfileSidebar
-      mySessionId={mySessionId}
-      hubChannel={hubChannel}
-      presences={presences}
       userId={user.id}
       displayName={displayName}
+      pronouns={pronouns}
       identityName={identityName}
-      avatarId={avatarId}
-      avatarPreview={avatarPreview}
+      avatarPreview={<img src={avatarThumbnailUrl} />}
       isSignedIn={isSignedIn}
       canPromote={mayAddOwner}
       onPromote={addOwner}
@@ -145,32 +122,17 @@ export function UserProfileSidebarContainer({
       onClose={onClose}
       onBack={onBack}
       hasMicPresence={hasMicPresence}
-      toggleChatSidebar={toggleChatSidebar}
-      performConditionalSignIn={performConditionalSignIn}
-      onCloseDialog={onCloseDialog}
-      showNonHistoriedDialog={showNonHistoriedDialog}
-      onSelectPerson={onSelectPerson}
-      store={store}
-      mediaSearchStore={mediaSearchStore}
-      signedIn={signedIn}
     />
   );
 }
 
 UserProfileSidebarContainer.propTypes = {
-  mySessionId: PropTypes.string,
-  user: PropTypes.object.required,
+  user: PropTypes.object.isRequired,
   hubChannel: PropTypes.object,
-  presences: PropTypes.object,
   performConditionalSignIn: PropTypes.func,
   showBackButton: PropTypes.bool,
   onBack: PropTypes.func,
   onClose: PropTypes.func,
-  onCloseDialog: PropTypes.func,
-  showNonHistoriedDialog: PropTypes.func,
-  toggleChatSidebar: PropTypes.func,
-  onSelectPerson: PropTypes.func,
-  store: PropTypes.object,
-  mediaSearchStore: PropTypes.object,
-  signedIn: PropTypes.func
+  onCloseDialog: PropTypes.func.isRequired,
+  showNonHistoriedDialog: PropTypes.func
 };

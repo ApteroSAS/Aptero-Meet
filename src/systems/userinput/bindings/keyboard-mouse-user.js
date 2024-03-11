@@ -2,7 +2,6 @@ import { paths } from "../paths";
 import { sets } from "../sets";
 import { xforms } from "./xforms";
 import { addSetsToBindings } from "./utils";
-import qsTruthy from "../../../utils/qs_truthy";
 
 // import { Pose } from "../pose";
 
@@ -27,44 +26,6 @@ const k = name => {
   return `/keyboard-mouse-user/keyboard-var/${name}`;
 };
 
-const videoBindings = [
-  {
-    src: { value: paths.device.mouse.wheel },
-    dest: { value: paths.actions.cursor.right.mediaVolumeMod },
-    xform: xforms.scale(-0.3),
-    priority: 1
-  }
-];
-
-if (qsTruthy("newLoader")) {
-  const priority = 3;
-  videoBindings.push({
-    src: { value: paths.device.mouse.buttonLeft },
-    dest: { value: k("mousedown") },
-    xform: xforms.rising,
-    priority
-  });
-  videoBindings.push({
-    src: { value: paths.device.mouse.buttonLeft },
-    dest: { value: k("mouseup") },
-    xform: xforms.falling,
-    priority
-  });
-  videoBindings.push({
-    src: {
-      rising: k("mousedown"),
-      falling: k("mouseup")
-    },
-    dest: {
-      click: paths.actions.cursor.right.togglePlayVideo,
-      grab: paths.actions.cursor.right.grab,
-      drop: paths.actions.cursor.right.drop
-    },
-    xform: xforms.clickAndHold(),
-    priority
-  });
-}
-
 export const keyboardMouseUserBindings = addSetsToBindings({
   [sets.global]: [
     {
@@ -85,9 +46,9 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     {
       src: {
         w: paths.device.keyboard.key("arrowup"),
-        //a: paths.device.keyboard.key("arrowleft"),
+        //a: paths.device.keyboard.key("arrowleft"), //Aptero
         s: paths.device.keyboard.key("arrowdown"),
-        //d: paths.device.keyboard.key("arrowright")
+        //d: paths.device.keyboard.key("arrowright") //Aptero
       },
       dest: { vec2: arrows_vec2 },
       xform: xforms.wasd_to_vec2
@@ -103,11 +64,13 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       xform: xforms.wasd_to_vec2
     },
     {
+    /*aptero */
       src: { value: paths.device.keyboard.key("arrowleft") },
       dest: { value: paths.actions.rotateLeft },
       xform: xforms.copy
     },
     {
+    /*aptero */
       src: { value: paths.device.keyboard.key("arrowright") },
       dest: { value: paths.actions.rotateRight },
       xform: xforms.copy
@@ -780,7 +743,42 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       xform: xforms.rising
     }
   ],
-  [sets.rightCursorHoveringOnVideo]: videoBindings,
+  [sets.rightCursorHoveringOnVideo]: [
+    {
+      src: { value: paths.device.mouse.wheel },
+      dest: { value: paths.actions.cursor.right.mediaVolumeMod },
+      xform: xforms.scale(-0.3),
+      priority: 1
+    },
+    // TODO These 3 only technically apply to newLoader but making them conditional is tricky
+    // This makes old videos have the grab behavior of newLoader ones, but we can live
+    // with that for now.
+    {
+      src: { value: paths.device.mouse.buttonLeft },
+      dest: { value: k("mousedown") },
+      xform: xforms.rising,
+      priority: 3
+    },
+    {
+      src: { value: paths.device.mouse.buttonLeft },
+      dest: { value: k("mouseup") },
+      xform: xforms.falling,
+      priority: 3
+    },
+    {
+      src: {
+        rising: k("mousedown"),
+        falling: k("mouseup")
+      },
+      dest: {
+        click: paths.actions.cursor.right.togglePlayVideo,
+        grab: paths.actions.cursor.right.grab,
+        drop: paths.actions.cursor.right.drop
+      },
+      xform: xforms.clickAndHold(),
+      priority: 3
+    }
+  ],
   [sets.inputFocused]: [
     {
       src: { value: "/device/keyboard" },

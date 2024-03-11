@@ -19,6 +19,7 @@ import { WEB_BROWSER_URL_MODE, HYPERBEAM_MODE } from "../aptero/module/HubsBridg
 import { processWebBrowserEntity } from "../aptero/module/RemoteScreen/RemoteControlServiceV2";
 
 import anime from "animejs";
+
 export const MediaType = {
   MODEL: 1 << 0,
   IMAGE: 1 << 1,
@@ -61,29 +62,6 @@ export const resolveUrl = async (url, quality = null, version = 1, bustCache) =>
   const key = `${url}_${version}`;
   if (!bustCache && resolveUrlCache.has(key)) return resolveUrlCache.get(key);
 
-
-  if(url.startsWith("https://localhost")){
-    return {"origin":url};
-  }
-  if(url.startsWith("http://")){
-    //auto promote anythings to https since we cannot serve on http
-    url = url.replace("http://","https://");
-  }
-  let urlWithoutParams = url.split("?")[0];
-  urlWithoutParams = urlWithoutParams.toLowerCase();
-  if(urlWithoutParams.startsWith("https://") && urlWithoutParams.endsWith(".png")){
-      return {"meta":{"expected_content_type":"image/png"},"origin":url}
-  }else if(urlWithoutParams.startsWith("https://") && (urlWithoutParams.endsWith(".jpg")|| urlWithoutParams.endsWith(".jpeg"))){
-      return {"meta":{"expected_content_type":"image/jpeg"},"origin":url}
-  }else if(urlWithoutParams.startsWith("https://") && urlWithoutParams.endsWith(".mp4")){
-      return {"meta":{"expected_content_type":"video/mp4"},"origin":url}
-  }else if(urlWithoutParams.startsWith("https://") && urlWithoutParams.endsWith(".m3u8")){
-    return {"meta":{"expected_content_type":"video/mp4"},"origin":url}
-  }else if(urlWithoutParams.startsWith("https://") && (urlWithoutParams.endsWith(".glb")|| urlWithoutParams.endsWith(".gltf"))){
-    return {"meta":{"expected_content_type":"model/gltf-binary"},"origin":url}
-  }else if(urlWithoutParams.startsWith("https://") && urlWithoutParams.endsWith(".pdf")){
-    return {"meta":{"expected_content_type":"application/pdf"},"origin":url}
-  }
   const resultPromise = fetch(mediaAPIEndpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -125,7 +103,7 @@ export const upload = (file, desiredContentType) => {
 // https://stackoverflow.com/questions/7584794/accessing-jpeg-exif-rotation-data-in-javascript-on-the-client-side/32490603#32490603
 function getOrientation(file, callback) {
   const reader = new FileReader();
-  reader.onload = function(e) {
+  reader.onload = function (e) {
     const view = new DataView(e.target.result);
     if (view.getUint16(0, false) != 0xffd8) {
       return callback(-2);
@@ -242,7 +220,7 @@ export const addMedia = (
 
   (parentEl || scene).appendChild(entity);
 
-  const orientation = new Promise(function(resolve) {
+  const orientation = new Promise(function (resolve) {
     if (needsToBeUploaded) {
       getOrientation(src, x => {
         resolve(x);
@@ -257,11 +235,6 @@ export const addMedia = (
 
     upload(src, desiredContentType)
       .then(response => {
-      //aptero
-        if(!response.origin.startsWith("https://") && response.origin.startsWith("http://")){
-          //upgrade url to https in anycases
-          response.origin = response.origin.replace("http://","https://");
-        }
         const srcUrl = new URL(proxiedUrlFor(response.origin));
         srcUrl.searchParams.set("token", response.meta.access_token);
         entity.setAttribute("media-loader", { resolve: false, src: srcUrl.href, fileId: response.file_id });
@@ -337,7 +310,7 @@ export function injectCustomShaderChunks(obj) {
       if (
         object.el &&
         (object.el.classList.contains("ui") ||
-        object.el.classList.contains("hud") ||
+          object.el.classList.contains("hud") ||
           object.el.getAttribute("text-button"))
       )
         return material;
@@ -370,11 +343,11 @@ export function injectCustomShaderChunks(obj) {
           shader.vertexShader.replace(
             "#include <skinning_vertex>",
             `#include <skinning_vertex>
-        if (hubs_HighlightInteractorOne || hubs_HighlightInteractorTwo || hubs_IsFrozen) {
-          vec4 wt = modelMatrix * vec4(transformed, 1);
+             if (hubs_HighlightInteractorOne || hubs_HighlightInteractorTwo || hubs_IsFrozen) {
+              vec4 wt = modelMatrix * vec4(transformed, 1);
 
-          // Used in the fragment shader below.
-          hubs_WorldPosition = wt.xyz;
+              // Used in the fragment shader below.
+              hubs_WorldPosition = wt.xyz;
             }`
           );
 
@@ -479,6 +452,7 @@ export const textureLoader = new HubsTextureLoader().setCrossOrigin("anonymous")
 export async function createImageTexture(url, filter) {
   let texture;
 
+  //APTERO ensure https
     url = url.replace("http://","https://");
     url = url.replace("hyperbeam://","https://");
     url = url.replace("https://https://","https://");
@@ -529,15 +503,15 @@ export function createVideoOrAudioEl(type) {
   el.muted = isIOS;
   el.preload = "auto";
   el.crossOrigin = "anonymous";
-
+  // Audio should default to zero or it be heard before it is positioning and adjusted
   el.volume = 0;
   return el;
 }
 
 export function addMeshScaleAnimation(mesh, initialScale, onComplete) {
-  const step = (function() {
+  const step = (function () {
     const lastValue = {};
-    return function(anim) {
+    return function (anim) {
       const value = anim.animatables[0].target;
 
       value.x = Math.max(Number.MIN_VALUE, value.x);
@@ -642,10 +616,16 @@ export function parseURL(text) {
 }
 
 export async function resolveMediaInfo(urlString) {
+  // check if url is an anchor hash e.g. #Spawn_Point_1
+  if (urlString.charAt(0) === "#") {
+    urlString = `${window.location.origin}${window.location.pathname}${window.location.search}${urlString}`;
+  }
+
   const url = parseURL(urlString);
   if (!url) {
     throw new Error(`Cannot fetch data for URL: ${urlString}`);
   }
+
   let canonicalUrl = url.href;
   let canonicalAudioUrl = null; // set non-null only if audio track is separated from video track (eg. 360 video)
   let contentType;

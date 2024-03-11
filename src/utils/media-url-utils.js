@@ -1,3 +1,4 @@
+import { hasReticulumServer } from "./phoenix-utils";
 import configs from "./configs";
 
 const nonCorsProxyDomains = (configs.NON_CORS_PROXY_DOMAINS || "").split(",");
@@ -36,9 +37,7 @@ const farsparkEncodeUrl = url => {
 };
 
 export const scaledThumbnailUrlFor = (url, width, height) => {
-  return url;
-  //aptero
-  /*let extension = "";
+  let extension = "";
   try {
     const pathParts = new URL(url).pathname.split(".");
 
@@ -53,9 +52,10 @@ export const scaledThumbnailUrlFor = (url, width, height) => {
   }
 
   // HACK: the extension is needed to ensure CDN caching on Cloudflare
-  const thumbnailUrl = `https://${configs.THUMBNAIL_SERVER}/thumbnail/${farsparkEncodeUrl(
+  /*const thumbnailUrl = `https://${configs.THUMBNAIL_SERVER}/thumbnail/${farsparkEncodeUrl(
     url
-  )}${extension}?w=${width}&h=${height}`;
+  )}${extension}?w=${width}&h=${height}`;*/
+  const thumbnailUrl = url;//TODO APTERO - no thumbnail server for now
 
   try {
     const urlHostname = new URL(url).hostname;
@@ -68,7 +68,7 @@ export const scaledThumbnailUrlFor = (url, width, height) => {
     return thumbnailUrl;
   }
 
-  return thumbnailUrl;*/
+  return thumbnailUrl;
 };
 
 export const isNonCorsProxyDomain = hostname => {
@@ -77,6 +77,7 @@ export const isNonCorsProxyDomain = hostname => {
 
 export const proxiedUrlFor = url => {
   if (!(url.startsWith("http:") || url.startsWith("https:"))) return url;
+
   // Skip known domains that do not require CORS proxying.
   try {
     const parsedUrl = new URL(url);
@@ -174,25 +175,19 @@ async function isHubsServer(url) {
   }
 
   let isHubsServer;
-  //TODO aptero to check
-  /*try {
+  try {
     isHubsServer = (await fetch(proxiedUrlFor(origin), { method: "HEAD" })).headers.has("hub-name");
   } catch (e) {
     isHubsServer = false;
-  }*/
-
-  //Fix simple urls from being interpreted as hubs server
-  if(url.includes("www.")) isHubsServer =  false;
-  else isHubsServer = true;
-
+  }
   originIsHubsServer.set(origin, isHubsServer);
   return isHubsServer;
 }
 
-//to test https://regex101.com/
 const hubsSceneRegex = /https?:\/\/[^/]+\/scenes\/[a-zA-Z0-9]{7}(?:\/|$)/;
 const hubsAvatarRegex = /https?:\/\/[^/]+\/avatars\/(?<id>[a-zA-Z0-9]{7})(?:\/|$)/;
-const hubsRoomRegex = /(https?:\/\/)?[^/]+\/(?!service\/)(?<id>[a-zA-Z0-9]{7})(?:\/|$)/;
+export const hubsRoomRegex = /(https?:\/\/)?[^/]+\/(?<id>[a-zA-Z0-9]{7})(?:\/|$)/;
+export const localHubsRoomRegex = /https?:\/\/[^/]+\/hub\.html\?hub_id=(?<id>[a-zA-Z0-9]{7})/;
 
 export const isLocalHubsUrl = async url =>
   (await isHubsServer(url)) && new URL(url).origin === document.location.origin;
@@ -203,13 +198,10 @@ export const isLocalHubsSceneUrl = async url => (await isHubsSceneUrl(url)) && (
 export const isHubsAvatarUrl = async url => (await isHubsServer(url)) && hubsAvatarRegex.test(url);
 export const isLocalHubsAvatarUrl = async url => (await isHubsAvatarUrl(url)) && (await isLocalHubsUrl(url));
 
-export const isHubsRoomUrl = async url => {
-  if(url.startsWith("https://localhost:53000/hub.html?hub_id=")) return new URL(url).searchParams.get("hub_id");//Aptero
-  return (await isHubsServer(url)) &&
-  !(await isHubsAvatarUrl(url)) &&
-  !(await isHubsSceneUrl(url)) &&
-  url.match(hubsRoomRegex)?.groups.id;
-}
+export const hubIdFromUrl = url => url.match(hubsRoomRegex)?.groups.id || url.match(localHubsRoomRegex)?.groups.id;
+
+export const isHubsRoomUrl = async url =>
+  (await isHubsServer(url)) && !(await isHubsAvatarUrl(url)) && !(await isHubsSceneUrl(url)) && hubIdFromUrl(url);
 
 export const isHubsDestinationUrl = async url =>
   (await isHubsServer(url)) && ((await isHubsSceneUrl(url)) || (await isHubsRoomUrl(url)));

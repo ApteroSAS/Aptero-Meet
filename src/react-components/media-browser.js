@@ -203,7 +203,7 @@ class MediaBrowserContainer extends Component {
 
     const newState = { result, query: this.state.query || searchParams.get("q") || "" };
     const urlSource = this.getUrlSource(searchParams);
-    newState.showNav = (searchParams.get("media_nav") !== "false");
+    newState.showNav = !!(searchParams.get("media_nav") !== "false");
     newState.selectAction = searchParams.get("selectAction") || "spawn";
 
     if (result && result.suggestions && result.suggestions.length > 0) {
@@ -242,6 +242,7 @@ class MediaBrowserContainer extends Component {
   handleEntryClicked = (evt, entry) => {
     evt.preventDefault();
 
+    //APTERO
     mlHandleEntryClicked(evt, entry,this)
     /*if (!entry.lucky_query) {
       this.selectEntry(entry);
@@ -364,7 +365,7 @@ class MediaBrowserContainer extends Component {
   };
 
   render() {
-    mediaTilesLib.setPropsAndState(this,this.props,this.state);
+    mediaTilesLib.setPropsAndState(this,this.props,this.state);//aptero
     const intl = this.props.intl;
     const searchParams = new URLSearchParams(this.props.history.location.search);
     const urlSource = this.getUrlSource(searchParams);
@@ -374,10 +375,8 @@ class MediaBrowserContainer extends Component {
       !isFavorites && (!isSceneApiType || this.props.hubChannel.canOrWillIfCreator("update_hub"));
     const entries = (this.state.result && this.state.result.entries) || [];
     const hideSearch = urlSource === "favorites";
-    const showEmptyStringOnNoResult = urlSource == "avatars" || urlSource == "scenes" || mediaTilesLib.showEmptyStringOnNoResult();
+    const showEmptyStringOnNoResult = urlSource !== "avatars" && urlSource !== "scenes";
 
-    //In case of media_nav on false we do not display the sources
-    const mediaSources = ((searchParams.get("media_nav") === "false") || urlSource === "favorites") ? undefined : SOURCES;
     const facets = this.state.facets && this.state.facets.length > 0 ? this.state.facets : undefined;
 
     // Don't render anything if we just did a feeling lucky query and are waiting on result.
@@ -402,8 +401,7 @@ class MediaBrowserContainer extends Component {
     const hasNext = !!(meta && meta.next_cursor);
     const hasPrevious = !!searchParams.get("cursor");
 
-    const customObjectType =
-      this.state.result && isSceneApiType ? "scene" : urlSource === "avatars" ? "avatar" : "object";
+    const customObjectType = isSceneApiType ? "scene" : urlSource === "avatars" ? "avatar" : "object";
 
     let searchDescription;
 
@@ -449,21 +447,6 @@ class MediaBrowserContainer extends Component {
 
     return (
       <MediaBrowser
-        banner = {()=>{
-          if(urlSource === "avatars" && searchParams.get("create") === "true" && isTeamsLimitedOK()){//Aptero
-            return createAvatarCustomTileV2((evt,entry)=> {
-              //Aptero
-              const { scene, store} = this.props;
-              const url = entry.gltfs.avatar;
-              store.update({ profile: { ...store.state.profile, ...{ avatarId: url } } });
-              scene.emit("avatar_updated");
-              //End Of Aptero
-              this.handleEntryClicked(evt, entry);
-            })
-          }else{
-            return <div></div>
-          }
-        }}
         browserRef={r => (this.browserDiv = r)}
         onClose={this.close}
         searchInputRef={r => (this.inputRef = r)}
@@ -485,7 +468,7 @@ class MediaBrowserContainer extends Component {
           }
         }}
         onClearSearch={() => this.handleQueryUpdated("", true)}
-        mediaSources={mediaSources}
+        mediaSources={urlSource === "favorites" ? undefined : SOURCES}
         selectedSource={urlSource}
         onSelectSource={this.handleSourceClicked}
         activeFilter={activeFilter}
@@ -520,7 +503,7 @@ class MediaBrowserContainer extends Component {
         entries.length > 0 ||
         !showEmptyStringOnNoResult ? (
           <>
-            {configs.feature("create_avatar") &&  urlSource === "avatars" && (
+            {urlSource === "avatars" && (
               <CreateTile
                 type="avatar"
                 onClick={this.onCreateAvatar}

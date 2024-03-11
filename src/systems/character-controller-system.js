@@ -13,6 +13,7 @@ import {
 import { getCurrentPlayerHeight } from "../utils/get-current-player-height";
 import qsTruthy from "../utils/qs_truthy";
 import { releaseOccupiedWaypoint } from "../bit-systems/waypoint";
+import { shouldUseNewLoader } from "../utils/bit-utils";
 //import { m4String } from "../utils/pretty-print";
 const NAV_ZONE = "character";
 const qsAllowWaypointLerp = qsTruthy("waypointLerp");
@@ -242,15 +243,6 @@ export class CharacterControllerSystem {
         this.navNode = null;
       }
       const preferences = window.APP.store.state.preferences;
-      const rotateLeft = userinput.get(paths.actions.rotateLeft);
-      const rotateRight = userinput.get(paths.actions.rotateRight);
-      if (rotateLeft) {
-        this.dXZ += Math.PI / 100.;
-      }
-      if (rotateRight) {
-        this.dXZ -= Math.PI / 100.;
-      }
-
       const snapRotateLeft = userinput.get(paths.actions.snapRotateLeft);
       const snapRotateRight = userinput.get(paths.actions.snapRotateRight);
       if (snapRotateLeft) {
@@ -268,10 +260,10 @@ export class CharacterControllerSystem {
         const zCharacterAcceleration = -1 * characterAcceleration[1];
         this.relativeMotion.set(
           this.relativeMotion.x +
-            (window.getPreferences("disableMovement") || preferences.disableStrafing ? 0 : characterAcceleration[0]),
+            (preferences.disableMovement || preferences.disableStrafing ? 0 : characterAcceleration[0]),
           this.relativeMotion.y,
           this.relativeMotion.z +
-            (window.getPreferences("disableMovement")
+            (preferences.disableMovement
               ? 0
               : preferences.disableBackwardsMovement
               ? Math.min(0, zCharacterAcceleration)
@@ -344,7 +336,7 @@ export class CharacterControllerSystem {
         ) {
           this.didTeleportSinceLastWaypointTravel = false;
           this.shouldUnoccupyWaypointsOnceMoving = false;
-          if (qsTruthy("newLoader")) {
+          if (shouldUseNewLoader()) {
             releaseOccupiedWaypoint();
           } else {
             this.waypointSystem.releaseAnyOccupiedWaypoints();

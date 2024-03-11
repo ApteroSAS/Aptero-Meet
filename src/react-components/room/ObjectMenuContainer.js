@@ -35,7 +35,7 @@ MyMenuItems.propTypes = {
 };
 
 function PlayerMenuItems({ hubChannel, activeObject, deselectObject }) {
-  const hideAvatar = useHideAvatar(hubChannel, activeObject.el);
+  const hideAvatar = useHideAvatar(hubChannel, activeObject);
 
   return (
     <ObjectMenuButton
@@ -88,8 +88,8 @@ function ObjectMenuItems({ hubChannel, scene, activeObject, deselectObject, onGo
         disabled={!canGoTo}
         onClick={() => {
           goToSelectedObject();
-          //deselectObject();
-          //onGoToObject();
+          deselectObject();
+          onGoToObject();
         }}
       >
         <GoToIcon />
@@ -126,10 +126,12 @@ export function ObjectMenuContainer({ hubChannel, scene, onOpenProfile, onGoToOb
     useObjectList();
 
   let menuItems;
-
+  let isAvatar = false;
   if (isMe(activeObject)) {
+    isAvatar = true;
     menuItems = <MyMenuItems onOpenProfile={onOpenProfile} />;
   } else if (isPlayer(activeObject)) {
+    isAvatar = true;
     menuItems = <PlayerMenuItems hubChannel={hubChannel} activeObject={activeObject} deselectObject={deselectObject} />;
   } else {
     menuItems = (
@@ -154,6 +156,7 @@ export function ObjectMenuContainer({ hubChannel, scene, onOpenProfile, onGoToOb
       onPrevObject={selectPrevObject}
       onToggleLights={toggleLights}
       lightsEnabled={lightsEnabled}
+      isAvatar={isAvatar}
     >
       {menuItems}
     </ObjectMenu>

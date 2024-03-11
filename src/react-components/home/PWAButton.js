@@ -1,10 +1,10 @@
 import React from "react";
 import { FormattedMessage } from "react-intl";
 import { ReactComponent as AddIcon } from "../icons/Add.svg";
-import styles from "./PWAButton.scss";
 import { IconButton } from "../input/IconButton";
 import checkIsMobile from "../../utils/is-mobile";
 import { useInstallPWA } from "./useInstallPWA";
+import styles from "./PWAButton.scss";
 
 const isMobile = checkIsMobile();
 

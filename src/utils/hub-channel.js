@@ -2,7 +2,6 @@ import jwtDecode from "jwt-decode";
 import { EventTarget } from "event-target-shim";
 import { migrateChannelToSocket, discordBridgesForPresences, migrateToChannel } from "./phoenix-utils";
 import configs from "./configs";
-import { roomParameters } from "../aptero/module/HubsBridge/service/RoomParameters";
 import { Presence } from "../aptero/module/HubsBridge/utils/Presence";
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
@@ -36,7 +35,8 @@ const VALID_PERMISSIONS = HUB_CREATOR_PERMISSIONS.concat([
   "fly",
   "voice_chat",
   "text_chat"
-]).concat(roomParameters.customPermission()); //APTERO
+]);
+
 export default class HubChannel extends EventTarget {
   constructor(store, hubId) {
     super();
@@ -103,9 +103,9 @@ export default class HubChannel extends EventTarget {
         onSync: this.presence.caller.onSync
       };
 
-      this.presence.onJoin(function() {});
-      this.presence.onLeave(function() {});
-      this.presence.onSync(function() {});
+      this.presence.onJoin(function () {});
+      this.presence.onLeave(function () {});
+      this.presence.onSync(function () {});
     }
 
     this.channel = await migrateChannelToSocket(this.channel, socket, params);
@@ -131,9 +131,9 @@ export default class HubChannel extends EventTarget {
         onSync: this.presence.caller.onSync
       };
 
-      this.presence.onJoin(function() {});
-      this.presence.onLeave(function() {});
-      this.presence.onSync(function() {});
+      this.presence.onJoin(function () {});
+      this.presence.onLeave(function () {});
+      this.presence.onSync(function () {});
     }
 
     this.channel = newChannel;
@@ -155,11 +155,7 @@ export default class HubChannel extends EventTarget {
     this.token = token;
     this._permissions = jwtDecode(token);
     configs.setIsAdmin(this._permissions.postgrest_role === "ret_admin");
-    //aptero delayed permission set
-    (async () => {
-      this._permissions = await roomParameters.applyPermissionAsync(this._permissions, configs.isAdmin());
     this.dispatchEvent(new CustomEvent("permissions_updated"));
-    })();
 
     // Refresh the token 1 minute before it expires.
     const nextRefresh = new Date(this._permissions.exp * 1000 - 60 * 1000) - new Date();
@@ -321,20 +317,9 @@ export default class HubChannel extends EventTarget {
     return new Promise(resolve => this.channel.push("unsubscribe", { subscription }).receive("ok", resolve));
   };
 
-  receivePrivateClientId(privateData, text_message) {
-    this.sendPrivateMessage(privateData, text_message, "chat");
-  }
-
   sendMessage = (body, type = "chat") => {
     if (!body) return;
     this.channel.push("message", { body, type });
-  };
-
-  sendPrivateMessage = (receiverClientId, body, type = "chat") => {
-    if (!body) {
-      return;
-    }
-    this.channel.push("message", { receiverClientId, body, type });
   };
 
   _getCreatorAssignmentToken = () => {
@@ -370,7 +355,7 @@ export default class HubChannel extends EventTarget {
   };
 
   signOut = () => {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       this.channel
         .push("sign_out")
         .receive("ok", async () => {

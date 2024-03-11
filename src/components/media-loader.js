@@ -1,7 +1,6 @@
 import { computeObjectAABB, getBox, getScaleCoefficient } from "../utils/auto-box-collider";
 import {
   resolveUrl,
-  fetchContentType,
   getDefaultResolveQuality,
   injectCustomShaderChunks,
   addMeshScaleAnimation,
@@ -13,7 +12,11 @@ import {
   proxiedUrlFor,
   isHubsRoomUrl,
   isLocalHubsSceneUrl,
-  isLocalHubsAvatarUrl
+  isLocalHubsAvatarUrl,
+  isHubsDestinationUrl,
+  isHubsAvatarUrl,
+  hubsRoomRegex,
+  localHubsRoomRegex
 } from "../utils/media-url-utils";
 import { addAnimationComponents } from "../utils/animation";
 
@@ -24,8 +27,8 @@ import { cloneObject3D, setMatrixWorld } from "../utils/three-utils";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 
 import { SHAPE } from "three-ammo/constants";
-import { addComponent, entityExists, removeComponent } from "bitecs";
-import { MediaContentBounds, MediaLoading } from "../bit-components";
+import { addComponent } from "bitecs";
+import { MediaContentBounds } from "../bit-components";
 import { IN_APP_WEB_BROWSER_PROTOCOL } from "../aptero/module/RemoteScreen/RemoteControlServiceV2";
 import { HYPERBEAM_PROTOCOL } from "../aptero/module/RemoteScreen/HyperbeamService";
 import {msTeamsAPILight} from "../aptero/module/axolotis/modules/basic/ImportHelper";
@@ -39,13 +42,15 @@ waitForDOMContentLoaded().then(() => {
     loadingObject = gltf;
   });
 });
+const fetchContentType = url => { 
   console.log("Fetch type B",url);
 
-  return fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
+  const bb = fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
 
   console.log("bb",bb)
 
   return bb;
+};
 
 AFRAME.registerComponent("media-loader", {
   schema: {
@@ -91,7 +96,7 @@ AFRAME.registerComponent("media-loader", {
     }
   },
 
-  updateScale: (function() {
+  updateScale: (function () {
     const center = new THREE.Vector3();
     const originalMeshMatrix = new THREE.Matrix4();
     const desiredObjectMatrix = new THREE.Matrix4();
@@ -99,7 +104,7 @@ AFRAME.registerComponent("media-loader", {
     const quaternion = new THREE.Quaternion();
     const scale = new THREE.Vector3();
     const box = new THREE.Box3();
-    return function(fitToBox, moveTheParentNotTheMesh) {
+    return function (fitToBox, moveTheParentNotTheMesh) {
       this.el.object3D.updateMatrices();
       const mesh = this.el.getObject3D("mesh");
       mesh.updateMatrices();
@@ -121,7 +126,7 @@ AFRAME.registerComponent("media-loader", {
         setMatrixWorld(mesh, originalMeshMatrix);
       } else {
         // Move the mesh such that the center of its bounding box is in the same position as the parent matrix position
-        const box = getBox(this.el, mesh);
+        const box = getBox(this.el.object3D, mesh);
         const scaleCoefficient = fitToBox ? getScaleCoefficient(0.5, box) : 1;
         const { min, max } = box;
         center.addVectors(min, max).multiplyScalar(0.5 * scaleCoefficient);
@@ -245,10 +250,10 @@ AFRAME.registerComponent("media-loader", {
     this.removeShape("loader");
   },
 
-  updateHoverableVisuals: (function() {
+  updateHoverableVisuals: (function () {
     const boundingBox = new THREE.Box3();
     const boundingSphere = new THREE.Sphere();
-    return function() {
+    return function () {
       const hoverableVisuals = this.el.components["hoverable-visuals"];
 
       if (hoverableVisuals) {
@@ -294,14 +299,11 @@ AFRAME.registerComponent("media-loader", {
       }
 
       // TODO this does duplicate work in some cases, but finish() is the only consistent place to do it
-      const contentBounds = getBox(this.el, this.el.getObject3D("mesh")).getSize(new THREE.Vector3());
+      const contentBounds = getBox(this.el.object3D, this.el.getObject3D("mesh")).getSize(new THREE.Vector3());
       addComponent(APP.world, MediaContentBounds, el.eid);
       MediaContentBounds.bounds[el.eid].set(contentBounds.toArray());
 
       el.emit("media-loaded");
-      if (el.eid && entityExists(APP.world, el.eid)) {
-        removeComponent(APP.world, MediaLoading, el.eid);
-      }
     };
 
     if (this.data.animate) {
@@ -330,7 +332,7 @@ AFRAME.registerComponent("media-loader", {
     this.el.setAttribute("media-loader", { version: Math.floor(Date.now() / 1000) });
   },
 
-//aptero
+  //aptero
   reloadSrc(newSrc) {
     console.log("reloadSrc media view "+newSrc);
     const oldData = { ...this.data };
@@ -343,7 +345,7 @@ AFRAME.registerComponent("media-loader", {
   async update(oldData, forceLocalRefresh) {
     const { version, contentSubtype } = this.data;
     //let src = this.data.src;
-    let src = container.get<CustomURL>(CustomURLName).processURL(this.data.src);//aptero
+    let src = container.get(CustomURLName).processURL(this.data.src);//aptero
     if (!src) return;
 
     //aptero change content code
@@ -378,11 +380,8 @@ AFRAME.registerComponent("media-loader", {
     }
 
     try {
-      console.log("Detect content type:",src);
-
       if ((forceLocalRefresh || srcChanged) && !this.showLoaderTimeout) {
         this.showLoaderTimeout = setTimeout(this.showLoader, 100);
-        addComponent(APP.world, MediaLoading, this.el.eid);
       }
 
       //check if url is an anchor hash e.g. #Spawn_Point_1
@@ -396,26 +395,18 @@ AFRAME.registerComponent("media-loader", {
       let contentType = this.data.contentType;
       let thumbnail;
 
-      //aptero feature video 360
-      if((this.data.contentSubtype && this.data.contentSubtype.includes("360")) || (contentType && contentType.includes("360")) || (this.data.mediaOptions.type && this.data.mediaOptions.type.includes("360"))){
-        this.networkedEl.setAttribute("media-loader","contentSubtype", "360-equirectangular");
-        this.el.setAttribute("media-loader","contentSubtype", "360-equirectangular");
-        this.el.setAttribute("media-loader","type", "360-equirectangular");
-      }
-      const attrType = this.el.components["media-loader"].data.type;
-      if( attrType && attrType.includes("360")){
-        this.data.mediaOptions.projection = "360-equirectangular";
-      }
-
       const parsedUrl = new URL(src);
 
       // We want to resolve and proxy some hubs urls, like rooms and scene links,
       // but want to avoid proxying assets in order for this to work in dev environments
-      const isLocalModelAsset =
-        isNonCorsProxyDomain(parsedUrl.hostname) && (guessContentType(src) || "").startsWith("model/gltf");
+      const isLocalAsset =
+        isNonCorsProxyDomain(parsedUrl.hostname) &&
+        !(await isHubsDestinationUrl(src)) &&
+        !(await isHubsAvatarUrl(src)) &&
+        !src.match(hubsRoomRegex)?.groups.id &&
+        !src.match(localHubsRoomRegex)?.groups.id;
 
-      try {
-        if (this.data.resolve && !src.startsWith(HYPERBEAM_PROTOCOL)  && !src.startsWith(IN_APP_WEB_BROWSER_PROTOCOL) && !src.startsWith("data:") && !src.startsWith("hubs:") && !isLocalModelAsset) {
+      if (this.data.resolve && !src.startsWith("data:") && !src.startsWith("hubs:") && !isLocalAsset) {
         const is360 = !!(this.data.mediaOptions.projection && this.data.mediaOptions.projection.startsWith("360"));
         const quality = getDefaultResolveQuality(is360);
         const result = await resolveUrl(src, quality, version, forceLocalRefresh);
@@ -434,12 +425,8 @@ AFRAME.registerComponent("media-loader", {
         contentType = (result.meta && result.meta.expected_content_type) || contentType;
         thumbnail = result.meta && result.meta.thumbnail && proxiedUrlFor(result.meta.thumbnail);
       }
-      }catch(ex){
-        contentType = "text/html; charset=utf-8";
-        console.error(ex);
-      }
 
-      //Hyperbeam type
+      //APTERO Hyperbeam type
       if (src.startsWith(HYPERBEAM_PROTOCOL)) {
         contentType = HYPERBEAM_PROTOCOL;
         //We need to remove the protocol to resolve the url
@@ -454,6 +441,7 @@ AFRAME.registerComponent("media-loader", {
       // todo: we don't need to proxy for many things if the canonical URL has permissive CORS headers
       accessibleUrl = proxiedUrlFor(canonicalUrl);
 
+      //APTERO TEAMS INTEGRATION
       if(accessibleUrl.endsWith(msTeamsAPILight().MICROSOFT_AUTH_ERROR)){
         if (this.el.components["position-at-border__freeze"]) {
           this.el.setAttribute("position-at-border__freeze", { isFlat: true });
@@ -491,8 +479,8 @@ AFRAME.registerComponent("media-loader", {
         contentType.startsWith("audio/") ||
         contentType.startsWith("application/dash") ||
         AFRAME.utils.material.isHLS(canonicalUrl, contentType) ||
-        contentType.startsWith(HYPERBEAM_PROTOCOL)
-      ) {//------
+        contentType.startsWith(HYPERBEAM_PROTOCOL) //APTERO
+      ) {
         let linkedVideoTexture, linkedAudioSource, linkedMediaElementAudioSource;
         if (this.data.linkedEl) {
           const linkedMediaVideo = this.data.linkedEl.components["media-video"];
@@ -535,7 +523,7 @@ AFRAME.registerComponent("media-loader", {
         if (this.el.components["position-at-border__freeze-unprivileged"]) {
           this.el.setAttribute("position-at-border__freeze-unprivileged", { isFlat: true });
         }
-      } else if (contentType.startsWith("image/")) {//------
+      } else if (contentType.startsWith("image/")) {
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-video");
         this.el.removeAttribute("audio-zone-source");
@@ -585,8 +573,6 @@ AFRAME.registerComponent("media-loader", {
             contentType
           })
         );
-        //aptero media limiter feature
-        this.el.setAttribute("media-limiter", {});
         this.el.setAttribute("media-pager", {});
         this.el.setAttribute("floaty-object", { reduceAngularFloat: true, releaseGravity: -1 });
         this.el.addEventListener(

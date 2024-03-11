@@ -5,8 +5,6 @@ import styles from "./Sidebar.scss";
 
 import {Fullscreen, FullscreenExit} from "@material-ui/icons/"
 
-import { startsWith } from "core-js/core/string";
-
 
 export class Sidebar extends React.Component {
   // set initial state

@@ -180,14 +180,14 @@ export function WaitForVerification({ email, onCancel, showNewsletterSignup }) {
               id="sign-in-modal.newsletter-signup-question"
               defaultMessage="Want Hubs news sent to your inbox?"
             />
-            <br/>
+            <br />
             <a href="https://eepurl.com/gX_fH9" target="_blank" rel="noopener noreferrer">
-              <FormattedMessage id="sign-in-modal.newsletter-signup-link" defaultMessage="Subscribe for updates"/>
+              <FormattedMessage id="sign-in-modal.newsletter-signup-link" defaultMessage="Subscribe for updates" />
             </a>
           </small>
         </p>
       )}
-      <CancelButton onClick={onCancel}/>
+      <CancelButton onClick={onCancel} />
     </Column>
   );
 }
@@ -226,11 +226,11 @@ export function SignInComplete({ message, onContinue }) {
           {message ? (
             intl.formatMessage(message)
           ) : (
-            <FormattedMessage id="sign-in-modal.complete" defaultMessage="You are now signed in."/>
+            <FormattedMessage id="sign-in-modal.complete" defaultMessage="You are now signed in." />
           )}
         </b>
       </p>
-      <ContinueButton onClick={onContinue}/>
+      <ContinueButton onClick={onContinue} />
     </Column>
   );
 }
@@ -240,13 +240,11 @@ SignInComplete.propTypes = {
   onContinue: PropTypes.func.isRequired
 };
 
-
 export function SignInModal({ closeable, onClose, children, ...rest }) {
-
   return (
     <Modal
-      title={<FormattedMessage id="sign-in-modal.title" defaultMessage="Sign In"/>}
-      beforeTitle={closeable && <CloseButton onClick={onClose}/>}
+      title={<FormattedMessage id="sign-in-modal.title" defaultMessage="Sign In" />}
+      beforeTitle={closeable && <CloseButton onClick={onClose} />}
       {...rest}
     >
       {children}

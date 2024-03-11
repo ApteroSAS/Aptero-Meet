@@ -1,20 +1,19 @@
 import React, { useState, useCallback } from "react";
 import PropTypes from "prop-types";
-import { useForm } from "react-hook-form";
-import styles from "./Banner.scss";
+import { RadioInputField } from "../input/RadioInputField";
+import { RadioInputOption } from "../input/RadioInput";
 import { Button } from "../input/Button";
 import { CloseButton } from "../input/CloseButton";
-import { CheckboxInput } from "../input/CheckboxInput";
-import { FormattedMessage } from "react-intl";
-import { RadioInputOption } from "../input/RadioInput";
-import { RadioInputField } from "../input/RadioInputField";
-import { TextInputField } from "../input/TextInputField";
+import { useForm } from "react-hook-form";
+import styles from "./Banner.scss";
 import { ReactComponent as ArrowIcon } from "../icons/Arrow.svg";
 import critical from "../../assets/images/critical.png";
+import { TextInputField } from "../input/TextInputField";
+import { CheckboxInput } from "../input/CheckboxInput";
+import { FormattedMessage } from "react-intl";
 import cone from "../../assets/images/cone.png";
 
 const Banner = () => {
-  const [email, setEmail] = useState("");
   const [confirm, setConfirm] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [responseStatus, setResponseStatus] = useState(false);
@@ -91,16 +90,6 @@ const Banner = () => {
     }
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
-
-  /**
-   * Emain input change
-   */
-  const onChangeEmail = useCallback(
-    e => {
-      setEmail(e.target.value);
-    },
-    [setEmail]
-  );
 
   /**
    * Checkbox Confirm
@@ -310,13 +299,11 @@ const Banner = () => {
                   ) : (
                     <div className={styles.expand_form_fields}>
                       <TextInputField
-                        ref={register}
-                        name="email"
+                        {...register("email", {
+                          required: true
+                        })}
                         type="email"
                         label={<FormattedMessage id="banner.email-address" defaultMessage="Email Address" />}
-                        required
-                        value={email}
-                        onChange={onChangeEmail}
                         placeholder="name@email.com"
                         className={styles.expand_form_field}
                       />
@@ -327,17 +314,15 @@ const Banner = () => {
                       >
                         <RadioInputOption
                           className={styles.radio_override}
-                          name="email_format"
                           value="html"
                           label={<FormattedMessage id="banner.format-html" defaultMessage="HTML" />}
-                          ref={register}
+                          {...register("email_format")}
                         />
                         <RadioInputOption
                           className={styles.radio_override}
-                          name="email_format"
                           value="text"
                           label={<FormattedMessage id="banner.format-text" defaultMessage="Text" />}
-                          ref={register}
+                          {...register("email_format")}
                         />
                       </RadioInputField>
 

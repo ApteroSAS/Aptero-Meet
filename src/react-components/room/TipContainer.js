@@ -41,7 +41,7 @@ export function TipContainer({ inLobby, inRoom, isStreaming, isEmbedded, scene, 
   const timeoutRef = useRef(null);
 
   const onSkipOnboarding = useCallback(() => {
-      scene.systems.tips.skipTips();
+    scene.systems.tips.skipTips();
   }, [scene]);
 
   const onNextTip = useCallback(() => {
@@ -61,14 +61,14 @@ export function TipContainer({ inLobby, inRoom, isStreaming, isEmbedded, scene, 
   }, [scene, timeoutRef, onboardingTipId]);
 
   useEffect(() => {
-      function onSceneTipChanged({ detail: tipId }) {
+    function onSceneTipChanged({ detail: tipId }) {
       setOnboardingTipId(null);
-        setOnboardingTipId(tipId);
-      }
+      setOnboardingTipId(tipId);
+    }
 
-      scene.addEventListener("tip-changed", onSceneTipChanged);
+    scene.addEventListener("tip-changed", onSceneTipChanged);
 
-      setOnboardingTipId(scene.systems.tips.activeTip);
+    setOnboardingTipId(scene.systems.tips.activeTip);
 
     return () => {
       scene.removeEventListener("tip-changed", onSceneTipChanged);

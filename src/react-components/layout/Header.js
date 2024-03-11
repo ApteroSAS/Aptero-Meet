@@ -44,7 +44,7 @@ export function Header({
                   </a>
                 </li>
               )}
-                <a href="/spoke">{editorName}</a>
+                <a href="/opal">{editorName}</a>
               {showDocsLink && (
                 <li>
                   <a href={docsUrl}>
