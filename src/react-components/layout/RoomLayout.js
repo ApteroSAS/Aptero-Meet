@@ -26,6 +26,7 @@ export function RoomLayout({
       <div className={classNames(styles.modalContainer, styles.viewport)}>{modal}</div>
       {(toolbarLeft || toolbarCenter || toolbarRight) && (
         <Toolbar
+          style={{ position: "absolute", bottom: "0px", width:"100%",backgroundColor:"#ffffff00",border:"0" }} /* APTERO */
           className={classNames(styles.main, styles.toolbar, toolbarClassName)}
           left={toolbarLeft}
           center={toolbarCenter}

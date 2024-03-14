@@ -37,13 +37,13 @@ export function Header({
                 <AppLogo />
               </a>
             </li>
-              {enableSpoke && (
+              {/*enableSpoke && (
                 <li>
                   <a href="/spoke">
                     {isHmc ? <FormattedMessage id="header.spoke" defaultMessage="Spoke" /> : editorName}
                   </a>
                 </li>
-              )}
+              )*/}
                 <a href="/opal">{editorName}</a>
               {showDocsLink && (
                 <li>

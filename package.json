@@ -87,7 +87,6 @@
     "@sentry/integrations": "^6.19.6",
     "@sentry/utils": "^6.19.6",
     "aframe": "github:mozillareality/aframe#hubs/master",
-    "aframe-slice9-component": "file:./vendor/aframe-slice9-component",
     "ammo-debug-drawer": "github:infinitelee/ammo-debug-drawer",
     "ammo.js": "github:mozillareality/ammo.js#hubs/master",
     "animejs": "github:mozillareality/anime#hubs/master",

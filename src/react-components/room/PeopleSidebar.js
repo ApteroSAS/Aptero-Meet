@@ -134,14 +134,14 @@ export function PeopleSidebar({
         />
       }
       beforeTitle={<CloseButton onClick={onClose} />}
-      afterTitle={{/*
+      afterTitle={<></>/*
         //APTERO no sound in the experience
         showMuteAll && !(msTeamsAPILight().msTeams() || getAdapterParams().adapter === "none")? (
           <IconButton onClick={onMuteAll}>
             <FormattedMessage id="people-sidebar.mute-all-button" defaultMessage="Mute All" />
           </IconButton>
         ) : undefined
-      */}}
+      */}
     >
       {!canVoiceChat && <PermissionNotification permission={"voice_chat"} />}
       {!voiceChatEnabled && isMod && <PermissionNotification permission={"voice_chat"} isMod={true} />}

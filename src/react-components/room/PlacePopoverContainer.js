@@ -49,13 +49,14 @@ export function PlacePopoverContainer({ scene, mediaSearchStore, showNonHistorie
           // TODO: Create text/link dialog
           // { id: "text", icon: TextIcon, color: "blue", label: "Text" },
           // { id: "link", icon: LinkIcon, color: "blue", label: "Link" },
-          configs.integration("tenor") && {
+          /*configs.integration("tenor") && {
+            Aptero remove gif place
             id: "gif",
             icon: GIFIcon,
             color: "accent2",
             label: <FormattedMessage id="place-popover.item-type.gif" defaultMessage="GIF" />,
             onSelect: () => mediaSearchStore.sourceNavigate("gifs")
-          },
+          },*/
           configs.integration("sketchfab") && {
             id: "model",
             icon: ObjectIcon,
@@ -63,20 +64,22 @@ export function PlacePopoverContainer({ scene, mediaSearchStore, showNonHistorie
             label: <FormattedMessage id="place-popover.item-type.model" defaultMessage="3D Model" />,
             onSelect: () => mediaSearchStore.sourceNavigate("sketchfab")
           },
-          {
+          /*{
+            Aptero remove avatar place
             id: "avatar",
             icon: AvatarIcon,
             color: "accent1",
             label: <FormattedMessage id="place-popover.item-type.avatar" defaultMessage="Avatar" />,
             onSelect: () => mediaSearchStore.sourceNavigate("avatars")
-          },
-          {
+          },*/
+          /*{
+            Aptero remove scene place
             id: "scene",
             icon: SceneIcon,
             color: "accent1",
             label: <FormattedMessage id="place-popover.item-type.scene" defaultMessage="Scene" />,
             onSelect: () => mediaSearchStore.sourceNavigate("scenes")
-          },
+          },*/
           // TODO: Launch system file prompt directly
           {
             id: "upload",

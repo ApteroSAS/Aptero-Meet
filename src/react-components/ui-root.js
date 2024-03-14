@@ -1944,7 +1944,8 @@ class UIRoot extends Component {
                   ) : undefined
                 }
                 modal={this.state.dialog}
-                toolbarLeft={
+                toolbarLeft={<></>/*
+                Aptero remove invite BTN
                   <>
                     <InvitePopoverContainer
                       hub={this.props.hub}
@@ -1954,7 +1955,7 @@ class UIRoot extends Component {
                     />
                     {isLockedDownDemo && <SeePlansCTA />}
                   </>
-                }
+                */}
                 toolbarCenter={
                   !aptGuiVisible ? null : (
                     <>
@@ -1982,9 +1983,10 @@ class UIRoot extends Component {
                     )}
                     {entered && (
                       <>
-                        {!isLockedDownDemo && (
+                        {
+                        !isLockedDownDemo && (
                           <>
-                            <AudioPopoverButtonContainer scene={this.props.scene} />
+                            {/* APTERO disable mic <AudioPopoverButtonContainer scene={this.props.scene} />*/}
                             <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel} />
                             <PlacePopoverContainer
                               scene={this.props.scene}
@@ -2035,7 +2037,9 @@ class UIRoot extends Component {
                         }
                       />
                     )}
-                    {entered && (
+                    {/*
+                    Aptero remove Leave button
+                    entered && (
                       <ToolbarButton
                         icon={<LeaveIcon />}
                         label={<FormattedMessage id="toolbar.leave-room-button" defaultMessage="Leave" />}
@@ -2053,10 +2057,10 @@ class UIRoot extends Component {
                           });
                         }}
                       />
-                    )}
+                    )*/}
                     <MoreMenuPopoverButton menu={moreMenu} />
-                    {/*Aptero*/}
-                    {!aptGuiVisible ? null : (
+                    {/* APTERO Remove invite btn
+                    !aptGuiVisible ? null : (
                       <InvitePopoverContainer
                         className={styles.inviteButtonContainer}
                         hub={this.props.hub}
@@ -2064,7 +2068,7 @@ class UIRoot extends Component {
                         scene={this.props.scene}
                         store={this.props.store}
                       />
-                    )}
+                    )*/}
                   </>
                 }
               />
