@@ -302,21 +302,7 @@ module.exports = async (env, argv) => {
         path: require.resolve("path-browserify"),
         //https://gist.github.com/ef4/d2cf5672a93cf241fd47c020b9b3066a
         'process/browser': require.resolve("process/browser"),
-        'zlib': require.resolve('browserify-zlib'),
-        'util': require.resolve('util/'),
-        'events': require.resolve('events/'),
         "buffer": require.resolve("buffer/"),
-        "http": require.resolve("stream-http"),
-        "https": require.resolve("https-browserify"),
-        //"crypto": require.resolve("crypto-browserify"),
-        "crypto":false,
-        "net": false, // net is typically not used in the browser, so we can safely disable it
-        "tls": false, // tls is also typically not used in the browser
-        "tty": require.resolve("tty-browserify"),
-        "timers": require.resolve("timers-browserify"),
-        "os": require.resolve("os-browserify/browser"),
-        "constants": require.resolve("constants-browserify"),
-        "child_process": false // child_process is not available in the browser
       },
       //extensions: [".*", ".js", ".jsx", ".tsx", ".ts", ".json"]
       extensions: [".ts", ".tsx", ".js", ".jsx"]
