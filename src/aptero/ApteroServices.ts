@@ -77,7 +77,7 @@ export class ApteroServices {
   start(audioSettingsSystem: AudioSettingsSystem) {
     this.audioSettingsSystem = audioSettingsSystem;
     waitForDOMContentLoaded().then(async () => {
-      await networkService.start();
+      networkService.start();
       await gltfExtensionProcessorService.start();
       await this.thirdPersonService.start();
       await remoteControlServiceV2.start();

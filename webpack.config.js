@@ -117,7 +117,7 @@ function deepModuleDependencyTest(modulesArr) {
   };
 }
 
-function createDefaultAppConfig() {
+/*function createDefaultAppConfig() {
   const schemaPath = path.join(__dirname, "src", "schema.toml");
   const schemaString = fs.readFileSync(schemaPath).toString();
 
@@ -156,9 +156,9 @@ function createDefaultAppConfig() {
   }
 
   return appConfig;
-}
+}*/
 
-async function fetchAppConfigAndEnvironmentVars() {
+/*async function fetchAppConfigAndEnvironmentVars() {
   const { internalIpV4 } = await import("internal-ip");
 
   if (!fs.existsSync(".ret.credentials")) {
@@ -208,7 +208,7 @@ async function fetchAppConfigAndEnvironmentVars() {
   process.env.NON_CORS_PROXY_DOMAINS = `${localIp},hubs.local,localhost`;
 
   return appConfig;
-}
+}*/
 
 function htmlPagePlugin({ filename, extraChunks = [], chunksSortMode, inject }) {
   const chunkName = filename.match(/(.+).html/)[1];
@@ -326,7 +326,7 @@ module.exports = async (env, argv) => {
     },
     output: {
       filename: "assets/js/[name]-[chunkhash].js",
-      publicPath: process.env.BASE_ASSETS_PATH || ""
+      publicPath: process.env.BASE_ASSETS_PATH || "/"
     },
     target: ["web", "es5"], // use es5 for webpack runtime to maximize compatibility
     devtool: argv.mode === "production" ? "source-map" : "inline-source-map",
@@ -724,6 +724,12 @@ module.exports = async (env, argv) => {
       new MiniCssExtractPlugin({
         filename: "assets/stylesheets/[name]-[contenthash].css"
       }),
+      // Define process.env variables in the browser context.
+      new webpack.DefinePlugin({
+        "process.env": JSON.stringify({
+          BUILD_VERSION: versionJson.version,
+        })
+      })
       // Define process.env variables in the browser context.
       /*new webpack.DefinePlugin({
         "process.env": JSON.stringify({
