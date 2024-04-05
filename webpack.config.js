@@ -274,7 +274,7 @@ module.exports = async (env, argv) => {
   const internalHostname = process.env.INTERNAL_HOSTNAME || "hubs.local";
   return {
     cache: {
-      type: "filesystem"
+      type: "memory"
     },
     resolve: {
       alias: {
@@ -415,6 +415,16 @@ module.exports = async (env, argv) => {
     },
     module: {
       rules: [
+        {
+          //APTERO
+          test: /\.(js|ts|map)$/,
+          enforce: 'pre',
+          use: ['source-map-loader'],
+          include: [
+            path.resolve(__dirname, 'node_modules/@aptero/axolotis-module-teams'),
+            path.resolve(__dirname, 'node_modules/@aptero/axolotis-module-basic'),
+          ],
+        },
         {
           test: /\.html$/,
           loader: "html-loader",
@@ -686,20 +696,20 @@ module.exports = async (env, argv) => {
       htmlPagePlugin({
         filename: "tokens.html"
       }),
+      //APTERO Teams support
+      new HTMLWebpackPlugin({
+        filename: "microsoft-settings.html",
+        template: "src/aptero/module/microsoft/page/microsoft-settings.html",
+        chunks: ['microsoft-settings'],
+        extraChunks: ["support"],
+        inject: true
+      }),
       new CopyWebpackPlugin({
         patterns: [
           { from: "src/schema.toml", to: "schema.toml" },
           { from: "src/aptero/module/properties/properties.js", to: "properties.js" },
           { from: "src/assets/images/favicon.ico", to: "favicon.ico" },
-          //3rd party axolotis modules
-          {
-            from: moduleTeamsPackagePath + "/assets/auth-start.html",
-            to: "auth-start.html"
-          },
-          {
-            from: moduleTeamsPackagePath + "/assets/auth-end.html",
-            to: "auth-end.html"
-          },
+          { from: path.join(moduleTeamsPackagePath,"assets"), to: "" },// Aptero module assets
           { from: "src/assets/manifest.webmanifest", to: "manifest.webmanifest" },
           { from: "src/assets/static/", to: "assets/static/" },
         ]

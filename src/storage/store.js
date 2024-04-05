@@ -61,14 +61,23 @@ export const SCHEMA = {
   definitions: {
     profile: {
       type: "object",
-      additionalProperties: false,
+      additionalProperties: true,//aptero
       properties: {
         displayName: { type: "string", pattern: "^[A-Za-z0-9_~\\s\\-]{3,32}$" },
         avatarId: { type: "string" },
         pronouns: { type: "string", pattern: "^([a-zA-Z]{1,32}\\/){0,4}[a-zA-Z]{1,32}$" },
         // personalAvatarId is obsolete, but we need it here for backwards compatibility.
         personalAvatarId: { type: "string" }
-      }
+      },
+      //APTERO
+      email: { type: "string" },
+      companyName: { type: "string" },
+      jobTitleName: { type: "string" },
+      phoneNumber: { type: "string" },
+      description: { type: "string" },
+      profilePicture: { type: "string" },
+      microsoftUserprofilePicture: { type: "string" },
+      microsoftUser: { type: "string" },
     },
 
     credentials: {
@@ -82,7 +91,7 @@ export const SCHEMA = {
 
     activity: {
       type: "object",
-      additionalProperties: false,
+      additionalProperties: true,
       properties: {
         hasFoundFreeze: { type: "boolean" },
         hasChangedNameOrPronouns: { type: "boolean" },

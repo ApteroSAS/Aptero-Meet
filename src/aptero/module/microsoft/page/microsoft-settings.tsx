@@ -1,7 +1,6 @@
 import * as React from "react";
 import ReactDOM from "react-dom";
 import registerTelemetry from "../../../../telemetry";
-import Store from "../../../../storage/store";
 import "../../../../utils/theme";
 import {AuthContextProvider} from "../../../../react-components/auth/AuthContext";
 import {ThemeProvider} from "../../../../react-components/styles/theme";
@@ -9,11 +8,12 @@ import {WrappedIntlProvider} from "../../../../react-components/wrapped-intl-pro
 import {MSettingsMain} from "../react-components/page/MSettingsMain";
 import {container} from "../../axolotis/IOCConfig";
 import { Provider } from 'inversify-react';
+import { store } from "../../../../utils/store-instance";
 
 
 registerTelemetry("/microsoft-settings", "microsoft-settings");
 
-const store = new Store();
+
 declare const window;
 window.APP = { store };
 

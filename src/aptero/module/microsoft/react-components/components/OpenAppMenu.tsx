@@ -11,7 +11,8 @@ export function OpenAppMenu({style}: { style?: React.CSSProperties }) {
         primary
         style={style}
         onClick={async () => {
-            if(context.app.host.name === "Teams") {
+            //console.log("context", context);
+            if(context.app.host.name === "Teams" || context.app.host.name === "TeamsModern") {
             //if(context.app.host.name === "Office") { debug
                 //context.app.host.name can be "Teams" or "Office"
                 const msTeamsAPI1 = await msTeamsAPI();

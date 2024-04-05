@@ -7,8 +7,7 @@ import {
   Store, STORE_SERVICE
 } from "@aptero/axolotis-module-basic";
 import {container} from "../../IOCConfig";
-import type {MsTeamsAPILight} from "@aptero/axolotis-module-teams";
-import type {MsTeamsAPI} from "@aptero/axolotis-module-teams";
+import type {MsTeamsAPILight,MsTeamsAPI} from "@aptero/axolotis-module-teams";
 import {MICROSOFT_SERVICE, MICROSOFT_STATIC_SERVICE} from "@aptero/axolotis-module-teams";
 
 export async function roomService(): Promise<RoomService> {

@@ -20,7 +20,6 @@ import { SignInButton } from "./SignInButton";
 import { SocialBar } from "../home/SocialBar";
 import { useFavoriteRooms } from "./useFavoriteRooms";
 import { usePublicRooms } from "./usePublicRooms";
-import { HaveRoomCodeButton } from "../../aptero/module/HubsBridge/react-components/HaveRoomCodeButton";
 
 export function HomePage() {
   const auth = useContext(AuthContext);
@@ -79,8 +78,7 @@ export function HomePage() {
           </div>
           <div className={styles.appInfo}>
             <div className={styles.appDescription}>{configs.translation("app-description")}</div>
-            <HaveRoomCodeButton />
-            {canCreateRooms && <CreateRoomButton />}
+            {/* APTERO canCreateRooms && <CreateRoomButton />*/}
             <PWAButton />
           </div>
           <div className={styles.heroImageContainer}>

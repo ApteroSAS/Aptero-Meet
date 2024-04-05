@@ -1,7 +1,8 @@
-import {propertiesService} from "../properties/propertiesService";
 import {msTeamsAPILight} from "../axolotis/modules/basic/ImportHelper";
-const configs = propertiesService;
+
+
+const teams_limited = false;
 
 export function isTeamsLimitedOK(){
-    return !msTeamsAPILight().msTeams() || !configs.feature("teams_limited")
+    return !msTeamsAPILight().msTeams() || !teams_limited;
 }

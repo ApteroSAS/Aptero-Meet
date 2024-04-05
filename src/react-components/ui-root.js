@@ -1563,12 +1563,6 @@ class UIRoot extends Component {
               icon: HomeIcon,
               onClick: () => this.setSidebar("room-info")
             },
-            isTeamsLimitedOK() && {
-              id: "objects",
-              label: <FormattedMessage id="more-menu.objects" defaultMessage="Objects" />,
-              icon: ObjectsIcon,
-              onClick: () => this.setSidebar("objects")
-            },
             this.isFavorited()
               ? {
                   id: "unfavorite-room",

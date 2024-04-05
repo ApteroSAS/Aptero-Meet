@@ -4,6 +4,9 @@ import {msTeamsAPI, msTeamsAPILight} from "../../../axolotis/modules/basic/Impor
 export async function tryMSMatchTheme(){
   if (msTeamsAPILight().msTeams()) {
     await (await msTeamsAPI()).getContext((context) => {
+      if(!context){
+        return;//not in teams
+      }
       //https://learn.microsoft.com/en-us/microsoftteams/platform/tabs/how-to/access-teams-context?tabs=teamsjs-v2
       try {
         changeTheme(context.app.theme === "default" ? "light-default" : "dark-default");

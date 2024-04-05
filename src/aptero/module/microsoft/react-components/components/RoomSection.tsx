@@ -9,7 +9,6 @@ import {Container} from "../hubs/react-components/layout/Container";
 import {Column} from "../hubs/react-components/layout/Column";
 import {AuthContext} from "../../../../../react-components/auth/AuthContext";
 import {MediaTile} from "../../../../../react-components/room/MediaTiles";
-import {PadNumber} from "./PadNumber";
 import {msTeamsAPI, roomService, roomServiceSync} from "../../../axolotis/modules/basic/ImportHelper";
 import {useInjection} from "inversify-react";
 import {MICROSOFT_LOGIN_SERVICE, MicrosoftLoginService} from "@aptero/axolotis-module-teams";
@@ -145,15 +144,6 @@ export function RoomSection(props: {
                                 <FormattedMessage id="microsoft-settings-page.my-scene" defaultMessage="My Room"/>
                             </Button>
                         )}
-                        <Button
-                            style={{margin: 5, padding: 0}}
-                            primary={currentTab === "room-code"}
-                            onClick={() => {
-                                setTab("room-code");
-                            }}
-                        >
-                            <FormattedMessage id="microsoft-settings-page.room-code" defaultMessage="Room Code"/>
-                        </Button>
                     </div>
                     {currentTab === "featured" && sortedFeaturedScene.length > 0 && (
                         <Container as={undefined} className={undefined}>
@@ -229,7 +219,8 @@ export function RoomSection(props: {
                                                     if (window.location.origin.startsWith("https://localhost")) {
                                                         roomURL = window.location.origin + "/hub.html?hub_id=" + room.id;
                                                     }
-                                                    await (await msTeamsAPI()).changeUrlSettings(roomURL);
+                                                    const teamsPI = await msTeamsAPI()
+                                                    await teamsPI.changeUrlSettings(roomURL);
                                                 }}
                                                 key={room.id}
                                                 entry={room}
@@ -242,17 +233,6 @@ export function RoomSection(props: {
                                         );
                                     })}
                                 </MediaGrid>
-                            </Column2>
-                        </Container>
-                    )}
-                    {currentTab === "room-code" && (
-                        <Container className={undefined} as={undefined}>
-                            <Column2 grow padding>
-                                <PadNumber execute={async (code) => {
-                                    const url = await (await roomService()).getLinkFromCode(code);
-                                    console.log("room from code : " + url);
-                                    await (await msTeamsAPI()).changeUrlSettings(url);
-                                }}/>
                             </Column2>
                         </Container>
                     )}
