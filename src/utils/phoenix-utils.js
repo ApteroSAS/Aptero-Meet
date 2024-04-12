@@ -48,6 +48,9 @@ let reticulumMeta = null;
 let invalidatedReticulumMetaThisSession = false;
 
 export function getReticulumFetchUrl(path, absolute = false, host = null, port = null) {
+  if(window.location.host.startsWith("localhost")) {
+     return `https://${host || configs.RETICULUM_SERVER}${port ? `:${port}` : ""}${path}`;
+  }
   if (host || hasReticulumServer()) {
     return `https://${host || configs.RETICULUM_SERVER}${port ? `:${port}` : ""}${path}`;
   } else if (absolute) {
