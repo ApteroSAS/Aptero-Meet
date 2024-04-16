@@ -124,7 +124,6 @@ export function MediaBrowser({
         </div>
       )}
       <div className={styles.content}>
-        {banner()}
         <Column grow ref={browserRef}>
           {children ? (
             <MediaGrid

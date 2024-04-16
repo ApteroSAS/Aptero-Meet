@@ -4,6 +4,9 @@ import classNames from "classnames";
 import styles from "./RoomLayout.scss";
 import { Toolbar } from "./Toolbar";
 
+/**
+ * Aptero style Room layout component.
+ */
 export function RoomLayout({
   className,
   viewportClassName,
@@ -21,21 +24,25 @@ export function RoomLayout({
   ...rest
 }) {
   return (
-    <div className={classNames(styles.roomLayout, { [styles.objectFocused]: objectFocused }, className)} {...rest}>
+    <div
+        ref={viewportRef}
+        className={classNames(styles.roomLayout, { [styles.objectFocused]: objectFocused }, className)} {...rest}>
       {sidebar && <div className={classNames(styles.sidebar, sidebarClassName)}>{sidebar}</div>}
       <div className={classNames(styles.modalContainer, styles.viewport)}>{modal}</div>
       {(toolbarLeft || toolbarCenter || toolbarRight) && (
-        <Toolbar
-          style={{ position: "absolute", bottom: "0px", width:"100%",backgroundColor:"#ffffff00",border:"0" }} /* APTERO */
-          className={classNames(styles.main, styles.toolbar, toolbarClassName)}
-          left={toolbarLeft}
-          center={toolbarCenter}
-          right={toolbarRight}
-        />
+          <div style={{position: "absolute", bottom: "0px", width:"100%",display: "flex",}}>
+            <Toolbar
+              style={{backgroundColor:"#ffffff00",border:"0", flex: "1" }} /* APTERO */
+              className={classNames(styles.main, styles.toolbar, toolbarClassName)}
+              left={toolbarLeft}
+              center={toolbarCenter}
+              right={toolbarRight}
+            />
+            {sidebar && <div style={{width:"450px"}}></div>}
+          </div>
       )}
       <div
         className={classNames(styles.main, styles.viewport, { [styles.streaming]: streaming }, viewportClassName)}
-        ref={viewportRef}
       >
         {viewport}
       </div>

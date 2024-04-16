@@ -68,7 +68,7 @@ export function ContentMenu({ children }) {
   return (
     <div className={styles.contentMenu}>
       {joinChildren(children, () => (
-        <div className={styles.separator} />
+        <div />
       ))}
     </div>
   );
