@@ -85,15 +85,13 @@ configs.feature = featureName => {
 };
 
 let localDevImages = {};
-if (isLocalDevelopment) {
-  localDevImages = {
-    logo: appLogo,
-    logo_dark: appLogoDark,
-    company_logo: companyLogo,
-    editor_logo: sceneEditorLogo,
-    home_background: homeHeroBackground
-  };
-}
+localDevImages = {
+  logo: appLogo,
+  logo_dark: appLogoDark,
+  company_logo: companyLogo,
+  editor_logo: sceneEditorLogo,
+  home_background: homeHeroBackground
+};
 
 configs.image = (imageName, cssUrl) => {
   const url =

@@ -186,7 +186,7 @@ async function isHubsServer(url) {
 
 const hubsSceneRegex = /https?:\/\/[^/]+\/scenes\/[a-zA-Z0-9]{7}(?:\/|$)/;
 const hubsAvatarRegex = /https?:\/\/[^/]+\/avatars\/(?<id>[a-zA-Z0-9]{7})(?:\/|$)/;
-export const hubsRoomRegex = /(https?:\/\/)?[^/]+\/(?<id>[a-zA-Z0-9]{7})(?:\/|$)/;
+export const hubsRoomRegex = /(https?:\/\/)?[^/]+\/(?!service\/)(?<id>[a-zA-Z0-9]{7})(?:\/|$)/;
 export const localHubsRoomRegex = /https?:\/\/[^/]+\/hub\.html\?hub_id=(?<id>[a-zA-Z0-9]{7})/;
 
 export const isLocalHubsUrl = async url =>
@@ -200,8 +200,10 @@ export const isLocalHubsAvatarUrl = async url => (await isHubsAvatarUrl(url)) &&
 
 export const hubIdFromUrl = url => url.match(hubsRoomRegex)?.groups.id || url.match(localHubsRoomRegex)?.groups.id;
 
-export const isHubsRoomUrl = async url =>
-  (await isHubsServer(url)) && !(await isHubsAvatarUrl(url)) && !(await isHubsSceneUrl(url)) && hubIdFromUrl(url);
+export const isHubsRoomUrl = async url => {
+  if(url.startsWith("https://localhost:53000/hub.html?hub_id=")) return new URL(url).searchParams.get("hub_id");//Aptero
+  return (await isHubsServer(url)) && !(await isHubsAvatarUrl(url)) && !(await isHubsSceneUrl(url)) && hubIdFromUrl(url);
+}
 
 export const isHubsDestinationUrl = async url =>
   (await isHubsServer(url)) && ((await isHubsSceneUrl(url)) || (await isHubsRoomUrl(url)));
