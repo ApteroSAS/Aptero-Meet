@@ -7,7 +7,7 @@ import "./module/ButtonAPI/component/stop-share-screen-on-destroy";
 import "./module/ButtonAPI/component/release-media-frame-on-destroy";
 import { gltfExtensionProcessorService } from "./module/ButtonAPI/api/GLTFExtensionProcessorService";
 import { AudioSettingsSystem } from "../systems/audio-settings-system";
-
+import {redirectIfNeeded} from "./module/load-balancer/LoadBalancer";
 //adapter
 import { ThirdPersonService } from "./module/ThirdPerson/ThirdPersonService";
 import { remoteControlServiceV2 } from "./module/RemoteScreen/RemoteControlServiceV2";
@@ -17,6 +17,8 @@ import { roomParameters } from "./module/HubsBridge/service/RoomParameters";
 import { tryMSMatchTheme } from "./module/microsoft/react-components/components/MSThemeMatcher";
 import {container} from "./module/axolotis/IOCConfig";
 import {HttpEventService, HttpEventServiceName} from "@aptero/axolotis-module-basic";
+import {msTeamsAPILight} from "./module/axolotis/modules/basic/ImportHelper";
+import {initIOC} from "./module/axolotis/AxInit";
 
 declare let window:any;
 declare let AFRAME:any;
@@ -71,7 +73,29 @@ export class ApteroServices {
   private audioSettingsSystem: any;
   private sceneEntered: boolean = false;
   constructor() {
-    roomParameters.getRoomParameters(); //called as soon as possible
+    this.firstLoadProcess().then(() =>{
+        console.log("firstLoadProcess done");
+    } );
+  }
+
+  /**
+   * This function is called as soon as possible to start the loading/redirecting process
+   */
+  async firstLoadProcess() {
+    try {
+      const prom = [];
+      prom.push(redirectIfNeeded());//call as soon as possible
+      prom.push((async () => {
+        await initIOC();
+        let teamsAPILight = msTeamsAPILight();
+        console.log("teamsAPILight", teamsAPILight);
+        teamsAPILight.redirectToTeamsSidePanel()
+      })());
+      prom.push(roomParameters.getRoomParameters()); //called as soon as possible
+      await Promise.all(prom);
+    }catch (e) {
+      console.error(e);
+    }
   }
 
   start(audioSettingsSystem: AudioSettingsSystem) {

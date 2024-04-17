@@ -6,6 +6,10 @@ import {useEffect, useState} from "react";
 import {Loader} from "@fluentui/react-northstar";
 import {tryMSMatchTheme} from "../components/MSThemeMatcher";
 import {msTeamsAPI, msTeamsAPILight} from "../../../axolotis/modules/basic/ImportHelper";
+import { ReactComponent as CubeBIcon }  from "../../../../../assets/aptero/microsoft/cubeB.svg";
+import { ReactComponent as CubeRIcon }  from "../../../../../assets/aptero/microsoft/cubeR.svg";
+import { ReactComponent as CubeJIcon }  from "../../../../../assets/aptero/microsoft/cubeJ.svg";
+import { ReactComponent as FlecheIcon } from "../../../../../assets/aptero/microsoft/fleche.svg";
 
 //https://fluentsite.z22.web.core.windows.net/0.60.1
 
@@ -14,12 +18,9 @@ export function MeetingSidePanelMobileAfterInstall() {
         <div style={{height: "20px"}}></div>
         <main className={classNames(styles.main)}>
             <div className={classNames(styles.cubes)}>
-                <img className={classNames(styles.B)} src="../../../../../assets/aptero/microsoft/cubeB.svg"
-                     alt="B"/>
-                <img className={classNames(styles.R)} src="../../../../../assets/aptero/microsoft/cubeR.svg"
-                     alt="R"/>
-                <img className={classNames(styles.J)} src="../../../../../assets/aptero/microsoft/cubeJ.svg"
-                     alt="J"/>
+                <CubeBIcon className={classNames(styles.B)} />
+                <CubeRIcon className={classNames(styles.R)} />
+                <CubeJIcon className={classNames(styles.J)} />
             </div>
             <p> Your room is set up and ready to be shared to everyone</p>
             <p> Now you can go back to your meeting in the "Apps" section to share the app for everyone</p>
@@ -29,18 +30,14 @@ export function MeetingSidePanelMobileAfterInstall() {
 
 export function MeetingSidePanelInviteToShareArrow() {
     return <div className={classNames(styles.sidePanelBody)}>
-        <img className={classNames(styles.fleche)} src="../../../../../assets/aptero/microsoft/fleche.svg"
-             alt="fleche"/>
+        <FlecheIcon className={classNames(styles.fleche)} />
         <div style={{height: "100px"}}></div>
         <div style={{height: "20px"}}></div>
         <main className={classNames(styles.main)}>
             <div className={classNames(styles.cubes)}>
-                <img className={classNames(styles.B)} src="../../../../../assets/aptero/microsoft/cubeB.svg"
-                     alt="B"/>
-                <img className={classNames(styles.R)} src="../../../../../assets/aptero/microsoft/cubeR.svg"
-                     alt="R"/>
-                <img className={classNames(styles.J)} src="../../../../../assets/aptero/microsoft/cubeJ.svg"
-                     alt="J"/>
+                <CubeBIcon className={classNames(styles.B)} />
+                <CubeRIcon className={classNames(styles.R)} />
+                <CubeJIcon className={classNames(styles.J)} />
             </div>
             <p> Your room is set up and ready to be shared to everyone</p>
             <p> To start your 3D meeting, click the share button on&nbsp;top of this panel</p>

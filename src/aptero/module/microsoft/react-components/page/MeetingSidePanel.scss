@@ -35,7 +35,7 @@
   position: relative;
 }
 
-:local(.cubes) img {
+:local(.cubes) > * {
   width: 30px;
   position: absolute;
   transform: translate(-50%, -50%);

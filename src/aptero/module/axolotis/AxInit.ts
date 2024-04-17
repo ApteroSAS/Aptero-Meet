@@ -6,7 +6,19 @@ import {SampleServiceA, SampleServiceAName} from "./modules/basic/SampleServiceA
 import {GenericModule} from "./GenericModules";
 import {CustomURL, CustomURLName} from "../customURL/CustomURL";
 
-export function initIOC() {
+let init:Promise<void> = null;
+
+export function initIOC():Promise<void> {
+    if(!init) {
+        init = new Promise<void>((resolve) => {
+            initIOCInternal();
+            resolve();
+        });
+    }
+    return init;
+}
+
+function initIOCInternal() {
     container.load(BasicModule());
     container.load(TeamsModule());
     container.load(GenericModule);

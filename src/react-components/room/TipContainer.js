@@ -117,6 +117,7 @@ export function TipContainer({ inLobby, inRoom, isStreaming, isEmbedded, scene, 
       );
     }
 
+    {/* APTERO
     if ((isEmbedded || hasEmbedPresences(presences)) && !embeddedTipDismissed) {
       return (
         <Tip onDismiss={() => setEmbeddedTipDismissed(true)} dismissLabel={<OkDismissLabel />}>
@@ -127,6 +128,7 @@ export function TipContainer({ inLobby, inRoom, isStreaming, isEmbedded, scene, 
         </Tip>
       );
     }
+    */}
 
     return null;
   }
