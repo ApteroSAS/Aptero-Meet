@@ -22,14 +22,21 @@ export class CustomActionRegister {
     let actionData = this.actions[id];
     if (actionData) {
       if (actionData.action.type === "animation") {
-        actionData.callback();
+        //actionData.callback(); // Animate only once
         networkService.sendMessage("animation_play", { id });
       } else if (actionData.action.type === "spawn_attach") {
+        if (!window.APP.hubChannel.can("spawn_and_move_media")) {
+          return; // We check if the user has the permission to spawn media
+        }
         let entry = this.convertToEntry(id, data);
         await this.spawnAttach(actionData, entry);
+
       } else if (actionData.action.type === "remove_from_media_frame") {
         await this.removeFromMediaFrame(actionData);
       } else if (actionData.action.type === "spawn") {
+        if (!window.APP.hubChannel.can("spawn_and_move_media")) {
+          return; // We check if the user has the permission to spawn media
+        }
         let entry = this.convertToEntry(id, data);
         await this.handleEntry(entry,this.getMediaOptionSetting(actionData));
       } else if (actionData.action.type === "url") {
@@ -42,7 +49,7 @@ export class CustomActionRegister {
         }
       } else if(actionData.action.type === "sidebar_iframe" ){
         AFRAME.scenes[0].emit("action_toggle_custom_sidebar");
-        setTimeout(()=>{AFRAME.scenes[0].emit("action_toggle_custom_sidebar_info",actionData.action)},0);
+        setTimeout(()=>{AFRAME.scenes[0].emit("action_toggle_custom_sidebar_info",actionData.action)},10);
       }
     }
   }
@@ -138,9 +145,18 @@ export class CustomActionRegister {
     //}
   }
 
-  async waitForNetworkEl(el) {
+  /*async waitForNetworkEl(el) {
+    console.log("CHECK THIS EL IS MINE",el)
+    //FIRST check if the element is networked
+    if (!el.components["networked"]) {
+      console.log("NO NETWORKED COMPONENT");
+      return;
+    }
+    
+    // Not being used right now, the Frame is not networked, but rather a Raw 3D Object
     const startMs = new Date().getTime();
     return new Promise((resolve,reject) => {
+      
       if (NAF.utils.isMine(el) || NAF.utils.takeOwnership(el)) {
         resolve();
       } else {
@@ -156,15 +172,22 @@ export class CustomActionRegister {
         }, 200);
       }
     });
-  }
+  }*/
 
   async spawnAttach(actionData, entry) {
-    let mediaFrame = await this.findMediaFrameByName(actionData.action.mediaFrame);
-    if (mediaFrame && mediaFrame.components["media-frame"]) {
-      let mediaFrameComponent = mediaFrame.components["media-frame"];
+    //let mediaFrame = await this.findMediaFrameByName(actionData.action.mediaFrame);
+    let mediaFrame = document.querySelector("."+actionData.action.mediaFrame)
+
+    if (mediaFrame) {
+      //let mediaFrameComponent = mediaFrame;
+
       const mfvWorldPos = new THREE.Vector3();
-      mediaFrameComponent.el.object3D.getWorldPosition(mfvWorldPos);
+      mediaFrame.object3D.getWorldPosition(mfvWorldPos);
+
+      let mediaFrameComponent = mediaFrame;
+
       await this.removeOldMediaFrameEntity(mediaFrame);
+      
       let entity = await new Promise(async (resolve, reject) => {
         try {
           let {entity,orientation} = await this.handleEntry(entry,this.getMediaOptionSetting(actionData));
@@ -213,12 +236,22 @@ export class CustomActionRegister {
           /*capturableEntity.object3D.scale.setScalar(
             scaleForAspectFit(this.data.bounds, capturableEntity.getObject3D("mesh").scale)
           );*/
-          await this.waitForNetworkEl(mediaFrameComponent.el);
+          
+          // THE MEDIAFRAME NETWORK COMPONENT WAS REMOVED
+          //await this.waitForNetworkEl(mediaFrameComponent);
+
           //NAF.entities.completeSync(NAF.clientId,true);
-          mediaFrameComponent.capture(entity);
+          if (mediaFrameComponent.capture) {
+            mediaFrameComponent.capture(entity);
+          }
           if (actionData.action.pin) {
             await pinEntity(entity);
           }
+          if (!mediaFrameComponent.data){
+            mediaFrameComponent.data = {};
+          }
+          mediaFrameComponent.data.targetId = entity.id;
+
           //applyPersistentSync(entity.components["networked"].data.networkId);//TODO usefull?
           //applyPersistentSync(mediaFrame.components["networked"].data.networkId);//TODO usefull?
         }, 0);
@@ -230,18 +263,18 @@ export class CustomActionRegister {
 
   async removeOldMediaFrameEntity(mediaFrame) {
     return new Promise(async (resolve, reject) => {
-      if (mediaFrame && mediaFrame.components["media-frame"]) {
-        let mediaFrameComponent = mediaFrame.components["media-frame"];
+      if (mediaFrame) {
+        let mediaFrameComponent = mediaFrame;
+
         //1 find the element to remove
-        let capturedEl = document.getElementById(mediaFrameComponent.data.targetId);
-        const bodyUUID = mediaFrameComponent.el.components["body-helper"].uuid;
-        const mediaFrameSystem = AFRAME.scenes[0].systems["hubs-systems"].mediaFramesSystem;
-        const physicalyPresentInMediaFrameEl = mediaFrameSystem.getCapturableEntityCollidingWithBody(mediaFrameComponent.data.mediaType, bodyUUID);//physicaly present but not linked
-        capturedEl = capturedEl || physicalyPresentInMediaFrameEl;
+        let capturedEl = null;
+        capturedEl = document.getElementById(mediaFrameComponent.data?.targetId);
 
         //2 release the element just in case
-        if(mediaFrameComponent.data.targetId !== "empty") {
-          mediaFrameComponent.release();
+        if(mediaFrameComponent.data 
+          && mediaFrameComponent.data.targetId
+          && mediaFrameComponent.data.targetId !== "empty") {
+          mediaFrameComponent.data.targetId = "empty";
         }
 
         if (capturedEl) {
@@ -294,6 +327,11 @@ export class CustomActionRegister {
         }
       } else {
         console.error("invalid media frame target");
+        // List all media-frames and console log them
+        Object.keys(NAF.entities.entities).forEach(key => {
+          let frame = NAF.entities.entities[key];
+        });
+        
         reject();
       }
     });

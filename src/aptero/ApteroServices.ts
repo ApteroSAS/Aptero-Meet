@@ -5,6 +5,7 @@ import "./module/ButtonAPI/component/media-limiter";
 import "./module/CustomPanel/component/open-iframe-button";
 import "./module/ButtonAPI/component/stop-share-screen-on-destroy";
 import "./module/ButtonAPI/component/release-media-frame-on-destroy";
+import "./module/AudioZone/component/trigger";
 import { gltfExtensionProcessorService } from "./module/ButtonAPI/api/GLTFExtensionProcessorService";
 import { AudioSettingsSystem } from "../systems/audio-settings-system";
 import {redirectIfNeeded} from "./module/load-balancer/LoadBalancer";

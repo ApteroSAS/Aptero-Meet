@@ -44,7 +44,6 @@ export class ActionController {
     let element = jquery("#" + elid);
     let htmlElement = element.get()[0];
     let networkId = await networkService.getElementNetworkId(htmlElement) || "local";
-    console.log("registered custom controller", sceneuuid, meshuuid, meshName);
     let actionIds = [];
     entry.actions.forEach((action, index) => {
       let actionid = networkId + "_" + meshName + "_" + masterindex + "_" + pairIndex + "_" + index + "_" + (action.data || "");
@@ -59,6 +58,8 @@ export class ActionController {
     entry.triggers.forEach((trigger, index) => {
       let triggerId = networkId + "_" + meshName + "_" + masterindex + "_" + pairIndex + "_" + index;
       customActionRegister.triggers[triggerId]=trigger;
+      console.log("TRIGGER", trigger)
+      console.log("ENTRY", entry)
       if (trigger.type === "btn" || trigger.type === "btn-ask") {
         if(!trigger.position){
           trigger.position=new THREE.Vector3(0,0,0);
@@ -103,7 +104,7 @@ export class ActionController {
         "           visible=\"true\"\n" +
         "           text=\" value:" + (text || "click") + "; width:" + (textWidth || "1.75") + "; align:center;\"\n" +
         "           text-raycast-hack\n" +
-        "           position=\"0 0 0\">\n" +
+        "           position=\"0 0 0.01\">\n" +
         "       </a-entity>\n" +
         "   </a-entity>");
   }

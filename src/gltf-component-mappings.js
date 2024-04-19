@@ -135,12 +135,18 @@ import { setInitialNetworkedData } from "./utils/assign-network-ids";
 
 AFRAME.GLTFModelPlus.registerComponent("media-frame", "media-frame", (el, _componentName, componentData) => {
   // eslint-disable-next-line react/no-unknown-property
+  console.log("[!!] media-frame:", _componentName)
   const eid = renderAsEntity(APP.world, <entity mediaFrame={componentData} />);
 
   addComponent(APP.world, Networked, eid);
-
   const networkedEl = findAncestorWithComponent(el, "networked");
+  
+  console.log("[!!] networkedEl:", networkedEl)
+
+
   const rootNid = (networkedEl && networkedEl.components.networked.data.networkId) || "scene";
+
+
   setInitialNetworkedData(eid, `${rootNid}.${el.object3D.children[0].userData.gltfIndex}`, rootNid);
 
   el.object3D.add(APP.world.eid2obj.get(eid));
@@ -284,6 +290,7 @@ async function mediaInflator(el, componentName, componentData, components, fitTo
       HBFalloffDistance: componentData.HBFalloffDistance,
       HBPermissions: componentData.HBPermissions,
       universalStream: componentData.universalStream,
+      customTitle: componentData.customTitle,
       // Advanced audio properties
       HBAdvancedAudio: componentData.HBAdvancedAudio,
       audioType: componentData.audioType,
@@ -295,6 +302,9 @@ async function mediaInflator(el, componentName, componentData, components, fitTo
       coneInnerAngle: componentData.coneInnerAngle,
       coneOuterAngle: componentData.coneOuterAngle,
       coneOuterGain: componentData.coneOuterGain,
+      audioChannel: componentData.audioChannel,
+      screenShareMode: componentData.screenShareMode,
+      screenShareMuted: componentData.screenShareMuted,
     });
   }
 

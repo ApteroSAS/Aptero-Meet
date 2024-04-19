@@ -1,6 +1,7 @@
 
 
 export async function setupIframeButton(t) {
+  console.log("setupIframeButton");
   console.dir(t.src);
   const link = document.createElement('a');
   link.href = t.src;

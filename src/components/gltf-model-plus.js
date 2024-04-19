@@ -1023,7 +1023,6 @@ export function cloneModelFromCache(src) {
  * @param {null|(json:any)=>any} [jsonPreprocessor]
  */
 export async function loadModel(src, contentType = null, useCache = false, jsonPreprocessor = null) {
-  console.log(`Loading model ${src}`);
   if (useCache) {
     if (gltfCache.has(src)) {
       gltfCache.retain(src);
@@ -1131,6 +1130,14 @@ AFRAME.registerComponent("gltf-model-plus", {
       this.disposeLastInflatedEl();
 
       this.model = gltf.scene;
+      
+      /*
+        Please note that this system will most of the time be used for loading the Scene GLTF file, and not each individual model.
+        The models are processed using processGltfFile, which is called from the GLTFExtensionProcessorService.
+      */
+      if (this.data.batch) {
+        this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.addObject(this.model.animations);
+      }
 
       if (gltf.animations.length > 0) {
         this.el.setAttribute("animation-mixer", {});
@@ -1189,9 +1196,10 @@ AFRAME.registerComponent("gltf-model-plus", {
       this.el.setObject3D("mesh", object3DToSet);
 
       rewires.forEach(f => f());
+      object3DToSet.visible = true; 
+      let parent = (gltf.scene || gltf.scenes[0]).parent;//aptero
+      gltfExtensionProcessorService.processGltfFile(parent,this.model.uuid);//Aptero entry point for personalized animation library
 
-      object3DToSet.visible = true;
-      //gltfExtensionProcessorService.processGltfFile(children,this.model.uuid);//Aptero entry point for personalized animation library
       this.el.emit("model-loaded", { format: "gltf", model: object3DToSet });
     } catch (e) {
       gltfCache.release(src);

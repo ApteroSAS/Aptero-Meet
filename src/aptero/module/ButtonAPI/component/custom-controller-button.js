@@ -10,6 +10,7 @@ AFRAME.registerComponent("custom-controller-action", {
   },
 
   applyPerm(object3D, data) {
+    console.log("Applying permissions")
     object3D.visible = false;
     let authorizationData = customActionRegister.triggers[data.triggerId].authorization;
     if (configs.isAdmin()) {
@@ -29,6 +30,7 @@ AFRAME.registerComponent("custom-controller-action", {
   },
 
   init() {
+    console.log("Initiated the Button")
     this._updateUI = this._updateUI.bind(this);
     this._updateUIOnStateChange = this._updateUIOnStateChange.bind(this);
     this.onHovered = () => {
@@ -59,18 +61,23 @@ AFRAME.registerComponent("custom-controller-action", {
         this.clickWIP = true;
         try {
           let entry = null;
+          console.log("Triggering action data", this)
           if (this.data.type === "btn-ask") {
             entry = await searchService.sourceNavigateWithResult(this.data.source || "videos2d-simple");
+            console.log("BtnkAsk", entry);
           }
           if (this.data.actionIds) {
             let ids = this.data.actionIds.split("+");
             for (const id of ids) {
+              console.log("Trigger Attempt", id, entry)
               await customActionRegister.triggerAction(id, entry);
+              console.log("Triggered action", id);
             }
           }
           await new Promise(resolve => {
             setTimeout(resolve,600);//prevent spam click
           });
+          
           this.clickWIP = false;
         } catch (ex) {
           this.clickWIP = false;

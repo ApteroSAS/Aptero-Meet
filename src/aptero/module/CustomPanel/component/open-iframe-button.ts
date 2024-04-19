@@ -23,7 +23,11 @@ AFRAME.registerComponent("open-iframe-button", {
       title:"viewer"
     }
     this.el.sceneEl.emit("action_toggle_custom_sidebar");
-    setTimeout(()=>{this.el.sceneEl.emit("action_toggle_custom_sidebar_info",obj)},10);
+    setTimeout(()=>{
+      this.el.sceneEl.emit("action_toggle_custom_sidebar_info",obj)
+      console.log("action_toggle_custom_sidebar", obj);
+    
+    },20);
     
   }
 });

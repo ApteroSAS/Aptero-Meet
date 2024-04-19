@@ -43,13 +43,7 @@ waitForDOMContentLoaded().then(() => {
   });
 });
 const fetchContentType = url => { 
-  console.log("Fetch type B",url);
-
-  const bb = fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
-
-  console.log("bb",bb)
-
-  return bb;
+  return fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
 };
 
 AFRAME.registerComponent("media-loader", {
@@ -395,6 +389,17 @@ AFRAME.registerComponent("media-loader", {
       let contentType = this.data.contentType;
       let thumbnail;
 
+      //aptero feature video 360
+      if((this.data.contentSubtype && this.data.contentSubtype.includes("360")) || (contentType && contentType.includes("360")) || (this.data.mediaOptions.type && this.data.mediaOptions.type.includes("360"))){
+        this.networkedEl.setAttribute("media-loader","contentSubtype", "360-equirectangular");
+        this.el.setAttribute("media-loader","contentSubtype", "360-equirectangular");
+        this.el.setAttribute("media-loader","type", "360-equirectangular");
+      }
+      const attrType = this.el.components["media-loader"].data.type;
+      if( attrType && attrType.includes("360")){
+        this.data.mediaOptions.projection = "360-equirectangular";
+      }
+
       const parsedUrl = new URL(src);
 
       // We want to resolve and proxy some hubs urls, like rooms and scene links,
@@ -406,7 +411,8 @@ AFRAME.registerComponent("media-loader", {
         !src.match(hubsRoomRegex)?.groups.id &&
         !src.match(localHubsRoomRegex)?.groups.id;
 
-      if (this.data.resolve && !src.startsWith("data:") && !src.startsWith("hubs:") && !isLocalAsset) {
+      if (this.data.resolve && !src.startsWith("data:") && !src.startsWith("hubs:") && !isLocalAsset
+      && !src.startsWith(HYPERBEAM_PROTOCOL) && !src.startsWith(IN_APP_WEB_BROWSER_PROTOCOL)) {
         const is360 = !!(this.data.mediaOptions.projection && this.data.mediaOptions.projection.startsWith("360"));
         const quality = getDefaultResolveQuality(is360);
         const result = await resolveUrl(src, quality, version, forceLocalRefresh);

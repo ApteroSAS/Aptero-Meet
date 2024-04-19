@@ -17,12 +17,16 @@ import semver from "semver";
 import { createPlaneBufferGeometry } from "../utils/three-utils";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";
 import { getCurrentAudioSettings, updateAudioSettings } from "../update-audio-settings";
-import { SourceType, AudioType } from "./audio-params";
+import { SourceType, AudioType, MediaAudioDefaults } from "./audio-params";
 import { errorTexture } from "../utils/error-texture";
 import { scaleToAspectRatio } from "../utils/scale-to-aspect-ratio";
 import { isSafari } from "../utils/detect-safari";
 import { isIOS as detectIOS } from "../utils/is-mobile";
 import { Layers } from "../camera-layers";
+
+//aptero
+import { IN_APP_WEB_BROWSER_PROTOCOL, remoteWebBrowser } from "../aptero/module/RemoteScreen/RemoteControlServiceV2";
+import { hyperbeamBrowser, HYPERBEAM_PROTOCOL } from "../aptero/module/RemoteScreen/HyperbeamService";
 
 const ONCE_TRUE = { once: true };
 const TYPE_IMG_PNG = { type: "image/png" };
@@ -57,6 +61,7 @@ const MAX_GAIN_MULTIPLIER = 2;
 AFRAME.registerComponent("media-video", {
   schema: {
     src: { type: "string" },
+    hsrc: { type: "string" }, // Used for storing Hyperbeam EmbedURL
     audioSrc: { type: "string" }, // set only if audio track is separated from video track (eg. 360 video)
     contentType: { type: "string" },
     loop: { type: "boolean", default: true },
@@ -68,7 +73,8 @@ AFRAME.registerComponent("media-video", {
     syncTolerance: { default: 2 },
     linkedVideoTexture: { default: null },
     linkedAudioSource: { default: null },
-    linkedMediaElementAudioSource: { default: null }
+    linkedMediaElementAudioSource: { default: null },
+    customOptions: { type: "string" ,  default: ""},
   },
 
   init() {
@@ -334,6 +340,9 @@ AFRAME.registerComponent("media-video", {
       this.playPauseButton.setAttribute("icon-button", "active", pause);
     }
 
+    // Ignore if we are using Hyperbeam
+    if (this.data.src.startsWith(HYPERBEAM_PROTOCOL)) return;
+
     if (pause) {
       this.video.pause();
     } else {
@@ -422,7 +431,7 @@ AFRAME.registerComponent("media-video", {
       }
 
       this.mediaElementAudioSource = null;
-      if (!src.startsWith("hubs://")) {
+      if (!src.startsWith("hubs://") && !src.startsWith(HYPERBEAM_PROTOCOL) && !src.startsWith(IN_APP_WEB_BROWSER_PROTOCOL)/** APTERO **/) {
         // iOS video audio is broken on ios safari < 13.1.2, see: https://github.com/mozilla/hubs/issues/1797
         if (!isIOS || semver.satisfies(detect().version, ">=13.1.2")) {
           // TODO FF error here if binding mediastream: The captured HTMLMediaElement is playing a MediaStream. Applying volume or mute status is not currently supported -- not an issue since we have no audio atm in shared video.
@@ -438,6 +447,13 @@ AFRAME.registerComponent("media-video", {
       this.video.loop = this.data.loop;
       this.video.addEventListener("pause", this.onPauseStateChange);
       this.video.addEventListener("play", this.onPauseStateChange);
+
+      //aptero livescream bugfix //TODO still necessary? //devnote: livescream??
+      if (src.startsWith("hubs://") && !src.startsWith(HYPERBEAM_PROTOCOL) && !src.startsWith(IN_APP_WEB_BROWSER_PROTOCOL) ) {
+        setTimeout(() => {
+          this.video.play();
+        }, 2000);
+      }
 
       if (texture.hls) {
         const updateHLSLiveState = () => {
@@ -568,7 +584,13 @@ AFRAME.registerComponent("media-video", {
       }
 
       // Set src on video to begin loading.
-      if (url.startsWith("hubs://")) {
+      // Set src on video to begin loading.
+      if(url.startsWith(HYPERBEAM_PROTOCOL)) {
+        texture = await hyperbeamBrowser(this.el,texture,this.data);
+
+      } else if (url.startsWith(IN_APP_WEB_BROWSER_PROTOCOL)) {
+        texture = await remoteWebBrowser(this.el,texture,this.data);
+      } else if (url.startsWith("hubs://")) {
         const streamClientId = url.substring(7).split("/")[1]; // /clients/<client id>/video is only URL for now
         const stream = await APP.dialog.getMediaStream(streamClientId, "video");
         // We subscribe to video stream notifications for this peer to update the video element
