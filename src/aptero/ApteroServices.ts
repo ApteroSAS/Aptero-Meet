@@ -20,6 +20,7 @@ import {container} from "./module/axolotis/IOCConfig";
 import {HttpEventService, HttpEventServiceName} from "@aptero/axolotis-module-basic";
 import {msTeamsAPILight} from "./module/axolotis/modules/basic/ImportHelper";
 import {initIOC} from "./module/axolotis/AxInit";
+import {FrontEndAPI} from "./module/FrontEndAPI/FrontEndAPI";
 
 declare let window:any;
 declare let AFRAME:any;
@@ -73,6 +74,7 @@ export class ApteroServices {
   thirdPersonService = new ThirdPersonService();
   private audioSettingsSystem: any;
   private sceneEntered: boolean = false;
+  private frontEndAPI: FrontEndAPI = new FrontEndAPI();
   constructor() {
     this.firstLoadProcess().then(() =>{
         console.log("firstLoadProcess done");
@@ -94,6 +96,7 @@ export class ApteroServices {
       })());
       prom.push(roomParameters.getRoomParameters()); //called as soon as possible
       await Promise.all(prom);
+      this.frontEndAPI.attachToWindow();
     }catch (e) {
       console.error(e);
     }

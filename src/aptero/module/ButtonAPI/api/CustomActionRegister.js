@@ -6,7 +6,6 @@ import {
 import { ObjectContentOrigins } from "../../../../object-types";
 import { ActionAnimationController } from "./ActionAnimationController";
 import { roomController } from "./RoomController";
-import { mediaViewEventEmitter } from "../service/ChangeVideoService";
 import axios from "axios";
 import { networkService } from "../../HubsBridge/service/NetworkService";
 
@@ -86,10 +85,8 @@ export class CustomActionRegister {
             }
           }else{
             reject("premature end of share screen/camera");
-            mediaViewEventEmitter.removeListener("share_video_media_stream_created", onCreate)
           }
         }, { once: true });
-        mediaViewEventEmitter.once("share_video_media_stream_created",onCreate );
       } else {
         resolve(spawnMedia(entry.url, entry.contentOrigin, mediaOptions));
       }

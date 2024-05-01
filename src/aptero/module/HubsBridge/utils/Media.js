@@ -52,5 +52,5 @@ export function spawnMediaInfrontOfPlayer(src, contentOrigin, data) {
       orientation: or
     });
   });
-  return entity;
+  return {entity, orientation};
 }

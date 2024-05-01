@@ -60,7 +60,7 @@ export class ActionController {
       customActionRegister.triggers[triggerId]=trigger;
       console.log("TRIGGER", trigger)
       console.log("ENTRY", entry)
-      if (trigger.type === "btn" || trigger.type === "btn-ask") {
+      if (trigger.type === "btn") {
         if(!trigger.position){
           trigger.position=new THREE.Vector3(0,0,0);
         }

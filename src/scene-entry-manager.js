@@ -28,9 +28,6 @@ import { anyEntityWith, shouldUseNewLoader } from "./utils/bit-utils";
 import { moveToSpawnPoint } from "./bit-systems/waypoint";
 import { spawnFromFileList, spawnFromUrl } from "./load-media-on-paste-or-drop";
 import { isLockedDownDemoRoom } from "./utils/hub-utils";
-//aptero
-import { mediaViewEventEmitter, lastVideoShareData } from "./aptero/module/ButtonAPI/service/ChangeVideoService";
-import { searchService } from "./aptero/module/ButtonAPI/service/SearchService";
 import { networkService } from "./aptero/module/HubsBridge/service/NetworkService";
 
 export default class SceneEntryManager {

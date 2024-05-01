@@ -4,8 +4,6 @@ import { remoteControlServiceV2 } from "../../RemoteScreen/RemoteControlServiceV
 import CreateAvatar from "../../AvatarReadyPlayerMe/CreateAvatar";
 import styles from "./scss/component/MediaTiles.scss";
 import PropTypes from "prop-types";
-import { lastVideoShareData } from "../../ButtonAPI/service/ChangeVideoService";
-
 
 export const WEB_BROWSER_URL_MODE = "web-browser";
 export const HYPERBEAM_MODE = "hyperbeam";
@@ -204,7 +202,6 @@ export function completeEntry (entry,is360,selectAction) {
   if (entry.shareScreen) {
     entry.shareScreen.type = is360 ? "360-equirectangular" : "2d";
     entry.shareScreen.selectAction = selectAction;
-    lastVideoShareData.data =  entry.shareScreen;
     AFRAME.scenes[0].emit("action_end_video_sharing");
     setTimeout(()=>{
       AFRAME.scenes[0].emit(`action_share_screen`,"change_screen_to_share_screen");
@@ -215,7 +212,6 @@ export function completeEntry (entry,is360,selectAction) {
   } else if (entry.camera) {
     entry.camera.type = is360 ? "360-equirectangular" : "2d";
     entry.camera.selectAction = selectAction;
-    lastVideoShareData.data =  entry.camera;
     AFRAME.scenes[0].emit("action_end_video_sharing");
     setTimeout(()=> {
       AFRAME.scenes[0].emit("action_share_camera", "change_screen_to_camera");
