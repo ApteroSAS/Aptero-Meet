@@ -6,40 +6,7 @@
  */
 import {SpawnHelperAPI} from "./SpawnHelperAPI";
 import {AnimationControllerAPI} from "./AnimationControllerAPI";
-
-
-export class FrontEndAPIIframe {
-    private sendCommandToParent(command: string, data: any) {
-        //window.parent.postMessage({ command:"ping", data:"ph" }, '*');
-        window.parent.postMessage({ command, data }, '*');
-    }
-
-    echo(data: string) {
-        this.sendCommandToParent('echo', data);
-    }
-
-    /** eg with parameter '#WayPoint3' in opal it must have the Waypoint3 name **/
-    moveToWaypoint(waypoint: string) {
-        this.sendCommandToParent('moveToWaypoint', waypoint);
-    }
-
-    spawnAttach(mediaFrameName: string, url: string, config: any) {
-        this.sendCommandToParent('spawnAttach', { mediaFrameName, url, config });
-    }
-
-    spawn(url: string, mediaOptions: any) {
-        this.sendCommandToParent('spawn', { url, mediaOptions });
-    }
-
-    removeFromMediaFrame(mediaFrameName: string) {
-        this.sendCommandToParent('removeFromMediaFrame', mediaFrameName);
-    }
-
-    triggerAnimation(elName: string, animName: string, action: any) {
-        this.sendCommandToParent('triggerAnimation', { elName, animName, action });
-    }
-
-}
+import {MediaOptions, SpawnAttachConfig, TriggerAnimationAction} from "./FrontEndCommandAPI";
 
 export class FrontEndAPI{
     spawnHelperAPI = new SpawnHelperAPI();
@@ -48,12 +15,13 @@ export class FrontEndAPI{
     attachToWindow(){
         //this define the API that can be used by the parent window
         const listMapping = {
-            echo: (data:string) => {this.echo(data);},
-            moveToWaypoint: (waypoint:string) => {this.moveToWaypoint(waypoint);},
-            spawnAttach: (data:any) => {this.spawnAttach(data.mediaFrameName, data.url, data.config);},
-            spawn: (data:any) => {this.spawn(data.url, data.mediaOptions);},
-            removeFromMediaFrame: (mediaFrameName:string) => {this.removeFromMediaFrame(mediaFrameName);},
-            triggerAnimation: (data:any) => {this.triggerAnimation(data.elName, data.animName, data.action);},
+            echo: (data:string) => {return this.echo(data);},
+            moveToWaypoint: (waypoint:string) => {return this.moveToWaypoint(waypoint);},
+            spawnAttach: (data:any) => {return this.spawnAttach(data.mediaFrameName, data.url, data.config);},
+            spawn: (data:any) => {return this.spawn(data.url, data.mediaOptions);},
+            removeFromMediaFrame: (mediaFrameName:string) => {return this.removeFromMediaFrame(mediaFrameName);},
+            triggerAnimation: (data:any) => {return this.triggerAnimation(data.animName, data.action);},
+            describe: () => {return this.describe();}
         };
 
         (window as any).ROOM_API = {
@@ -63,17 +31,71 @@ export class FrontEndAPI{
         window.addEventListener('message', event => {
             const cmd = event.data.command;
             if (listMapping[cmd]) {
-                listMapping[cmd](event.data.data);
+                const ret = listMapping[cmd](event.data.data);
+                // Sending the response back to the parent window
+                event.source.postMessage({
+                    id:event.data.id,
+                    response: ret
+                },{
+                    targetOrigin: event.origin
+                }); // Ensure to use event.origin for security
+            } else {
+                // Optionally handle the case where the command is not found
+                event.source.postMessage({
+                    id:event.data.id,
+                    error: 'Command not found'
+                },{
+                    targetOrigin: event.origin
+                });
             }
         });
     }
 
+    describe(){
+        const objects = Array.from(document.querySelector('#environment-scene').querySelectorAll("a-entity"));
+        const avatars = Array.from(document.querySelectorAll('#avatar-rig'))
+        let result = [];
+        const filterName = ["Floor_Plan","Ground_Plane","Skybox","scene-preview-camera"]
+        const filterComponent = ["environment-settings","directional-light",'shape-helper__heightfield','nav-mesh']
+        for (let objectEl of [...avatars,...objects]){
+            const object = objectEl as any;
+            const object3D = object.object3D;
+            let name = object3D && object3D.name;
+            if(object.components["player-info"]){
+                name = "player"
+            }
+            if(name){
+                const components = Object.keys(object3D.el?.components || {}) || [];
+                if(filterName.includes(object3D.name)) continue;
+                if(components.some((component) => filterComponent.includes(component))) continue;
+                const q = object3D.getWorldDirection(new THREE.Vector3());
+                const s = object3D.getWorldScale(new THREE.Vector3());
+                const p = object3D.getWorldPosition(new THREE.Vector3());
+                result.push({
+                    name,
+                    position: {x:p.x, y:p.y, z:p.z},
+                    direction: {x:q.x, y:q.y, z:q.z},
+                    scale: {x:s.x, y:s.y, z:s.z},
+                    components
+                });
+            }
+        }
+        return {
+            objects:result,
+            animation: this.animationControllerAPI.listAnimation()
+        };
+    }
+
     echo(data:string){
         console.log(":"+data);
+        return data;
     }
 
     moveToWaypoint(waypoint:string){
-        window.history.pushState(null,null,waypoint);
+        if(waypoint.startsWith("#")){
+            waypoint = waypoint.slice(1);
+        }
+        window.history.pushState(null,null,`#${waypoint}`);
     }
 
     /**
@@ -85,19 +107,7 @@ export class FrontEndAPI{
     spawnAttach(
         mediaFrameName:string,
         url:string,
-        config: {
-            audio?: {
-                distanceModel: string;
-                rolloffFactor: number;
-                refDistance: number;
-                maxDistance: number;
-                coneInnerAngle: number;
-                coneOuterAngle: number;
-                coneOuterGain: number
-            },
-            pin?:boolean,
-            attribute?:any
-        }){
+        config: SpawnAttachConfig){
         this.spawnHelperAPI.spawnAttach(
             mediaFrameName,
             url,
@@ -119,15 +129,7 @@ export class FrontEndAPI{
      * @param url
      * @param mediaOptions
      */
-    spawn(url:string, mediaOptions?:{
-        distanceModel?: string;
-        rolloffFactor?: number;
-        refDistance?: number;
-        maxDistance?: number;
-        coneInnerAngle?: number;
-        coneOuterAngle?: number;
-        coneOuterGain?: number
-    }){
+    spawn(url:string, mediaOptions?:MediaOptions){
         if(!url){
             console.error("url is required");
             return;
@@ -141,18 +143,12 @@ export class FrontEndAPI{
      * @param animName
      * @param action
      */
-    triggerAnimation(elName:string,animName:string,action:{
-        speed?: number,
-        reclick?: number,
-        loop?: boolean,
-        repeat?: number,
-        data?: any
-    } = {}){
-        if(!elName || !animName){
-            console.error("elName and animName are required");
+    triggerAnimation(animName:string,action:TriggerAnimationAction = {}){
+        if(!animName){
+            console.error("animName are required");
             return;
         }
-        this.animationControllerAPI.triggerAnimation(elName,animName,action);
+        this.animationControllerAPI.triggerAnimation(animName,action);
     }
 
     /*openNewTab(url){

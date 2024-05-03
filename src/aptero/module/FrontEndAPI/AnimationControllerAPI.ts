@@ -1,42 +1,44 @@
-import { findAncestorWithComponent } from "../../../utils/scene-graph";
-import { networkService } from "../HubsBridge/service/NetworkService";
+import {findAncestorWithComponent} from "../../../utils/scene-graph";
+import {networkService} from "../HubsBridge/service/NetworkService";
+import {TriggerAnimationAction} from "./FrontEndCommandAPI";
 
-export class AnimationControllerAPI{
-    constructor() {    }
+export class AnimationControllerAPI {
+    constructor() {
+    }
 
-    init(){
-        networkService.onMessage("animation_play_v2", ({  body }) => {
-            this.triggerAnimation(body.elName,body.animName,body.action);
+    init() {
+        networkService.onMessage("animation_play_v2", ({body}) => {
+            this.triggerAnimation(body.animName, body.action);
         });
     }
 
-    findElement(name:string){
+    findElement(name: string) {
         return document.querySelector(`.${name}`)
     }
 
 
-    private findAnimation(animName:string,mixerEl:Element){
+    private findAnimation(animName: string, mixerEl: Element) {
         let mixer = mixerEl && (mixerEl as any).components["animation-mixer"].mixer;
         let actionAnimation = mixer.clipAction(animName);
-        if(actionAnimation) return actionAnimation;
-        for(const animation of (mixerEl as any).object3D.animations){
-            if(animation.name.includes(animName)){
+        if (actionAnimation) return actionAnimation;
+        for (const animation of (mixerEl as any).object3D.animations) {
+            if (animation.name.includes(animName)) {
                 return mixer.clipAction(animation.name);
             }
         }
     }
 
-    public triggerAnimation(elName:string,animName:string,action: {
-        speed?: number,
-        reclick?: number,
-        loop?: boolean,
-        repeat?: number,
-        data?: any
-    } = {}){
-        networkService.sendMessage("animation_play_v2", { elName,animName,action });//plays on other instances
-        let element = this.findElement(elName) as any;
-        let mixerEl = findAncestorWithComponent(element, "animation-mixer");
-        let actionAnimation = this.findAnimation(animName,mixerEl);
+    public listAnimation(): string[] {
+        let mixerEl = document.querySelector('#environment-scene').children[0] as any;
+        const animations: any[] = mixerEl.object3D?.animations || [];
+        const animName = animations.map((anim) => anim.name);
+        return animName;
+    }
+
+    public triggerAnimation(animName: string, action: TriggerAnimationAction = {}) {
+        networkService.sendMessage("animation_play_v2", {animName, action});//plays on other instances
+        let mixerEl = document.querySelector('#environment-scene').children[0];
+        let actionAnimation = this.findAnimation(animName, mixerEl);
         const repeat = action.repeat || 1;
 
         if (action.speed !== 0) { // Pause buttons should not affect loops
@@ -79,7 +81,7 @@ export class AnimationControllerAPI{
                 actionAnimation.originalTimeScale = 1;
             } else { // Click / Reclick functionality
                 // Play or change speed
-                const animData = [action.data, action.speed, action.reclick, action.loop, action.repeat];
+                const animData = [{}, action.speed, action.reclick, action.loop, action.repeat];
 
                 // Is not moving AND is unpaused
                 if ((!actionAnimation.isRunning() && actionAnimation.getEffectiveTimeScale() !== 0)
@@ -87,7 +89,7 @@ export class AnimationControllerAPI{
                     || (actionAnimation.lastAnimation !== undefined
                         && JSON.stringify(actionAnimation.lastAnimation) !== JSON.stringify(animData))
                     // reclick functionality is undefined
-                    || action.reclick === undefined ) {
+                    || action.reclick === undefined) {
                     // This animation is NEW
                     actionAnimation.setEffectiveTimeScale(action.speed);
                     setTimeout(() => {

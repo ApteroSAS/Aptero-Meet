@@ -3,30 +3,14 @@ import {
     spawnMedia, spawnMediaInfrontOfPlayer,
     unpinEntity
 } from "../HubsBridge/utils/Media";
+import {MediaOptions, SpawnAttachConfig} from "./FrontEndCommandAPI";
 
 declare let NAF: any;
 
 export class SpawnHelperAPI {
 
     private getMediaOptionSetting(config: {
-        audio?: {
-            distanceModel?: string;
-            rolloffFactor?: number;
-            refDistance?: number;
-            maxDistance?: number;
-            coneInnerAngle?: number;
-            coneOuterAngle?: number;
-            coneOuterGain?: number
-        }
-    }): {
-        distanceModel: string;
-        rolloffFactor: number;
-        refDistance: number;
-        maxDistance: number;
-        coneInnerAngle: number;
-        coneOuterAngle: number;
-        coneOuterGain: number
-    } {
+        audio?: MediaOptions}): MediaOptions {
         if (config && config.audio) {
             return {
                 distanceModel: config.audio.distanceModel,
@@ -75,28 +59,12 @@ export class SpawnHelperAPI {
         //}
     }
 
-    private spawn(url:string, mediaOptions?:{
-        distanceModel?: string;
-        rolloffFactor?: number;
-        refDistance?: number;
-        maxDistance?: number;
-        coneInnerAngle?: number;
-        coneOuterAngle?: number;
-        coneOuterGain?: number
-    }) {
+    private spawn(url:string, mediaOptions?:MediaOptions) {
         //1 = URL is the origin of the content
         return spawnMedia(url, 1, mediaOptions) as any;
     }
 
-    public spawnMediaInfrontOfPlayer(url:string, mediaOptions?:{
-        distanceModel?: string;
-        rolloffFactor?: number;
-        refDistance?: number;
-        maxDistance?: number;
-        coneInnerAngle?: number;
-        coneOuterAngle?: number;
-        coneOuterGain?: number
-    }) {
+    public spawnMediaInfrontOfPlayer(url:string, mediaOptions?:MediaOptions) {
         //1 = URL is the origin of the content
         return spawnMediaInfrontOfPlayer(url, 1, mediaOptions) as any;
     }
@@ -104,19 +72,7 @@ export class SpawnHelperAPI {
     public async spawnAttach(
         mediaFrameName: string,
         url: string,
-        config: {
-            audio?: {
-                distanceModel: string;
-                rolloffFactor: number;
-                refDistance: number;
-                maxDistance: number;
-                coneInnerAngle: number;
-                coneOuterAngle: number;
-                coneOuterGain: number
-            },
-            pin?: boolean,
-            attribute?: any
-        } = {}) {
+        config: SpawnAttachConfig = {}) {
         //let mediaFrame = await this.findMediaFrameByName(actionData.action.mediaFrame);
         let mediaFrame: any = document.querySelector("." + mediaFrameName)
 
