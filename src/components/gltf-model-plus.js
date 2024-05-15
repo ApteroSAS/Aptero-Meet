@@ -1197,6 +1197,7 @@ AFRAME.registerComponent("gltf-model-plus", {
 
       rewires.forEach(f => f());
       object3DToSet.visible = true; 
+      
       let parent = (gltf.scene || gltf.scenes[0]).parent;//aptero
       gltfExtensionProcessorService.processGltfFile(parent,this.model.uuid);//Aptero entry point for personalized animation library
 

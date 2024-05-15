@@ -144,6 +144,9 @@ AFRAME.registerComponent("trigger", {
         // Set the position and scale of the entity
         entity.setAttribute('position', modelData.position);
         entity.setAttribute('scale', modelData.scale);
+        //entity.setAttribute('animation-mixer', '');
+        document.querySelector('a-scene').appendChild(entity);
+
       }
     }
   },

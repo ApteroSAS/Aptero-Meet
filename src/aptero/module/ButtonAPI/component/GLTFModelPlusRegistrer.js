@@ -15,6 +15,7 @@ export function registerCustomGLTFModelPlusComponents(){
         audioChannel,
         triggerModels,
         customTitle,
+
         // legacy properties
         enterComponent,
         enterProperty,
