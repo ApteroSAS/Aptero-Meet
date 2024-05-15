@@ -29,24 +29,27 @@ export class FrontEndAPI{
         }
 
         window.addEventListener('message', event => {
-            const cmd = event.data.command;
-            if (listMapping[cmd]) {
-                const ret = listMapping[cmd](event.data.data);
-                // Sending the response back to the parent window
-                event.source.postMessage({
-                    id:event.data.id,
-                    response: ret
-                },{
-                    targetOrigin: event.origin
-                }); // Ensure to use event.origin for security
-            } else {
-                // Optionally handle the case where the command is not found
-                event.source.postMessage({
-                    id:event.data.id,
-                    error: 'Command not found'
-                },{
-                    targetOrigin: event.origin
-                });
+            const cmd = event.data?.command;
+            if(cmd) {
+                console.log("function message received",event.data)
+                if (listMapping[cmd]) {
+                    const ret = listMapping[cmd](event.data.data);
+                    // Sending the response back to the parent window
+                    event.source.postMessage({
+                        id: event.data.id,
+                        response: ret
+                    }, {
+                        targetOrigin: event.origin
+                    }); // Ensure to use event.origin for security
+                } else {
+                    // Optionally handle the case where the command is not found
+                    event.source.postMessage({
+                        id: event.data.id,
+                        error: 'Command not found'
+                    }, {
+                        targetOrigin: event.origin
+                    });
+                }
             }
         });
     }
@@ -81,6 +84,13 @@ export class FrontEndAPI{
             }
         }
         return {
+            room:{
+                id: window.APP.hub.hub_id,
+                name: (window.APP?.hub as any)?.name
+            },
+            player:{
+                name: window.APP?.store?.state?.profile?.displayName
+            },
             objects:result,
             animation: this.animationControllerAPI.listAnimation()
         };

@@ -75,8 +75,10 @@ export class ApteroServices {
   private audioSettingsSystem: any;
   private sceneEntered: boolean = false;
   private frontEndAPI: FrontEndAPI = new FrontEndAPI();
+  private firstLoadProcessPromise: Promise<void>;
+
   constructor() {
-    this.firstLoadProcess().then(() =>{
+    this.firstLoadProcessPromise = this.firstLoadProcess().then(() =>{
         console.log("firstLoadProcess done");
     } );
   }
@@ -114,7 +116,7 @@ export class ApteroServices {
 
   async onEnterRoom() {
     window.fullyInRoom = false;
-    console.log("FIRST ENTRANCE")
+    await this.firstLoadProcessPromise;
     await wait(() => {
       return AFRAME && AFRAME.scenes && AFRAME.scenes[0] && AFRAME.scenes[0].systems;
     });
