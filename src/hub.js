@@ -206,7 +206,6 @@ initIOC();
 
 //aptero service
 import { apteroService } from "./aptero/ApteroServices";
-import { roomController } from "./aptero/module/ButtonAPI/api/RoomController";
 //aptero service end
 window.APP = new App();
 
@@ -559,7 +558,6 @@ export async function updateEnvironmentForHub(hub, entryManager) {
 }
 
 export async function updateUIForHub(hub, hubChannel, showBitECSBasedClientRefreshPrompt = false) {
-  roomController.setRoom(hub, hubChannel); //Aptero
   remountUI({ hub, entryDisallowed: !hubChannel.canEnterRoom(hub), showBitECSBasedClientRefreshPrompt });
 }
 

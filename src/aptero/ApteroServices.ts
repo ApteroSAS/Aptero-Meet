@@ -1,7 +1,6 @@
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 
 import "./module/ButtonAPI/component/custom-controller-button";
-import "./module/ButtonAPI/component/media-limiter";
 import "./module/CustomPanel/component/open-iframe-button";
 import "./module/ButtonAPI/component/stop-share-screen-on-destroy";
 import "./module/ButtonAPI/component/release-media-frame-on-destroy";
@@ -20,7 +19,7 @@ import {container} from "./module/axolotis/IOCConfig";
 import {HttpEventService, HttpEventServiceName} from "@aptero/axolotis-module-basic";
 import {msTeamsAPILight} from "./module/axolotis/modules/basic/ImportHelper";
 import {initIOC} from "./module/axolotis/AxInit";
-import {FrontEndAPI} from "./module/FrontEndAPI/FrontEndAPI";
+import {attachRoomAPIToWindow, FrontEndAPI} from "./module/FrontEndAPI/RoomApi";
 
 declare let window:any;
 declare let AFRAME:any;
@@ -74,7 +73,6 @@ export class ApteroServices {
   thirdPersonService = new ThirdPersonService();
   private audioSettingsSystem: any;
   private sceneEntered: boolean = false;
-  private frontEndAPI: FrontEndAPI = new FrontEndAPI();
   private firstLoadProcessPromise: Promise<void>;
 
   constructor() {
@@ -98,7 +96,7 @@ export class ApteroServices {
       })());
       prom.push(roomParameters.getRoomParameters()); //called as soon as possible
       await Promise.all(prom);
-      this.frontEndAPI.attachToWindow();
+      attachRoomAPIToWindow();
     }catch (e) {
       console.error(e);
     }
@@ -108,7 +106,6 @@ export class ApteroServices {
     this.audioSettingsSystem = audioSettingsSystem;
     waitForDOMContentLoaded().then(async () => {
       networkService.start();
-      await gltfExtensionProcessorService.start();
       await this.thirdPersonService.start();
       await remoteControlServiceV2.start();
     });
