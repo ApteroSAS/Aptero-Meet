@@ -127,8 +127,11 @@ export class FrontEndAPI {
             reaction: triggerAI,
             context:context
         };
-        //await axios.post("https://meet.aptero.co/service/chatgpt/api/notifyRoomAction", payload)
-        await axios.post("http://localhost:3000/service/chatgpt/api/notifyRoomAction", payload)//TODO: remove this line
+        if(window.location.pathname.includes("localhost")) {
+            await axios.post("http://localhost:3000/service/chatgpt/api/notifyRoomAction", payload)
+        }else {
+            await axios.post("https://meet.aptero.co/service/chatgpt/api/notifyRoomAction", payload)
+        }
         if (triggerAI) {
             const iframes = Array.from(document.querySelectorAll<HTMLIFrameElement>('iframe'));
             for (const iframe of iframes) {
