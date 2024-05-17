@@ -152,84 +152,76 @@ export class SpawnHelperAPI {
                 }, 0);
             });
         } else {
-            console.error("invalid media frame target");
+            throw new Error(`invalid media frame target ${mediaFrameName}`);
         }
     }
 
-    private async removeOldMediaFrameEntity(mediaFrame) {
-        return new Promise<void>(async (resolve, reject) => {
-            if (mediaFrame) {
-                let mediaFrameComponent = mediaFrame;
+    private async removeOldMediaFrameEntity(mediaFrame: any): Promise<void> {
+        if (!mediaFrame) {
+            // List all media-frames and console log them
+            Object.keys(NAF.entities.entities).forEach(key => {
+                let frame = NAF.entities.entities[key];
+            });
+            throw new Error(`Invalid media frame target: ${mediaFrame}`);
+        }
 
-                //1 find the element to remove
-                let capturedEl = null;
-                capturedEl = document.getElementById(mediaFrameComponent.data?.targetId);
+        let mediaFrameComponent = mediaFrame;
+        let capturedEl:any = document.getElementById(mediaFrameComponent.data?.targetId);
 
-                //2 release the element just in case
-                if (mediaFrameComponent.data
-                    && mediaFrameComponent.data.targetId
-                    && mediaFrameComponent.data.targetId !== "empty") {
-                    mediaFrameComponent.data.targetId = "empty";
-                }
+        // Release the element just in case
+        if (mediaFrameComponent.data?.targetId && mediaFrameComponent.data.targetId !== "empty") {
+            mediaFrameComponent.data.targetId = "empty";
+        }
 
-                if (capturedEl) {
-                    //1.1 stop sharing
-                    const scene = capturedEl.sceneEl;
-                    if (capturedEl.components["media-video"] && capturedEl.components["media-video"].data.src.startsWith("hubs://")) {
-                        //hubs:// is the protocole for sharescreen and webcam media
-                        scene.emit("action_end_video_sharing");
-                    }
-                    //removeNetworkedObject(capturedEl.sceneEl, capturedEl);
-                    //3 destroy the element
-                    NAF.utils.getNetworkedEntity(capturedEl).then(async networkedEl => {
-                        if (!NAF.utils.isMine(networkedEl)) {
-                            NAF.utils.takeOwnership(networkedEl);
+        if (!capturedEl) {
+            return;
+        }
+
+        try {
+            // Stop sharing
+            const scene = capturedEl.sceneEl;
+            if (capturedEl.components["media-video"] && capturedEl.components["media-video"].data.src.startsWith("hubs://")) {
+                // hubs:// is the protocol for screen sharing and webcam media
+                scene.emit("action_end_video_sharing");
+            }
+
+            const networkedEl = await NAF.utils.getNetworkedEntity(capturedEl);
+
+            if (!NAF.utils.isMine(networkedEl)) {
+                NAF.utils.takeOwnership(networkedEl);
+            }
+
+            // Unpin
+            if (!capturedEl.components["media-video"].data.src.startsWith("hubs://")) {
+                await unpinEntity(networkedEl);
+            }
+
+            // Start remove animation
+            networkedEl.setAttribute("animation__remove", {
+                property: "scale",
+                dur: 200,
+                to: {x: 0.01, y: 0.01, z: 0.01},
+                easing: "easeInQuad"
+            } as any);
+
+            await Promise.race([
+                new Promise<void>(resolve => {
+                    networkedEl.addEventListener("animationcomplete", () => {
+                        if (networkedEl.parentNode) {
+                            networkedEl.parentNode.removeChild(networkedEl);
                         }
-                        //unpin
-                        if (!capturedEl.components["media-video"].data.src.startsWith("hubs://")) {
-                            await unpinEntity(networkedEl);
-                        }
-                        //start remove animation
-                        networkedEl.setAttribute("animation__remove", {
-                            property: "scale",
-                            dur: 200,
-                            to: {x: 0.01, y: 0.01, z: 0.01},
-                            easing: "easeInQuad"
-                        } as any);
-                        const promise1 = new Promise<void>((resolve2) => {
-                            networkedEl.addEventListener("animationcomplete", () => {
-                                if (networkedEl.parentNode) {
-                                    networkedEl.parentNode.removeChild(networkedEl);
-                                }
-                                resolve2();
-                            });
-                        });
-                        const promise2 = new Promise((resolve2) => {
-                            setTimeout(resolve2, 1000);
-                        });
-                        Promise.race([promise1, promise2]).then(() => {
-                            resolve();
-                        });
-                    }).catch(() => {
-                        capturedEl.parentNode.removeChild(capturedEl);
-                        resolve();
-                    }).catch(() => {
-                        capturedEl.remove();
                         resolve();
                     });
-                } else {
-                    resolve();
-                }
+                }),
+                new Promise<void>(resolve => setTimeout(resolve, 1000))
+            ]);
+        } catch (error) {
+            if (capturedEl.parentNode) {
+                capturedEl.parentNode.removeChild(capturedEl);
             } else {
-                console.error("invalid media frame target");
-                // List all media-frames and console log them
-                Object.keys(NAF.entities.entities).forEach(key => {
-                    let frame = NAF.entities.entities[key];
-                });
-
-                reject();
+                capturedEl.remove();
             }
-        });
+        }
     }
 
     private async findMediaFrameByName(name: string) {

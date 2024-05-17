@@ -20,6 +20,7 @@ import {HttpEventService, HttpEventServiceName} from "@aptero/axolotis-module-ba
 import {msTeamsAPILight} from "./module/axolotis/modules/basic/ImportHelper";
 import {initIOC} from "./module/axolotis/AxInit";
 import {attachRoomAPIToWindow, FrontEndAPI} from "./module/FrontEndAPI/RoomApi";
+import {setupVersionComp} from "./module/HubsBridge/utils/Version";
 
 declare let window:any;
 declare let AFRAME:any;
@@ -97,6 +98,7 @@ export class ApteroServices {
       prom.push(roomParameters.getRoomParameters()); //called as soon as possible
       await Promise.all(prom);
       attachRoomAPIToWindow();
+      setupVersionComp();
     }catch (e) {
       console.error(e);
     }

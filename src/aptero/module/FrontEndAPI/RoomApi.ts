@@ -7,12 +7,13 @@
 import {SpawnHelperAPI} from "./SpawnHelperAPI";
 import {AnimationControllerAPI} from "./AnimationControllerAPI";
 import {MediaOptions, SpawnAttachConfig, TriggerAnimationAction} from "./FrontEndCommandAPI";
-import {propertiesService} from "../properties/propertiesService";
 import axios from "axios";
+import {MoveAPI} from "./MoveAPI";
 
 export class FrontEndAPI {
     spawnHelperAPI = new SpawnHelperAPI();
     animationControllerAPI = new AnimationControllerAPI();
+    moveAPI = new MoveAPI();
 
     describe() {
         const objects = Array.from(document.querySelector('#environment-scene').querySelectorAll("a-entity"));
@@ -62,10 +63,7 @@ export class FrontEndAPI {
     }
 
     moveToWaypoint(waypoint: string) {
-        if (waypoint.startsWith("#")) {
-            waypoint = waypoint.slice(1);
-        }
-        window.history.pushState(null, null, `#${waypoint}`);
+        return this.moveAPI.moveToWaypoint(waypoint);
     }
 
     /**
@@ -148,26 +146,26 @@ export const roomApi = new FrontEndAPI();
 
 export function attachRoomAPIToWindow() {
     //this define the API that can be used by the parent window
-    const listMapping = {
-        echo: (data: string) => {
+    const listMapping:Record<string, (data:any)=>Promise<any>> = {
+        echo: async (data: string) => {
             return roomApi.echo(data);
         },
-        moveToWaypoint: (waypoint: string) => {
+        moveToWaypoint: async (waypoint: string) => {
             return roomApi.moveToWaypoint(waypoint);
         },
-        spawnAttach: (data: any) => {
+        spawnAttach: async (data: any) => {
             return roomApi.spawnAttach(data.mediaFrameName, data.url, data.config);
         },
-        spawn: (data: any) => {
+        spawn: async (data: any) => {
             return roomApi.spawn(data.url, data.mediaOptions);
         },
-        removeFromMediaFrame: (mediaFrameName: string) => {
+        removeFromMediaFrame: async (mediaFrameName: string) => {
             return roomApi.removeFromMediaFrame(mediaFrameName);
         },
-        triggerAnimation: (data: any) => {
+        triggerAnimation: async (data: any) => {
             return roomApi.triggerAnimation(data.animName, data.action);
         },
-        describe: () => {
+        describe: async () => {
             return roomApi.describe();
         }
     };
@@ -176,19 +174,29 @@ export function attachRoomAPIToWindow() {
         ...listMapping,
     }
 
-    window.addEventListener('message', event => {
+    window.addEventListener('message', async event => {
         const cmd = event.data?.command;
         if (cmd) {
             console.log("function message received", event.data)
             if (listMapping[cmd]) {
-                const ret = listMapping[cmd](event.data.data);
-                // Sending the response back to the parent window
-                event.source.postMessage({
-                    id: event.data.id,
-                    response: ret
-                }, {
-                    targetOrigin: event.origin
-                }); // Ensure to use event.origin for security
+                try {
+                    const ret = await listMapping[cmd](event.data.data);
+                    // Sending the response back to the parent window
+                    event.source.postMessage({
+                        id: event.data.id,
+                        response: ret
+                    }, {
+                        targetOrigin: event.origin
+                    }); // Ensure to use event.origin for security
+                } catch (e) {
+                    console.error(e);
+                    event.source.postMessage({
+                        id: event.data.id,
+                        error: e.message
+                    }, {
+                        targetOrigin: event.origin
+                    });
+                }
             } else {
                 // Optionally handle the case where the command is not found
                 event.source.postMessage({

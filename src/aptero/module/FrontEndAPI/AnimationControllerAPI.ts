@@ -1,13 +1,14 @@
-import {findAncestorWithComponent} from "../../../utils/scene-graph";
 import {networkService} from "../HubsBridge/service/NetworkService";
 import {TriggerAnimationAction} from "./FrontEndCommandAPI";
+
+const event = "animation_play";
 
 export class AnimationControllerAPI {
     constructor() {
     }
 
     init() {
-        networkService.onMessage("animation_play_v2", ({body}) => {
+        networkService.onMessage(event, ({body}) => {
             this.triggerAnimation(body.animName, body.action);
         });
     }
@@ -26,6 +27,7 @@ export class AnimationControllerAPI {
                 return mixer.clipAction(animation.name);
             }
         }
+        return null;
     }
 
     public listAnimation(): string[] {
@@ -36,9 +38,12 @@ export class AnimationControllerAPI {
     }
 
     public triggerAnimation(animName: string, action: TriggerAnimationAction = {}) {
-        networkService.sendMessage("animation_play_v2", {animName, action});//plays on other instances
         let mixerEl = document.querySelector('#environment-scene').children[0];
         let actionAnimation = this.findAnimation(animName, mixerEl);
+        if(!actionAnimation) {
+            throw new Error(`Animation ${animName} not found`);
+        }
+        networkService.sendMessage(event, {animName, action});//plays on other instances
         const repeat = action.repeat || 1;
 
         if (action.speed !== 0) { // Pause buttons should not affect loops

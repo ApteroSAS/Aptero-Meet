@@ -7,27 +7,32 @@ export class CustomActionRegister {
     public triggers: Record<string, any> = {};
 
     async triggerAction(id, data) {
-        let actionData = this.actions[id];
-        if (actionData) {
-            const actionDef = actionData.action;
-            if (actionDef.type === "animation") {
-                roomApi.triggerAnimation(id, actionDef);
-            } else if (actionDef.type === "spawn_attach") {
-                await roomApi.spawnAttach(actionDef.mediaFrame, actionDef.url, {attribute: actionDef.attributes});
-            } else if (actionDef.type === "remove_from_media_frame") {
-                await roomApi.removeFromMediaFrame(actionDef.mediaFrame);
-            } else if (actionDef.type === "spawn") {
-                roomApi.spawn(actionDef.url, {});
-            } else if (actionDef.type === "url") {
-                await this.url(actionDef);
-            } else if (actionDef.type === "sidebar_iframe") {
-                this.openSidebarIframe(actionDef);
-            } else if (actionDef.type === "ai_action") {
-                await roomApi.notifyUserActionToAi(actionDef.description, actionDef.triggerReaction, {
-                    id:id.split("_")[1],
-                    position:actionData.htmlElement.object3D.getWorldPosition(new THREE.Vector3())
-                });
+        try {
+            let actionData = this.actions[id];
+            if (actionData) {
+                const actionDef = actionData.action;
+                if (actionDef.type === "animation") {
+                    roomApi.triggerAnimation(id, actionDef);
+                } else if (actionDef.type === "spawn_attach") {
+                    await roomApi.spawnAttach(actionDef.mediaFrame, actionDef.url, {attribute: actionDef.attributes});
+                } else if (actionDef.type === "remove_from_media_frame") {
+                    await roomApi.removeFromMediaFrame(actionDef.mediaFrame);
+                } else if (actionDef.type === "spawn") {
+                    roomApi.spawn(actionDef.url, {});
+                } else if (actionDef.type === "url") {
+                    await this.url(actionDef);
+                } else if (actionDef.type === "sidebar_iframe") {
+                    this.openSidebarIframe(actionDef);
+                } else if (actionDef.type === "ai_action") {
+                    await roomApi.notifyUserActionToAi(actionDef.description, actionDef.triggerReaction, {
+                        id: id.split("_")[1],
+                        position: actionData.htmlElement.object3D.getWorldPosition(new THREE.Vector3())
+                    });
+                }
             }
+        } catch (e) {
+            //an action should never crash the app just log the error and move one
+            console.error(e);
         }
     }
 
