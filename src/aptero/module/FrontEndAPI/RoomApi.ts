@@ -143,6 +143,13 @@ export class FrontEndAPI {
         }
     }
 
+    async getScreenShot() {
+        const canvas = document.getElementsByClassName('a-canvas')[0] as HTMLCanvasElement;
+        const dataURL = canvas.toDataURL('image/png');
+        //starts with data:image/png;base64,
+        return dataURL;
+    }
+
 }
 
 export const roomApi = new FrontEndAPI();
@@ -170,6 +177,12 @@ export function attachRoomAPIToWindow() {
         },
         describe: async () => {
             return roomApi.describe();
+        },
+        notifyUserActionToAi: async (data: any) => {
+            return roomApi.notifyUserActionToAi(data.actionDescription, data.triggerAI,data.context);
+        },
+        getScreenShot: async () => {
+            return roomApi.getScreenShot();
         }
     };
 

@@ -243,6 +243,16 @@ export class CharacterControllerSystem {
         this.navNode = null;
       }
       const preferences = window.APP.store.state.preferences;
+      //Aptero
+      const rotateLeft = userinput.get(paths.actions.rotateLeft);
+      const rotateRight = userinput.get(paths.actions.rotateRight);
+      if (rotateLeft) {
+        this.dXZ += Math.PI / 100.;
+      }
+      if (rotateRight) {
+        this.dXZ -= Math.PI / 100.;
+      }
+
       const snapRotateLeft = userinput.get(paths.actions.snapRotateLeft);
       const snapRotateRight = userinput.get(paths.actions.snapRotateRight);
       if (snapRotateLeft) {
