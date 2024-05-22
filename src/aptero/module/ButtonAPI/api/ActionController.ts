@@ -59,6 +59,8 @@ export class ActionController {
 
     }
 
+    // [!] DevNote: We use *4 size to scale the button to the correct size
+
     createButtonOnElement(type, triggerId, actionsIds, element, position, rotationDeg, text, size, textWidth, style, version = 1, addReverse = true) {
         if (addReverse) {
             this.createButtonOnElement(type, triggerId, actionsIds, element, position, rotationDeg, text, size, textWidth, style,version, false);
@@ -74,7 +76,7 @@ export class ActionController {
             "       class='interactable'\n" +
             "       custom-controller-action=\"actionIds:" + actionsIds.join("+") + ";triggerId:" + triggerId + ";type:" + type + "\"\n" +
             "       tags=\"singleActionButton:true\"\n" +
-            "       scale=\"" + (size || "1") + " " + (size || "1") + " " + (size || "1") + "\" \n" +
+            "       scale=\"" + (size*4 || "4") + " " + (size*4 || "4") + " " + (size*4 || "4") + "\" \n" +
             "       rotation=\"" + (rotationDeg ? (rotationDeg.x + " " + rotationDeg.y + " " + rotationDeg.z) : "0 0 0") + "\"\n" +
             "       position=\"" + positionUpdated.x + " " + positionUpdated.y + " " + positionUpdated.z + "\">\n" +
             "       <a-entity\n" +
