@@ -143,10 +143,20 @@ export class FrontEndAPI {
         }
     }
 
-    async getScreenShot() {
+    async getScreenshot() {
         const canvas = document.getElementsByClassName('a-canvas')[0] as HTMLCanvasElement;
+        if (!canvas) {
+            throw new Error('Canvas element not found');
+        }
+        if (canvas.width === 0 || canvas.height === 0) {
+            throw new Error('Canvas has zero width or height');
+        }
+        // Use requestAnimationFrame to ensure the canvas is fully rendered
+        await new Promise(resolve => requestAnimationFrame(resolve));
         const dataURL = canvas.toDataURL('image/png');
-        //starts with data:image/png;base64,
+        if (!dataURL.startsWith('data:image/png;base64,')) {
+            throw new Error('Failed to generate a valid data URL');
+        }
         return dataURL;
     }
 
@@ -181,8 +191,8 @@ export function attachRoomAPIToWindow() {
         notifyUserActionToAi: async (data: any) => {
             return roomApi.notifyUserActionToAi(data.actionDescription, data.triggerAI,data.context);
         },
-        getScreenShot: async () => {
-            return roomApi.getScreenShot();
+        getScreenshot: async () => {
+            return roomApi.getScreenshot();
         }
     };
 

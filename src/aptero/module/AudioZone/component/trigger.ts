@@ -5,6 +5,13 @@ const sizeVec = new THREE.Vector3();
 const boundingBoxWorldPositionVec = new THREE.Vector3();
 const colliderWorldPositionVec = new THREE.Vector3();
 
+declare global {
+    interface Window {
+        PERSISTENTIFRAME: any;
+        PFrameProps: any;
+        fullyInRoom: boolean;
+    }
+}
 
 function startPFrame(data,objid) {
   console.log("startPFrame",data,objid);
@@ -73,7 +80,7 @@ function startPFrame(data,objid) {
     icon: data.buttonIcon,
   }
 
-  const sceneEl = document.querySelector("a-scene");
+  const sceneEl:any = document.querySelector("a-scene");
   sceneEl.emit("togglePFrameButtonVisibility"); // Toggle Button
   sceneEl.emit("action_toggle_custom_psidebar"); // Toggle Persistent Sidebar
   setTimeout(()=>{sceneEl.emit("action_toggle_custom_sidebar_info",obj)},10);
@@ -111,44 +118,47 @@ AFRAME.registerComponent("trigger", {
     }
   },
   init() {
-    console.log("------trigger init------")
-    this.boundingBox = new THREE.Box3();
-    this.collidingLastFrame = {};
-    this.wip = false;
+      this.boundingBox = new THREE.Box3();
+      this.collidingLastFrame = {};
+      this.wip = true;
 
-    if (this.data && this.data.triggerModels) {
-      const modelsData = JSON.parse(this.data.triggerModels);
-      // Access the models data here
-      const barrierCore = modelsData.barrierCore;
-      const logoCore = modelsData.logoCore;
-    
-      // Spawn models
-      const sceneEl = document.querySelector("a-scene");
-      for (let key in modelsData) {
-        const modelData = modelsData[key];
-        //const { src, position, scale } = modelData;
-        
-        // Load the model
-        const { entity, orientation } = addMedia(
-          modelData.src, // Source URL
-          '#static-media', // The template ID for the entity
-          undefined, // contentOrigin
-          null, // contentSubtype
-          true, // resolve URLs to get the actual file URL
-          false, // fitToBox
-          true, // animate
-          {}, // mediaOptions
-          false // networked
-        );
+      (async ()=> {
+        //defers until scene is entered, so we are sure that the physics system is ready (also speedup initial load)
+        await new Promise<void>((resolve) => {
+          window.addEventListener("apt_scene_entered", () => {
+            resolve();
+          }, {once: true});
+        });
+        if (this.data && this.data.triggerModels) {
+          const modelsData = JSON.parse(this.data.triggerModels);
 
-        // Set the position and scale of the entity
-        entity.setAttribute('position', modelData.position);
-        entity.setAttribute('scale', modelData.scale);
-        //entity.setAttribute('animation-mixer', '');
-        document.querySelector('a-scene').appendChild(entity);
+          // Spawn models
+          const sceneEl = document.querySelector("a-scene");
+          for (let key in modelsData) {
+            const modelData = modelsData[key];
 
-      }
-    }
+            // Load the model
+            const {entity, orientation} = addMedia(
+                modelData.src, // Source URL
+                '#static-media', // The template ID for the entity
+                undefined, // contentOrigin
+                null, // contentSubtype
+                true, // resolve URLs to get the actual file URL
+                false, // fitToBox
+                true, // animate
+                {}, // mediaOptions
+                false // networked
+            );
+
+            // Set the position and scale of the entity
+            entity.setAttribute('position', modelData.position);
+            entity.setAttribute('scale', modelData.scale);
+          }
+        }
+        this.wip = false;
+      })().catch((e) => {
+        console.error("Error in trigger init async",e);
+      });
   },
   update() {
     this.el.object3D.getWorldPosition(boundingBoxWorldPositionVec);
@@ -189,7 +199,7 @@ AFRAME.registerComponent("trigger", {
         console.log("leaving zone");
         window.PERSISTENTIFRAME.remove();
         window.PERSISTENTIFRAME = null;
-        const sceneEl = document.querySelector("a-scene");
+        const sceneEl:any = document.querySelector("a-scene");
         sceneEl.emit("togglePFrameButtonVisibility");
         sceneEl.emit("action_toggle_custom_psidebar");
       }
@@ -201,12 +211,13 @@ AFRAME.registerComponent("trigger", {
   },
 
   remove() {
+    console.log("removing trigger");
     if (window.PERSISTENTIFRAME) {
       window.PERSISTENTIFRAME.remove();
       window.PERSISTENTIFRAME = null;
-      const sceneEl = document.querySelector("a-scene");
+      const sceneEl:any = document.querySelector("a-scene");
       sceneEl.emit("togglePFrameButtonVisibility");
       sceneEl.emit("action_toggle_custom_psidebar");
     }
   }
-});
+} as any);
