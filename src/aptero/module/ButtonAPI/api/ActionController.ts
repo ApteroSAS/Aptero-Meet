@@ -30,6 +30,7 @@ export class ActionController {
         let networkId = await networkService.getElementNetworkId(htmlElement) || "local";
         let actionIds = [];
         entry.actions.forEach((action, index) => {
+            console.log("[A]------->action.data", action.data)
             let actionid = networkId + "_" + meshName + "_" + masterindex + "_" + pairIndex + "_" + index + "_" + (action.data || "");
             let differentiator = 0;
             while (customActionRegister.actionExist(actionid+ "_"+ differentiator)){

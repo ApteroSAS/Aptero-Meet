@@ -44,19 +44,8 @@ export class AnimationControllerAPI {
             throw new Error(`Animation ${animName} not found`);
         }
         networkService.sendMessage(event, {animName, action});//plays on other instances
+
         const repeat = action.repeat || 1;
-
-        if (action.speed !== 0) { // Pause buttons should not affect loops
-            if (action.loop) {// Infinite loop
-                actionAnimation.setLoop(THREE.LoopRepeat);
-            } else if (action.repeat !== undefined) {
-                actionAnimation.setLoop(THREE.LoopRepeat, repeat);
-            } else {
-                // Legacy support
-                actionAnimation.setLoop(THREE.LoopOnce);
-            }
-        }
-
         if (action.speed === undefined) {
             // Legacy support
             actionAnimation.setEffectiveTimeScale(1);
@@ -64,67 +53,159 @@ export class AnimationControllerAPI {
             actionAnimation.reset();
             actionAnimation.originalTimeScale = 1;
         } else {
-            if (action.speed === 0) {
-                // Toggle between pause and resume
-                if (typeof actionAnimation.originalTimeScale === 'undefined') {
-                    // Store the original time scale the first time the animation is played
-                    actionAnimation.originalTimeScale = actionAnimation.getEffectiveTimeScale();
+            
+            if (action.mainclick !== undefined) {
+                /*
+                  New Button handling method
+                */
+
+                // ---->Main click
+                let actionTrigger = action.mainclick.valueOf() as number;
+
+                // [?] Is not moving or is paused
+                if ((!actionAnimation.isRunning() || actionAnimation.getEffectiveTimeScale() === 0)
+                // [?] First animation, or last one was different
+                || (actionAnimation.lastAnimation !== animName)
+                // [?] reclick functionality is undefined (for some reason)
+                || action.reclick === undefined) {
+                    console.log("[Main click]")
+                } else {
+                    actionTrigger = action.reclick.valueOf() as number;
+
+                    console.log("[Re-click]")
+                    if (actionTrigger === 0) {
+                        actionTrigger = 4; // Pause
+                    }
                 }
 
-                if (actionAnimation.getEffectiveTimeScale() !== 0) {
-                    // Pause the animation by setting its time scale to 0
-                    actionAnimation.setEffectiveTimeScale(0);
-                } else {
-                    // Resume the animation by restoring its original time scale
-                    actionAnimation.setEffectiveTimeScale(actionAnimation.originalTimeScale);
-                }
-            } else if (action.speed === -1) {
-                // Stop and reset the animation
-                actionAnimation.stop();
-                actionAnimation.reset();
-                actionAnimation.setEffectiveTimeScale(1);
-                actionAnimation.originalTimeScale = 1;
-            } else { // Click / Reclick functionality
-                // Play or change speed
-                const animData = [{}, action.speed, action.reclick, action.loop, action.repeat];
-
-                // Is not moving AND is unpaused
-                if ((!actionAnimation.isRunning() && actionAnimation.getEffectiveTimeScale() !== 0)
-                    // First animation, or last one was different
-                    || (actionAnimation.lastAnimation !== undefined
-                        && JSON.stringify(actionAnimation.lastAnimation) !== JSON.stringify(animData))
-                    // reclick functionality is undefined
-                    || action.reclick === undefined) {
-                    // This animation is NEW
-                    actionAnimation.setEffectiveTimeScale(action.speed);
-                    setTimeout(() => {
-                        //Wait a bit so "isRunning()" doesn't retroactively return true
-                        actionAnimation.play();
-                    }, 10);
-                    actionAnimation.reset();
-                    actionAnimation.originalTimeScale = action.speed;
-                    actionAnimation.lastAnimation = animData;
-                } else {
-                    // This animation is already playing
-                    // Depends on config
-                    if (action.reclick === 0) {
-                        // Pause and resume
-                        if (actionAnimation.getEffectiveTimeScale() !== 0) {
-                            // Pause the animation by setting its time scale to 0
-                            actionAnimation.setEffectiveTimeScale(0);
+                switch (actionTrigger) {
+                    case 0: // Play or resume
+                    case 1: // Reset and play again
+                        if (actionTrigger === 0){
+                          console.log("[Play/Resume]")
                         } else {
-                            // Resume the animation by restoring its original time scale
-                            actionAnimation.setEffectiveTimeScale(actionAnimation.originalTimeScale);
+                          console.log("[Reset and Play again]")
                         }
-                    } else if (action.reclick === 1) {
-                        // Reset and play again
-                        actionAnimation.play();
-                        actionAnimation.reset();
-                    } else if (action.reclick === 2) {
-                        // Stop and reset the animation
+
+                        if (action.loop) {// Infinite loop
+                          actionAnimation.setLoop(THREE.LoopRepeat);
+                        } else if (action.repeat !== undefined) {
+                            actionAnimation.setLoop(THREE.LoopRepeat, repeat);
+                        }
+
+                        if (actionAnimation.lastAnimation !== animName
+                        || ((!actionAnimation.isRunning()) && actionAnimation.getEffectiveTimeScale() !== 0)
+                        || actionTrigger === 1) {
+                            console.log("ANIMATION CHANGE / FRESH START")
+                            actionAnimation.reset();
+                        }
+                        setTimeout(() => {
+                            //Wait a bit so "isRunning()" doesn't retroactively return true
+                            actionAnimation.play();
+                        }, 10);
+
+                        actionAnimation.setEffectiveTimeScale(action.speed);
+                        actionAnimation.originalTimeScale = action.speed;
+                        actionAnimation.lastAnimation = animName;
+                        break;
+                    case 2: // Stop and reset
+                        console.log("[Stop and Reset]")
                         actionAnimation.stop();
                         actionAnimation.reset();
-                    } // else do nothing
+                        actionAnimation.setEffectiveTimeScale(1);
+                        actionAnimation.originalTimeScale = 1;
+                        actionAnimation.lastAnimation = undefined;
+                        break;
+                    case 3: // Do nothing
+                        console.log("[Do nothing]")
+                        break;
+                    case 4: // Pause
+                        actionAnimation.setEffectiveTimeScale(0);
+                        console.log("[Pause]");
+                        break;
+                }
+
+                // Define this animation as the last one
+                //actionAnimation.lastAnimation = animData;
+                
+            } else {
+                /*
+                  All this section is for the old way of handling animations
+                */
+                if (action.speed !== 0) {
+                    if (action.loop) {// Infinite loop
+                        actionAnimation.setLoop(THREE.LoopRepeat);
+                    } else if (action.repeat !== undefined) {
+                        actionAnimation.setLoop(THREE.LoopRepeat, repeat);
+                    } else {
+                        // Legacy support
+                        actionAnimation.setLoop(THREE.LoopOnce);
+                    }
+                }
+
+
+                if (action.speed === 0) {
+                    // Toggle between pause and resume
+                    if (typeof actionAnimation.originalTimeScale === 'undefined') {
+                        // Store the original time scale the first time the animation is played
+                        actionAnimation.originalTimeScale = actionAnimation.getEffectiveTimeScale();
+                    }
+
+                    if (actionAnimation.getEffectiveTimeScale() !== 0) {
+                        // Pause the animation by setting its time scale to 0
+                        actionAnimation.setEffectiveTimeScale(0);
+                    } else {
+                        // Resume the animation by restoring its original time scale
+                        actionAnimation.setEffectiveTimeScale(actionAnimation.originalTimeScale);
+                    }
+                } else if (action.speed === -1) {
+                    // Stop and reset the animation
+                    actionAnimation.stop();
+                    actionAnimation.reset();
+                    actionAnimation.setEffectiveTimeScale(1);
+                    actionAnimation.originalTimeScale = 1;
+                } else { // Click / Reclick functionality
+                    // Play or change speed
+                    const animData = [{}, action.mainclick, action.speed, action.reclick, action.loop, action.repeat];
+
+                    // Is not moving AND is unpaused
+                    if ((!actionAnimation.isRunning() && actionAnimation.getEffectiveTimeScale() !== 0)
+                        // First animation, or last one was different
+                        || (actionAnimation.lastAnimation !== undefined
+                            && JSON.stringify(actionAnimation.lastAnimation) !== JSON.stringify(animData))
+                        // reclick functionality is undefined
+                        || action.reclick === undefined) {
+                        // This animation is NEW
+                        actionAnimation.setEffectiveTimeScale(action.speed);
+                        setTimeout(() => {
+                            //Wait a bit so "isRunning()" doesn't retroactively return true
+                            actionAnimation.play();
+                        }, 10);
+                        actionAnimation.reset();
+                        actionAnimation.originalTimeScale = action.speed;
+                        actionAnimation.lastAnimation = animData;
+                    } else {
+                        // This animation is already playing
+                        // Depends on config
+                        if (action.reclick === 0) {
+                            // Pause and resume
+                            if (actionAnimation.getEffectiveTimeScale() !== 0) {
+                                // Pause the animation by setting its time scale to 0
+                                actionAnimation.setEffectiveTimeScale(0);
+                            } else {
+                                // Resume the animation by restoring its original time scale
+                                actionAnimation.setEffectiveTimeScale(actionAnimation.originalTimeScale);
+                            }
+                        } else if (action.reclick === 1) {
+                            // Reset and play again
+                            actionAnimation.play();
+                            actionAnimation.reset();
+                        } else if (action.reclick === 2) {
+                            // Stop and reset the animation
+                            actionAnimation.stop();
+                            actionAnimation.reset();
+                        } // else do nothing
+                    }
                 }
             }
         }

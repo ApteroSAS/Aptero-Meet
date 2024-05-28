@@ -1,6 +1,7 @@
 export interface TriggerAnimationAction {
     speed?: number, /** speed of the animation default to 1**/
-    reclick?: 0 | 1 | 2, /** 0: pause and resume, 1: reset and play again, 2: stop and reset the animation **/
+    mainclick?: 0 | 1 | 2 | 3, /** 0: play or resume, 1: reset and play again, 2: stop and reset the animation, 3: do nothing **/
+    reclick?: 0 | 1 | 2 | 3, /** 0: pause, 1: reset and play again, 2: stop and reset the animation, 3 do nothing **/
     loop?: boolean, /** loop the animation infinite amount of time default to false**/
     repeat?: number,/** number of time the animation should be repeated default to 1**/
 }

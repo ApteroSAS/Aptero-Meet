@@ -12,7 +12,12 @@ export class CustomActionRegister {
             if (actionData) {
                 const actionDef = actionData.action;
                 if (actionDef.type === "animation") {
-                    roomApi.triggerAnimation(id, actionDef);
+                    // Remove ALL text before "ApteroANIM_" from apteroAnimation
+                    let apteroAnimation = id.replace(/.*ApteroANIM_/, "");
+                    // Also, remove everything after the last underscore (including the underscore)
+                    apteroAnimation = apteroAnimation.replace(/_[^_]*$/, "");
+
+                    roomApi.triggerAnimation(apteroAnimation, actionDef);
                 } else if (actionDef.type === "spawn_attach") {
                     await roomApi.spawnAttach(actionDef.mediaFrame, actionDef.url, {attribute: actionDef.attributes});
                 } else if (actionDef.type === "remove_from_media_frame") {
