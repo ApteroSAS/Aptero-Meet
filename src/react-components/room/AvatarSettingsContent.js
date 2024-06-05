@@ -5,6 +5,7 @@ import styles from "./AvatarSettingsContent.scss";
 import { TextInputField } from "../input/TextInputField";
 import { Column } from "../layout/Column";
 import { FormattedMessage } from "react-intl";
+import { ReactComponent as VRIcon } from "../icons/VR.svg";
 
 export function AvatarSettingsContent({
   displayName,
@@ -18,6 +19,8 @@ export function AvatarSettingsContent({
   displayNamePattern,
   pronounsPattern,
   onChangeAvatar,
+  showEnterOnDevice,
+  onEnterOnDevice,
   ...rest
 }) {
   return (
@@ -52,7 +55,12 @@ export function AvatarSettingsContent({
           <FormattedMessage id="avatar-settings-content.change-avatar-button" defaultMessage="Change Avatar" />
         </Button>
       </div>
-      <AcceptButton preset="accept" type="submit" />
+      <div style={{display: "flex", justifyContent: "space-between"}}>
+        <AcceptButton preset="accept" type="submit" />
+        {showEnterOnDevice &&
+        <Button preset="accent3" onClick={onEnterOnDevice} style={{marginLeft:"10px",minWidth:"0", padding:"0 12px"}}><VRIcon /> VR</Button>
+        }
+      </div>
     </Column>
   );
 }

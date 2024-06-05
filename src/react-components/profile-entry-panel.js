@@ -21,7 +21,9 @@ export default class ProfileEntryPanel extends Component {
     onBack: PropTypes.func,
     showBackButton: PropTypes.bool,
     isSignedIn: PropTypes.bool,
-    signedIn: PropTypes.func
+    signedIn: PropTypes.func,
+    showEnterOnDevice: PropTypes.bool,
+    onEnterOnDevice: PropTypes.func,
   };
 
   static defaultProps = {
@@ -147,7 +149,9 @@ export default class ProfileEntryPanel extends Component {
       },
       onSubmit: this.saveStateAndFinish,
       onClose: this.props.onClose,
-      onBack: this.props.onBack
+      onBack: this.props.onBack,
+      showEnterOnDevice:this.props.showEnterOnDevice,
+      onEnterOnDevice: this.props.onEnterOnDevice,
     };
 
     if (this.props.containerType === "sidebar") {

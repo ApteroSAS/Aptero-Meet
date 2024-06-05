@@ -44,7 +44,7 @@ export function EnterOnDeviceModal({
                 defaultMessage="In your device's web browser, go to:"
               />
             </small>
-            <div className={styles.shortUrlContainer}>{shortUrl}</div>
+            <div>{shortUrl}</div>
             <small>
               <FormattedMessage
                 id="enter-on-device-modal.code-directions"
