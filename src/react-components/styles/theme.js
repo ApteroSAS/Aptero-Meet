@@ -23,6 +23,7 @@ if (config?.theme?.error) {
 export let currentTheme = "default";
 
 export const themes = config?.theme?.themes || [];
+console.log("theme", themes);
 
 function useDarkMode() {
   const [darkMode, setDarkMode] = useState(false);
@@ -50,6 +51,7 @@ export function useTheme(themeId) {
 
   useEffect(() => {
     const theme = tryGetTheme(themeId);
+    console.log("theme", theme);
 
     if (!theme) {
       return;
@@ -93,7 +95,8 @@ export function changeTheme(newThemeId) {
 }
 
 export function useThemeFromStore(store) {
-  const [themeId, setThemeId] = useState(currentTheme || store?.state?.preferences?.theme);
+  const [themeId, setThemeId] = useState(store?.state?.preferences?.theme || currentTheme);
+  console.log("themeId from store", themeId);
 
   useEffect(() => {
     window.theme = {
@@ -103,7 +106,7 @@ export function useThemeFromStore(store) {
     };
 
     function onStoreChanged() {
-      const nextThemeId = currentTheme || store.state?.preferences?.theme;
+      const nextThemeId = store.state?.preferences?.theme || currentTheme;
       if (themeId !== nextThemeId) {
         setThemeId(nextThemeId);
       }

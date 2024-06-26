@@ -1,12 +1,21 @@
 import axios from "axios";
-import { propertiesService } from "../../properties/propertiesService";
+import {propertiesService} from "../../properties/propertiesService";
 import configs from "../../../../utils/configs";
-import { addEntryModeIfNotExist } from "../utils/EntryMode";
+import {addEntryModeIfNotExist} from "../utils/EntryMode";
+import {AudioSettings, Permission, RoomParametersData} from "./RoomParametersInterface";
+
+interface WindowExtended extends Window {
+  APP: any;
+  theme: any;
+}
+
+declare const window: WindowExtended;
 
 export class RoomParameters {
   fetch = false;
+  roomConfig: RoomParametersData;
 
-  async getParameters(roomSID) {
+  async getParameters(roomSID):Promise<RoomParametersData> {
     //console.log(propertiesService);
     return await new Promise((resolve) => {
       axios
@@ -37,7 +46,7 @@ export class RoomParameters {
     return null; //default
   }
 
-  async applyPermissionAsync(permission, admin) {
+  async applyPermissionAsync(permission:Permission, admin:boolean):Promise<Permission> {
     permission["show_spawn_and_move_media"] = true; //default value
     let roomConfig = await this.getParameters(permission.hub_id);
     await this.applyRoomParameters(); //also update preferences
@@ -70,7 +79,7 @@ export class RoomParameters {
     return permission;
   }
 
-  async applyDefaultAudioSettingsSystem(audioSettingsSystem) {
+  async applyDefaultAudioSettingsSystem(audioSettingsSystem:{audioSettings:AudioSettings}):Promise<void> {
     //let audioSettings = AFRAME.scenes[0].systems["hubs-systems"].audioSettingsSystem.audioSettings;
     let roomConfig = await this.getRoomParameters(); //ensure parameters are retrieved
     let audioSettings = audioSettingsSystem.audioSettings;
@@ -91,7 +100,7 @@ export class RoomParameters {
     }
   }
 
-  async getRoomParameters() {
+  async getRoomParameters():Promise<RoomParametersData> {
     if (!this.fetch) {
       const qs = new URLSearchParams(window.location.search);
       const roomSID = qs.get("hub_id") || document.location.pathname.substring(1).split("/")[0];
@@ -101,27 +110,37 @@ export class RoomParameters {
     return this.roomConfig;
   }
 
-  async applyRoomParameters() {
+  async applyRoomParameters(): Promise<RoomParametersData> {
     let roomConfig = await this.getRoomParameters();
     window.APP.override = { preferences: {} };
     if (roomConfig) {
       if (roomConfig.preferences) {
-        Object.keys(roomConfig.preferences).forEach(key => {
+        for (const key of Object.keys(roomConfig.preferences)) {
           window.APP.store.state.preferences[key] = roomConfig.preferences[key];
-        });
+        }
       }
       if (roomConfig.preferencesOverride) {
-        Object.keys(roomConfig.preferencesOverride).forEach(key => {
+        for (const key of Object.keys(roomConfig.preferencesOverride)) {
           window.APP.override.preferences[key] = roomConfig.preferencesOverride[key];
-        });
+        }
       }
       if (roomConfig.entryMode) {
         addEntryModeIfNotExist(roomConfig.entryMode);
       }
       if (roomConfig.AppConfigOverride) {
-        Object.keys(roomConfig.AppConfigOverride).forEach(key => {
+        for (const key of Object.keys(roomConfig.AppConfigOverride)) {
           configs.APP_CONFIG[key] = roomConfig.AppConfigOverride[key];
-        });
+        }
+        const defaultTheme = roomConfig.AppConfigOverride.defaultTheme;
+        if (defaultTheme){
+          //store.state?.preferences?.theme
+          console.log("defaultTheme", defaultTheme);
+          window.APP.store.update({
+            preferences: {
+              theme: defaultTheme
+            }
+          });
+        }
       }
     }
     return roomConfig;
