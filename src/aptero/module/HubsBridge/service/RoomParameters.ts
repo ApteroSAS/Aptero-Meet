@@ -14,6 +14,7 @@ declare const window: WindowExtended;
 export class RoomParameters {
   fetch = false;
   roomConfig: RoomParametersData;
+  currentTheme: string;
 
   async getParameters(roomSID):Promise<RoomParametersData> {
     //console.log(propertiesService);
@@ -135,11 +136,13 @@ export class RoomParameters {
         if (defaultTheme){
           //store.state?.preferences?.theme
           console.log("defaultTheme", defaultTheme);
-          window.APP.store.update({
+          this.currentTheme = defaultTheme;
+          //window.theme.requestChangeTheme(defaultTheme); //note this will bug since react is not initialized at this point
+          /*window.APP.store.update({ // this will change the user preferences
             preferences: {
               theme: defaultTheme
             }
-          });
+          });*/
         }
       }
     }

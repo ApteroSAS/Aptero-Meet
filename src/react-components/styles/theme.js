@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import configs from "../../utils/configs";
 import { tryGetTheme, getCurrentTheme, registerDarkModeQuery } from "../../utils/theme";
+import {roomParameters} from "../../aptero/module/HubsBridge/service/RoomParameters";
 
 let config = process.env.APP_CONFIG;
 // Storybook includes environment variables as a string
@@ -95,7 +96,7 @@ export function changeTheme(newThemeId) {
 }
 
 export function useThemeFromStore(store) {
-  const [themeId, setThemeId] = useState(store?.state?.preferences?.theme || currentTheme);
+  const [themeId, setThemeId] = useState(roomParameters.currentTheme || store?.state?.preferences?.theme || currentTheme);
   console.log("themeId from store", themeId);
 
   useEffect(() => {
@@ -106,7 +107,7 @@ export function useThemeFromStore(store) {
     };
 
     function onStoreChanged() {
-      const nextThemeId = store.state?.preferences?.theme || currentTheme;
+      const nextThemeId = roomParameters.currentTheme || store.state?.preferences?.theme || currentTheme ;
       if (themeId !== nextThemeId) {
         setThemeId(nextThemeId);
       }
