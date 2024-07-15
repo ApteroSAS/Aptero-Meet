@@ -29,7 +29,7 @@ const STATS_REFRESH_TIME = 2000;
 const PRODUCERS_KEY = "producers";
 const CONSUMERS_KEY = "consumers";
 const MEDIASOUP_DOC_BASE_URL = "https://mediasoup.org/documentation/v3/libmediasoupclient/api/";
-const MDN_DOC_BASE_URL = "https://developer.mozilla.org/en-US/docs/Web/API/";
+const MDN_DOC_BASE_URL = "https://developer.Aptero.org/en-US/docs/Web/API/";
 
 const MessageButtonStyle = {
   width: "auto",

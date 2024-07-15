@@ -70,52 +70,52 @@ const scene = {
   attributions: {
     content: [
       {
-        author: "mozillareality",
+        author: "Apteroreality",
         name: "House with Open Atrium",
         url: "https://sketchfab.com/3d-models/house-with-open-atrium-bc1046092d334bbbacdb40c1cf8796cd"
       },
       {
-        author: "mozillareality",
+        author: "Apteroreality",
         name: "Couch - midcentury modern",
         url: "https://sketchfab.com/models/f8def3c5f656454c935fe3d626ed9fab"
       },
       {
-        author: "mozillareality",
+        author: "Apteroreality",
         name: "Armchair - midcentury modern",
         url: "https://sketchfab.com/models/f26063c8ca6a438d9e328b28434d1c44"
       },
       {
-        author: "mozillareality",
+        author: "Apteroreality",
         name: "End table - wooden with magazine rack",
         url: "https://sketchfab.com/models/7fab655234e84e0ea6a3ada36ece2ad1"
       },
       {
-        author: "mozillareality",
+        author: "Apteroreality",
         name: "Ceiling Fan",
         url: "https://sketchfab.com/models/ec2c6087d4824211abc827f2a4c2b578"
       },
       {
-        author: "mozillareality",
+        author: "Apteroreality",
         name: "Light Fixture - Ceiling Recessed",
         url: "https://sketchfab.com/models/269fd427629548a8a0949a6493c5b223"
       },
       {
-        author: "mozillareality",
+        author: "Apteroreality",
         name: "Dresser - modern light wood",
         url: "https://sketchfab.com/models/25134a84c07e420b93cae181731fd7a0"
       },
       {
-        author: "mozillareality",
+        author: "Apteroreality",
         name: "Bookshelf - tall wooden",
         url: "https://sketchfab.com/models/efe2a35b92c443519fab5a5b515e92ab"
       },
       {
-        author: "mozillareality",
+        author: "Apteroreality",
         name: "Desk - marble top",
         url: "https://sketchfab.com/models/328eb54341cc4b3f9c7a07fa1cb71a02"
       },
       {
-        author: "mozillareality",
+        author: "Apteroreality",
         name: "Desk Lamp - brushed aluminum",
         url: "https://sketchfab.com/models/da4b9020b0614309ab787b67f63c1dba"
       },
@@ -221,7 +221,7 @@ const sketchfabModel = {
       url: "https://media.sketchfab.com/models/a4c500d7358a4a199b6a5cd35f416466/thumbnails/6b41b00f0f474c058bea071db62097fd/d3a6f64b461f4cc8af7331a220a4122c.jpeg"
     }
   },
-  name: "Ducky_MozillaHubs",
+  name: "Ducky_ApteroHubs",
   type: "sketchfab_model",
   url: "https://sketchfab.com/models/a4c500d7358a4a199b6a5cd35f416466"
 };

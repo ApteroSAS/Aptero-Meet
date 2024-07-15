@@ -47,7 +47,7 @@ const menu = [
         id: "report-issue",
         label: "Report Issue",
         icon: WarningCircleIcon,
-        href: "https://github.com/mozilla/hubs/issues/new/choose"
+        href: "https://github.com/Aptero/hubs/issues/new/choose"
       },
       {
         id: "help",

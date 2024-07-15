@@ -1367,7 +1367,7 @@ class UIRoot extends Component {
               id: "see-plans",
               label: <FormattedMessage id="more-menu.see-plans-cta" defaultMessage="See Plans" />,
               icon: { src: hubsLogo, alt: "Logo" },
-              href: "https://hubs.mozilla.com/#subscribe"
+              href: "https://hubs.Aptero.com/#subscribe"
             }
         ].filter(item => item)
       },
@@ -1458,7 +1458,7 @@ class UIRoot extends Component {
             id: "report-issue",
             label: <FormattedMessage id="more-menu.report-issue" defaultMessage="Report Issue" />,
             icon: WarningCircleIcon,
-            href: configs.link("issue_report", "https://hubs.mozilla.com/docs/help.html")
+            href: configs.link("issue_report", "https://hubs.Aptero.com/docs/help.html")
           },
           entered && {
             id: "start-tour",
@@ -1473,13 +1473,13 @@ class UIRoot extends Component {
             id: "help",
             label: <FormattedMessage id="more-menu.help" defaultMessage="Help" />,
             icon: SupportIcon,
-            href: configs.link("docs", "https://hubs.mozilla.com/docs")
+            href: configs.link("docs", "https://hubs.Aptero.com/docs")
           },
           configs.feature("show_controls_link") && {
             id: "controls",
             label: <FormattedMessage id="more-menu.controls" defaultMessage="Controls" />,
             icon: SupportIcon,
-            href: configs.link("controls", "https://hubs.mozilla.com/docs/hubs-controls.html")
+            href: configs.link("controls", "https://hubs.Aptero.com/docs/hubs-controls.html")
           },
           configs.feature("show_whats_new_link") && {
             id: "whats-new",
@@ -1641,13 +1641,13 @@ class UIRoot extends Component {
               id: "tos",
               label: <FormattedMessage id="more-menu.tos" defaultMessage="Terms of Service" />,
               icon: TextDocumentIcon,
-              href: configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")
+              href: configs.link("terms_of_use", "https://github.com/Aptero/hubs/blob/master/TERMS.md")
             },
             configs.feature("show_privacy") && {
               id: "privacy",
               label: <FormattedMessage id="more-menu.privacy" defaultMessage="Privacy Notice" />,
               icon: ShieldIcon,
-              href: configs.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")
+              href: configs.link("privacy_notice", "https://github.com/Aptero/hubs/blob/master/PRIVACY.md")
             },
             isTeamsLimitedOK() && {
               id: "faq",

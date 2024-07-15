@@ -14,16 +14,16 @@ export function SocialBar({ mobile }) {
       <a target="_blank" rel="noopener noreferrer" href="https://discord.com/invite/dFJncWwHun">
         <Discord />
       </a>
-      <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/MozillaHubs">
+      <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/ApteroHubs">
         <Twitter />
       </a>
-      <a target="_blank" rel="noopener noreferrer" href="https://www.youtube.com/c/MozillaHubs">
+      <a target="_blank" rel="noopener noreferrer" href="https://www.youtube.com/c/ApteroHubs">
         <Youtube />
       </a>
-      <a target="_blank" rel="noopener noreferrer" href="https://www.twitch.tv/mozillahubs">
+      <a target="_blank" rel="noopener noreferrer" href="https://www.twitch.tv/Apterohubs">
         <Twitch />
       </a>
-      <a target="_blank" rel="noopener noreferrer" href="https://vimeo.com/mozillahubs">
+      <a target="_blank" rel="noopener noreferrer" href="https://vimeo.com/Apterohubs">
         <Vimeo />
       </a>
     </Container>

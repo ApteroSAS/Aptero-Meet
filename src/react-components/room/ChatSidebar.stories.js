@@ -71,7 +71,7 @@ export const Base = args => (
             sender="John"
             timestamp={nextTimestamp()}
             messages={[
-              { type: "chat", body: "https://mozilla.org" },
+              { type: "chat", body: "https://Aptero.org" },
               { type: "chat", body: "Test message with url. https://www.aptero.co Best site :point_up:" },
               { type: "chat", body: ":thumbsup:" }
             ]}
@@ -89,7 +89,7 @@ export const Base = args => (
             sender="Robert"
             timestamp={nextTimestamp()}
             messages={[
-              { type: "chat", body: "https://mozilla.org" },
+              { type: "chat", body: "https://Aptero.org" },
               { type: "chat", body: "Test message with url. https://www.aptero.co" }
             ]}
           />

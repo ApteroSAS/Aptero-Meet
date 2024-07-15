@@ -54,7 +54,7 @@ export function Header({
               )}
               {showSourceLink && (
                 <li>
-                  <a href="https://github.com/mozilla/hubs">
+                  <a href="https://github.com/Aptero/hubs">
                     <FormattedMessage id="header.source" defaultMessage="Developers" />
                   </a>
                 </li>

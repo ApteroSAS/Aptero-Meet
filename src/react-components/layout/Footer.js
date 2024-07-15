@@ -25,7 +25,7 @@ export function Footer({
           {!hidePoweredBy && (
             <FormattedMessage
               id="footer.powered-by"
-              defaultMessage="Powered by <a>Mozilla Hubs</a>"
+              defaultMessage="Powered by <a>Aptero Hubs</a>"
               values={{
                 // eslint-disable-next-line react/display-name
                 a: chunks => (
@@ -62,14 +62,14 @@ export function Footer({
             )}
             {isHmc && (
               <li>
-                <a target="_blank" rel="noopener noreferrer" href={"https://shop.spreadshirt.com/mozillaMR/"}>
+                <a target="_blank" rel="noopener noreferrer" href={"https://shop.spreadshirt.com/ApteroMR/"}>
                   <FormattedMessage id="footer.hubs-merch" defaultMessage="Hubs Merch" />
                 </a>
               </li>
             )}
             {isHmc && (
               <li>
-                <a target="_blank" rel="noopener noreferrer" href={"https://hubs.mozilla.com/docs/hubs-faq.html"}>
+                <a target="_blank" rel="noopener noreferrer" href={"https://hubs.Aptero.com/docs/hubs-faq.html"}>
                   <FormattedMessage id="footer.FAQ" defaultMessage="FAQ" />
                 </a>
               </li>
