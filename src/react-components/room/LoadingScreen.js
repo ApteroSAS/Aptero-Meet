@@ -1,19 +1,11 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { LoadingScreenLayout } from "../layout/LoadingScreenLayout";
-import { Spinner } from "../misc/Spinner";
-import { useRandomMessageTransition } from "./hooks/useRandomMessageTransition";
-export function LoadingScreen({ message, infoMessages }) {
-   //APTERO
-  //const infoMessage = useRandomMessageTransition(infoMessages);
+import { LoadingScreenLayout } from "../layout/LoadingScreenLayoutNew";
+
+export function LoadingScreen() {
   return (
     <LoadingScreenLayout
-      center={
-        <>
-          <Spinner />
-          <p>{message}</p>
-        </>
-      }
+      center={<></>}
       bottom={<div></div>}
     />
   );
@@ -21,14 +13,8 @@ export function LoadingScreen({ message, infoMessages }) {
 
 LoadingScreen.propTypes = {
   message: PropTypes.node,
-  infoMessages: PropTypes.arrayOf(
-    PropTypes.shape({
-      heading: PropTypes.node.isRequired,
-      message: PropTypes.node.isRequired
-    })
-  )
 };
 
 LoadingScreen.defaultProps = {
-  infoMessages: []
+  message: "",
 };

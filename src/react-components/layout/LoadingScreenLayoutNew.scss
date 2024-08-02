@@ -1,0 +1,95 @@
+@use "../styles/theme.scss";
+
+:local(.loading-screen-layout) {
+  pointer-events: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  background: #3C3C3B;
+  color: theme.$text1-color;
+  padding: 10%;
+  box-sizing: border-box;
+
+  @media (min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
+    font-size: theme.$font-size-md;
+  }
+}
+
+:local(.center) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: fit-content;
+}
+
+:local(.logo) {
+  width: 100%;
+  max-width: 300px;
+  margin-bottom: 20px;
+}
+
+:local(.svg-container) {
+  width: 100px;
+}
+
+:local(.corners) {
+  position: fixed;
+  height: 80vh;
+  max-height: 100vw;
+}
+
+:local(.corner-top-left) {
+  top: 0;
+  left: 0;
+  transform: translate(-35%, -35%) rotate(135deg);
+}
+
+:local(.corner-bottom-right) {
+  bottom: 0;
+  right: 0;
+  transform: translate(35%, 35%) rotate(-45deg);
+}
+
+:local(.cls-orange) {
+  transform-origin: 48% 55%;
+  animation: spin-orange 3s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+  stroke: #f37020;
+  fill: none;
+  stroke-linecap: round;
+  stroke-miterlimit: 10;
+  stroke-width: 4px;
+}
+
+:local(.cls-white) {
+  transform-origin: 48% 55%;
+  animation: spin-white 2s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+  stroke: #dadada;
+  fill: none;
+  stroke-linecap: round;
+  stroke-miterlimit: 10;
+  stroke-width: 4px;
+}
+
+@keyframes spin-orange {
+  0% {
+    transform: rotate(0deg) scale(0.75);
+  }
+  100% {
+    transform: rotate(360deg) scale(0.75);
+  }
+}
+
+@keyframes spin-white {
+  0% {
+    transform: rotate(0deg) scale(0.75);
+  }
+  100% {
+    transform: rotate(360deg) scale(0.75);
+  }
+}
