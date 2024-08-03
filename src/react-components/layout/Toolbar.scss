@@ -1,42 +1,49 @@
 @use "../styles/theme";
 
 :local(.toolbar) {
-  height: 96px;
   display: flex;
-  padding: 12px;
-  background-color: theme.$background1-color;
-  border-top: 1px solid theme.$border1-color;
+  align-items: center;
   position: relative;
-
-  @media (min-width: theme.$breakpoint-lg) {
-    padding: 12px 24px;
-    justify-content: space-between;
-  }
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 :local(.content) {
   display: flex;
-  flex: 1;
-  justify-content: space-around;
+  flex-direction: column;
+  justify-content: flex-start;
   align-items: center;
-  gap: 0 24px;
-
-  @media (min-width: theme.$breakpoint-lg) {
-    flex: 0;
-  }
+  gap: 0;
 }
 
-:local(.center_content) {
-  position: absolute;
-  display: flex;
-  width: calc(100% - 48px);
-  justify-content: center;
-  z-index: -1;
-
-  @media (max-width: theme.$breakpoint-lg) {
-    width: 100%;
-    position: relative;
-    justify-content: space-around;
-    gap: unset;
+:local(.content > *) {
+  // The first child should have top border radius of 5px, and the last child should have bottom border radius of 5px
+  &:first-child {
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    padding-top: 12px;
   }
+  &:last-child {
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    height: 20px;
+    label {
+      display: none;
+    }
+  }
+
+  // Add a line separator between each child below each label, using border line bottom
+  span,
+  label {
+    border-bottom: 1px solid gray;
+    width: 93%;
+  }
+
+  &:not(:last-child) {
+    > div {
+      padding: 12px 0 6px 0;
+    }
+  }
+  
 }

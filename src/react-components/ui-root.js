@@ -70,6 +70,7 @@ import { ReactComponent as VRIcon } from "./icons/VR.svg";
 import { ReactComponent as LeaveIcon } from "./icons/Leave.svg";
 import { ReactComponent as EnterIcon } from "./icons/Enter.svg";
 import { ReactComponent as InviteIcon } from "./icons/Invite.svg";
+
 import hubsLogo from "../assets/images/hubs-logo.png";
 import { PeopleSidebarContainer, userFromPresence } from "./room/PeopleSidebarContainer";
 import { ObjectListProvider } from "./room/hooks/useObjectList";
@@ -1732,48 +1733,9 @@ class UIRoot extends Component {
                 viewport={
                   <>
                     {!this.state.dialog && renderEntryFlow ? entryDialog : undefined}
-                    {!this.props.selectedObject && <CompactMoreMenuButton />}
                     {aptGuiVisible &&
                       (!this.props.selectedObject ||
-                      (this.props.breakpoint !== "sm" && this.props.breakpoint !== "md")) && (
-                      <ContentMenu>
-                          <CustomMenuButton
-                            active={this.state.sidebarId === "custom"}
-                            onClick={() => this.toggleSidebar("custom")}
-                          />
-                          <InstancesMenuButton
-                            active={this.state.sidebarId === "instances"}
-                            onClick={() => this.toggleSidebar("instances")}
-                          />
-                          {showObjectList &&
-                            false && ( //Aptero
-                          <ObjectsMenuButton
-                            active={this.state.sidebarId === "objects"}
-                            onClick={() => this.toggleSidebar("objects")}
-                              />
-                            )}
-                          {//Aptero
-                            this.state.persistentIframe && (
-                            <PSidebarButton
-                              active={this.state.sidebarId === "psidebar"}
-                              onClick={() => this.toggleSidebar("psidebar")}
-                              icon={this.state.psidebarIcon}
-                          />
-                        )}
-                        <PeopleMenuButton
-                          active={this.state.sidebarId === "people"}
-                          disabled={isLockedDownDemo}
-                          onClick={!isLockedDownDemo ? () => this.toggleSidebar("people") : null}
-                          presencecount={this.state.presenceCount}
-                        />
-                        {showECSObjectsMenuButton && (
-                          <ECSDebugMenuButton
-                            active={this.state.sidebarId === "ecs-debug"}
-                            onClick={() => this.toggleSidebar("ecs-debug")}
-                          />
-                        )}
-                      </ContentMenu>
-                    )}
+                        (this.props.breakpoint !== "sm" && this.props.breakpoint !== "md")) && <></>}
                     {!entered && !streaming && !isMobile && streamerName && <SpectatingLabel name={streamerName} />}
                     {this.props.activeObject && (
                       <ObjectMenuContainer
@@ -1840,8 +1802,7 @@ class UIRoot extends Component {
                 sidebar={
                   this.state.sidebarId ? (
                     <>
-                      {(this.state.sidebarId === "custom" ||
-                       this.state.sidebarId === "psidebar") && (
+                      {(this.state.sidebarId === "custom" || this.state.sidebarId === "psidebar") && (
                         <CustomSidebarContainer onClose={() => this.setSidebar(null)} />
                       )}
                       {this.state.sidebarId === "instances" && (
@@ -1983,6 +1944,47 @@ class UIRoot extends Component {
                         {
                         !isLockedDownDemo && (
                           <>
+              
+                            <CustomMenuButton
+                              active={this.state.sidebarId === "custom"}
+                              onClick={() => this.toggleSidebar("custom")}
+                            />
+                            <InstancesMenuButton
+                              active={this.state.sidebarId === "instances"}
+                              onClick={() => this.toggleSidebar("instances")}
+                            />
+                            {showObjectList &&
+                              false && ( //Aptero
+                                <ObjectsMenuButton
+                                  active={this.state.sidebarId === "objects"}
+                                  onClick={() => this.toggleSidebar("objects")}
+                                />
+                              )}
+                            {
+                              //Aptero
+                              this.state.persistentIframe && (
+                                <PSidebarButton
+                                  active={this.state.sidebarId === "psidebar"}
+                                  onClick={() => this.toggleSidebar("psidebar")}
+                                  icon={this.state.psidebarIcon}
+                                />
+                              )
+                            }
+                            <PeopleMenuButton
+                              active={this.state.sidebarId === "people"}
+                              disabled={isLockedDownDemo}
+                              onClick={!isLockedDownDemo ? () => this.toggleSidebar("people") : null}
+                              presencecount={this.state.presenceCount}
+                            />
+                            {showECSObjectsMenuButton && (
+                              <ECSDebugMenuButton
+                                active={this.state.sidebarId === "ecs-debug"}
+                                onClick={() => this.toggleSidebar("ecs-debug")}
+                              />
+                            )}
+
+
+
                             {/* APTERO disable mic <AudioPopoverButtonContainer scene={this.props.scene} />*/}
                             <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel} />
                             <PlacePopoverContainer

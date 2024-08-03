@@ -2,7 +2,9 @@ import React, { useState, useEffect } from "react";
 import className from "classnames";
 import PropTypes from "prop-types";
 import { joinChildren } from "../misc/joinChildren";
-import styles from "./ContentMenu.scss";
+//import styles from "./ContentMenu.scss";
+import styles from "../input/ToolbarButton.scss";
+
 import { ReactComponent as ObjectsIcon } from "../icons/Objects.svg";
 import { ReactComponent as PeopleIcon } from "../icons/People.svg";
 import { FormattedMessage } from "react-intl";

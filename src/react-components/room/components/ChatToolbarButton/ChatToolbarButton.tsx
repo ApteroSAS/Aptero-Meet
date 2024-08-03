@@ -5,7 +5,6 @@ import { ReactComponent as ChatIcon } from "../../../icons/Chat.svg";
 import { FormattedMessage, defineMessage, useIntl } from "react-intl";
 import React, { useContext } from "react";
 import { ChatContext } from "../../contexts/ChatContext";
-import { ToolTip } from "@mozilla/lilypad-ui";
 
 const chatTooltipDescription = defineMessage({
   id: "chat-tooltip.description",
@@ -23,7 +22,6 @@ const ChatToolbarButton = ({ onClick, selected }: ChatToolbarButtonProps) => {
   const description = intl.formatMessage(chatTooltipDescription);
 
   return (
-    <ToolTip description={description}>
       <ToolbarButton
         // Ignore type lint error as we will be redoing ToolbarButton in the future
         // @ts-ignore
@@ -34,7 +32,6 @@ const ChatToolbarButton = ({ onClick, selected }: ChatToolbarButtonProps) => {
         label={<FormattedMessage id="chat-toolbar-button" defaultMessage="Chat" />}
         selected={selected}
       />
-    </ToolTip>
   );
 };
 

@@ -25,25 +25,24 @@ export function RoomLayout({
 }) {
   return (
     <div
-        ref={viewportRef}
-        className={classNames(styles.roomLayout, { [styles.objectFocused]: objectFocused }, className)} {...rest}>
+      ref={viewportRef}
+      className={classNames(styles.roomLayout, { [styles.objectFocused]: objectFocused }, className)}
+      {...rest}
+    >
       {sidebar && <div className={classNames(styles.sidebar, sidebarClassName)}>{sidebar}</div>}
       <div className={classNames(styles.modalContainer, styles.viewport)}>{modal}</div>
       {(toolbarLeft || toolbarCenter || toolbarRight) && (
-          <div style={{position: "absolute", bottom: "0px", width:"100%",display: "flex",}}>
-            <Toolbar
-              style={{backgroundColor:"#ffffff00",border:"0", flex: "1" }} /* APTERO */
-              className={classNames(styles.main, styles.toolbar, toolbarClassName)}
-              left={toolbarLeft}
-              center={toolbarCenter}
-              right={toolbarRight}
-            />
-            {sidebar && <div style={{width:"450px"}}></div>}
-          </div>
+        <div className={classNames(styles.toolbarWrapper)}>
+          <Toolbar
+            className={classNames(styles.toolbar, toolbarClassName)}
+            left={toolbarLeft}
+            center={toolbarCenter}
+            right={toolbarRight}
+          />
+          {sidebar && <div style={{width:"450px"}}></div>}
+        </div>
       )}
-      <div
-        className={classNames(styles.main, styles.viewport, { [styles.streaming]: streaming }, viewportClassName)}
-      >
+      <div className={classNames(styles.main, styles.viewport, { [styles.streaming]: streaming }, viewportClassName)}>
         {viewport}
       </div>
     </div>

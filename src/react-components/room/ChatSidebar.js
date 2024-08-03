@@ -72,8 +72,8 @@ export const EmojiPickerPopoverButton = React.memo(({ onSelectEmoji, disabled })
           }}
         />
       )}
-      placement="top"
-      offsetDistance={28}
+      placement="left"
+      offsetDistance={8}
     >
       {({ togglePopover, popoverVisible, triggerRef }) => (
         <IconButton
