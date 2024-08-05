@@ -1,11 +1,13 @@
 @use "../styles/theme.scss";
 
 :local(.chat-input-container) {
-  padding: 8px 16px;
-  background-color: theme.$input-bg-color;
+  padding: 6px 8px;
   flex-basis: max-content;
-}
 
+  > div {
+    background-color: white;
+  }
+}
 :local(.message-list) {
   display: flex;
   flex-grow: 1;
@@ -41,15 +43,16 @@
 }
 
 :local(.message-bubble) {
-  background-color: theme.$chat-bubble-bg-color-received;
-  border-radius: 19px;
+  background-color: rgb(198,198,198);
+  border-radius: 4px;
   margin: 2px;
   padding: 10px 16px;
   max-width: 80%;
   width: max-content;
-  font-size: theme.$font-size-md;
+  font-size: 12px;
   overflow-wrap: break-word;
   line-height: 1.25;
+  border: 1px solid white;
 
   img,
   video {
@@ -68,19 +71,19 @@
   }
 
   :local(.message-bubble) {
-    background-color: theme.$chat-bubble-bg-color-sent;
-    color: theme.$chat-bubble-text-color-sent;
+    background-color: #ffa269;
+    color: black;
     align-self: flex-end;
 
     a {
-      color: theme.$chat-bubble-text-color-sent;
+      color: black;
 
       &:hover {
-        color: theme.$chat-bubble-link-color-sent-hover;
+        color: black;
       }
 
       &:active {
-        color: theme.$chat-bubble-link-color-sent-pressed;
+        color: gray;
       }
     }
   }
