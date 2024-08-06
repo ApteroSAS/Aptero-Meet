@@ -13,7 +13,7 @@
   margin-left: 16px;
   font-size: theme.$font-size-xs;
   font-weight: theme.$font-weight-bold;
-  color: theme.$text3-color;
+  color: black;
 }
 
 :local(.more-menu-item-list) {
@@ -27,7 +27,7 @@
   width: 100%;
   height: 40px;
   padding: 0 16px;
-  color: theme.$text1-color;
+  color: black;
   font-size: theme.$font-size-sm;
   font-weight: theme.$font-weight-medium;
 
@@ -40,7 +40,7 @@
   }
 
   svg {
-    color: theme.$text1-color;
+    color: black;
   }
 
   // Hack to make hover styles overlap popover border and look correct.
@@ -90,7 +90,7 @@ button:local(.more-menu-item-target) {
   width: 48px;
   height: 48px;
   border-radius: 48px;
-  color: theme.$button-text-color;
+  color: black;
   background-color: theme.$button-bg-color;
   border: 1px solid theme.$button-border-color;
   display: flex;
@@ -106,7 +106,7 @@ button:local(.more-menu-item-target) {
   }
 
   svg {
-    color: theme.$text1-color;
+    color: black;
   }
 
   @media(min-width: theme.$breakpoint-lg) {

@@ -6,12 +6,12 @@
   right: 8px;
   display: flex;
   flex-direction: row;
-  background-color: theme.$button-bg-color;
+  background-color: white;
   border: 1px solid theme.$button-border-color;
   border-radius: 12px;
   pointer-events: auto;
   padding: 4px;
-  color: theme.$text1-color;
+  color: black;
 
   @media (min-width: theme.$breakpoint-lg) {
     top: 24px;
@@ -29,6 +29,7 @@
   font-weight: theme.$font-weight-bold;
   align-items: center;
   padding: 8px 10px;
+  color: black !important;
 
   & > * {
     margin-right: 8px;
@@ -47,17 +48,12 @@
   }
 
   svg {
-    color: theme.$text1-color;
+    color: black !important;
   }
 }
 
 :local(.active) {
-  color: theme.$text5-color;
   background-color: theme.$active-color;
-
-  svg {
-    color: theme.$text5-color;
-  }
 
   &:hover {
     background-color: theme.$active-color-hover;

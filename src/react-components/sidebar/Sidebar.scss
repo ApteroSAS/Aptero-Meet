@@ -43,6 +43,7 @@
   align-items: center;
   justify-content: center;
   background-color: #ebebeb;
+  color: black;
 
   @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
     border-top-left-radius: 10px;
