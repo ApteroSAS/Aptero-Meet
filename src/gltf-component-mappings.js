@@ -135,14 +135,10 @@ import { setInitialNetworkedData } from "./utils/assign-network-ids";
 
 AFRAME.GLTFModelPlus.registerComponent("media-frame", "media-frame", (el, _componentName, componentData) => {
   // eslint-disable-next-line react/no-unknown-property
-  console.log("[!!] media-frame:", _componentName)
   const eid = renderAsEntity(APP.world, <entity mediaFrame={componentData} />);
 
   addComponent(APP.world, Networked, eid);
   const networkedEl = findAncestorWithComponent(el, "networked");
-  
-  console.log("[!!] networkedEl:", networkedEl)
-
 
   const rootNid = (networkedEl && networkedEl.components.networked.data.networkId) || "scene";
 

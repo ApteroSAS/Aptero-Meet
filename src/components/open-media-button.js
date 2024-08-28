@@ -23,6 +23,7 @@ const checkIfFrameable = async (url) => {
     }
 
     if (
+      url.startsWith("#") || 
       url.startsWith("hyperbeam") || 
       url.startsWith("https://hyperbeam") || 
       url.startsWith("https://meet.aptero.co") || 
@@ -91,7 +92,9 @@ const checkIfFrameable = async (url) => {
     }
     return true;
   } catch (e) {
-    console.error("Cannot detect iframeability",e);
+    console.error("Cannot detect iframeability of", url, e); 
+    // If we can't check iframeability, we'll just assume it's iframeable
+    // so we don't create a Hyperbeam instance from a potentially invalid URL
     return true;
   }
 };
@@ -140,8 +143,7 @@ AFRAME.registerComponent("open-media-button", {
             } else {
               label = "visit room";
             }
-          }
-          else {
+          } else {
             //Aptero
             label = await setupIframeButton(this) || label;
           }
@@ -153,8 +155,7 @@ AFRAME.registerComponent("open-media-button", {
       this.clean_src = this.src;
       // Check if the url is frameable
       const isFrameable = await checkIfFrameable(this.src);
-      if (!isFrameable)
-      {
+      if (!isFrameable) {
         //Convert into a Hyperbeam link to bypass Embed restrictions
         const url = new URL(this.src);
         const hyperbeamURL = "https://hyperbeam.serverless.aptero.co/?url=" + url.toString();
