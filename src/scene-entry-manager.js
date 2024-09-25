@@ -29,6 +29,7 @@ import { moveToSpawnPoint } from "./bit-systems/waypoint";
 import { spawnFromFileList, spawnFromUrl } from "./load-media-on-paste-or-drop";
 import { isLockedDownDemoRoom } from "./utils/hub-utils";
 import { networkService } from "./aptero/module/HubsBridge/service/NetworkService";
+import { linkToYoutube } from "./utils/linkToYoutube";
 
 export default class SceneEntryManager {
   constructor(hubChannel, authChannel, history) {
@@ -248,6 +249,10 @@ export default class SceneEntryManager {
     };
 
     const spawnMediaInfrontOfPlayer = (src, contentOrigin) => {
+      
+      // Convert youtube links into Hyperbeam youtube embeds
+      src = linkToYoutube(src);
+
       if (shouldUseNewLoader()) {
         console.warn(
           "Spawning newLoader object using `spawnMediaInFrontOfPlayer`. This codepath should likely be made more direct.",
