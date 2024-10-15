@@ -41,14 +41,14 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
       HBRes: null,
       HBRegion: null,
       HBWebGL: null,
-      HBBrowserNav: null,
+      HBBrowserNav: true,
       HBDarkMode: null,
       HBFps: null,
       HBQlty: null,
-      HBuBlock: null,
+      HBuBlock: true,
       HBSession: null,
       HBNoCursors: null,
-      HBStready: null,
+      HBStready: true,
       HBRestricted: null,
       HBPermissions: {},
       HBaudioParamsComp: {},
@@ -178,10 +178,11 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
 
   let hbTimeout = 3;
   let retries = 0;
+  let killTimeout = false;
   // Add reconnectTimeout constantly
   setInterval(() => {
     reconnectTimeout++;
-    if (reconnectTimeout > hbTimeout && (retries < 4 || hbProperties.HBNoCursors)) {
+    if (!killTimeout && reconnectTimeout > hbTimeout && (retries < 4 || hbProperties.HBNoCursors)) {
       hbTimeout = Math.min(20, hbTimeout*3);
       reconnectTimeout = -5;
       retries++;
@@ -641,6 +642,17 @@ export const hyperbeamBrowser = async (screenElement, texture, mediaData) => {
   screenElement.addEventListener("componentremoved", (evt) => {
     if (evt.detail.name === "networked") {
       hb.destroy();
+      
+      // Remove the listeners
+      screenElement.removeEventListener("componentremoved", () => { });
+      window.removeEventListener("keydown", onKeyEvent);
+      window.removeEventListener("keyup", onKeyEvent);
+      window.removeEventListener("mousemove", onMouseEvent);
+      window.removeEventListener("mousedown", onMouseEvent);
+      window.removeEventListener("mouseup", onMouseEvent);
+      window.removeEventListener("wheel", onMouseEvent);
+      
+      killTimeout = true;
     }
   });
   
