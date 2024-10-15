@@ -5,6 +5,14 @@ AFRAME.registerComponent("local-refresh-media-button", {
     this.onClick = async () => {
       if (this.targetEl) {
         const c = this.targetEl.components;
+        try {
+          if (c["media-video"] && c["media-video"].data && c["media-video"].data.contentType === "hyperbeam:") {
+            // Do not refresh hyperbeam media manually, as it will break it's logic
+            return
+          }
+        } catch (e) {
+        }
+
         // If an HLS stream is loaded, refresh directly with HLS.js
         if (c["media-video"] && c["media-video"].videoTexture && c["media-video"].videoTexture.hls) {
           c["media-video"].videoTexture.hls.recoverMediaError();
