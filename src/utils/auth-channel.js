@@ -30,7 +30,6 @@ export default class AuthChannel {
     this.store.update({ credentials: { token: null, email: null } });
     await this.store.resetToRandomDefaultAvatar();
     this._signedIn = false;
-    await msTeamsAPILight().logout();
   };
 
   verifyAuthentication(authTopic, authToken, authPayload) {

@@ -1,12 +1,14 @@
-import React, { useState } from "react";
+import React, {useCallback, useContext, useReducer, useState} from "react";
 import PropTypes from "prop-types";
 import configs from "../../utils/configs";
 import { SignInModal, SignInStep, SubmitEmail, WaitForVerification, SignInComplete, WaitForMicrosoftVerification } from "./SignInModal";
 import { TERMS, PRIVACY } from "../../constants";
+import {useSignIn} from "./SignInModalContainer";
 
 // TODO: Migrate to use AuthContext
-export function RoomSignInModalContainer({ onClose, step, onSubmitEmail,onSubmitEmailMicrosoftLogin, message, onContinue }) {
+export function RoomSignInModalContainer({ onClose, message }) {
   const [cachedEmail, setCachedEmail] = useState();
+  const { step, submitEmail, submitEmailMicrosoftLogin } = useSignIn();
 
   return (
     <SignInModal onClose={onClose} closeable>
@@ -14,10 +16,10 @@ export function RoomSignInModalContainer({ onClose, step, onSubmitEmail,onSubmit
         <SubmitEmail
           onSubmitEmail={email => {
             setCachedEmail(email);
-            onSubmitEmail(email);
+            submitEmail(email);
           }}
           onSubmitEmailMicrosoftLogin={user=>{
-            onSubmitEmailMicrosoftLogin(user);
+            submitEmailMicrosoftLogin(user);
           }}
           initialEmail={cachedEmail}
           termsUrl={configs.link("terms_of_use", TERMS)}
@@ -39,7 +41,7 @@ export function RoomSignInModalContainer({ onClose, step, onSubmitEmail,onSubmit
         onCancel={onClose}
         />
       )}
-      {step === SignInStep.complete && <SignInComplete message={message} onContinue={onContinue} />}
+      {step === SignInStep.complete && <SignInComplete message={message} onContinue={onClose} />}
     </SignInModal>
   );
 }

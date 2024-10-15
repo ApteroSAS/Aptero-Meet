@@ -16,7 +16,7 @@ import {initIOC} from "./aptero/module/axolotis/AxInit";
 
 initIOC();
 
-registerTelemetry("/signin", "Hubs Sign In Page");
+registerTelemetry("/signin", "Sign In Page");
 
 window.APP = { store };
 function SignInRoot() {

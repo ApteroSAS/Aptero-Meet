@@ -113,6 +113,8 @@ import { InstancesMenuButton } from "../aptero/module/load-balancer/ui/Instances
 import { InstancesSidebarContainer } from "../aptero/module/load-balancer/ui/InstancesSidebarContainer";
 import { isTeamsLimitedOK } from "../aptero/module/microsoft/TeamsLimit";
 import {msTeamsAPI, msTeamsAPILight} from "../aptero/module/axolotis/modules/basic/ImportHelper";
+import {store} from "../utils/store-instance";
+import {AuthContextProvider} from "./auth/AuthContext";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -757,7 +759,7 @@ class UIRoot extends Component {
 
   showNonHistoriedDialog = (DialogClass, props = {}) => {
     this.setState({
-      dialog: <DialogClass {...{ onClose: this.closeDialog, ...props }} />
+      dialog: <AuthContextProvider store={store}><DialogClass {...{ onClose: this.closeDialog, ...props }} /></AuthContextProvider>
     });
   };
 

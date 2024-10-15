@@ -33,7 +33,7 @@ function loginReducer(state, action) {
   }
 }
 
-function useSignIn() {
+export function useSignIn() {
   const auth = useContext(AuthContext);
   const [state, dispatch] = useReducer(loginReducer, initialSignInState);
 
@@ -50,24 +50,18 @@ function useSignIn() {
     },
     [auth]
   );
-/**
- *  ) : step===SignInStep.microsoftverificationReceived ?(
-        <SignInComplete/>
-      )
- */
-  const submitEmailMicrosoftLogin =useCallback(
-    user=>{
-      auth.signInMicrosoft(user).then(()=>{
-        dispatch({type:SignInAction.verificationReceived});
-      }).catch(e => {
-        console.log(e);
-    });
-      authenticationType.microsoftAuhtentication=true;
-      authenticationType.adresseMailAuhtentication=false;
-      dispatch({type:SignInAction.WaitForMicrosoftVerification});
-
-    },
-    [auth]
+  const submitEmailMicrosoftLogin = useCallback(
+      user => {
+        auth.signInMicrosoft(user).then(() => {
+          dispatch({type: SignInAction.verificationReceived});
+        }).catch(e => {
+          console.log(e);
+        });
+        authenticationType.microsoftAuhtentication = true;
+        authenticationType.adresseMailAuhtentication = false;
+        dispatch({type: SignInAction.WaitForMicrosoftVerification});
+      },
+      [auth]
   );
 
   const cancel = useCallback(() => {

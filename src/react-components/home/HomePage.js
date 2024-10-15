@@ -6,7 +6,6 @@ import { AppLogo } from "../misc/AppLogo";
 import { AuthContext } from "../auth/AuthContext";
 import { Column } from "../layout/Column";
 import { Container } from "../layout/Container";
-import { CreateRoomButton } from "./CreateRoomButton";
 import styles from "./HomePage.scss";
 import { isHmc } from "../../utils/isHmc";
 import maskEmail from "../../utils/mask-email";
