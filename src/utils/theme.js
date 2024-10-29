@@ -144,6 +144,14 @@ function updateTextButtonColors() {
         "text-button",
         `textHoverColor: #fff; textColor: #fff; backgroundColor: ${actionColor}; backgroundHoverColor: ${actionHoverColor}`
       );
+
+    // Hack to trigger the Hover and Unhover for the button custom model
+    document
+      .querySelector("#custom-button")
+      .setAttribute(
+        "text-button",
+        `textHoverColor: #fff; textColor: #fff; backgroundColor: ${actionColor}; backgroundHoverColor: ${actionHoverColor}`
+      );
   }
 }
 

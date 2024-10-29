@@ -111,12 +111,12 @@ export class FrontEndAPI {
      * @param animName
      * @param action
      */
-    triggerAnimation(animName: string, action: TriggerAnimationAction = {}) {
+    triggerAnimation(animName: string, action: TriggerAnimationAction = {}, triggerData: any = {}) {
         if (!animName) {
             console.error("animName are required");
             return;
         }
-        this.animationControllerAPI.triggerAnimation(animName, action);
+        this.animationControllerAPI.triggerAnimation(animName, action, triggerData);
     }
 
     async notifyUserActionToAi(actionDescription: string, triggerAI: boolean = true,context:any) {

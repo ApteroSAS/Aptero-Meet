@@ -9,7 +9,6 @@ AFRAME.registerComponent("custom-controller-action", {
     },
 
     applyPerm(object3D, data) {
-        console.log("Applying permissions")
         object3D.visible = false;
         let authorizationData = customActionRegister.triggers[data.triggerId].authorization;
         if (configs.isAdmin()) {
@@ -29,17 +28,55 @@ AFRAME.registerComponent("custom-controller-action", {
     },
 
     init() {
-        console.log("Initiated the Button")
         this._updateUI = this._updateUI.bind(this);
         this._updateUIOnStateChange = this._updateUIOnStateChange.bind(this);
+        this.hoverQueue = [];
+        this.isHoverAnimInProgress = false;
+        const hoverActionsIds = this.data.hoverActionIds;
+
+        this.processHoverQueue = () => {
+            if (this.hoverQueue.length === 0 || this.isHoverAnimInProgress) {
+                return;
+            }
+            const nextAction = this.hoverQueue.shift();
+            this.isHoverAnimInProgress = true;
+            
+            customActionRegister.triggerAction(nextAction.id, nextAction.payload).finally(() => {
+                setTimeout(() => {
+                    this.isHoverAnimInProgress = false;
+                    this.processHoverQueue();
+                }, 600);
+            });
+        };
+
         this.onHovered = () => {
             this.hovering = true;
             this._updateUI();
+
+            if (hoverActionsIds) {
+                // Clear redundant hover/unhover actions, keep only the latest
+                this.hoverQueue = this.hoverQueue.filter(action => action.payload && action.payload.type !== "unhover");
+                let ids = hoverActionsIds.split("+");
+                ids.forEach(id => {
+                    this.hoverQueue.push({ id: id, payload: null });
+                });
+                this.processHoverQueue();
+            }
         };
 
         this.onUnhovered = () => {
             this.hovering = false;
             this._updateUI();
+
+            if (hoverActionsIds) {
+                // Clear redundant hover/unhover actions, keep only the latest
+                this.hoverQueue = this.hoverQueue.filter(action => action.payload && action.payload.type !== "hover");
+                let ids = hoverActionsIds.split("+");
+                ids.forEach(id => {
+                    this.hoverQueue.push({ id: id, payload: { type: "unhover" } });
+                });
+                this.processHoverQueue();
+            }
         };
 
         let triggerData = customActionRegister.triggers[this.data.triggerId];
@@ -56,15 +93,19 @@ AFRAME.registerComponent("custom-controller-action", {
                 this.clickWIP = true;
                 try {
                     let entry = null;
-                    //console.log("Triggering action data", this)
                     if (this.data.actionIds) {
                         let ids = this.data.actionIds.split("+");
                         for (const id of ids) {
-                            //console.log("Trigger Attempt", id, entry)
                             await customActionRegister.triggerAction(id, entry);
-                            //console.log("Triggered action", id);
                         }
                     }
+                    // Apply cooldown to the hover queue as well
+                    this.hoverQueue = [];
+                    this.isHoverAnimInProgress = false;
+                    setTimeout(() => {
+                        this.processHoverQueue();
+                    }, 1000);
+
                     await new Promise(resolve => {
                         setTimeout(resolve,600);//prevent spam click
                     });

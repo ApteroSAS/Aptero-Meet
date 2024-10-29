@@ -1,5 +1,9 @@
 import { customActionRegister } from "./CustomActionRegister";
 import { networkService } from "../../HubsBridge/service/NetworkService";
+import { CustomURL } from "../../customURL/CustomURL"
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { Vector3, Euler, AnimationMixer, LoopOnce, AnimationClip } from 'three';
+import { Action } from "./Action";
 
 export class ActionController {
 
@@ -52,7 +56,7 @@ export class ActionController {
                 if(!trigger.rotation){
                     trigger.rotation=new THREE.Vector3(0,0,0);
                 }
-                this.createButtonOnElement(trigger.type, triggerId, actionIds, element, trigger.position, trigger.rotation, trigger.text, trigger.size, trigger.textWidth, trigger.style,version);
+                this.createButtonOnElement(trigger.type, triggerId, actionIds, element, trigger.position, trigger.rotation, trigger.text, trigger.size, trigger.textWidth, trigger.style,version, true, trigger.customModelProperties);
             } else {
                 throw new Error("invalid btn type");
             }
@@ -62,11 +66,163 @@ export class ActionController {
 
     // [!] DevNote: We use *4 size to scale the button to the correct size
 
-    createButtonOnElement(type, triggerId, actionsIds, element, position, rotationDeg, text, size, textWidth, style, version = 1, addReverse = true) {
+    createButtonOnElement(type, triggerId, actionsIds, element, position, rotationDeg, text, size, textWidth, style, version = 1, addReverse = true, customModelProperties = null) {
+      
         if (addReverse) {
-            this.createButtonOnElement(type, triggerId, actionsIds, element, position, rotationDeg, text, size, textWidth, style,version, false);
+            this.createButtonOnElement(type, triggerId, actionsIds, element, position, rotationDeg, text, size, textWidth, style,version, false, customModelProperties);
             rotationDeg.y += 180;
+            return;
         }
+        if (customModelProperties && customModelProperties.url && customModelProperties.url !== "") {
+    
+            const loader = new GLTFLoader();
+            loader.load(customModelProperties.url, (gltf) => {
+                const model = gltf.scene;
+    
+                // Apply position and scale (relative to the parent element's position)
+                const modelPosition = customModelProperties.position || { x: 0, y: 0, z: 0 };
+                const modelScale = customModelProperties.scale || { x: 1, y: 1, z: 1 };
+                
+                model.position.set(modelPosition.x, modelPosition.y, modelPosition.z);
+                model.scale.set(modelScale.x, modelScale.y, modelScale.z);
+    
+                // Create an A-Frame entity to wrap the model
+                const customEntity = document.createElement('a-entity');
+                element.append(customEntity);
+
+                customEntity.setAttribute('mixin', 'custom-button');
+                // Force model after applying the mixin (So we can have the Hover + Unhover triggers)
+                customEntity.addEventListener('loaded', () => {
+                    (customEntity as any).setObject3D('mesh', model);
+                });
+
+                
+                // Apply the necessary A-Frame interaction components to the custom entity
+                customEntity.setAttribute('is-remote-hover-target', '');
+                customEntity.setAttribute('class', 'interactable');
+                customEntity.setAttribute('tags', 'singleActionButton:true');
+
+                // Apply the model as part of the A-Frame entity
+                (customEntity as any).setObject3D('mesh', model);
+
+                let positionUpdated = new THREE.Vector3(position.x,position.y,position.z);
+
+                // Set the correct position, rotation, and scale on the A-Frame entity itself
+                customEntity.setAttribute('position', `${positionUpdated.x} ${positionUpdated.y} ${positionUpdated.z}`);
+                customEntity.setAttribute('rotation', `${rotationDeg.x} ${rotationDeg.y} ${rotationDeg.z}`);
+                customEntity.setAttribute('scale', `${size} ${size} ${size}`);
+
+                customEntity.setAttribute('geometry', 'primitive: box');
+                customEntity.setAttribute('raycaster-target', '');
+
+                let hoverActionsIds = [];
+
+                // Register local animation action for the custom model
+                if (gltf.animations && gltf.animations.length > 0) {
+                    // Add a mixer to the custom entity
+                    const mixer = new THREE.AnimationMixer(model);
+                    (customEntity as any).object3D.mixer = mixer;
+
+                    const clock = new THREE.Clock();
+
+                    // Generate or retrieve a UUID for the object
+                    let objectUuid = customEntity.getAttribute('uuid');
+                    if (!objectUuid) {
+                        objectUuid = THREE.MathUtils.generateUUID();
+                        customEntity.setAttribute('uuid', objectUuid);
+                    }
+
+                    // Rename animations and add them to the mixer
+                    gltf.animations.forEach((animationClip: AnimationClip) => {
+                      // Rename the animation if it doesn't already follow the custom format
+                      if (!animationClip.name.startsWith("ApteroANIM_")) {
+                          animationClip.name = `ApteroANIM_${animationClip.name}_${objectUuid}`;
+                      }
+                    });
+
+                    if (customModelProperties.clickAnimation) {
+                        if (!customModelProperties.clickAnimation.startsWith("ApteroANIM_")) {
+                            customModelProperties.clickAnimation = `ApteroANIM_${customModelProperties.clickAnimation}_${objectUuid}`;
+                        }
+                    }
+
+                    if (customModelProperties.hoverAnimation) {
+                        if (!customModelProperties.hoverAnimation.startsWith("ApteroANIM_")) {
+                            customModelProperties.hoverAnimation = `ApteroANIM_${customModelProperties.hoverAnimation}_${objectUuid}`;
+                        }
+                    }
+
+                    const clickClip = gltf.animations.find((clip: AnimationClip) => clip.name === customModelProperties.clickAnimation);
+                    if (customModelProperties.clickAnimation && clickClip) {
+                        // Create and register an Action for this animation
+                        const animationAction: Action = {
+                            type: 'local_animation',
+                            data: customModelProperties.clickAnimation,
+                            speed: customModelProperties.speed === undefined ? 1 : customModelProperties.speed,
+                            mainclick: 5, // Lock to 1 animation or Force reverse if equal
+                            reclick: 1,  // Reset and play again on reclick
+                            onEnd: 0, // Reset at the end
+                            loop: false,
+                            repeat: 1
+                        };
+
+                        // Create a unique ID for this action
+                        const animationActionId = customModelProperties.clickAnimation; 
+                        customActionRegister.setup(customEntity, animationAction, animationActionId);
+                        actionsIds.push(animationActionId);
+                        model.animations.push(clickClip);
+                    }
+
+                    const hoverClip = gltf.animations.find((clip: AnimationClip) => clip.name === customModelProperties.hoverAnimation);
+                    if (customModelProperties.hoverAnimation && hoverClip) {
+                        // Create and register an Action for this animation
+                        const animationAction: Action = {
+                            type: 'local_animation',
+                            data: customModelProperties.hoverAnimation,
+                            speed: customModelProperties.speed === undefined ? 1 : customModelProperties.speed,
+                            mainclick: 5, // Lock to 1 animation or Force reverse if equal
+                            reclick: 1,  // Reset and play again on reclick
+                            onEnd: 1, // Pause at the end
+                            loop: false,
+                            repeat: 1
+                        };
+
+                        // Create a unique ID for this action
+                        const animationActionId = customModelProperties.hoverAnimation; 
+                        customActionRegister.setup(customEntity, animationAction, animationActionId);
+                        hoverActionsIds.push(animationActionId);
+                        model.animations.push(hoverClip);
+                    }
+
+                    // Add a tick function so we can animate the model
+                    function animate() {
+                        const delta = clock.getDelta(); // Get time elapsed since last frame
+                        if (mixer) mixer.update(delta);
+
+                        // Remove if the element is removed
+                        if (!customEntity.parentNode || !mixer) {
+                            mixer.stopAllAction();
+                            return;
+                        }
+
+                        requestAnimationFrame(animate);
+                    }
+                    animate();
+                }
+                customEntity.setAttribute(
+                    'custom-controller-action',
+                    `actionIds:${actionsIds.join('+')};
+                    triggerId:${triggerId};
+                    type:${type};
+                    hoverActionIds:${hoverActionsIds.join('+')}`
+                );
+            }, undefined, (error) => {
+                console.error('Error loading custom model:', error);
+            });
+
+            return;  // We return because the custom model has been handled, and there's no need to process default button logic
+        }
+
         //1) apply transform to button
         let positionUpdated = new THREE.Vector3(position.x,position.y,position.z);
         element.append(

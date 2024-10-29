@@ -1,6 +1,6 @@
 {
   // Format on save for Prettier
-  "editor.formatOnSave": true,
+  "editor.formatOnSave": false,
   // Using the prettier-vscode plugin as the old eslint integration has been deprecated. More here: https://github.com/prettier/prettier-vscode/issues/870
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "[javascriptreact]": {
