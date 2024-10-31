@@ -29,7 +29,6 @@ import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { SHAPE } from "three-ammo/constants";
 import { addComponent } from "bitecs";
 import { MediaContentBounds } from "../bit-components";
-import { IN_APP_WEB_BROWSER_PROTOCOL } from "../aptero/module/RemoteScreen/RemoteControlServiceV2";
 import { HYPERBEAM_PROTOCOL } from "../aptero/module/RemoteScreen/HyperbeamService";
 import {msTeamsAPILight} from "../aptero/module/axolotis/modules/basic/ImportHelper";
 import {container} from "../aptero/module/axolotis/IOCConfig";

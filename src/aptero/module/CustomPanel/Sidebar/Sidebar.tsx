@@ -40,7 +40,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   };
 
   let hyperbeamPrefix = "";
-  if (children && 'props' in children && children.props.src?.startsWith("https://hyperbeam")) {
+  if (children && 'props' in (children as any) && (children as any).props.src?.startsWith("https://hyperbeam")) {
     hyperbeamPrefix = "Hyperbeam: ";
   }
 
@@ -55,7 +55,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   onMouseEnter={e => (e.currentTarget.style.color = "#00a0ff")}
                   onMouseLeave={e => (e.currentTarget.style.color = "")}
               >
-                <FullscreenLogo size="24" style={{ display: afterTitle ? "none" : "block" }} />
+                <FullscreenLogo component="svg" fontSize="small" style={{ display: afterTitle ? "none" : "block" }} />
               </button>
               <h5>{hyperbeamPrefix}{title}</h5>
               <div className={styles.afterTitle}>{afterTitle}</div>

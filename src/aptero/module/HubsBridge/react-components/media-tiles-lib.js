@@ -1,6 +1,5 @@
 import classNames from "classnames";
 import React from "react";
-import { remoteControlServiceV2 } from "../../RemoteScreen/RemoteControlServiceV2";
 import CreateAvatar from "../../AvatarReadyPlayerMe/CreateAvatar";
 import styles from "./scss/component/MediaTiles.scss";
 import PropTypes from "prop-types";

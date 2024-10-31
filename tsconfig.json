@@ -18,7 +18,7 @@
     "baseUrl": "./",
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
-    "types": ["reflect-metadata"],
+    "types": ["reflect-metadata","node"],
     "typeRoots": [
       "./node_modules/@types",
       "./types"

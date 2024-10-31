@@ -13,7 +13,6 @@ import { sets } from "../systems/userinput/sets";
 import { getLastWorldPosition } from "../utils/three-utils";
 import { Layers } from "../camera-layers";
 
-import {remoteControlServiceV2} from "../aptero/module/RemoteScreen/RemoteControlServiceV2";
 import { hyperbeamService } from "../aptero/module/RemoteScreen/HyperbeamService";
 export function findRemoteHoverTarget(world, object3D) {
   if (!object3D) return null;

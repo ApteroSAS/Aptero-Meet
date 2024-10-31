@@ -25,7 +25,6 @@ import { isIOS as detectIOS } from "../utils/is-mobile";
 import { Layers } from "../camera-layers";
 
 //aptero
-import { IN_APP_WEB_BROWSER_PROTOCOL, remoteWebBrowser } from "../aptero/module/RemoteScreen/RemoteControlServiceV2";
 import { hyperbeamBrowser, HYPERBEAM_PROTOCOL } from "../aptero/module/RemoteScreen/HyperbeamService";
 
 const ONCE_TRUE = { once: true };

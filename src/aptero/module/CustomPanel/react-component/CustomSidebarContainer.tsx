@@ -17,7 +17,7 @@ export function CustomSidebarContainer({ onClose }) {
   }
 
   useEffect(() => {
-    setcurrentButtonTitle(customMenuService.getButtonTitle());
+    setcurrentButtonTitle(customMenuService.getButtonTitle() as any);
     const url = container.get<CustomURL>(CustomURLName).processURL(customMenuService.getIframeContentURL());
     setCurrentUrl(url);
 
