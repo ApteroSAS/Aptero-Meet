@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import classNames from 'classnames';
 import styles from './Sidebar.scss'; // Assuming you're using CSS modules
-import { Fullscreen, FullscreenExit } from '@material-ui/icons';
 
 interface SidebarProps {
   title?: React.ReactNode;
@@ -27,7 +26,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                            fullmode,
                                          }) => {
   const [fullmodeToggle, setFullmodeToggle] = useState(false);
-  const FullscreenLogo = fullmodeToggle ? FullscreenExit : Fullscreen;
 
   useEffect(() => {
     const handleFullmodeToggle = () => setFullmodeToggle(!fullmodeToggle);
@@ -55,7 +53,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   onMouseEnter={e => (e.currentTarget.style.color = "#00a0ff")}
                   onMouseLeave={e => (e.currentTarget.style.color = "")}
               >
-                <FullscreenLogo component="svg" fontSize="small" style={{ display: afterTitle ? "none" : "block" }} />
+                FULL
               </button>
               <h5>{hyperbeamPrefix}{title}</h5>
               <div className={styles.afterTitle}>{afterTitle}</div>
