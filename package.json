@@ -157,6 +157,7 @@
     "three-to-ammo": "github:infinitelee/three-to-ammo",
     "tlds": "^1.250.0",
     "troika-three-text": "^0.45.0",
+    "tslib": "^2.6.2",
     "url": "^0.11.1",
     "url-toolkit": "^2.2.5",
     "use-clipboard-copy": "^0.2.0",
