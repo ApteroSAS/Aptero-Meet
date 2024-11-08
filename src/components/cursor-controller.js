@@ -203,7 +203,7 @@ AFRAME.registerComponent("cursor-controller", {
         }
       }
       hyperbeamService.tryCaptureCursor(this.intersection,obstructed);
-      remoteControlServiceV2.tryCaptureCursor(this.intersection);
+      //remoteControlServiceV2.tryCaptureCursor(this.intersection);
 
       const { cursor, minDistance, far, camera } = this.data;
 

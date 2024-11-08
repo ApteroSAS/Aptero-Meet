@@ -144,11 +144,13 @@ export class MediaTilesLib {
     const clickAction = (e) => {
       this.handleEntryClicked && this.handleEntryClicked(e, {
         url: WEB_BROWSER_URL_MODE,
-        webBrowser: { sessionID: remoteControlServiceV2.getNewRemoteSessionID() }
+        //webBrowser: { sessionID: remoteControlServiceV2.getNewRemoteSessionID() }
+        webBrowser: { sessionID: null }
       });
     };
     let img = "/assets/static/camera-thumbnail.png";
     let title = "Web Browser";
+    console.error("[Aptero] Web Browser is no longer supported");
     return this.createStandardTile(clickAction,img,title);
   }
 
