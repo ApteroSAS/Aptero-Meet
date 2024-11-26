@@ -1,9 +1,9 @@
 import { FormattedMessage } from "react-intl";
-import Button from "@material-ui/core/Button";
+import Button from '@mui/material/Button';
 import React from "react";
 
 export function customFormatSystemMessage(entry, intl) {
-  let scene = document.querySelector("a-scene");
+  let scene:any = document.querySelector("a-scene");
   switch (entry.type) {
     case "audio_sub_room_changed": {
       return (

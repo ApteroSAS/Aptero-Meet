@@ -1,8 +1,9 @@
-import {Collapse, Paper, TextField, Typography, Button, Box, IconButton} from "@material-ui/core";
+import {Collapse, Paper, TextField} from "@mui/material";
 import React, {useState} from 'react';
 import {FormattedMessage} from "react-intl";
-import ArrowBackIcon from "@material-ui/icons/ArrowBack";
-import InfoIcon from '@material-ui/icons/Info';
+
+import InfoIcon from '@mui/icons-material/Info';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 export const RoomRecap: React.FC<{
     suggestedDisplayName: string,
@@ -28,19 +29,17 @@ export const RoomRecap: React.FC<{
                 borderRadius: '10px',
                 position: "relative" // To position the buttons absolutely
             }} elevation={3}>
-                <IconButton
+                <ArrowBackIcon
                     style={{ position: "absolute", top: "20px", left: "20px" }}
                     onClick={() => {onChangeRoomUrl("");}}
                 >
-                    <ArrowBackIcon />
-                </IconButton>
+                </ArrowBackIcon>
 
-                <IconButton
+                <InfoIcon
                     style={{ position: "absolute", top: "20px", right: "20px" }}
                     onClick={() => setIsOpen(!isOpen)}
                 >
-                    <InfoIcon />
-                </IconButton>
+                </InfoIcon>
 
                 <TextField
                     label={<FormattedMessage id="microsoft.settings.room-display-name"

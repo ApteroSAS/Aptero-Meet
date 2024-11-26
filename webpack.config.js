@@ -273,6 +273,12 @@ module.exports = async (env, argv) => {
 
   const internalHostname = process.env.INTERNAL_HOSTNAME || "hubs.local";
   return {
+    stats: {
+      warningsFilter: [
+        /sass-loader/,
+        /@fluentui/,
+      ]
+    },
     cache: {
       type: "memory"
     },

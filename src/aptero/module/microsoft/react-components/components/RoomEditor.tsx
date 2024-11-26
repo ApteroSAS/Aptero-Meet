@@ -1,17 +1,8 @@
-import React, {useEffect, useState} from "react";
-import {useInjection} from "inversify-react";
-import {
-    MICROSOFT_GRAPH_SERVICE,
-    MICROSOFT_LOGIN_SERVICE,
-    MicrosoftGraphService,
-    MicrosoftLoginService
-} from "@aptero/axolotis-module-teams";
-import {Button, Segment} from "@fluentui/react-northstar";
+import React from "react";
+import {Segment} from "@fluentui/react-northstar";
 import {useLicense, useMSSignIn} from "./useLicense";
 import {OpenAppSourceService, OpenMicrosoftLicensePanel} from "./OpenAppSourceService";
-import {Authorize} from "./Authorize";
 import {License} from "./License";
-import {Typography} from "@material-ui/core";
 import {SignIn} from "./SignIn";
 
 export const NoLicenseMessage: React.FC<any> = (props) => {

@@ -1,4 +1,4 @@
-import {Card, CardContent, Typography, Box, Grid} from "@material-ui/core";
+import {Card, CardContent, Typography, Box, Grid} from "@mui/material";
 import React from "react";
 import {OpenAppMenu} from "./OpenAppMenu";
 import {Button, Flex} from "@fluentui/react-northstar";

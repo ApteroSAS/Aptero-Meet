@@ -136,6 +136,8 @@ const AUTO_EXIT_TIMER_SECONDS = 10;
 
 const aptGuiVisible = !new URL(window.location.href).searchParams.get("hideui"); //aptero
 
+console.log(`React version: ${React.version}`);
+
 class UIRoot extends Component {
   willCompileAndUploadMaterials = false;
 

@@ -2,8 +2,9 @@ import React, { useEffect } from "react";
 import { Sidebar } from "../../CustomPanel/Sidebar/Sidebar";
 import { CloseButton } from "../../../../react-components/input/CloseButton";
 import { ClonesI, getClones, getClonesSync } from "../LoadBalancer";
-import { List, ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
-import InboxIcon from "@material-ui/icons/Inbox";
+import {List, ListItemButton, ListItemIcon, ListItemText} from "@mui/material";
+
+import InboxIcon from '@mui/icons-material/Inbox';
 export function InstancesSidebarContainer({ onClose }) {
   const [instances, setInstances] = React.useState<ClonesI>(getClonesSync().clones);
   useEffect(() => {
@@ -29,7 +30,7 @@ export function InstancesSidebarContainer({ onClose }) {
       <List>{Object.keys(instances).map(value => {
         let instance = instances[value];
         const line = instance.name + " (" + instance.people + "/" + instance.peopleMax + ")";
-        return <ListItem button key={value} onClick={async () => {
+        return <ListItemButton key={value} onClick={async () => {
           // move to new room without page load or entry flow
           const { changeHub } = await import("../../../../change-hub");
           changeHub(value);
@@ -39,7 +40,7 @@ export function InstancesSidebarContainer({ onClose }) {
             <InboxIcon/>
           </ListItemIcon>
           <ListItemText primary={instance.current?<b>{line}</b>:line}/>
-        </ListItem>;
+        </ListItemButton>;
       })}</List>
     </Sidebar>
   );

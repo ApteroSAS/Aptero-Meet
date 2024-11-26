@@ -1,7 +1,4 @@
 import * as React from "react";
-import { useLicense } from "./useLicense";
-import Chip from '@material-ui/core/Chip';
-import Typography from '@material-ui/core/Typography';
 
 function getLastPart(input: string, delimiter: string = '.'): string {
     const parts = input.split(delimiter);
