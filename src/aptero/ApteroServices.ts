@@ -10,7 +10,6 @@ import { AudioSettingsSystem } from "../systems/audio-settings-system";
 import {redirectIfNeeded} from "./module/load-balancer/LoadBalancer";
 //adapter
 import { ThirdPersonService } from "./module/ThirdPerson/ThirdPersonService";
-import { remoteControlServiceV2 } from "./module/RemoteScreen/RemoteControlServiceV2";
 import { wait } from "./util/AsyncWaiter";
 import { networkService } from "./module/HubsBridge/service/NetworkService";
 import { roomParameters } from "./module/HubsBridge/service/RoomParameters";
@@ -109,7 +108,6 @@ export class ApteroServices {
     waitForDOMContentLoaded().then(async () => {
       networkService.start();
       await this.thirdPersonService.start();
-      await remoteControlServiceV2.start();
     });
   }
 

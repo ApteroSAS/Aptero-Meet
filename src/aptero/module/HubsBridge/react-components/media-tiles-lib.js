@@ -1,6 +1,5 @@
 import classNames from "classnames";
 import React from "react";
-import { remoteControlServiceV2 } from "../../RemoteScreen/RemoteControlServiceV2";
 import CreateAvatar from "../../AvatarReadyPlayerMe/CreateAvatar";
 import styles from "./scss/component/MediaTiles.scss";
 import PropTypes from "prop-types";
@@ -145,11 +144,12 @@ export class MediaTilesLib {
     const clickAction = (e) => {
       this.handleEntryClicked && this.handleEntryClicked(e, {
         url: WEB_BROWSER_URL_MODE,
-        webBrowser: { sessionID: remoteControlServiceV2.getNewRemoteSessionID() }
+        webBrowser: { sessionID: null }
       });
     };
     let img = "/assets/static/camera-thumbnail.png";
     let title = "Web Browser";
+    console.error("[Aptero] Web Browser is no longer supported, use Hyperbeam instead.");
     return this.createStandardTile(clickAction,img,title);
   }
 

@@ -16,7 +16,6 @@ import HLS from "hls.js";
 import configs from "../utils/configs";
 import qsTruthy from "../utils/qs_truthy";
 import { WEB_BROWSER_URL_MODE, HYPERBEAM_MODE } from "../aptero/module/HubsBridge/react-components/media-tiles-lib";
-import { processWebBrowserEntity } from "../aptero/module/RemoteScreen/RemoteControlServiceV2";
 
 import anime from "animejs";
 
