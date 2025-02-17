@@ -1,4 +1,5 @@
 import { findAncestorWithComponent } from "../utils/scene-graph";
+import { roomApi } from "../aptero/module/FrontEndAPI/RoomApi";
 
 /**
  * Loops the given clip using this entity's animation mixer
@@ -66,7 +67,7 @@ AFRAME.registerComponent("loop-animation", {
           }
         }
       } else {
-        // Remove all animations which name starts with "ApteroANIM"
+        // Remove all animations whose name starts with "ApteroANIM"
         let clipFilter = [animations[activeClipIndex]];
         if (activeClipIndex === 0) {
           clipFilter = animations.filter(clip => !clip.name.startsWith("ApteroANIM"));
@@ -79,9 +80,39 @@ AFRAME.registerComponent("loop-animation", {
 
     this.currentActions.length = 0;
 
+    // Loop animation now uses our custom TriggerAnimation API
+    // to ensure consistency with other animation triggers
+
     for (let i = 0; i < clips.length; i++) {
+      let animName = clips[i].name;
+      // Remove "ApteroANIM" prefix
+      animName = animName.replace("ApteroANIM_", "");
+
+      const triggerData = {
+        elementUuid: this.el.getAttribute("uuid"),
+        startOffset: this.data.startOffset,
+        timeScale: this.data.timeScale,
+        loop: true
+      };
+
+      const actionDef = {
+        type: "animation",
+        data: animName,
+        loop: true,
+        speed: this.data.timeScale,
+        mainclick: 0,
+        reclick: 0,
+        onEnd: 0,
+        lastAnimation: animName,
+      };
+
+      // Use the new TriggerAnimation method to trigger this clip.
+      roomApi.triggerAnimation(animName, actionDef, triggerData, false);
+
+
+      // OLD DEPRECATED CODE
       const action = mixer.clipAction(clips[i], this.el.object3D);
-      action.enabled = true;
+      action.enabled = false; // Changed to false to disable
       action.time = this.data.startOffset;
       action.timeScale = this.data.timeScale;
       action.setLoop(THREE.LoopRepeat, Infinity).play();

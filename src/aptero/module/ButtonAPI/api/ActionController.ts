@@ -1,8 +1,14 @@
 import { customActionRegister } from "./CustomActionRegister";
+
+declare global {
+    interface Window {
+        syncAnimationsActive?: boolean;
+    }
+}
 import { networkService } from "../../HubsBridge/service/NetworkService";
 import { CustomURL } from "../../customURL/CustomURL"
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { Vector3, Euler, AnimationMixer, LoopOnce, AnimationClip } from 'three';
+import { Vector3, Euler, AnimationMixer, LoopOnce, AnimationClip, MathUtils } from 'three';
 import { Action } from "./Action";
 
 export class ActionController {
@@ -34,7 +40,7 @@ export class ActionController {
         let networkId = await networkService.getElementNetworkId(htmlElement) || "local";
         let actionIds = [];
         entry.actions.forEach((action, index) => {
-            console.log("[A]------->action.data", action.data)
+            //console.log("[A]------->action.data", action.data)
             let actionid = networkId + "_" + meshName + "_" + masterindex + "_" + pairIndex + "_" + index + "_" + (action.data || "");
             let differentiator = 0;
             while (customActionRegister.actionExist(actionid+ "_"+ differentiator)){
@@ -47,8 +53,8 @@ export class ActionController {
         entry.triggers.forEach((trigger, index) => {
             let triggerId = networkId + "_" + meshName + "_" + masterindex + "_" + pairIndex + "_" + index;
             customActionRegister.triggers[triggerId]=trigger;
-            console.log("TRIGGER", trigger)
-            console.log("ENTRY", entry)
+            //console.log("TRIGGER", trigger)
+            //console.log("ENTRY", entry)
             if (trigger.type === "btn") {
                 if(!trigger.position){
                     trigger.position=new THREE.Vector3(0,0,0);
@@ -73,6 +79,11 @@ export class ActionController {
             rotationDeg.y += 180;
             return;
         }
+
+        const mixerEl = document.querySelector('#environment-scene')?.children[0] as any || null;
+        //const parentObject = element[0]?.object3D?.parent.children[0];
+
+        // If the button has a custom model, but is NOT attached to a bone, load the custom model
         if (customModelProperties && customModelProperties.url && customModelProperties.url !== "") {
     
             const loader = new GLTFLoader();
@@ -107,11 +118,155 @@ export class ActionController {
 
                 let positionUpdated = new THREE.Vector3(position.x,position.y,position.z);
 
-                // Set the correct position, rotation, and scale on the A-Frame entity itself
-                customEntity.setAttribute('position', `${positionUpdated.x} ${positionUpdated.y} ${positionUpdated.z}`);
-                customEntity.setAttribute('rotation', `${rotationDeg.x} ${rotationDeg.y} ${rotationDeg.z}`);
-                customEntity.setAttribute('scale', `${size} ${size} ${size}`);
+                let useBoneAnimation = false;
 
+                // Check if the button should sync with a bone
+                if (customModelProperties.attachToParentBone && customModelProperties.parentBoneName) {
+
+                    const parentObject = element[0]?.object3D?.parent?.children[0];
+
+                    if (parentObject && parentObject.traverse) {
+                        // Deep search for the specified bone
+                        let bone = null;
+                        parentObject.traverse((object) => {
+                            if (object.isBone && (object.name === customModelProperties.parentBoneName || object.name.startsWith(customModelProperties.parentBoneName + "_"))) {
+                                bone = object;
+                            }
+                        });
+
+                        const mixer = mixerEl && mixerEl.components["animation-mixer"].mixer as AnimationMixer;
+
+                        // Inside the bone detection block
+                        if (bone && mixer) {
+
+                            // Reset animation to get the bone's initial position
+                            const mixerTime = mixer.time;
+                            mixer.setTime(0);
+                            mixer.time = 0;
+                        
+                            // Get initial bone world matrix
+                            bone.updateWorldMatrix(true, true);
+                            const boneMatrixInitial = bone.matrixWorld.clone();
+                            const inverseBoneMatrixInitial = new THREE.Matrix4().copy(boneMatrixInitial).invert();
+                        
+                            // Get button's DESIRED world position (element position + offset)
+                            const elementWorldPos = new THREE.Vector3();
+                            element[0].object3D.getWorldPosition(elementWorldPos);
+                            const buttonWorldPosition = new THREE.Vector3(position.x, position.y, position.z)
+                                .add(elementWorldPos);
+                        
+                            // Convert to bone's LOCAL space using INITIAL bone matrix
+                            const localPosition = new THREE.Vector3()
+                                .copy(buttonWorldPosition)
+                                .applyMatrix4(inverseBoneMatrixInitial);
+                        
+                            // Get button's DESIRED world rotation
+                            const buttonRotation = new THREE.Euler(
+                                THREE.MathUtils.degToRad(rotationDeg.x),
+                                THREE.MathUtils.degToRad(rotationDeg.y),
+                                THREE.MathUtils.degToRad(rotationDeg.z),
+                                'XYZ'
+                            );
+                            const buttonWorldQuat = new THREE.Quaternion()
+                                .setFromEuler(buttonRotation);
+
+                                
+                            // Compute the button's initial WORLD rotation based on its parent (element)
+                            const elementWorldRotation = new THREE.Quaternion();
+                            element[0].object3D.getWorldQuaternion(elementWorldRotation).invert();
+                            
+                            // Apply elementWorldRotation to elementWorldPos
+                            elementWorldPos.applyQuaternion(elementWorldRotation);
+
+                            if (!window.syncAnimationsActive) {
+                                window.syncAnimationsActive = true;
+                            } 
+                        
+                            // Convert to bone's LOCAL rotation using INITIAL bone rotation
+                            const boneInitialQuat = new THREE.Quaternion()
+                                .setFromRotationMatrix(boneMatrixInitial);
+                            const localQuaternion = boneInitialQuat.clone()
+                                .invert()
+                                .multiply(buttonWorldQuat);
+
+
+                            // Retrieve the bone's current world scale.
+                            const boneWorldScale = new THREE.Vector3();
+                            bone.getWorldScale(boneWorldScale);
+
+                            
+
+
+                            
+                        
+                            const updateButtonTransform = () => {
+
+                                bone.updateMatrixWorld(true);
+                                const currentBoneMatrix = bone.matrixWorld.clone();
+
+
+                                // Rotate currentBoneMatrix by elementWorldRotation
+                                const elementWorldQuat = new THREE.Quaternion()
+                                    .copy(elementWorldRotation);
+
+                                // Apply elementWorldRotation to currentBoneMatrix
+                                currentBoneMatrix.premultiply(new THREE.Matrix4().makeRotationFromQuaternion(elementWorldQuat));
+                                
+                        
+
+                                // Apply CURRENT bone transform to INITIAL local position/rotation
+                                const worldPosition = new THREE.Vector3()
+                                    .copy(localPosition)
+                                    .applyMatrix4(currentBoneMatrix);
+                        
+                                const boneCurrentQuat = new THREE.Quaternion()
+                                    .setFromRotationMatrix(currentBoneMatrix);
+                                const worldQuaternion = boneCurrentQuat
+                                    .clone()
+                                    .multiply(localQuaternion);
+
+                        
+                                // Convert to Euler for AFRAME
+                                const euler = new THREE.Euler()
+                                    .setFromQuaternion(worldQuaternion, 'XYZ');
+
+                                // Move worldPosition to the correct position
+                                worldPosition.sub(elementWorldPos);
+
+                                // Apply elementWorldRotation to the final rotation calculation
+                                euler.setFromQuaternion(worldQuaternion.multiply(elementWorldQuat.clone().invert()), 'XYZ');
+                        
+                                // Update element
+                                customEntity.setAttribute('position', `${worldPosition.x} ${worldPosition.y} ${worldPosition.z}`);
+                                //customEntity.setAttribute('rotation', `${THREE.MathUtils.radToDeg(euler.x)} ${THREE.MathUtils.radToDeg(euler.y)} ${THREE.MathUtils.radToDeg(euler.z)}`);
+                                (customEntity as any).object3D.quaternion.copy(worldQuaternion);
+                            };
+                            
+
+                            if (!(mixer as any).syncAnimations) {
+                                (mixer as any).syncAnimations = [];
+                            }
+
+                            (mixer as any).syncAnimations.push({
+                                element: customEntity,
+                                update: updateButtonTransform
+                            });
+
+                            // Reset the animation to the original time
+                            mixer.setTime(mixerTime);
+                            mixer.time = mixerTime;
+                        }
+                    }
+                }
+
+                if (!useBoneAnimation) {
+                    // Set the default position and rotation if not attached to a bone
+                    customEntity.setAttribute('position', `${positionUpdated.x} ${positionUpdated.y} ${positionUpdated.z}`);
+                    customEntity.setAttribute('rotation', `${rotationDeg.x} ${rotationDeg.y} ${rotationDeg.z}`);
+                }
+
+                // Set the correct scale on the A-Frame entity itself
+                customEntity.setAttribute('scale', `${size} ${size} ${size}`);
                 customEntity.setAttribute('geometry', 'primitive: box');
                 customEntity.setAttribute('raycaster-target', '');
 
