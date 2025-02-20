@@ -3,6 +3,7 @@ import { customActionRegister } from "./CustomActionRegister";
 declare global {
     interface Window {
         syncAnimationsActive?: boolean;
+        testVariable?: number;
     }
 }
 import { networkService } from "../../HubsBridge/service/NetworkService";
@@ -95,7 +96,7 @@ export class ActionController {
                 const modelScale = customModelProperties.scale || { x: 1, y: 1, z: 1 };
                 
                 model.position.set(modelPosition.x, modelPosition.y, modelPosition.z);
-                model.scale.set(modelScale.x, modelScale.y, modelScale.z);
+                //model.scale.set(modelScale.x, modelScale.y, modelScale.z);
     
                 // Create an A-Frame entity to wrap the model
                 const customEntity = document.createElement('a-entity');
@@ -138,7 +139,6 @@ export class ActionController {
 
                         // Inside the bone detection block
                         if (bone && mixer) {
-
                             // Reset animation to get the bone's initial position
                             const mixerTime = mixer.time;
                             mixer.setTime(0);
@@ -197,13 +197,26 @@ export class ActionController {
                             
 
 
+
+                            // Capture initial element and bone matrices
+                            element[0].object3D.updateMatrixWorld(true);
+                            const elementWorldMatrixInitial = element[0].object3D.matrixWorld.clone();
+
+                            bone.updateMatrixWorld(true);
+
+                            // Compute initial bone local matrix relative to element
+                            const inverseElementWorldMatrixInitial = new THREE.Matrix4().copy(elementWorldMatrixInitial).invert();
+                            const boneLocalMatrixInitial = new THREE.Matrix4().multiplyMatrices(inverseElementWorldMatrixInitial, boneMatrixInitial);
                             
-                        
+                            // Decompose initial local matrix to get position and rotation
+                            const initialPosition = new THREE.Vector3();
+                            const initialRotation = new THREE.Quaternion();
+                            const initialScale = new THREE.Vector3();
+                            boneLocalMatrixInitial.decompose(initialPosition, initialRotation, initialScale)
                             const updateButtonTransform = () => {
 
                                 bone.updateMatrixWorld(true);
-                                const currentBoneMatrix = bone.matrixWorld.clone();
-
+                                const currentBoneMatrix = bone.matrixWorld.clone();                            
 
                                 // Rotate currentBoneMatrix by elementWorldRotation
                                 const elementWorldQuat = new THREE.Quaternion()
@@ -211,7 +224,6 @@ export class ActionController {
 
                                 // Apply elementWorldRotation to currentBoneMatrix
                                 currentBoneMatrix.premultiply(new THREE.Matrix4().makeRotationFromQuaternion(elementWorldQuat));
-                                
                         
 
                                 // Apply CURRENT bone transform to INITIAL local position/rotation
@@ -230,16 +242,53 @@ export class ActionController {
                                 const euler = new THREE.Euler()
                                     .setFromQuaternion(worldQuaternion, 'XYZ');
 
+                                
+
                                 // Move worldPosition to the correct position
                                 worldPosition.sub(elementWorldPos);
 
+                                // Divide by scale
+                                worldPosition.divide(boneWorldScale);
+
+
+                                //const eulerRotOnly = euler.clone();
+
                                 // Apply elementWorldRotation to the final rotation calculation
                                 euler.setFromQuaternion(worldQuaternion.multiply(elementWorldQuat.clone().invert()), 'XYZ');
-                        
-                                // Update element
+
+
+
+
+
+                                // Get current element and bone world matrices
+                                element[0].object3D.updateMatrixWorld(true);
+                                const elementWorldMatrixCurrent = element[0].object3D.matrixWorld.clone();
+
+                                const boneMatrixCurrent = bone.matrixWorld.clone();
+
+                                // Compute current bone local matrix relative to element
+                                const inverseElementWorldMatrixCurrent = new THREE.Matrix4().copy(elementWorldMatrixCurrent).invert();
+                                const boneLocalMatrixCurrent = new THREE.Matrix4().multiplyMatrices(inverseElementWorldMatrixCurrent, boneMatrixCurrent);
+
+                                // Decompose current local matrix
+                                const currentPosition = new THREE.Vector3();
+                                const currentRotation = new THREE.Quaternion();
+                                const currentScale = new THREE.Vector3();
+                                boneLocalMatrixCurrent.decompose(currentPosition, currentRotation, currentScale);
+
+                                // Calculate rotation difference: currentRotation * inverse(initialRotation)
+                                const rotationDiff = currentRotation.clone().multiply(initialRotation.clone().invert());
+
+                                // Convert to Euler angles
+                                const eulerB = new THREE.Euler().setFromQuaternion(rotationDiff, 'XYZ');
+
+                                // Apply rotation to model
+                                model.rotation.set(eulerB.x, eulerB.y, eulerB.z);
+                                model.updateMatrix();
+
+
+
                                 customEntity.setAttribute('position', `${worldPosition.x} ${worldPosition.y} ${worldPosition.z}`);
-                                //customEntity.setAttribute('rotation', `${THREE.MathUtils.radToDeg(euler.x)} ${THREE.MathUtils.radToDeg(euler.y)} ${THREE.MathUtils.radToDeg(euler.z)}`);
-                                (customEntity as any).object3D.quaternion.copy(worldQuaternion);
                             };
                             
 
