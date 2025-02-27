@@ -430,7 +430,7 @@ AFRAME.registerComponent("media-video", {
       }
 
       this.mediaElementAudioSource = null;
-      if (!src.startsWith("hubs://") && !src.startsWith(HYPERBEAM_PROTOCOL) && !src.startsWith(IN_APP_WEB_BROWSER_PROTOCOL)/** APTERO **/) {
+      if (!src.startsWith("hubs://") && !src.startsWith(HYPERBEAM_PROTOCOL)/** APTERO **/) {
         // iOS video audio is broken on ios safari < 13.1.2, see: https://github.com/mozilla/hubs/issues/1797
         if (!isIOS || semver.satisfies(detect().version, ">=13.1.2")) {
           // TODO FF error here if binding mediastream: The captured HTMLMediaElement is playing a MediaStream. Applying volume or mute status is not currently supported -- not an issue since we have no audio atm in shared video.
@@ -448,7 +448,7 @@ AFRAME.registerComponent("media-video", {
       this.video.addEventListener("play", this.onPauseStateChange);
 
       //aptero livescream bugfix //TODO still necessary? //devnote: livescream??
-      if (src.startsWith("hubs://") && !src.startsWith(HYPERBEAM_PROTOCOL) && !src.startsWith(IN_APP_WEB_BROWSER_PROTOCOL) ) {
+      if (src.startsWith("hubs://") && !src.startsWith(HYPERBEAM_PROTOCOL)) {
         setTimeout(() => {
           this.video.play();
         }, 2000);
@@ -586,9 +586,6 @@ AFRAME.registerComponent("media-video", {
       // Set src on video to begin loading.
       if(url.startsWith(HYPERBEAM_PROTOCOL)) {
         texture = await hyperbeamBrowser(this.el,texture,this.data);
-
-      } else if (url.startsWith(IN_APP_WEB_BROWSER_PROTOCOL)) {
-        texture = await remoteWebBrowser(this.el,texture,this.data);
       } else if (url.startsWith("hubs://")) {
         const streamClientId = url.substring(7).split("/")[1]; // /clients/<client id>/video is only URL for now
         const stream = await APP.dialog.getMediaStream(streamClientId, "video");

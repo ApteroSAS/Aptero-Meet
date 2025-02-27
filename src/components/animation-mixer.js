@@ -10,6 +10,33 @@ export class AnimationMixerSystem {
       const cmp = components[i];
       if (cmp.mixer) {
         cmp.mixer.update(dt / 1000);
+
+        // Aptero
+        if (window.syncAnimationsActive) {
+
+          /*
+            We use a custom Sync Animation system, to process post-animation updates
+
+            This is useful for animations that are not directly controlled by the AnimationMixer
+
+            For example, the Bone-attached Buttons
+          */
+
+          const hasActiveAnimations = cmp.mixer._actions.some(action => action.isRunning());
+                              
+          if (hasActiveAnimations || cmp.mixer.needsFinalUpdate) {
+            if (cmp.mixer.syncAnimations) {
+              for (let j = 0; j < cmp.mixer.syncAnimations.length; j++) {
+                const syncAnim = cmp.mixer.syncAnimations[j];
+    
+                if (syncAnim && syncAnim.update && typeof syncAnim.update === "function") {
+                  syncAnim.update();
+                }
+              }
+            }
+            cmp.mixer.needsFinalUpdate = hasActiveAnimations ? 2 : (cmp.mixer.needsFinalUpdate - 1);
+          }
+        }
       }
     }
   }

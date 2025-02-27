@@ -150,7 +150,7 @@ export class MediaTilesLib {
     };
     let img = "/assets/static/camera-thumbnail.png";
     let title = "Web Browser";
-    console.error("[Aptero] Web Browser is no longer supported");
+    console.error("[Aptero] Web Browser is no longer supported, use Hyperbeam instead.");
     return this.createStandardTile(clickAction,img,title);
   }
 

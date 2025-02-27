@@ -1,22 +1,54 @@
 import {networkService} from "../HubsBridge/service/NetworkService";
 import {TriggerAnimationAction} from "./FrontEndCommandAPI";
 import * as THREE from "three"; 
+import { v4 as uuidv4 } from 'uuid';
 
-const event = "animation_play";
+const event = "animation";
+const mySenderId = uuidv4();
 
 export class AnimationControllerAPI {
     constructor() {
     }
 
+    
+
+/*
+
+networkService.onMessage ???
+
+! The Animations are not being networked (both button and the new loop-animation), I may have broken or forgot to implement something, I'll investigate
+-> I am in fact networking, I just have to fix the way I do it
+
+
+
+! The Bone attachment system is working better and better, but upon further testing, it apparently breaks when the models are scaled (The system calculates the gimbal using position and rotations, I have to implement scale now). 
+
+*/
+
     init() {
         networkService.onMessage(event, ({body}) => {
-            this.triggerAnimation(body.animName, body.action, body.triggerData);
+            this.triggerAnimation(body.animName, body.action, body.triggerData, body.senderId, body.transmit);
         });
     }
 
-    findElement(name: string) {
-        return document.querySelector(`.${name}`)
+    findElement(name: string, parentBoneName: string | null = null) {
+        const element = document.querySelector(`[uuid="${name}"]`);
+        if (!element) {
+            throw new Error(`Element with UUID ${name} not found`);
+        }
+    
+        if (parentBoneName) {
+            const parentModel = (element as any).object3D.parent;
+            const parentBone = parentModel?.getObjectByName(parentBoneName);
+            if (!parentBone) {
+                throw new Error(`Bone ${parentBoneName} not found on parent model.`);
+            }
+            return parentBone;
+        }
+    
+        return element;
     }
+  
 
 
     private findAnimation(animName: string, mixerEl: Element, localMode = false) {
@@ -59,13 +91,23 @@ export class AnimationControllerAPI {
         }
     }
 
-    public triggerAnimation(animName: string, action: TriggerAnimationAction = {}, triggerData: any = {}) {
+    public triggerAnimation(animName: string, action: TriggerAnimationAction = {}, triggerData: any = {}, senderId = null, transmit = true) {
+        if (senderId === null) {
+            if (transmit) {
+                networkService.sendMessage(event, { animName, action, triggerData, senderId:mySenderId, transmit: false });
+            }
+        }
+
+        if (senderId === mySenderId) {
+            return;
+        }
         
         let elementUuid = null;
         let mixerEl: Element | null = null;
-        const animType = triggerData.type;
+        const animType = triggerData?.type;
+        let targetBone: THREE.Object3D | null = null;
       
-        if (triggerData && triggerData.elementUuid) {
+        if (triggerData?.elementUuid) {
           elementUuid = triggerData.elementUuid.replace(/.*_/, "");
         }
 
@@ -73,7 +115,8 @@ export class AnimationControllerAPI {
             // Find the element by UUID
             mixerEl = document.querySelector(`[uuid="${elementUuid}"]`);
             if (!mixerEl) {
-                throw new Error(`Element with UUID ${elementUuid} not found`);
+                //throw new Error(`Element with UUID ${elementUuid} not found`);
+                return;
             }
         } else {
             // Default to the first child of the environment scene
@@ -84,8 +127,6 @@ export class AnimationControllerAPI {
         if (!actionAnimation) {
             throw new Error(`Animation ${animName} not found`);
         }
-
-        networkService.sendMessage(event, { animName, action, triggerData });
 
         const repeat = action.repeat || 1;
         const onEnd = action.onEnd || 0;
@@ -318,9 +359,10 @@ export class AnimationControllerAPI {
                     case -1: // Force reset
                     case 0: // Reset
                         actionAnimation.reset();
-                        actionAnimation.setEffectiveTimeScale(1);
+                        //actionAnimation.setEffectiveTimeScale(1);
+                        actionAnimation.setEffectiveTimeScale(0);
                         actionAnimation.time = 0;
-                        actionAnimation.stop();
+                        //actionAnimation.stop();
                         break;
                     case 1: // Pause
                         actionAnimation.reset();

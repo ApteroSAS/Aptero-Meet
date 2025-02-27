@@ -15,6 +15,10 @@ export class FrontEndAPI {
     animationControllerAPI = new AnimationControllerAPI();
     moveAPI = new MoveAPI();
 
+    constructor() {
+        this.animationControllerAPI.init();
+    }
+
     describe() {
         const objects = Array.from(document.querySelector('#environment-scene').querySelectorAll("a-entity"));
         const avatars = Array.from(document.querySelectorAll('#avatar-rig'))
@@ -111,12 +115,17 @@ export class FrontEndAPI {
      * @param animName
      * @param action
      */
-    triggerAnimation(animName: string, action: TriggerAnimationAction = {}, triggerData: any = {}) {
+    triggerAnimation(animName: string, action: TriggerAnimationAction = {}, triggerData: any = {}, transmit = null) {
         if (!animName) {
             console.error("animName are required");
             return;
         }
-        this.animationControllerAPI.triggerAnimation(animName, action, triggerData);
+
+        if (transmit === null) { // Aptero: Keep like this for backward compatibility
+            this.animationControllerAPI.triggerAnimation(animName, action, triggerData);
+        } else {
+            this.animationControllerAPI.triggerAnimation(animName, action, triggerData, transmit);
+        }
     }
 
     async notifyUserActionToAi(actionDescription: string, triggerAI: boolean = true,context:any) {

@@ -22,6 +22,15 @@ export class GLTFExtensionProcessorService {
                         if (!el.id) {
                             el.setAttribute("id", sceneuuid + "_" + meshuuid + "_" + masterindex + "_random_id")//TODO add random id
                         }
+    
+                        // Add bone attachment processing
+                        if (jsonData.triggers && jsonData.triggers[0].customModelProperties?.parentBoneName) {
+                            const parentBoneName = jsonData.triggers[0].customModelProperties.parentBoneName;
+    
+                            // Log or handle the bone attachment info
+                            console.log(`Attaching to bone: ${parentBoneName}, Parent: ${meshuuid}`);
+                        }
+    
                         this.actionController.process(jsonData, el.id, sceneuuid, meshuuid, meshName, masterindex);
                     }
                 });
