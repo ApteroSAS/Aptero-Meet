@@ -125,7 +125,9 @@ networkService.onMessage ???
 
         let actionAnimation = this.findAnimation(animName, mixerEl, !!elementUuid);
         if (!actionAnimation) {
-            throw new Error(`Animation ${animName} not found`);
+            //throw new Error(`Animation ${animName} not found`);
+            console.log(`Animation ${animName} skipped`);
+            return;
         }
 
         const repeat = action.repeat || 1;
