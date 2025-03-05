@@ -56,7 +56,11 @@ networkService.onMessage ???
         if (localMode) {
           mixer = (mixerEl as any).object3D.mixer;
         } else {
-          mixer = mixerEl && (mixerEl as any).components["animation-mixer"].mixer;
+          mixer = mixerEl && (mixerEl as any).components["animation-mixer"]?.mixer;
+        }
+        if (!mixer) {
+            console.log(`Mixer not found for element ${mixerEl}`);
+            return null;
         }
         let actionAnimation = mixer.clipAction(animName);
         if (actionAnimation) return actionAnimation;
