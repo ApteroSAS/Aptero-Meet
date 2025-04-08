@@ -769,7 +769,7 @@ export const processHyperbeamEntity = async (entity,mediaData,objIdentifier,hbPr
     ublock: hbProperties.HBuBlock ? hbProperties.HBuBlock : false,
     
     "hide_cursor": true,
-    max_area: 1920 * 1080,
+    maxarea: 1920 * 1080,
 
     timeout: {
       "absolute": 18 * 60 * 60, //seconds
